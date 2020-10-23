@@ -1,0 +1,539 @@
+* Myrisa Modules
+** Modules For Structure
+The ~FRAME~, ~FRAME~ expansion modules, and ~TIMELINE~, provide a framework for
+creating multi-layered, live music and songs.
+
+*** FRAME
+#+DOWNLOADED: file:///tmp/Spectacle.npfXoe/Screenshot_20200929_205338.png @ 2020-09-29 20:53:51
+#+ATTR_ORG: :width 100
+[[file:Proposal/2020-09-29_20-53-51_Screenshot_20200929_205338.png]]
+
+The core function of ~FRAME~ is to record and loop the signal of one of its
+expansion modules (excluding ~FRAME-X~). The expansion module(s) will define the
+inputs and outputs of ~FRAME~, and dictate what ~FRAME~ records and plays back.
+Multiple expansion modules maybe grouped together to record more and more
+signals.
+
+Despite the simple interface, one can use ~FRAME~ as a multi-track looper, a
+sequencer for musical sections, a delay unit, a sample & hold unit, a sequencer,
+and more! See the footnotes if interested in ~FRAME~ use cases.
+
+~FRAME~ is a [[https://vcvrack.com/manual/Polyphony][polyphonic]] module,
+meaning the engine will duplicate up to 16 times, depending on the amount of
+channels in the cables plugged into it, as well as the input signal.
+
+The box in the middle of ~FRAME~ shows a timeline with a moving cursor indicating
+the current position of the active buffer.
+
+There is a non input-output expander for ~FRAME~ called ~FRAME-X~. This module
+provides additional ~RATE~ and ~POS~ parameters, as well as additional control
+ports.  It enables more creative ways to use ~FRAME~.
+
+**** Scene Selection
+A scene is simply a collection of looping buffers, or, in frame's terminology, a
+collection of 'layers'.
+
+The ~SCENE~ parameter adjusts which scene ~FRAME~ records and reads from.
+
+If ~SCENE~'s position is between two scenes, the behaviour will depend on the
+"scene transition" option. 
+- If set to  'smooth' it will output a weighted mix of both scenes, allowing for smooth crossfading between scenes. 
+- If set to 'discrete', the scene will snap to the nearest scene. 
+- If  set to 'sequence', the scene will snap to the nearest scene at the next
+  clk step, and will also play the scene on transitioning. Useful for sequencing
+  multiple scenes.
+
+The port directly under ~SCENE~ modulates the parameter, allowing for
+interesting crossfade patterns, or voltage controlled scene sequencing.
+
+One may use multiple ~SCENEs~ to create different versions of a recording for
+variation, or, to sequence musical sections (such as a chorus, verse, etc..),
+or, in the case ~FRAME~ is capturing control voltage for other modules, a
+keyframer for control voltage. 
+
+Scenes that have not recorded anything start with the buffers of the scene before, so
+one may progress to the next scene to leave behind a 'checkpoint', that
+one may return to.
+
+**** Recording with FRAME 
+When ~DELTA~ has moved a small threshold away from 12 o'clock, ~FRAME~ will
+start recording. The scene that ~FRAME~ chooses for recording, is the scene that
+is closest to the sum of the ~SCENE~ parameter and ~SCENE~ port.
+
+If ~FRAME~ detects a clock signal on the ~CLK~ port, it will snap recording start
+and end points to mutiples of the clock period.
+
+Recording behaviour depends on whether ~FRAME~ is in /global/ mode, or /layer/
+mode. The ~DELTA_MODE~ button (up-right of ~DELTA~) toggles between these modes.
+The lower LED in the DELTA section indicates its state.
+
+Recording behaviour also depends on the direction of ~DELTA~'s rotation. If it
+moves clockwise, it activates the /extend/ record mode. If ~DELTA~ moves
+counter-clockwise, it activates /add/ mode. When ~DELTA~ returns to 12 o'clock,
+~FRAME~ finishes recording. The upper LED in the DELTA section indicates the
+current recording mode.
+
+The record and delta modes create four recording behaviours when combined.
+***** Recording Behaviours
+****** /global/ and /extend/ mode
+~FRAME~ records the input signal into a new buffer, and loops the buffer when
+~DELTA~ returns to 12o'clock.
+
+Used for dubbing a loop with elements that are longer than the current loop
+length - for example, adding a chord progression for a repeating phrase.
+****** /global/ and /add/ mode
+~FRAME~ records the input signal into a new buffer with the same length as the
+active buffer. On reaching the end, it repeats the process.
+
+Used for continuously recording multiple takes to audition and filter later
+on, or record new layers continuously.
+  
+****** /layer/ and /extend/ mode
+  ~FRAME~ records the input signal into the active buffer, and upon reaching the
+  end, will continue recording as well as extend the active buffer by looping
+  the old contents.
+
+Used for creating variation at the xth repetition of a buffer.
+****** /layer/ and /add/ mode
+~FRAME~ records the input signal into the active buffer and when it reaches the
+loop end, it repeats the process.
+
+Used for continuously overdubbing a buffer.
+***** Buffer Attenuation
+In all four mode combinations, if one twists further than the threshold
+position, it affects the amplitude of previous buffers at the current position,
+or in other words, the 'attenuation power' of the recording. If delta mode is
+/layer/, it only attenuates the active buffer, if delta mode is /global/, it
+attenuates all buffers.
+
+The attenuation power grows exponentially as ~DELTA~ twists, and when it reaches
+a maximum, it will erase previous buffers.
+
+This attenuation behaviour allows for easily 'pushing back' previous layers in a
+live-looping performance to create more movement, and also, if one fully
+attenuates the input signal, to create attenuation envelopes or erase parts of
+previous layers.
+
+**** Button Behaviour
+Excluding the ~DELTA_MODE~ button, there are four other buttons on ~FRAME~.
+
+The button to the upper left of ~DELTA~ is the ~UNDO~ button. ~FRAME~ keeps
+track of states before and after engaging record modes, and ~UNDO~ recalls the
+previous states. When one presses ~UNDO~ in a record mode, ~FRAME~ will discard
+any changes, and try again on the next loop start of the selected layer.
+
+The ~LEFT~ and ~RIGHT~ buttons change the active buffer, and the ~PLAY~ button
+resets all buffer positions to the beginning.
+**** FRAME Additional Uses Cases
+***** Delay Unit
+~FRAME~ can function as a delay unit in the case /add/ mode is consistently on
+in /layer/ mode. ~DELTA~ would control the feedback in this case.
+
+One may use ~FRAME-X~ to change the rate and offset of the delays to produce
+cool delay effects.
+
+*** FRAME Expansion Modules
+**** SIGNAL
+~SIGNAL~ takes a polyphonic (or monophonic) signal as input, sends it to
+~FRAME~, and outputs a mix of the input signal and output from ~FRAME~.
+
+It also outputs ~FRAME~'s active/selected buffer. This is useful in the case of
+applying audio functions or (control voltage functions) to particular buffers in
+~FRAME~. To do this, one would select a buffer, route ~BUF~ into other VCV Rack
+modules, route the output of those modules back into the input, and modify the
+buffer by engaging recording in /layer/ mode.
+
+#+DOWNLOADED: file:///tmp/Spectacle.UjiLef/Screenshot_20200929_001526.png @ 2020-09-29 00:15:39
+#+ATTR_ORG: :width 100
+[[file:Proposal/2020-09-29_00-15-39_Screenshot_20200929_001526.png]]
+
+***** MIX
+- At 7'oclock, ~SIG~ only outputs ~FRAME~ output, and the input signal is fully
+  attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when ~FRAME~ enters a record mode.
+- At 12'oclock, the input signal is not attenuated.
+- At 2:30, the input signal is still not attenuated, and ~SIG~ outputs 100% of ~FRAME~'s /active buffer/. Used for auditioning multiple takes that were loop recorded, and using /layer/ mode without sonic clutter from other layers.
+- Past 2:30, ~SIG~ will attenuate the input signal until it is fully attenuated at  5'oclock (max cw).
+***** VCA
+A VCA for the output. Used for setting or modulating the output volume.
+**** 4SIGNAL
+#+DOWNLOADED: file:///tmp/Spectacle.DlFJXH/Screenshot_20201005_212032.png @ 2020-10-05 21:20:45
+#+ATTR_ORG: :width 150
+
+~4IGNAL~ is ~SIGNAL~, just with 4 ports instead of 1. Useful for capturing
+multiple signals, as it saves space compared to 4 ~SIGNAL~ modules set side by
+side.
+**** PLAY
+~PLAY~ takes 3 polyphonic (or monophonic) signals associated with MIDI recording
+as input.
+
+#+DOWNLOADED: file:///tmp/Spectacle.MaNPSA/Screenshot_20200929_004530.png @ 2020-09-29 00:45:37
+#+ATTR_ORG: :width 125
+[[file:Proposal/2020-09-29_00-45-37_Screenshot_20200929_004530.png]]
+
+~PLAY~ functions just like ~SIG~, with a difference in how it attenuates signals.
+Attenuation only affects VEL (velocity) signals until max attenuation, where it
+also removes GATE signals and holds VOCT signals.
+
+**** FRAME-X
+This module is an expander for ~FRAME~. When placed on its right side, it gives
+it extra ~RATE~, and ~POS~ parameters, as well as ports for controlling ~LEFT~,
+~RIGHT~, and ~PLAY~.
+
+This module enables more ways to use ~FRAME~, checkout the footnotes section if
+interested.
+
+#+DOWNLOADED: file:///tmp/Spectacle.npfXoe/Screenshot_20200929_204733.png @ 2020-09-29 20:47:53
+#+ATTR_ORG: :width 100
+[[file:Proposal/2020-09-29_20-47-53_Screenshot_20200929_204733.png]]
+
+The ~POS~ parameter controls the start offset of the buffers in the scene.
+
+The ~RATE~ parameter controls the speed at which ~FRAME~ plays back the buffers
+in the scene.
+
+All the button ports react to rising edges. The ports underneath ~POS~ and
+~RATE~ modulate the parameters.
+***** FRAME-X Usage Ideas
+****** Pitch Shifter
+When one sets up ~FRAME~ as a delay unit with a small buffer size and adjusts
+the ~RATE~ of ~FRAME-X~, it will seem like the pitch of the sound is higher or
+lower.
+
+****** Advanced Sample & Hold / Sequencer
+When one sets ~RATE~ to 0, ~FRAME~ does not progress at all but still may record
+and read signals. In this case, it acts as an advanced sample and hold module.
+Adjusting the ~SCENE~ knob smoothly transitions between samples.
+
+One may sequence samples in interesting ways using the ~SCENE~ modulation port.
+****** Advanced MIDI Looper
+When ~FRAME~ is expanding ~PLAY~, one may create interesting playback patterns
+by recording some GATE, VOCT, and VEL signals, and varying or modulating the
+~RATE~ and ~POS~ ports. One idea is to record a chord, and modulate ~RATE~ and
+~POS~ with low frequency noise sources with channel variation to create
+fluctuating, dreamy note sequences.
+****** MIDI Instrument
+MIDI keyboards output VOCT (pitch) and GATE signals.
+
+One may patch the ~RATE~ port with a VOCT signal, and the ~PLAY~ port with a
+GATE signal, patch the output VCA with a GATE controlled envelope, and play
+~FRAME~ as if it were an instrument.
+
+This use case applies to all the additional use cases below.
+
+****** Wonky Audio Playback Unit 
+One may patch the ~RATE~ port to modulate the speed of playback and recording,
+and one may patch the ~POS~ port to modulate the offset of ~FRAME~ buffers.
+Using these, one could get some cool sounds with ~FRAME~ - especially if there
+is variation across channels. Have you ever wondered what playing back speech
+with a sin wave sounds like? I have.
+
+****** Wavetable Oscillator with Additive and Subtractive Synthesis Capabilities
+~FRAME~ can be a wavetable oscillator if either the ~CLK~ rate is high, or a
+high frequency saw wave is input into ~POS~.
+
+In this use case, the ~SCENE~ parameter morphs between recorded waves, and the
+~DELTA~ parameter would add or subract from a ~SCENEs~ wave.
+****** Granular Synthesis Engine Component
+To use ~FRAME~ as a granulart synthesis engine component, one would record an
+audio signal, then patch a constant polyphonic signal with channel variation
+into ~POS~.
+
+To create the grains, one would patch the ~VCA~ in ~SIGNAL~ with short, repeating
+envelopes with phase variation across channels.
+
+*** TIMELINE
+** Modules for a Sound Interface
+*** Context
+**** VCV Rack and the Modern DAW
+The core issue, is that VCV Rack provides an environment for sound design that is
+superior to the modern DAW, but lacks features related to the creation of sound
+structures. 
+
+Sound design is superior in VCV Rack, as there is freedom in the use and flow of
+signals. Visually speaking, signals in the DAW are of midi or audio type, and
+flow from ends of a graph towards the. Signals in VCV Rack, are of any
+type, and the routing may be that of any graph.
+
+From the perspective of a creator, it enables a language of sonic relationships
+and patterns. One could, for example, control the timber of two seperate sound
+sources with a control signal generated from a simulated pendulum.
+
+In addition to this freedom, VCV Rack modules are a possibly a superset of the
+'modules' (primarily VSTs) capable of running in the DAW. This is because the
+[[https://vcvrack.com/Host][VCV-HOST]] module can run VSTs, and VCV Rack also has a growing library of over
+2000 other modules.
+
+Due to these points, the sound creation possibilities of VCV Rack are much greater than that of the DAW. 
+
+The downside of VCV Rack, is that it lacks features related to the
+creation of sound structures. There are a couple of [[https://www.youtube.com/watch?v=i3I_prfgZis][workflows, and tricks]], as
+well as existing [[https://library.vcvrack.com/Entrian-Sequencers][modules]], to add structure to VCV Rack patches, though most are
+lacking in their interface, as well as features.
+
+One common issue in these workflows is that for larger compositions, the amount
+of modules required goes up, as well as CPU usage and visual clutter. A
+potential workflow to overcome this issue would be to record the audio output of
+modules multiple times, and to then sequence the volume of these recordings, and
+although this would overcome the CPU and visual clutter issue, one would be
+unable to adjust the aspects involved in the production of previously produced
+audio.
+
+**** Where is the interface for the creator?
+Workflows for composition aside, a key point is that both the interface for
+modern DAWs and VCV Rack seem to have been designed from the perspective of an
+engineer, not the perspective of a sound creator. Most importantly, is that
+there is no emphasis on the real-time aspect of capturing creativity. The speed
+at which sounds and sound structures heard in the mind may be realized in the
+world, is slow. There are frequent interruptions where one must click and clack
+to create and arm new tracks, set up new instruments, or patch new modules.
+
+There are interfaces for capturing sound structures that consider this real-time
+aspect, such as [[https://forum.cockos.com/showthread.php?t=233734][wayback]], or hardware units such as the [[https://www.youtube.com/watch?v=PffyRrUEPVM][digitakt]]. Though all of
+them either impose sonic restrictions, or lose some of the essential features
+related to sound structure composition. One feature that is particularly
+lacking, is a timeline that produces determinstic playback, that one may move
+around in and add, adjust, or remove parameter automation, sound sources, and
+fx.
+
+*** Purpose of the SI 
+# The purpose of this project, is to provide a realtime, user-friendly, and
+# featureful interface for sound and sound structure creation in VCV Rack. It will
+# be 
+
+# The /sound interface/ provides a higher-level controller for VCV Rack as well as
+# an interface for it, that would simplify the process of sound and sound
+# structure creation while preserving the versatility of VCV Rack. The result is
+# that instead of buying new guitar pedals, VSTs, hardware modules, and
+# synthesizers, creators could use the sound interface and configure VCV Rack to
+# provide the same functionality for free - with structural features included.
+# These structural features will rely on this module collection.
+
+The purpose of the SI is to provide a sound and sound structure creation
+interface that holds the creator paramount, and has both the versatile sound
+production capabilities of VCV Rack, and the essential sound structure features
+of a Modern DAW.
+
+Holding the creator paramount would entail minimal interruption of creative
+flow, realtime sound and sound structure creation, lack of sonic restrictions,
+as well as comfort and ease of use.
+
+Since the SI has the versatile sound production capabilities of VCV Rack, it
+will be able to adapt to the needs of any user. One could be a guitarist looking
+for an fx rack, a beatboxer who needs a live-looping solution for live shows, a
+band member who records and loops other bandmates instruments and applies fx to
+them, a keyboard player looking for a versatile synthesizer, or a music goblin
+that stays in his room for weeks at a time who believes his primary purpose in
+life is to realize the sound structures that appear in his head (aka me).
+
+This versatility of sound creation is why I think this project has potential. It
+would be able to adapt to produce the same sounds as most music hardware
+collections, without the hefty price tag. Think of the thousands spent on audio
+creation and fx units - the modular synthesizers, guitar pedal boards, keyboard
+synthesizers... why not have one common interface for sound creation, instead of
+buying the 9th synthesizer keyboard for a [[https://www.reddit.com/r/synthesizercirclejerk/comments/i6ghli/started_with_the_minibrute_about_4_months_agobeen/][studio]]?
+
+*** The User Experience
+**** Creating Sounds
+***** Macros
+The base block of sound generation in the SI is the /macro/. A macro is
+a strip of modules (or single module) in VCV Rack that has associated inputs,
+parameter values, and outputs. 
+
+The interface primarily consists of 'macro blocks', and the user spends
+most of his time adjusting these blocks. Macro blocks are controllers for macros
+running in VCV Rack. Multiple macros may be stacked on the same macro block
+position to save space, and switched between using the bottom arrow buttons (TODO).
+
+Macro blocks have a mechanism to change the macro, knobs to adjust the parameter
+values of macros, and arrow buttons for changing which macro parameters are
+currently displayed. The central knob in the macro is the main macro knob, and
+does not change on switching active macro parameters. 
+
+One may also press the name of a macro parameter to activate /send mode/ for that
+knob. The parameter name changes to the output name, and the values as well as
+the names of other macro knobs are updated to display the 'send power' of the
+activated knob to that knob, as well as the name of the input. One may twist the
+knobs to send more and more of the activated knobs output signal to the knobs
+associated in port. When fully twisted to the right, 100% of the signal is sent,
+when fully twisted to the left, -100% of the signal is sent. Pressing the
+activated knob name again exits send mode.
+
+This is how the SI accomplishes signal routing. 
+
+***** Macro Creation
+Macros would be made with a set of macro creation modules in VCV Rack. They are
+then saved into a folder, and then they can be selected by a macro block.
+
+If the user is comfortable with modular synthesizers, they may create their own
+macros for use. For less comfortable users, there will be provided macros, and
+collections for particular use cases. In the future, a platform for the
+downloading and sharing of macros would be a useful thing (possibly
+patchstorage?).
+
+**** Creating Structure 
+***** Macro Modules
+****** OUT
+8 in ports, with place to enter names, as well as labels about type of signal
+signal types
+- gates (blue), clks (purple), triggers (light blue), control (yellow), audio (red)
+
+these labels alter the color of the send in the 
+
+***** Sure-eties
+- the interfaces structure through a morphing graph of signals
+***** The Signal Graph
+- Global and layer mode as well, either inter-macro routing or
+  inter-layer routing
+- connections have colors according to output types, and opacity according to
+  power of send
+***** DELTA behaviour
+The DELTA knob handles all of the recording, dubbing, extending, 
+attenuation, and erasing in the SI.
+
+What the DELTA knob records, depends on the current state of the SI.
+- If a macro knob is in send mode, the DELTA knob will record the output of that
+  knob. Using this, one could record one part of a layer, such as a midi
+  keyboard macro, or an audio input macro, and then adjust parameters, add
+  automation, and etc.
+- If the interface is in /layer/ mode, it will record the layers parameters,
+  parameter changes, and layer outputs. Attenuation does not affect layer
+  parameters, only layer outputs. TODO Question: allow overdubbing for layer outputs? This
+  complicates things, how does one adjust previous overdubs? Will there be a
+  concept of layer dubs, that one may cycle through? One would have to save the
+  entire layer state each time.
+
+How the SI records the macro output depends on the type of the output - for
+
+example, it will not attenuate GATE signals.
+
+***** Concepts
+The interface achieves recording by applying the concepts of the ~FRAME~ module to the
+entire state of the interface. 
+
+I name this functionality the 'interface frame', and I will go over how the
+concepts from ~FRAME~ transfer over.
+
+****** Global And Layer Mode
+****** Layers
+A layer corresponds to one recorded instance of the interface. The recording
+contains macro parameter values, macro routing to macros in the current layer,
+macro routing to macros in other layers, (TODO?) macro routing to the global layer, as
+well as the outputs of macros.
+
+****** The Delta Parameter
+Recording, dubbing, erasing, and extending loops is all done through just /one/
+parameter - the ~DELTA~ parameter. The behaviour is conceptually identical to that
+of ~FRAME~'s ~DELTA~ parameter.
+
+When the recording loops, the outputs of the macros as well as the knob values
+loop. Knobs in the interface reflect the current values of the recording, so
+they may morph in time if one recorded such morphing.
+
+The attenuation feature of ~DELTA~ in /layer/ mode only attenuates recordings of
+macro outputs, not parameter values or routing values (a.k.a knob values). In
+/global/ mode, attenuation affects the currently selected layers outputs (TODO?
+
+When one alters knob values in read mode, it sets the offset for the knob value. When
+one alters knob values in a record mode, it records the relative position of the
+knob from the offset position.
+
+Knob recording behaviour is similar to 'latch and arm' automation in DAWs. To
+erase knob recordings, one enters a record mode, returns the knob to the offset
+position, and waits for the duration of the loop. One may alter knob recordings
+by temporarily engaging a record mode, recording knob movement, and exiting.
+
+****** Scenes
+Recall that in ~FRAME~ a 'scene' is a collections of layers, and one may use
+the ~SCENE~ parameter to cross-fade between scenes or to sequence scene's. 
+The scene feature in the interface frame includes this functionality, though it
+only works when the interface frame is in /global/ mode. This is because there are
+now ~SCENE~ values associated with not only the global context, but for each layer
+as well. 
+
+Using ~SCENE~ in /layer/ mode enables recording multiple takes of a particular
+layer, smooth morphing between two interface states, saving and comparing patch states
+
+it also has a seperate value associated with each layer. 
+
+# how to record automation of scene for a layer?
+
+***** User Steps To Record 
+1. Adjust the layers macro's, macro parameters, and macro routing.
+2. Activate /extend/ mode via ~DELTA~ to record the layer.
+When recording,
+
+***** Visual
+***** Notes  & Questions
+****** recording the sends of all macros in a layer is kind of a waste of
+  resources and redundant. it would be better to record the sends of a layer.
+it is also problematic when it comes to overdubs and the delta knob, 
+
+maybe one should create the illusion of 
+
+  though now there is the question of how to record midi tracks, adjust/automate
+  the instrument, and record the output in a fast way.
+option 1) put the midi into another layer
++ consistent behaviour, not fixes
++ setting up new instruments would require routing
+option 2) put a frame into the current layer
++ the instrument is in one layer
++ straying away from the system loses reproducible playback
+option 3) when creating modules, have option to force module recording
+option 4) stick with recording all macro send outputs
+option 5) arm button for macros
+
+*option 6) alternate recording mode when in send mode!*
+****** feature needed: take splicing
+maybe achieve through recording layer fading 
+
+****** should there be a concept of global modules? somewhat equivalent to master
+  track modules? or should there just be a layer all modules are routed to?
+  + having a layer that is consistenly on the tree graph would produce clutter
+  + imposing opinions is bad
+  + 
+
+-
+****** how to reconcile many recordings of different loop lengths, with a timeline of one loop length?
+****** TIMELINE
+******* option 1) a sequencer for scenes with a timeline that is connected to all the
+FRAMEs and scrubs their buffers.
++ cool high level control, scene 4 twist - verse - scene 5 twist - chorus ...
+  etc 
++ what if you want to add a long field recording of birds
++ can't do recording to timeline of live looping in this case, as scenes are
+  built up, but the timeline does not preserve that build up. - maybe it could
+  though, one would see the 'layer' number incrementing on each overdub, 
+  
+visualizes the layers of the scene for the particular scope, and the positions
+of all the buffers or their positions in their loops
+
+****** scope concept
+- interface controls adapt to scope, the visuals adapt to scope as well
+- LAYER SCENE and DELTA adapt to scope
+******* sends scope
+******* layer scope
+******* global scope
+
+**** Modules
+***** Macro Modules
+****** MACRO
+****** M-PRESS
+****** M-MAP
+****** M-IN
+****** M-OUT
+***** OSC
+*** Proposed Implementation 
+The SI will be made by creating a collection of VCV Rack modules, a
+higher-level controller for these modules as well as VCV Rack, and lastly, the
+interface to communicate with the controller.
+
+The communication between the controller and the interface will be through [[https://en.wikipedia.org/wiki/Open_Sound_Control][OSC]]
+protocol, so the interface may take multiple forms. To start off, a tablet or
+laptop with a touchscreen would run an interface made in [[https://openstagecontrol.ammd.net/docs/getting-started/introduction/][OpenStageControl]]. 
+
+# Creating this distinction between the interface and the controller would
+# allow multiple interfaces to connect to the same controller, allowing for multiple
+# people to alter a composition in parallel. 
+
+**** Automatic module disabling, and the macro routing graph
+

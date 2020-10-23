@@ -1,13 +1,14 @@
 * Myrisa Modules
 ** Modules For Structure
-The ~FRAME~, ~FRAME~ expansion modules, and ~TIMELINE~, provide a framework for
+The ~FRAME~, ~FRAME~ expansion modules, and ~TIMELINE~ module, provide a framework for
 creating multi-layered, live music and songs.
 
-*** FRAME
-#+DOWNLOADED: file:///tmp/Spectacle.npfXoe/Screenshot_20200929_205338.png @ 2020-09-29 20:53:51
-#+ATTR_ORG: :width 100
-[[file:Proposal/2020-09-29_20-53-51_Screenshot_20200929_205338.png]]
 
+#+DOWNLOADED: file:img/structure_modules.png
+#+ATTR_ORG: :width 700
+
+
+*** FRAME
 The core function of ~FRAME~ is to record and loop the signal of one of its
 expansion modules (excluding ~FRAME-X~). The expansion module(s) will define the
 inputs and outputs of ~FRAME~, and dictate what ~FRAME~ records and plays back.
@@ -143,10 +144,6 @@ applying audio functions or (control voltage functions) to particular buffers in
 modules, route the output of those modules back into the input, and modify the
 buffer by engaging recording in /layer/ mode.
 
-#+DOWNLOADED: file:///tmp/Spectacle.UjiLef/Screenshot_20200929_001526.png @ 2020-09-29 00:15:39
-#+ATTR_ORG: :width 100
-[[file:Proposal/2020-09-29_00-15-39_Screenshot_20200929_001526.png]]
-
 ***** MIX
 - At 7'oclock, ~SIG~ only outputs ~FRAME~ output, and the input signal is fully
   attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when ~FRAME~ enters a record mode.
@@ -156,8 +153,6 @@ buffer by engaging recording in /layer/ mode.
 ***** VCA
 A VCA for the output. Used for setting or modulating the output volume.
 **** 4SIGNAL
-#+DOWNLOADED: file:///tmp/Spectacle.DlFJXH/Screenshot_20201005_212032.png @ 2020-10-05 21:20:45
-#+ATTR_ORG: :width 150
 
 ~4IGNAL~ is ~SIGNAL~, just with 4 ports instead of 1. Useful for capturing
 multiple signals, as it saves space compared to 4 ~SIGNAL~ modules set side by
@@ -165,10 +160,6 @@ side.
 **** PLAY
 ~PLAY~ takes 3 polyphonic (or monophonic) signals associated with MIDI recording
 as input.
-
-#+DOWNLOADED: file:///tmp/Spectacle.MaNPSA/Screenshot_20200929_004530.png @ 2020-09-29 00:45:37
-#+ATTR_ORG: :width 125
-[[file:Proposal/2020-09-29_00-45-37_Screenshot_20200929_004530.png]]
 
 ~PLAY~ functions just like ~SIG~, with a difference in how it attenuates signals.
 Attenuation only affects VEL (velocity) signals until max attenuation, where it
@@ -181,10 +172,6 @@ it extra ~RATE~, and ~POS~ parameters, as well as ports for controlling ~LEFT~,
 
 This module enables more ways to use ~FRAME~, checkout the footnotes section if
 interested.
-
-#+DOWNLOADED: file:///tmp/Spectacle.npfXoe/Screenshot_20200929_204733.png @ 2020-09-29 20:47:53
-#+ATTR_ORG: :width 100
-[[file:Proposal/2020-09-29_20-47-53_Screenshot_20200929_204733.png]]
 
 The ~POS~ parameter controls the start offset of the buffers in the scene.
 

@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 #include "widgets/knobs.hpp"
+using namespace std;
 
 struct MyrisaSignal : Module {
 	enum ParamIds {
@@ -28,15 +29,39 @@ struct MyrisaSignal : Module {
 		configParam(VCA_PARAM, 0.f, 1.f, 0.f, "");
 	}
 
+  // TODO complex channel number behaviour (e.g. 1 input, multi vca)
+  // int getNumberChannels() {
+  //   int n_channels = 0;
+  //   for (Port input : inputs) {
+  //     if (input.getChannels() > n_channels) {
+  //       n_channels = input.getChannels();
+  //     }
+  //   }
+  //   return n_channels;
+  // }
+
+  void engine(const ProcessArgs& args, float in, float mix, float vca) {
+  }
+
 	void process(const ProcessArgs& args) override {
-	}
+    float* input = inputs[IN_INPUT].getVoltages();
+    float* mix = inputs[MIX_INPUT].getVoltages();
+    float* vca = inputs[VCA_INPUT].getVoltages();
+
+    for (int i = 0; i < n_channels; i++) {
+      // TODO
+    }
+
+
+    float out =
+  }
 };
 
 
 struct MyrisaSignalWidget : ModuleWidget {
 	MyrisaSignalWidget(MyrisaSignal* module) {
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/MyrisaSignal.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Signal.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

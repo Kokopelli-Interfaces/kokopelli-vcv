@@ -45,7 +45,7 @@ struct Myrisa4Signal : Module {
 struct Myrisa4SignalWidget : ModuleWidget {
 	Myrisa4SignalWidget(Myrisa4Signal* module) {
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Myrisa4Signal.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/4Signal.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));

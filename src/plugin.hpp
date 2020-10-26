@@ -2,6 +2,7 @@
 #include <rack.hpp>
 
 using namespace rack;
+using namespace myrisa;
 
 // Declare the Plugin, defined in plugin.cpp
 extern Plugin *pluginInstance;

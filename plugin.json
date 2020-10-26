@@ -1,0 +1,77 @@
+{
+  "slug": "Myrisa",
+  "name": "Myrisa",
+  "version": "1.0",
+  "license": "MIT",
+  "author": "Myrisa",
+  "brand": "Myrisa",
+  "authorEmail": "michael.ampm@gmail.com",
+  "authorUrl": "https://github.com/gwatcha",
+  "pluginUrl": "https://github.com/gwatcha/myrisa-modules",
+  "manualUrl": "https://github.com/gwatcha/myrisa-modules/wiki",
+  "sourceUrl": "https://github.com/gwatcha/myrisa-modules",
+  "donateUrl": "https://ko-fi.com/michaelmuszynski",
+  "modules": [{
+      "slug": "MyrisaMidiCC",
+      "name": "MIDI-CC",
+      "description": "Converts MIDI CC from an external device CV, supports polyphonic output.",
+      "tags": [
+        "External",
+        "MIDI"
+      ]
+    },
+    {
+      "slug": "MyrisaSignal",
+      "name": "Signal",
+      "description": "Frame expander which adds one signal input and output.",
+      "tags": [
+        "Expander"
+      ]
+    },
+    {
+      "slug": "Myrisa4Signal",
+      "name": "4Signal",
+      "description": "Frame expander which adds four signal inputs and outputs.",
+      "tags": [
+        "Expander"
+      ]
+    },
+    {
+      "slug": "MyrisaPlay",
+      "name": "Play",
+      "description": "Frame expander which adds midi recording inputs and outputs.",
+      "tags": [
+        "Expander"
+      ]
+    },
+    {
+      "slug": "MyrisaFrameX",
+      "name": "FrameX",
+      "description": "Frame expander which adds additional position and rate controls, as well as control ports. Enables alternative ways to use Frame.",
+      "tags": [
+        "Expander"
+      ]
+    },
+    {
+      "slug": "MyrisaSignal",
+      "name": "Signal",
+      "description": "Record, loop, edit, playback, and sequence signals.",
+      "tags": [
+        "Expander"
+      ]
+    },
+    {
+      "slug": "MyrisaFrame",
+      "name": "Frame",
+      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more.",
+      "tags": [
+        "Poly",
+        "Recording",
+        "Sequencer",
+        "Sampler",
+        "Visual",
+        "Waveshaper"
+      ]
+    }
+  ]
+}

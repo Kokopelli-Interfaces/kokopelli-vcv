@@ -5,15 +5,14 @@ record, loop, edit, playback, and sequence signals. The modules' interfaces are
 designed for fluidity and simple controls, making them suitable for live
 recording where one can not pause to click and clack. 
 
-These signal captured may be audio, in which case, these modules act as a loop recorder
+The signal captured may be audio, in which case, these modules act as a loop recorder
 that can create multi-layered musical sections, and then sequence these
 sections. 
 
 They of course work on any type of signal too, so one could use these to record
-and record and sequence parameter automation, or control voltage, for example.
+and record and sequence parameter automation, or any arbitrary control voltage.
 
-#+DOWNLOADED: file:img/structure_modules.png
-#+ATTR_ORG: :width 700
+[[file:img/structure_modules.png]]
 
 
 *** FRAME

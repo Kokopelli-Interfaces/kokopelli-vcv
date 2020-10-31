@@ -6,9 +6,9 @@ void init(Plugin *p) {
   pluginInstance = p;
 
   p->addModel(modelMyrisaMidiCC);
-  p->addModel(modelMyrisaSignal);
-  p->addModel(modelMyrisa4Signal);
-  p->addModel(modelMyrisaPlay);
-  p->addModel(modelMyrisaFrame);
-  p->addModel(modelMyrisaFrameX);
+  p->addModel(modelSignal);
+  p->addModel(modelMyrisaSignal4);
+  p->addModel(modelPlay);
+  p->addModel(modelFrame);
+  p->addModel(modelFrameX);
 }

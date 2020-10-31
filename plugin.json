@@ -21,7 +21,7 @@
       ]
     },
     {
-      "slug": "MyrisaSignal",
+      "slug": "Myrisa-Signal",
       "name": "Signal",
       "description": "Frame expander which adds one signal input and output.",
       "tags": [
@@ -29,15 +29,15 @@
       ]
     },
     {
-      "slug": "Myrisa4Signal",
-      "name": "4Signal",
+      "slug": "Myrisa-Signal4",
+      "name": "Signal4",
       "description": "Frame expander which adds four signal inputs and outputs.",
       "tags": [
         "Expander"
       ]
     },
     {
-      "slug": "MyrisaPlay",
+      "slug": "Myrisa-Play",
       "name": "Play",
       "description": "Frame expander which adds midi recording inputs and outputs.",
       "tags": [
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "slug": "MyrisaFrameX",
+      "slug": "Myrisa-FrameX",
       "name": "FrameX",
       "description": "Frame expander which adds additional position and rate controls, as well as control ports. Enables alternative ways to use Frame.",
       "tags": [
@@ -53,7 +53,7 @@
       ]
     },
     {
-      "slug": "MyrisaSignal",
+      "slug": "Myrisa-Signal",
       "name": "Signal",
       "description": "Record, loop, edit, playback, and sequence signals.",
       "tags": [
@@ -61,7 +61,7 @@
       ]
     },
     {
-      "slug": "MyrisaFrame",
+      "slug": "Myrisa-Frame",
       "name": "Frame",
       "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more.",
       "tags": [

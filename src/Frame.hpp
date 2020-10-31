@@ -1,5 +1,9 @@
 #pragma once
 
+#include "myrisa.hpp"
+
+extern Model *modelFrame;
+
 namespace myrisa {
 
 struct Frame : MyrisaModule {
@@ -39,10 +43,7 @@ struct Frame : MyrisaModule {
 		configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "Delta");
 	}
 
-	void processAll(const ProcessArgs& args) override;
-	void modulateChannel(const ProcessArgs& args) override;
+	void processAlways(const ProcessArgs& args) override;
 };
-
-
 
 } // namespace myrisa

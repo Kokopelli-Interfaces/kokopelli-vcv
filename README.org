@@ -242,22 +242,22 @@ structures.
 
 Sound design is superior in VCV Rack, as there is freedom in the use and flow of
 signals. Visually speaking, signals in the DAW are of midi or audio type, and
-flow from ends of a graph towards the. Signals in VCV Rack, are of any
+flow from ends of a graph towards the root. Signals in VCV Rack, are of any
 type, and the routing may be that of any graph.
 
 From the perspective of a creator, it enables a language of sonic relationships
 and patterns. One could, for example, control the timber of two seperate sound
 sources with a control signal generated from a simulated pendulum.
 
-In addition to this freedom, VCV Rack modules are a possibly a superset of the
-'modules' (primarily VSTs) capable of running in the DAW. This is because the
-[[https://vcvrack.com/Host][VCV-HOST]] module can run VSTs, and VCV Rack also has a growing library of over
-2000 other modules.
+In addition to this freedom, VCV Rack modules has the capability to run VSTs via
+the [[https://vcvrack.com/Host][VCV-HOST]] module, and VCV Rack also has a growing library of over 2000 other
+modules.
 
-Due to these points, the sound creation possibilities of VCV Rack are much greater than that of the DAW. 
+Due to these points, the sound creation possibilities of VCV Rack are much
+greater than that of the DAW.
 
 The downside of VCV Rack, is that it lacks features related to the
-creation of sound structures. There are a couple of [[https://www.youtube.com/watch?v=i3I_prfgZis][workflows, and tricks]], as
+creation of sound structures (compositions). There are a couple of [[https://www.youtube.com/watch?v=i3I_prfgZis][workflows, and tricks]], as
 well as existing [[https://library.vcvrack.com/Entrian-Sequencers][modules]], to add structure to VCV Rack patches, though most are
 lacking in their interface, as well as features.
 

@@ -30,8 +30,9 @@ struct FrameX : Module {
 		configParam(POS_PARAM, 0.f, 1.f, 0.f, "");
 		configParam(RATE_PARAM, 0.f, 1.f, 0.f, "");
 	}
-};
 
+  void processAlways(const ProcessArgs& args);
+};
 
 } // namespace myrisa
 

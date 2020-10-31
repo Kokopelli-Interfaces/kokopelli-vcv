@@ -34,7 +34,7 @@ struct Signal4 : MyrisaModule {
     configParam(MIX_PARAM, 0.f, 1.f, 0.f, "Mix");
   }
 
-  void processAlways(const ProcessArgs &args) override;
+  void processAlways(const ProcessArgs& args) override;
 };
 
 } // namespace myrisa

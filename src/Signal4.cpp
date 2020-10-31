@@ -1,6 +1,6 @@
 #include "Signal4.hpp"
 
-void processAlways(const ProcessArgs &args) {
+void Signal4::processAlways(const ProcessArgs &args) {
   return;
 }
 

@@ -1,12 +1,11 @@
 #include "FrameX.hpp"
 
-void processAlways(const ProcessArgs &args) {
+void FrameX::processAlways(const ProcessArgs& args) {
   return;
 }
 
 struct FrameXWidget : ModuleWidget {
 	FrameXWidget(FrameX* module) {
-		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/FrameX.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));

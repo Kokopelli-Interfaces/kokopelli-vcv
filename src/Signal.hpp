@@ -16,7 +16,7 @@ struct Signal : MyrisaModule {
     configParam(VCA_PARAM, 0.f, 1.f, 0.f, "VCA");
   }
 
-  void processAlways(const ProcessArgs &args) override;
+  void processAlways(const ProcessArgs& args) override;
 };
 
 } // namespace myrisa

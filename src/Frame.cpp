@@ -10,7 +10,7 @@ struct FrameWidget : ModuleWidget {
   FrameWidget(Frame *module) {
     setModule(module);
     box.size = Vec(RACK_GRID_WIDTH * hp, RACK_GRID_HEIGHT);
-    setPanel(box.size, "Frame");
+    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Frame.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));

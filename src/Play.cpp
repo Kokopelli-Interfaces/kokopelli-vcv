@@ -1,6 +1,6 @@
 #include "Play.hpp"
 
-void Play::processAlways(const ProcessArgs &args) { return }
+void Play::processAlways(const ProcessArgs &args) { return; }
 
 struct PlayWidget : ModuleWidget {
 	PlayWidget(Play* module) {

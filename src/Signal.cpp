@@ -1,9 +1,34 @@
 #include "Signal.hpp"
 
+float getMixOut(float mix, float in, float frame_out, float frame_sel_out) {
+  return frame_out;
+}
+
 void Signal::processAlways(const ProcessArgs &args) {
-  float *input = inputs[IN_INPUT].getVoltages();
-  float *mix = inputs[MIX_INPUT].getVoltages();
-  float *vca = inputs[VCA_INPUT].getVoltages();
+  // float *mix = inputs[MIX_INPUT].getVoltages();
+
+  SignalExpanderMessage *toFrame = &_dummyExpanderMessage;
+  SignalExpanderMessage *fromFrame = &_dummyExpanderMessage;
+  if (expanderConnected()) {
+    toFrame = toExpander();
+    fromFrame = fromExpander();
+  }
+
+  int n = inputs[IN_INPUT].getChannels();
+  for (int c = 0; c < n; ++c) {
+    toFrame->signal[c] = inputs[IN_INPUT].getPolyVoltage(c);
+
+    if (outputs[OUT_OUTPUT].isConnected()) {
+      float frame_out = fromFrame->signal[c];
+
+      float mix = clamp(params[MIX_PARAM].getValue(), 0.0f, 1.0f);
+      float in = inputs[IN_INPUT].getPolyVoltage(c);
+      float mix_out = getMixOut(mix, in, frame_out, 0.0f);
+
+      float vca = clamp(params[VCA_PARAM].getValue(), 0.0f, 1.0f);
+      outputs[OUT_OUTPUT].setVoltage(mix_out * vca, c);
+    }
+  }
 }
 
 struct SignalWidget : ModuleWidget {

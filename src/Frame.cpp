@@ -1,7 +1,11 @@
 #include "Frame.hpp"
 
 void Frame::processAlways(const ProcessArgs &args) {
-  return;
+  if (baseConnected()) {
+    SignalExpanderMessage *input = fromBase();
+    SignalExpanderMessage *output = toBase();
+    output = input;
+  }
 }
 
 struct FrameWidget : ModuleWidget {

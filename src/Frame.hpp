@@ -1,12 +1,12 @@
 #pragma once
 
-#include "myrisa.hpp"
+#include "Frame_IO.hpp"
 
 extern Model *modelFrame;
 
 namespace myrisa {
 
-struct Frame : MyrisaModule {
+struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 	enum ParamIds {
 		SCENE_PARAM,
 		PLAY_PARAM,

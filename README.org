@@ -292,7 +292,7 @@ interface that holds the creator paramount, and has both the versatile sound
 production capabilities of VCV Rack, and the essential sound structure features
 of a Modern DAW.
 
-Holding the creator paramount would entail minimal interruption of creative
+Holding the creator paramount would mean minimal interruption of creative
 flow, realtime sound and sound structure creation, lack of sonic restrictions,
 as well as comfort and ease of use.
 
@@ -322,13 +322,18 @@ of them and be able to create full songs (as well as optionally a midi keyboard,
 midi controllers, microphones ... etc).
 
 *** The User Experience
+Note, this section is a work in progress. It's lacking a lot of pictures too.
+For now, I'm just implementing the modules for structure section, and will work
+on this part in the future.  It mostly just contains notes  for myself right now.
+
 **** Creating Sounds
 ***** Macros
 The base block of sound generation in the SI is the /macro/. A macro is
 a strip of modules (or single module) in VCV Rack that has associated inputs,
-parameter values, and outputs. 
+parameter values, and outputs. A set  of  'macro' modules will be made so one
+can create these macros. 
 
-The interface primarily consists of 'macro blocks', and the user spends
+The interface primarily consists of  'macro blocks' , and the user spends
 most of his time adjusting these blocks. Macro blocks are controllers for macros
 running in VCV Rack. Multiple macros may be stacked on the same macro block
 position to save space, and switched between using the bottom arrow buttons (TODO).
@@ -345,19 +350,17 @@ activated knob to that knob, as well as the name of the input. One may twist the
 knobs to send more and more of the activated knobs output signal to the knobs
 associated in port. When fully twisted to the right, 100% of the signal is sent,
 when fully twisted to the left, -100% of the signal is sent. Pressing the
-activated knob name again exits send mode.
-
-This is how the SI accomplishes signal routing. 
+activated knob name again exits send mode. This is how the SI accomplishes
+signal routing. No cables, just press, twist another knob, and release.
 
 ***** Macro Creation
-Macros would be made with a set of macro creation modules in VCV Rack. They are
-then saved into a folder, and then they can be selected by a macro block.
+Macros are made with a set of macro creation modules in VCV Rack. They are then
+saved into a folder, and then they can be selected by a macro block.
 
 If the user is comfortable with modular synthesizers, they may create their own
 macros for use. For less comfortable users, there will be provided macros, and
 collections for particular use cases. In the future, a platform for the
-downloading and sharing of macros would be a useful thing (possibly
-patchstorage?).
+downloading and sharing of macros would be a useful thing.
 
 **** Creating Structure 
 ***** Macro Modules
@@ -368,8 +371,6 @@ signal types
 
 these labels alter the color of the send in the 
 
-***** Sure-eties
-- the interface's structure is a morphing graph of signals
 ***** The Signal Graph
 - Global and layer mode as well, either inter-macro routing or
   inter-layer routing

@@ -311,9 +311,17 @@ creation and fx units - the modular synthesizers, guitar pedal boards, keyboard
 synthesizers... why not have one common interface for sound creation, instead of
 buying the 9th synthesizer keyboard for a [[https://www.reddit.com/r/synthesizercirclejerk/comments/i6ghli/started_with_the_minibrute_about_4_months_agobeen/][studio]]?
 
+The Sound Interface will be a seperate from VCV Rack's interface, and may take
+many forms. To start off, a touchscreen tablet or laptop running OpenOSC will
+work, but later on, one could create a physical controller. No matter the form,
+it will work by communicating via OSC with a set of modules running in VCV Rack
+that will handle signal routing, parameter adjustement, module management, as
+well as recording. Optimally, the interface will be able to replace the current
+computer interface entirely, so one could just have the sound interface in front
+of them and be able to create full songs (as well as optionally a midi keyboard,
+midi controllers, microphones ... etc).
+
 *** The User Experience
-
-
 **** Creating Sounds
 ***** Macros
 The base block of sound generation in the SI is the /macro/. A macro is

@@ -4,30 +4,48 @@ float getMixOut(float mix, float in, float frame_out, float frame_sel_out) {
   return frame_out;
 }
 
-void Signal::processAlways(const ProcessArgs &args) {
-  // float *mix = inputs[MIX_INPUT].getVoltages();
+int Signal::channels() {
+  // TODO define # channels based on FRAME out layers may be recorded with more
+  // or less channels also, additional behaviours with mono or stereo
+  // duplication via pos & rate will increase channels
+  return inputs[IN_INPUT].getChannels();
+}
 
-  SignalExpanderMessage *toFrame = &_dummyExpanderMessage;
-  SignalExpanderMessage *fromFrame = &_dummyExpanderMessage;
-  if (expanderConnected()) {
-    toFrame = toExpander();
-    fromFrame = fromExpander();
+void Signal::modulateChannel(int c) {
+  Engine &e = *_engines[c];
+  e.mix = params[MIX_PARAM].getValue();
+  if (inputs[MIX_INPUT].isConnected()) {
+    e.mix += clamp(inputs[MIX_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
   }
 
-  int n = inputs[IN_INPUT].getChannels();
-  for (int c = 0; c < n; ++c) {
-    toFrame->signal[c] = inputs[IN_INPUT].getPolyVoltage(c);
+  e.vca = params[VCA_PARAM].getValue();
+  if (inputs[VCA_INPUT].isConnected()) {
+    e.vca += clamp(inputs[VCA_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
+  }
+}
 
-    if (outputs[OUT_OUTPUT].isConnected()) {
-      float frame_out = fromFrame->signal[c];
+void Signal::processAlways(const ProcessArgs &args) {
+  outputs[OUT_OUTPUT].setChannels(_channels);
+  outputs[SEL_OUTPUT].setChannels(_channels);
 
-      float mix = clamp(params[MIX_PARAM].getValue(), 0.0f, 1.0f);
-      float in = inputs[IN_INPUT].getPolyVoltage(c);
-      float mix_out = getMixOut(mix, in, frame_out, 0.0f);
+  if (expanderConnected()) {
+    _toFrame = toExpander();
+    _fromFrame = fromExpander();
+  }
+}
 
-      float vca = clamp(params[VCA_PARAM].getValue(), 0.0f, 1.0f);
-      outputs[OUT_OUTPUT].setVoltage(mix_out * vca, c);
-    }
+void Signal::processChannel(const ProcessArgs& args, int c) {
+  Engine &e = *_engines[c];
+
+  float in = inputs[IN_INPUT].getPolyVoltage(c);
+  // TODO mix knob with SEL
+  float frame_send = e.mix * in;
+  _toFrame->signal[c] = frame_send;
+
+  if (outputs[OUT_OUTPUT].isConnected()) {
+    float frame_rcv = _fromFrame->signal[c];
+    float out = frame_rcv + frame_send;
+    outputs[OUT_OUTPUT].setVoltage(out * e.vca, c);
   }
 }
 

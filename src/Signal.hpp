@@ -2,11 +2,21 @@
 
 namespace myrisa {
 
-  struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
+struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
   enum ParamIds { MIX_PARAM, VCA_PARAM, NUM_PARAMS };
   enum InputIds { IN_INPUT, MIX_INPUT, VCA_INPUT, NUM_INPUTS };
   enum OutputIds { SEL_OUTPUT, OUT_OUTPUT, NUM_OUTPUTS };
   enum LightIds { NUM_LIGHTS };
+
+  struct Engine {
+    float mix = 0.5f;
+    float vca = 0.0f;
+  };
+
+  Engine *_engines[maxChannels] {};
+
+  SignalExpanderMessage *_toFrame = NULL;
+  SignalExpanderMessage *_fromFrame = NULL;
 
   Signal() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -14,9 +24,10 @@ namespace myrisa {
     configParam(VCA_PARAM, 0.f, 1.f, 0.f, "VCA");
   }
 
-  SignalExpanderMessage _dummyExpanderMessage;
-
-  void processAlways(const ProcessArgs& args) override;
+  void modulateChannel(int c) override;
+  int channels() override;
+  void processAlways(const ProcessArgs &args) override;
+  void processChannel(const ProcessArgs &args, int channel) override;
 };
 
 } // namespace myrisa

@@ -313,12 +313,12 @@ well as recording. Optimally, the interface will be able to replace the current
 computer interface entirely, so one could just have the sound interface in front
 of them and be able to create full songs (as well as optionally a midi keyboard,
 midi controllers, microphones ... etc).
-
 *** The User Experience
 Note, this section is a work in progress. It's lacking a lot of pictures too.
 For now, I'm just implementing the modules for structure section, and will work
 on this part in the future.  It mostly just contains notes  for myself right now.
 
+*** The User Experience
 **** Creating Sounds
 ***** Macros
 The base block of sound generation in the SI is the /macro/. A macro is
@@ -495,15 +495,3 @@ Similar to there being an interface frame, there is also an interface timelines.
 ****** M-IN
 ****** M-OUT
 ***** OSC
-*** Proposed Implementation 
-The SI will be made by creating a collection of VCV Rack modules, a
-higher-level controller for these modules as well as VCV Rack, and lastly, the
-interface to communicate with the controller.
-
-The communication between the controller and the interface will be through [[https://en.wikipedia.org/wiki/Open_Sound_Control][OSC]]
-protocol, so the interface may take multiple forms. To start off, a tablet or
-laptop with a touchscreen would run an interface made in [[https://openstagecontrol.ammd.net/docs/getting-started/introduction/][OpenStageControl]]. 
-
-**** Automatic module disabling, and the macro routing graph
-TODO
-

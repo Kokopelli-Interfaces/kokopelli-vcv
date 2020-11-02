@@ -25,6 +25,8 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
   }
 
   void modulateChannel(int c) override;
+  void addChannel(int c) override;
+  void removeChannel(int c) override;
   int channels() override;
   void processAlways(const ProcessArgs &args) override;
   void processChannel(const ProcessArgs &args, int channel) override;

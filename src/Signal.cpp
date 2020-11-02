@@ -1,9 +1,5 @@
 #include "Signal.hpp"
 
-float getMixOut(float mix, float in, float frame_out, float frame_sel_out) {
-  return frame_out;
-}
-
 int Signal::channels() {
   // TODO define # channels based on FRAME out layers may be recorded with more
   // or less channels also, additional behaviours with mono or stereo
@@ -47,6 +43,15 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
     float out = frame_rcv + frame_send;
     outputs[OUT_OUTPUT].setVoltage(out * e.vca, c);
   }
+}
+
+void Signal::addChannel(int c) {
+  _engines[c] = new Engine();
+}
+
+void Signal::removeChannel(int c) {
+  delete _engines[c];
+  _engines[c] = NULL;
 }
 
 struct SignalWidget : ModuleWidget {

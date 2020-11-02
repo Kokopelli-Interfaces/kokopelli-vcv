@@ -501,15 +501,3 @@ Similar to there being an interface frame, there is also an interface timelines.
 ****** M-IN
 ****** M-OUT
 ***** OSC
-*** Proposed Implementation 
-The SI will be made by creating a collection of VCV Rack modules, a
-higher-level controller for these modules as well as VCV Rack, and lastly, the
-interface to communicate with the controller.
-
-The communication between the controller and the interface will be through [[https://en.wikipedia.org/wiki/Open_Sound_Control][OSC]]
-protocol, so the interface may take multiple forms. To start off, a tablet or
-laptop with a touchscreen would run an interface made in [[https://openstagecontrol.ammd.net/docs/getting-started/introduction/][OpenStageControl]]. 
-
-**** Automatic module disabling, and the macro routing graph
-TODO
-

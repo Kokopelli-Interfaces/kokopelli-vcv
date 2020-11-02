@@ -30,7 +30,24 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 		NUM_LIGHTS
 	};
 
-	Frame() {
+  SignalExpanderMessage *_toSignal = NULL;
+  SignalExpanderMessage *_fromSignal = NULL;
+
+  struct Engine {
+    struct Layer {
+      std::vector<float> buffer;
+      std::vector<float> attenuation_envelope;
+      std::vector<int> attenuation_target_layers;
+      int layer_number;
+      float phase;
+    };
+
+   Layer* layers[]{};
+  };
+
+  Engine *_engines[maxChannels]{};
+
+  Frame() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(SCENE_PARAM, 0.f, 1.f, 0.f, "Scene");
 		configParam(PLAY_PARAM, 0.f, 1.f, 0.f, "Play Layer");
@@ -44,7 +61,12 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     setBaseModelPredicate([](Model *m) { return m == modelSignal; });
  }
 
-  void processAlways(const ProcessArgs& args) override;
+  void modulateChannel(int c) override;
+  void addChannel(int c) override;
+  void removeChannel(int c) override;
+  int channels() override;
+  void processAlways(const ProcessArgs &args) override;
+  void processChannel(const ProcessArgs &args, int channel) override;
 };
 
 } // namespace myrisa

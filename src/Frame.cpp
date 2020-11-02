@@ -2,10 +2,25 @@
 
 void Frame::processAlways(const ProcessArgs &args) {
   if (baseConnected()) {
-    SignalExpanderMessage *input = fromBase();
-    SignalExpanderMessage *output = toBase();
-    output->signal[0] = 1.0f;
+    _fromSignal = fromBase();
+    _toSignal = toBase();
   }
+}
+
+int Frame::channels() {
+  // TODO define # channels based on FRAME out layers may be recorded with more
+  return maxChannels;
+}
+
+void Frame::modulateChannel(int c) {}
+
+void Frame::processChannel(const ProcessArgs& args, int c) {}
+
+void Frame::addChannel(int c) { _engines[c] = new Engine(); }
+
+void Frame::removeChannel(int c) {
+  delete _engines[c];
+  _engines[c] = NULL;
 }
 
 struct FrameWidget : ModuleWidget {

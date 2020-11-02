@@ -43,7 +43,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   if (outputs[OUT_OUTPUT].isConnected()) {
     float out = 0.0f;
     if (_fromFrame) {
-      // mix instead of add
+      // TODO mix instead of add
       out += _fromFrame->signal[c];
     }
     out += in;

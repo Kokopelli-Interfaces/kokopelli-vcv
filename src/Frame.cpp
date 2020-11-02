@@ -4,7 +4,7 @@ void Frame::processAlways(const ProcessArgs &args) {
   if (baseConnected()) {
     SignalExpanderMessage *input = fromBase();
     SignalExpanderMessage *output = toBase();
-    output = input;
+    output->signal[0] = 1.0f;
   }
 }
 

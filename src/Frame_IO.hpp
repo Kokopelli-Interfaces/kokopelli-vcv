@@ -4,6 +4,7 @@
 #include "expanders.hpp"
 
 extern Model *modelSignal;
+extern Model *modelFrame;
 
 namespace myrisa {
 

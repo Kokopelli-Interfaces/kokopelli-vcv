@@ -2,8 +2,6 @@
 
 #include "Frame_IO.hpp"
 
-extern Model *modelFrame;
-
 namespace myrisa {
 
 struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
@@ -41,9 +39,12 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 		configParam(UNDO_PARAM, 0.f, 1.f, 0.f, "Undo");
 		configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
 		configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "Delta");
-	}
 
-	void processAlways(const ProcessArgs& args) override;
+    // TODO chainable
+    setBaseModelPredicate([](Model *m) { return m == modelSignal; });
+ }
+
+  void processAlways(const ProcessArgs& args) override;
 };
 
 } // namespace myrisa

@@ -22,6 +22,11 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
     configParam(MIX_PARAM, 0.f, 1.f, 0.f, "Mix");
     configParam(VCA_PARAM, 0.f, 1.f, 0.f, "VCA");
+
+    setExpanderModelPredicate([](Model *m) {
+      // TODO chainable expanders
+      return m == modelFrame;
+    });
   }
 
   void modulateChannel(int c) override;

@@ -11,12 +11,12 @@ void Signal::modulateChannel(int c) {
   Engine &e = *_engines[c];
   e.mix = params[MIX_PARAM].getValue();
   if (inputs[MIX_INPUT].isConnected()) {
-    e.mix += clamp(inputs[MIX_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
+    e.mix *= clamp(inputs[MIX_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
   }
 
   e.vca = params[VCA_PARAM].getValue();
   if (inputs[VCA_INPUT].isConnected()) {
-    e.vca += clamp(inputs[VCA_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
+    e.vca *= clamp(inputs[VCA_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
   }
 }
 
@@ -33,14 +33,20 @@ void Signal::processAlways(const ProcessArgs &args) {
 void Signal::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
 
-  float in = inputs[IN_INPUT].getPolyVoltage(c);
   // TODO mix knob with SEL
-  float frame_send = e.mix * in;
-  _toFrame->signal[c] = frame_send;
+  float in = inputs[IN_INPUT].getPolyVoltage(c) * e.mix;
+
+  if(_toFrame) {
+    _toFrame->signal[c] = in;
+  }
 
   if (outputs[OUT_OUTPUT].isConnected()) {
-    float frame_rcv = _fromFrame->signal[c];
-    float out = frame_rcv + frame_send;
+    float out = 0.0f;
+    if (_fromFrame) {
+      // mix instead of add
+      out += _fromFrame->signal[c];
+    }
+    out += in;
     outputs[OUT_OUTPUT].setVoltage(out * e.vca, c);
   }
 }

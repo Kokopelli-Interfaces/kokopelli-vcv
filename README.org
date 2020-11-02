@@ -1,33 +1,26 @@
 * Myrisa Modules
 ** Modules For Structure
-The ~FRAME~, ~FRAME~ expansion modules, and ~TIMELINE~ module, provide the ability to
-record, loop, edit, playback, and sequence signals. The modules' interfaces are
-designed for fluidity and simple controls, making them suitable for live
-recording where one can not pause to click and clack. 
+These modules, provide the ability to record, loop, edit, playback, and sequence
+signals. I designed the interface for fluidity and simple controls, making them
+suitable for live recording where one can not pause to click and clack.
 
-The signal captured may be audio, in which case, these modules act as a loop recorder
-that can create multi-layered musical sections, and then sequence these
-sections. 
+The signal captured may be audio, in which case, these modules act as a loop
+recorder that can create multi-layered musical sections, and then sequence these
+sections. If capturing control voltage one could use these to record 
+and sequence parameter automation, or as a keyframer. 
 
-They of course work on any type of signal too, so one could use these to record
-and record and sequence parameter automation, or any arbitrary control voltage.
 
 [[file:img/structure_modules.png]]
 
 
 *** FRAME
-The core function of ~FRAME~ is to record and loop the signal of one of its
-expansion modules (excluding ~FRAME-X~). The expansion module(s) will define the
-inputs and outputs of ~FRAME~, and dictate what ~FRAME~ records and plays back.
-Multiple expansion modules may be grouped together to record more and more
-signals.
+The function of ~FRAME~ is to record and loop the input signals of the modules on
+it's left. These modules - ~PLAY~, ~SIGNAL~, and ~SIGNAL4~, define the inputs and
+outputs of ~FRAME~. Multiple can
 
 Despite the simple interface, one can use ~FRAME~ as a multi-track looper, a
 sequencer for musical sections, a delay unit, a sample & hold unit, a sequencer,
 and more! See the footnotes if interested in ~FRAME~ use cases.
-
-The box in the middle of ~FRAME~ shows a timeline with a moving cursor indicating
-the current position of the active buffer.
 
 There is a non input-output expander for ~FRAME~ called ~FRAME-X~. This module
 provides additional ~RATE~ and ~POS~ parameters, as well as additional control

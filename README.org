@@ -231,7 +231,7 @@ position of all ~FRAME~'s so to preserve deterministic playback.
 
 TODO
 
-* Module for a Sound Interface
+* Modules for a Sound Interface
 These modules are for the [[https://github.com/gwatcha/sound-interface][sound interface]].
 
 ** MACRO

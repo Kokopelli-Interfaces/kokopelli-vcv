@@ -319,7 +319,6 @@ Note, this section is a work in progress. It's lacking a lot of pictures too.
 For now, I'm just implementing the modules for structure section, and will work
 on this part in the future.  It mostly just contains notes  for myself right now.
 
-*** The User Experience
 **** Creating Sounds
 ***** Macros
 The base block of sound generation in the SI is the /macro/. A macro is
@@ -356,7 +355,54 @@ macros for use. For less comfortable users, there will be provided macros, and
 collections for particular use cases. In the future, a platform for the
 downloading and sharing of macros would be a useful thing.
 
-**** Creating Structure 
+**** Macro Modules
+***** Macro Modules
+****** MACRO
+Defines a macro. A macro consists of one or multiple ~M-PARAM~, and ~M-IN~ modules,
+a strip of modules that follow it, and one or multiple ~M-OUT~ modules after the
+strip, which touch the ~MACRO~ module.
+
+User can enter a name for the macro, and save to file similar
+to stoermelders ~STRIP~. The user can also use it to load macro files. 
+
+****** M-PARAM
+8 parameter mapping slots, with a place to enter an optional alias for the
+parameter.
+
+These mappings define the parameters of a macro.
+
+Placed on the left side of a strip of modules.
+
+****** M-OUT
+8 in ports, with place to enter names, as well as labels about type of signal
+- gates (blue), clks (purple), triggers (light blue), control (yellow), audio
+  (red), voct (green)
+  
+These ports define the output of the macro. they can be routed via OSC to any
+~M-IN~ module, as well as recorded via a ~FRAME~ like interface.
+
+Placed on the right side of a strip of modules.
+
+****** M-IN
+8 out ports, with place to enter names, as well as labels about type of signal.
+  
+These ports define the inputs for a macro. The signal on them can come from any ~M-OUT~ module.
+
+Placed on the left side of a strip of modules.
+
+***** OSC / Sound Interface Module
+This  module is the brains of the Sound Interface. The user inputs an address
+where it will listen for OSC messages from the controller. It will react to
+these messages and do multiple tasks, such  as 
+- control the routings between ~M-OUT~ and ~M-IN~ modules. (control macro routing)
+- control the values of ~M-PARAM~ modules. (control macro parameters)
+- record and loop ~M-OUT~ module outputs ('frame' macros)
+- intelligently disable modules that have a recording downstream of
+  the routing graph.
+- change active macros
+- control the timeline
+
+**** Structure Ideas & Notes WIP
 ***** Macro Modules
 ***** The Signal Graph
 - Global and layer mode as well, either inter-macro routing or
@@ -481,16 +527,3 @@ Similar to there being an interface frame, there is also an interface timelines.
   + 
 
 -
-**** Modules
-***** Macro Modules
-****** MACRO
-****** M-PRESS
-****** M-MAP
-****** M-IN
-****** M-OUT
-8 in ports, with place to enter names, as well as labels about type of signal
-signal types
-- gates (blue), clks (purple), triggers (light blue), control (yellow), audio (red)
-
-these labels alter the color of the send in the 
-***** OSC

@@ -151,7 +151,7 @@ buffer by engaging recording in /layer/ mode.
 ***** VCA
 A VCA for the output. Used for setting or modulating the output volume.
 **** 4SIGNAL
-~4IGNAL~ is ~SIGNAL~, just with 4 ports instead of 1. It's used for capturing
+~4IGNAL~ is ~SIGNAL~, just with 4 ports instead of 1. Its used for capturing
 multiple signals, as it saves space compared to 4 ~SIGNAL~ modules set side by
 side.
 **** PLAY
@@ -227,137 +227,10 @@ envelopes with phase variation across channels.
 
 *** TIMELINE
 TODO
-** Modules for a Sound Interface
-*** Context
-**** VCV Rack and the Modern DAW
-The core issue, is that VCV Rack provides an environment for sound design that is
-superior to the modern DAW, but lacks features related to the creation of sound
-structures. 
+** Module for a Sound Interface
+These modules are for the [[https://github.com/gwatcha/sound-interface][sound interface]].
 
-Sound design is superior in VCV Rack, as there is freedom in the use and flow of
-signals. Visually speaking, signals in the DAW are of midi or audio type, and
-flow from ends of a graph towards the root. Signals in VCV Rack, are of any
-type, and the routing may be that of any graph.
-
-From the perspective of a creator, it enables a language of sonic relationships
-and patterns. One could, for example, control the timber of two seperate sound
-sources with a control signal generated from a simulated pendulum.
-
-In addition to this freedom, VCV Rack modules has the capability to run VSTs via
-the [[https://vcvrack.com/Host][VCV-HOST]] module, and VCV Rack also has a growing library of over 2000 other
-modules.
-
-Due to these points, the sound creation possibilities of VCV Rack are much
-greater than that of the DAW.
-
-The downside of VCV Rack, is that it lacks features related to the
-creation of sound structures (compositions). There are a couple of [[https://www.youtube.com/watch?v=i3I_prfgZis][workflows, and tricks]], as
-well as existing [[https://library.vcvrack.com/Entrian-Sequencers][modules]], to add structure to VCV Rack patches, though most are
-lacking in their interface, as well as features.
-
-One common issue in these workflows is that for larger compositions, the amount
-of modules required goes up, as well as CPU usage and visual clutter. A
-potential workflow to overcome this issue would be to record the audio output of
-modules multiple times, and to then sequence the volume of these recordings, and
-although this would overcome the CPU and visual clutter issue, one would be
-unable to adjust the aspects involved in the production of previously produced
-audio.
-
-**** Where is the interface for the creator?
-Workflows for composition aside, a key point is that both the interface for
-modern DAWs and VCV Rack seem to have been designed from the perspective of an
-engineer, not the perspective of a sound creator. Most importantly, there is no
-emphasis on the real-time aspect of capturing creativity. The speed at which
-sounds and sound structures heard in the mind may be realized in the world is
-slow; there are frequent interruptions where one must click and clack to create
-and arm new tracks, set up new instruments, or patch new modules.
-
-There are interfaces for capturing sound structures that consider this real-time
-aspect, such as [[https://forum.cockos.com/showthread.php?t=233734][wayback]], or hardware units such as the [[https://www.youtube.com/watch?v=PffyRrUEPVM][digitakt]]. Though all of
-them either impose sonic restrictions, or lose some of the essential features
-related to sound structure composition. One feature that is particularly
-lacking, is a timeline that produces determinstic playback, that one may move
-around in and add, adjust, or remove parameter automation, sound sources, and
-fx.
-
-*** Purpose of the Sound Interface 
-The purpose of the SI is to provide a sound and sound structure creation
-interface that holds the creator paramount, and has both the versatile sound
-production capabilities of VCV Rack, and the essential sound structure features
-of a Modern DAW.
-
-Holding the creator paramount would mean minimal interruption of creative
-flow, realtime sound and sound structure creation, lack of sonic restrictions,
-as well as comfort and ease of use.
-
-Since the SI has the versatile sound production capabilities of VCV Rack, it
-will be able to adapt to the needs of any user. One could be a guitarist looking
-for an fx rack, a beatboxer who needs a live-looping solution for live shows, a
-band member who records and loops other bandmates instruments and applies fx to
-them, a keyboard player looking for a versatile synthesizer, or a music goblin
-that stays in his room for weeks at a time who believes his primary purpose in
-life is to realize the sound structures that appear in his head (aka me).
-
-This versatility of sound creation is why I think this project has potential. It
-would be able to adapt to produce the same sounds as most music hardware
-collections, without the hefty price tag. Think of the thousands spent on audio
-creation and fx units - the modular synthesizers, guitar pedal boards, keyboard
-synthesizers... why not have one common interface for sound creation, instead of
-buying the 9th synthesizer keyboard for a [[https://www.reddit.com/r/synthesizercirclejerk/comments/i6ghli/started_with_the_minibrute_about_4_months_agobeen/][studio]]?
-
-The Sound Interface will be a seperate from VCV Rack's interface, and may take
-many forms. To start off, a touchscreen tablet or laptop running OpenOSC will
-work, but later on, one could create a physical controller. No matter the form,
-it will work by communicating via OSC with a set of modules running in VCV Rack
-that will handle signal routing, parameter adjustement, module management, as
-well as recording. Optimally, the interface will be able to replace the current
-computer interface entirely, so one could just have the sound interface in front
-of them and be able to create full songs (as well as optionally a midi keyboard,
-midi controllers, microphones ... etc).
-*** TODO The User Experience
-Note, this section is a work in progress. It's lacking a lot of pictures too.
-For now, I'm just implementing the modules for structure section, and will work
-on this part in the future.  It mostly just contains notes  for myself right now.
-
-**** Creating Sounds
-***** Macros
-The base block of sound generation in the SI is the /macro/. A macro is
-a strip of modules (or single module) in VCV Rack that has associated inputs,
-parameter values, and outputs. A set  of  'macro' modules will be made so one
-can create these macros. 
-
-The interface primarily consists of  'macro blocks' , and the user spends
-most of his time adjusting these blocks. Macro blocks are controllers for macros
-running in VCV Rack. Multiple macros may be stacked on the same macro block
-position to save space, and switched between using the bottom arrow buttons (TODO).
-
-Macro blocks have a mechanism to change the macro, knobs to adjust the parameter
-values of macros, and arrow buttons for changing which macro parameters are
-currently displayed. The central knob in the macro is the main macro knob, and
-does not change on switching active macro parameters. 
-
-One may also press the name of a macro parameter to activate /send mode/ for that
-knob. The parameter name changes to the output name, and the values as well as
-the names of other macro knobs are updated to display the 'send power' of the
-activated knob to that knob, as well as the name of the input. One may twist the
-knobs to send more and more of the activated knobs output signal to the knobs
-associated in port. When fully twisted to the right, 100% of the signal is sent,
-when fully twisted to the left, -100% of the signal is sent. Pressing the
-activated knob name again exits send mode. This is how the SI accomplishes
-signal routing. No cables, just press, twist another knob, and release.
-
-***** Macro Creation
-Macros are made with a set of macro creation modules in VCV Rack. They are then
-saved into a folder, and then they can be selected by a macro block.
-
-If the user is comfortable with modular synthesizers, they may create their own
-macros for use. For less comfortable users, there will be provided macros, and
-collections for particular use cases. In the future, a platform for the
-downloading and sharing of macros would be a useful thing.
-
-**** Macro Modules
-***** Macro Modules
-****** MACRO
+*** MACRO
 Defines a macro. A macro consists of one or multiple ~M-PARAM~, and ~M-IN~ modules,
 a strip of modules that follow it, and one or multiple ~M-OUT~ modules after the
 strip, which touch the ~MACRO~ module.
@@ -365,7 +238,7 @@ strip, which touch the ~MACRO~ module.
 User can enter a name for the macro, and save to file similar
 to stoermelders ~STRIP~. The user can also use it to load macro files. 
 
-****** M-PARAM
+*** M-PARAM
 8 parameter mapping slots, with a place to enter an optional alias for the
 parameter.
 
@@ -373,7 +246,7 @@ These mappings define the parameters of a macro.
 
 Placed on the left side of a strip of modules.
 
-****** M-OUT
+*** M-OUT
 8 in ports, with place to enter names, as well as labels about type of signal
 - gates (blue), clks (purple), triggers (light blue), control (yellow), audio
   (red), voct (green)
@@ -383,14 +256,14 @@ These ports define the output of the macro. they can be routed via OSC to any
 
 Placed on the right side of a strip of modules.
 
-****** M-IN
+*** M-IN
 8 out ports, with place to enter names, as well as labels about type of signal.
   
 These ports define the inputs for a macro. The signal on them can come from any ~M-OUT~ module.
 
 Placed on the left side of a strip of modules.
 
-***** OSC / Sound Interface Module
+*** INTERFACE
 This  module is the brains of the Sound Interface. The user inputs an address
 where it will listen for OSC messages from the controller. It will react to
 these messages and do multiple tasks, such  as 
@@ -402,128 +275,3 @@ these messages and do multiple tasks, such  as
 - change active macros
 - control the timeline
 
-**** Structure Ideas & Notes WIP
-***** Macro Modules
-***** The Signal Graph
-- Global and layer mode as well, either inter-macro routing or
-  inter-layer routing
-- connections have colors according to output types, and opacity according to
-  power of send
-***** DELTA behaviour
-The DELTA knob handles all of the recording, dubbing, extending, 
-attenuation, and erasing in the SI.
-
-What the DELTA knob records, depends on the current state of the SI.
-- If a macro knob is in send mode, the DELTA knob will record the output of that
-  knob. Using this, one could record one part of a layer, such as a midi
-  keyboard macro, or an audio input macro, and then adjust parameters, add
-  automation, and etc.
-- If the interface is in /layer/ mode, it will record the layers parameters,
-  parameter changes, and layer outputs. Attenuation does not affect layer
-  parameters, only layer outputs. TODO Question: allow overdubbing for layer outputs? This
-  complicates things, how does one adjust previous overdubs? Will there be a
-  concept of layer dubs, that one may cycle through? One would have to save the
-  entire layer state each time.
-
-How the SI records the macro output depends on the type of the output - for
-
-example, it will not attenuate GATE signals.
-
-***** Concepts
-The interface achieves recording by applying the concepts of the ~FRAME~ module to the
-entire state of the interface. 
-
-I name this functionality the 'interface frame', and I will go over how the
-concepts from ~FRAME~ transfer over.
-
-****** Layers
-A layer corresponds to one recorded instance of the interface. The recording
-contains macro parameter values, macro routing to macros in the current layer,
-macro routing to macros in other layers, (TODO?) macro routing to the global layer, as
-well as the outputs of macros.
-
-****** Global And Layer Mode
-****** The Delta Parameter
-Recording, dubbing, erasing, and extending loops is all done through just /one/
-parameter - the ~DELTA~ parameter. The behaviour is conceptually identical to that
-of ~FRAME~'s ~DELTA~ parameter.
-
-When the recording loops, the outputs of the macros as well as the knob values
-loop. Knobs in the interface reflect the current values of the recording, so
-they may morph in time if one recorded such morphing.
-
-The attenuation feature of ~DELTA~ in /layer/ mode only attenuates recordings of
-macro outputs, not parameter values or routing values (a.k.a knob values). In
-/global/ mode, attenuation affects the currently selected layers outputs (TODO?
-
-When one alters knob values in read mode, it sets the offset for the knob value. When
-one alters knob values in a record mode, it records the relative position of the
-knob from the offset position.
-
-Knob recording behaviour is similar to 'latch and arm' automation in DAWs. To
-erase knob recordings, one enters a record mode, returns the knob to the offset
-position, and waits for the duration of the loop. One may alter knob recordings
-by temporarily engaging a record mode, recording knob movement, and exiting.
-
-****** Scenes
-Recall that in ~FRAME~ a 'scene' is a collections of layers, and one may use
-the ~SCENE~ parameter to cross-fade between scenes or to sequence scene's. 
-The scene feature in the interface frame includes this functionality, though it
-only works when the interface frame is in /global/ mode. This is because there are
-now ~SCENE~ values associated with not only the global context, but for each layer
-as well. 
-
-Using ~SCENE~ in /layer/ mode enables recording multiple takes of a particular
-layer, smooth morphing between two interface states, saving and comparing patch states
-
-it also has a seperate value associated with each layer. 
-
-# how to record automation of scene for a layer?
-
-***** User Steps To Record 
-1. Adjust the layers macro's, macro parameters, and macro routing.
-2. Activate /extend/ mode via ~DELTA~ to record the layer.
-When recording,
-
-***** Visual
-***** The Various Scope's of the Interface
-- interface controls adapt to scope, the visuals adapt to scope as well
-- LAYER, SCENE and DELTA adapt to scope
-  - reflects the cocentric circles structure of reality!
-****** sends scope
-activated when a knob is in send mode
-scene: sequence recording
-layer: change take
-delta: extend or dub the knobs send
-****** layer scope
-activated by default, affects selected layers.
-select all layers to create the global mode from ~FRAME~
-scene: change layers
-layer: change between different takes of the selected layers
-delta: extend or dub the 
-
-****** time scope
-scene: move between entire songs
-layer: move between different versions of the same song
-delta:  extend or dub the timeline
-
-***** Interface Timeline
-Similar to there being an interface frame, there is also an interface timelines.
-
-- timeline is a sequencer for the interface-frame's state as well as it's parameters.
-- on scene transition, have scenes play from the start. this  will avoid inter
-  scene desync,  
-- moving the timeline also moves the playback position of the scene, so to
-  enable reproducible playback
-  - note, that the 'enter recording and change parameters' feature will not work
-    with modules that have some concept of state - this state may desync with
-    the layer output as the timeline scrubs.
-
-***** Notes  & Questions
-****** should there be a concept of global modules? somewhat equivalent to master
-  track modules? or should there just be a layer all modules are routed to?
-  + having a layer that is consistenly on the tree graph would produce clutter
-  + imposing opinions is bad
-  + 
-
--

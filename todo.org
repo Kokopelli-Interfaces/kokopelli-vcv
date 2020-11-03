@@ -3,12 +3,16 @@ CLOSED: [2020-11-01 Sun 17:23]
 Signal sends it's input to Frame, and receives frames pass-through output.
 
 see bogaudios peq for expader module inspiration
-* TODO Frame - Basic Loop Functionality
+* DONE Frame - Basic Loop Functionality
+CLOSED: [2020-11-02 Mon 22:18]
 No clk, just twist to engage, and loop upon exitting. 
-* TODO Signal Mix & VCA
-* TODO Frame - Buffer structure
+* DONE Signal Mix & VCA
+CLOSED: [2020-11-02 Mon 22:18]
+* DONE Frame - Buffer structure
+CLOSED: [2020-11-02 Mon 22:18]
 Create a structure that holds buffers that frame reads back.
 * TODO Frame - record modes
-* TODO Frame - scenes
+* DONE Frame - scenes
+CLOSED: [2020-11-02 Mon 22:18]
 * TODO Frame - attenuation
 

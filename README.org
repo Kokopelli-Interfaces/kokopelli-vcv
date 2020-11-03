@@ -119,7 +119,7 @@ track of states before and after engaging record modes, and ~UNDO~ recalls the
 previous states. When one presses ~UNDO~ in a record mode, ~FRAME~ will discard
 any changes, and try again on the next loop start of the selected layer.
 
-The ~LEFT~ and ~RIGHT~ buttons change the active layer, and the ~PLAY~ button
+The ~PREV~ and ~NEXT~ buttons change the active layer, and the ~PLAY~ button
 resets all layer positions to the beginning.
 *** FRAME Additional Uses Cases
 **** Delay Unit
@@ -131,23 +131,22 @@ cool delay effects.
 
 ** FRAME Expansion Modules
 *** SIGNAL
-~SIGNAL~ takes a polyphonic (or monophonic) signal as input, sends it to
+~SIGNAL~ takes an arbitrary signal as input, sends it to
 ~FRAME~, and outputs a mix of the input signal and output from ~FRAME~.
 
-It also outputs ~FRAME~'s active/selected layer. This is useful in the case of
-applying audio functions or (control voltage functions) to particular layers in
-~FRAME~. To do this, one would select a layer, route ~BUF~ into other VCV Rack
+It also outputs ~FRAME~'s selected layer(s). This is useful in the case of
+applying audio functions (or signal functions) to particular layers in
+~FRAME~. To do this, one would select a layer, route ~SEL~ into other VCV Rack
 modules, route the output of those modules back into the input, and modify the
 layer by engaging recording in /layer/ mode.
 
 **** MIX
-- At 7'oclock, ~SIG~ only outputs ~FRAME~ output, and the input signal is fully
+- At 7 O'clock, ~SIG~ only outputs ~FRAME~ output, and the input signal is fully
   attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when ~FRAME~ enters a record mode.
-- At 12'oclock, the input signal is not attenuated.
-- At 2:30, the input signal is still not attenuated, and ~SIG~ outputs 100% of
+- At 12 O'clock, the input signal is not attenuated.
+- At 5 O'clock, the input signal is still not attenuated, and ~SIG~ outputs 100% of
   ~FRAME~'s /active layer/. Used for auditioning multiple takes that were loop
   recorded, and for using /layer/ mode without sonic clutter from other layers.
-- Past 2:30, ~SIG~ will attenuate the input signal until it is fully attenuated at  5'oclock (max cw).
 **** VCA
 A VCA for the output. Used for setting or modulating the output volume.
 *** 4SIGNAL
@@ -188,15 +187,13 @@ and read signals. In this case, it acts as an advanced sample and hold module.
 Adjusting the ~SCENE~ knob smoothly transitions between samples.
 
 One may sequence samples in interesting ways using the ~SCENE~ modulation port.
-***** Advanced MIDI Looper
+***** Advanced 'MIDI' Looper
 When ~FRAME~ is expanding ~PLAY~, one may create interesting playback patterns
 by recording some GATE, VOCT, and VEL signals, and varying or modulating the
 ~RATE~ and ~POS~ ports. One idea is to record a chord, and modulate ~RATE~ and
 ~POS~ with low frequency noise sources with channel variation to create
 fluctuating, dreamy note sequences.
-***** MIDI Instrument
-MIDI keyboards output VOCT (pitch) and GATE signals.
-
+***** An Instrument
 One may patch the ~RATE~ port with a VOCT signal, and the ~PLAY~ port with a
 GATE signal, patch the output VCA with a GATE controlled envelope, and play
 ~FRAME~ as if it were an instrument.
@@ -225,7 +222,15 @@ To create the grains, one would patch the ~VCA~ in ~SIGNAL~ with short, repeatin
 envelopes with phase variation across channels.
 
 ** TIMELINE
+Recall how ~FRAME~ keeps track of it's state before and after a recording starts.
+The ~TIMELINE~ module is essentially a sequencer for all ~FRAME~ module states. One
+could leave ~TIMELINE~ in record mode, record a live-looping performance with
+~FRAME~, rewind time via the ~TIMELINE~ module, and play back the performance.
+Rewinding / scrubbing time via the ~TIMELINE~ module will also scrub the playback
+position of all ~FRAME~'s so to preserve deterministic playback.
+
 TODO
+
 * Module for a Sound Interface
 These modules are for the [[https://github.com/gwatcha/sound-interface][sound interface]].
 

@@ -46,7 +46,8 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
       // TODO mix instead of add
       out += _fromFrame->signal[c];
     }
-    out += in;
+    // TODO uncomment
+    // out += in;
     outputs[OUT_OUTPUT].setVoltage(out * e.vca, c);
   }
 }

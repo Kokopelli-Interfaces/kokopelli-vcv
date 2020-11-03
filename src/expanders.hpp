@@ -95,6 +95,7 @@ struct ExpanderModule : BASE {
 		return (MSG*)MyrisaModule::leftExpander.module->rightExpander.producerMessage;
 	}
 
+  // TODO instead, define based off frame
 	int channels() override final {
 		if (baseConnected()) {
 			return fromBase()->channels;

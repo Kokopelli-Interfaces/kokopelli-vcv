@@ -106,8 +106,10 @@ The attenuation power grows exponentially as ~DELTA~ twists, and when it reaches
 a maximum, it will erase previous layers.
 
 This attenuation behaviour allows for easily 'pushing back' previous layers in a
-live-looping performance to create more movement, and also, to create
-attenuation envelopes or erase parts of previous layers.
+live-looping performance to create more movement. It also allows for editting
+existing layers by re-recording certain parts. In the case there is no input
+signal, it creates attenuation envelopes and when fully turned, erases parts of
+previous layers.
 
 *** Button Behaviour
 Excluding the ~DELTA_MODE~ button, there are four other buttons on ~FRAME~.

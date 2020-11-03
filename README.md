@@ -1,28 +1,28 @@
 
 # Table of Contents
 
-1.  [Modules For Structure](#org103cae2)
-    1.  [FRAME](#orgc78f3e2)
-        1.  [Scene Selection](#orgf745645)
-        2.  [Recording with FRAME](#orgbe13ce6)
-        3.  [Layer Attenuation](#org2da3fa4)
-        4.  [Button Behaviour](#orgd899f36)
-        5.  [FRAME Additional Uses Cases](#org4ba8c2e)
-    2.  [FRAME Expansion Modules](#org245131e)
-        1.  [SIGNAL](#org8439573)
-        2.  [4SIGNAL](#org895f7c4)
-        3.  [PLAY](#orgcdabc25)
-        4.  [FRAME-X](#org978e526)
-    3.  [TIMELINE](#org20beaee)
-2.  [Module for a Sound Interface](#org4b57441)
-    1.  [MACRO](#orgfdbf4a2)
-    2.  [M-PARAM](#org153ca91)
-    3.  [M-OUT](#orge608020)
-    4.  [M-IN](#orga32e8d6)
-    5.  [INTERFACE](#org5ac2287)
+1.  [Modules For Structure](#org832475c)
+    1.  [FRAME](#org22dfd8d)
+        1.  [Scene Selection](#org3557fd1)
+        2.  [Recording with FRAME](#org4c5fad4)
+        3.  [Layer Attenuation](#orga4886f7)
+        4.  [Button Behaviour](#org9abdaec)
+        5.  [FRAME Additional Uses Cases](#orgc8392fc)
+    2.  [FRAME Expansion Modules](#org69c60f7)
+        1.  [SIGNAL](#orgff88d71)
+        2.  [4SIGNAL](#org958d1d4)
+        3.  [PLAY](#org2a0ac51)
+        4.  [FRAME-X](#orgcd2a4e4)
+    3.  [TIMELINE](#org7e32644)
+2.  [Module for a Sound Interface](#org153d167)
+    1.  [MACRO](#org8d6236d)
+    2.  [M-PARAM](#org8ce99cc)
+    3.  [M-OUT](#org6dcaf2d)
+    4.  [M-IN](#org0b34567)
+    5.  [INTERFACE](#orgfb75299)
 
 
-<a id="org103cae2"></a>
+<a id="org832475c"></a>
 
 # Modules For Structure
 
@@ -38,7 +38,7 @@ and sequence parameter automation, or as a keyframer.
 ![img](img/structure_modules.png)
 
 
-<a id="orgc78f3e2"></a>
+<a id="org22dfd8d"></a>
 
 ## FRAME
 
@@ -58,7 +58,7 @@ ports.  It enables more creative ways to use `FRAME`.
 `FRAME` supports [polyphonic](https://vcvrack.com/manual/Polyphony) input.
 
 
-<a id="orgf745645"></a>
+<a id="org3557fd1"></a>
 
 ### Scene Selection
 
@@ -87,7 +87,7 @@ that one may return to, or to just start developing a new scene by altering the
 current one.
 
 
-<a id="orgbe13ce6"></a>
+<a id="org4c5fad4"></a>
 
 ### Recording with FRAME
 
@@ -142,7 +142,7 @@ The record and delta modes create four recording behaviours when combined.
     Used for continuously overdubbing a layer.
 
 
-<a id="org2da3fa4"></a>
+<a id="orga4886f7"></a>
 
 ### Layer Attenuation
 
@@ -156,11 +156,13 @@ The attenuation power grows exponentially as `DELTA` twists, and when it reaches
 a maximum, it will erase previous layers.
 
 This attenuation behaviour allows for easily 'pushing back' previous layers in a
-live-looping performance to create more movement, and also, to create
-attenuation envelopes or erase parts of previous layers.
+live-looping performance to create more movement. It also allows for editting
+existing layers by re-recording certain parts. In the case there is no input
+signal, it creates attenuation envelopes and when fully turned, erases parts of
+previous layers.
 
 
-<a id="orgd899f36"></a>
+<a id="org9abdaec"></a>
 
 ### Button Behaviour
 
@@ -175,7 +177,7 @@ The `LEFT` and `RIGHT` buttons change the active layer, and the `PLAY` button
 resets all layer positions to the beginning.
 
 
-<a id="org4ba8c2e"></a>
+<a id="orgc8392fc"></a>
 
 ### FRAME Additional Uses Cases
 
@@ -188,12 +190,12 @@ resets all layer positions to the beginning.
     cool delay effects.
 
 
-<a id="org245131e"></a>
+<a id="org69c60f7"></a>
 
 ## FRAME Expansion Modules
 
 
-<a id="org8439573"></a>
+<a id="orgff88d71"></a>
 
 ### SIGNAL
 
@@ -221,7 +223,7 @@ layer by engaging recording in *layer* mode.
     A VCA for the output. Used for setting or modulating the output volume.
 
 
-<a id="org895f7c4"></a>
+<a id="org958d1d4"></a>
 
 ### 4SIGNAL
 
@@ -230,7 +232,7 @@ multiple signals, as it saves space compared to 4 `SIGNAL` modules set side by
 side.
 
 
-<a id="orgcdabc25"></a>
+<a id="org2a0ac51"></a>
 
 ### PLAY
 
@@ -242,7 +244,7 @@ Attenuation only affects VEL (velocity) signals until max attenuation, where it
 also removes GATE signals and holds VOCT signals.
 
 
-<a id="org978e526"></a>
+<a id="orgcd2a4e4"></a>
 
 ### FRAME-X
 
@@ -320,21 +322,21 @@ All the button ports react to rising edges. The ports underneath `POS` and
         envelopes with phase variation across channels.
 
 
-<a id="org20beaee"></a>
+<a id="org7e32644"></a>
 
 ## TIMELINE
 
 TODO
 
 
-<a id="org4b57441"></a>
+<a id="org153d167"></a>
 
 # Module for a Sound Interface
 
 These modules are for the [sound interface](https://github.com/gwatcha/sound-interface).
 
 
-<a id="orgfdbf4a2"></a>
+<a id="org8d6236d"></a>
 
 ## MACRO
 
@@ -346,7 +348,7 @@ User can enter a name for the macro, and save to file similar
 to stoermelders `STRIP`. The user can also use it to load macro files. 
 
 
-<a id="org153ca91"></a>
+<a id="org8ce99cc"></a>
 
 ## M-PARAM
 
@@ -358,7 +360,7 @@ These mappings define the parameters of a macro.
 Placed on the left side of a strip of modules.
 
 
-<a id="orge608020"></a>
+<a id="org6dcaf2d"></a>
 
 ## M-OUT
 
@@ -373,7 +375,7 @@ These ports define the output of the macro. they can be routed via OSC to any
 Placed on the right side of a strip of modules.
 
 
-<a id="orga32e8d6"></a>
+<a id="org0b34567"></a>
 
 ## M-IN
 
@@ -384,7 +386,7 @@ These ports define the inputs for a macro. The signal on them can come from any 
 Placed on the left side of a strip of modules.
 
 
-<a id="org5ac2287"></a>
+<a id="orgfb75299"></a>
 
 ## INTERFACE
 

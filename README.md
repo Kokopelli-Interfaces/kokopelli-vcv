@@ -1,27 +1,28 @@
 
 # Table of Contents
 
-1.  [Modules For Structure](#org1f05aeb)
-    1.  [FRAME](#orgc4f7fbf)
-        1.  [Scene Selection](#org51b5ab7)
-        2.  [Recording with FRAME](#org52d5461)
-        3.  [Button Behaviour](#orga2b7990)
-        4.  [FRAME Additional Uses Cases](#org2d4f938)
-    2.  [FRAME Expansion Modules](#org7ccb03a)
-        1.  [SIGNAL](#orgcedc524)
-        2.  [4SIGNAL](#org4371e86)
-        3.  [PLAY](#orgecccd3b)
-        4.  [FRAME-X](#org4cf5828)
-    3.  [TIMELINE](#orge1bbb39)
-2.  [Module for a Sound Interface](#org094f402)
-    1.  [MACRO](#org1f4501a)
-    2.  [M-PARAM](#orgca91c47)
-    3.  [M-OUT](#org7de1610)
-    4.  [M-IN](#orgb46a203)
-    5.  [INTERFACE](#org82024d0)
+1.  [Modules For Structure](#org103cae2)
+    1.  [FRAME](#orgc78f3e2)
+        1.  [Scene Selection](#orgf745645)
+        2.  [Recording with FRAME](#orgbe13ce6)
+        3.  [Layer Attenuation](#org2da3fa4)
+        4.  [Button Behaviour](#orgd899f36)
+        5.  [FRAME Additional Uses Cases](#org4ba8c2e)
+    2.  [FRAME Expansion Modules](#org245131e)
+        1.  [SIGNAL](#org8439573)
+        2.  [4SIGNAL](#org895f7c4)
+        3.  [PLAY](#orgcdabc25)
+        4.  [FRAME-X](#org978e526)
+    3.  [TIMELINE](#org20beaee)
+2.  [Module for a Sound Interface](#org4b57441)
+    1.  [MACRO](#orgfdbf4a2)
+    2.  [M-PARAM](#org153ca91)
+    3.  [M-OUT](#orge608020)
+    4.  [M-IN](#orga32e8d6)
+    5.  [INTERFACE](#org5ac2287)
 
 
-<a id="org1f05aeb"></a>
+<a id="org103cae2"></a>
 
 # Modules For Structure
 
@@ -37,7 +38,7 @@ and sequence parameter automation, or as a keyframer.
 ![img](img/structure_modules.png)
 
 
-<a id="orgc4f7fbf"></a>
+<a id="orgc78f3e2"></a>
 
 ## FRAME
 
@@ -57,7 +58,7 @@ ports.  It enables more creative ways to use `FRAME`.
 `FRAME` supports [polyphonic](https://vcvrack.com/manual/Polyphony) input.
 
 
-<a id="org51b5ab7"></a>
+<a id="orgf745645"></a>
 
 ### Scene Selection
 
@@ -72,7 +73,7 @@ If `SCENE`'s position is between two scenes, the behaviour will depend on the
 -   If set to  'smooth' it will output a weighted mix of both scenes, allowing for smooth crossfading between scenes.
 -   If set to 'discrete', the scene will snap to the nearest scene.
 -   If  set to 'sequence', the scene will snap to the nearest scene at the next
-    clk step, and will also play the scene on transitioning.
+    clk step, and will also reset the play position of the scene on transitioning.
 
 The port directly under `SCENE` modulates the parameter, allowing for
 interesting crossfade patterns, or voltage controlled scene sequencing.
@@ -86,7 +87,7 @@ that one may return to, or to just start developing a new scene by altering the
 current one.
 
 
-<a id="org52d5461"></a>
+<a id="orgbe13ce6"></a>
 
 ### Recording with FRAME
 
@@ -99,66 +100,67 @@ and end points to mutiples of the clock period.
 
 Recording behaviour depends on whether `FRAME` is in *global* mode, or *layer*
 mode. The `DELTA_MODE` button (up-right of `DELTA`) toggles between these modes.
-The lower LED in the delta section indicates its state.
+The upper LED in the delta section indicates its state.
 
 Recording behaviour also depends on the direction of `DELTA`'s rotation. If it
 moves clockwise, it activates the *extend* record mode. If `DELTA` moves
 counter-clockwise, it activates *add* mode. When `DELTA` returns to 12 o'clock,
-`FRAME` finishes recording. The upper LED in the delta section indicates the
+`FRAME` finishes recording. The lower LED in the delta section indicates the
 current recording mode.
 
 The record and delta modes create four recording behaviours when combined.
 
-1.  Recording Behaviours
+1.  *global* and *extend* mode
 
-    1.  *global* and *extend* mode
+    `FRAME` records the input signal into a new layer, and loops the layer when
+    `DELTA` returns to 12 o'clock.
     
-        `FRAME` records the input signal into a new buffer, and loops the buffer when
-        `DELTA` returns to 12 o'clock.
-        
-        Used for dubbing a loop with elements that are longer than the current loop
-        length - for example, adding a chord progression for a repeating phrase.
-    
-    2.  *global* and *add* mode
-    
-        `FRAME` records the input signal into a new buffer with the same length as the
-        active buffer. On reaching the end, it repeats the process.
-        
-        Used for continuously recording multiple takes to audition and filter later
-        on, or record new layers continuously.
-    
-    3.  *layer* and *extend* mode
-    
-        `FRAME` records the input signal into the active buffer, and upon reaching the
-        end, will continue recording as well as extend the active buffer by looping
-        the old contents.
-        
-        Used for creating variation at the xth repetition of a buffer.
-    
-    4.  *layer* and *add* mode
-    
-        `FRAME` records the input signal into the active buffer and when it reaches the
-        loop end, it repeats the process.
-        
-        Used for continuously overdubbing a buffer.
+    Used for dubbing a loop with elements that are longer than the current loop
+    length - for example, adding a chord progression for a repeating phrase.
 
-2.  Buffer Attenuation
+2.  *global* and *add* mode
 
-    In all four mode combinations, if one twists further than the threshold
-    position, it affects the amplitude of previous buffers at the current position,
-    or in other words, the 'attenuation power' of the recording. If delta mode is
-    *layer*, it only attenuates the active buffer, if delta mode is *global*, it
-    attenuates all buffers.
+    `FRAME` records the input signal into a new layer with the same length as the
+    active layer. On reaching the end, it repeats the process.
     
-    The attenuation power grows exponentially as `DELTA` twists, and when it reaches
-    a maximum, it will erase previous buffers.
+    Used for continuously recording multiple takes to audition and filter later
+    on, or record new layers continuously.
+
+3.  *layer* and *extend* mode
+
+    `FRAME` records the input signal into the active layer, and upon reaching the
+    end, will continue recording as well as extend the active layer by looping
+    the old contents.
     
-    This attenuation behaviour allows for easily 'pushing back' previous layers in a
-    live-looping performance to create more movement, and also, to create
-    attenuation envelopes or erase parts of previous layers.
+    Used for creating variation at the xth repetition of a layer.
+
+4.  *layer* and *add* mode
+
+    `FRAME` records the input signal into the active layer and when it reaches the
+    loop end, it repeats the process.
+    
+    Used for continuously overdubbing a layer.
 
 
-<a id="orga2b7990"></a>
+<a id="org2da3fa4"></a>
+
+### Layer Attenuation
+
+In all four mode combinations, if one twists further than the threshold
+position, it affects the amplitude of previous layers at the current position,
+or in other words, the 'attenuation power' of the recording. If delta mode is
+*layer*, it only attenuates the active layer, if delta mode is *global*, it
+attenuates all layers.
+
+The attenuation power grows exponentially as `DELTA` twists, and when it reaches
+a maximum, it will erase previous layers.
+
+This attenuation behaviour allows for easily 'pushing back' previous layers in a
+live-looping performance to create more movement, and also, to create
+attenuation envelopes or erase parts of previous layers.
+
+
+<a id="orgd899f36"></a>
 
 ### Button Behaviour
 
@@ -169,11 +171,11 @@ track of states before and after engaging record modes, and `UNDO` recalls the
 previous states. When one presses `UNDO` in a record mode, `FRAME` will discard
 any changes, and try again on the next loop start of the selected layer.
 
-The `LEFT` and `RIGHT` buttons change the active buffer, and the `PLAY` button
-resets all buffer positions to the beginning.
+The `LEFT` and `RIGHT` buttons change the active layer, and the `PLAY` button
+resets all layer positions to the beginning.
 
 
-<a id="org2d4f938"></a>
+<a id="org4ba8c2e"></a>
 
 ### FRAME Additional Uses Cases
 
@@ -186,23 +188,23 @@ resets all buffer positions to the beginning.
     cool delay effects.
 
 
-<a id="org7ccb03a"></a>
+<a id="org245131e"></a>
 
 ## FRAME Expansion Modules
 
 
-<a id="orgcedc524"></a>
+<a id="org8439573"></a>
 
 ### SIGNAL
 
 `SIGNAL` takes a polyphonic (or monophonic) signal as input, sends it to
 `FRAME`, and outputs a mix of the input signal and output from `FRAME`.
 
-It also outputs `FRAME`'s active/selected buffer. This is useful in the case of
-applying audio functions or (control voltage functions) to particular buffers in
-`FRAME`. To do this, one would select a buffer, route `BUF` into other VCV Rack
+It also outputs `FRAME`'s active/selected layer. This is useful in the case of
+applying audio functions or (control voltage functions) to particular layers in
+`FRAME`. To do this, one would select a layer, route `BUF` into other VCV Rack
 modules, route the output of those modules back into the input, and modify the
-buffer by engaging recording in *layer* mode.
+layer by engaging recording in *layer* mode.
 
 1.  MIX
 
@@ -210,7 +212,7 @@ buffer by engaging recording in *layer* mode.
         attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when `FRAME` enters a record mode.
     -   At 12'oclock, the input signal is not attenuated.
     -   At 2:30, the input signal is still not attenuated, and `SIG` outputs 100% of
-        `FRAME`'s *active buffer*. Used for auditioning multiple takes that were loop
+        `FRAME`'s *active layer*. Used for auditioning multiple takes that were loop
         recorded, and for using *layer* mode without sonic clutter from other layers.
     -   Past 2:30, `SIG` will attenuate the input signal until it is fully attenuated at  5'oclock (max cw).
 
@@ -219,7 +221,7 @@ buffer by engaging recording in *layer* mode.
     A VCA for the output. Used for setting or modulating the output volume.
 
 
-<a id="org4371e86"></a>
+<a id="org895f7c4"></a>
 
 ### 4SIGNAL
 
@@ -228,7 +230,7 @@ multiple signals, as it saves space compared to 4 `SIGNAL` modules set side by
 side.
 
 
-<a id="orgecccd3b"></a>
+<a id="orgcdabc25"></a>
 
 ### PLAY
 
@@ -240,7 +242,7 @@ Attenuation only affects VEL (velocity) signals until max attenuation, where it
 also removes GATE signals and holds VOCT signals.
 
 
-<a id="org4cf5828"></a>
+<a id="org978e526"></a>
 
 ### FRAME-X
 
@@ -248,12 +250,11 @@ This module is an expander for `FRAME`. When placed on its right side, it gives
 it extra `RATE`, and `POS` parameters, as well as ports for controlling `PREV`,
 `NEXT`, and `PLAY`.
 
-This module enables more ways to use `FRAME`, checkout the footnotes section if
-interested.
+This module enables more ways to use `FRAME`, checkout the footnotes section if interested.
 
-The `POS` parameter controls the start offset of the buffers in the scene.
+The `POS` parameter controls the start offset of the layers in the scene.
 
-The `RATE` parameter controls the speed at which `FRAME` plays back the buffers
+The `RATE` parameter controls the speed at which `FRAME` plays back the layers
 in the scene.
 
 All the button ports react to rising edges. The ports underneath `POS` and
@@ -263,7 +264,7 @@ All the button ports react to rising edges. The ports underneath `POS` and
 
     1.  Pitch Shifter
     
-        When one sets up `FRAME` as a delay unit with a small buffer size and adjusts
+        When one sets up `FRAME` as a delay unit with a small layer size and adjusts
         the `RATE` of `FRAME-X`, it will seem like the pitch of the sound is higher or
         lower.
     
@@ -296,7 +297,7 @@ All the button ports react to rising edges. The ports underneath `POS` and
     5.  Wonky Audio Playback Unit
     
         One may patch the `RATE` port to modulate the speed of playback and recording,
-        and one may patch the `POS` port to modulate the offset of `FRAME` buffers.
+        and one may patch the `POS` port to modulate the offset of `FRAME` layers.
         Using these, one could get some cool sounds with `FRAME` - especially if there
         is variation across channels. Have you ever wondered what playing back speech
         with a sin wave sounds like? I have.
@@ -319,21 +320,21 @@ All the button ports react to rising edges. The ports underneath `POS` and
         envelopes with phase variation across channels.
 
 
-<a id="orge1bbb39"></a>
+<a id="org20beaee"></a>
 
 ## TIMELINE
 
 TODO
 
 
-<a id="org094f402"></a>
+<a id="org4b57441"></a>
 
 # Module for a Sound Interface
 
 These modules are for the [sound interface](https://github.com/gwatcha/sound-interface).
 
 
-<a id="org1f4501a"></a>
+<a id="orgfdbf4a2"></a>
 
 ## MACRO
 
@@ -345,7 +346,7 @@ User can enter a name for the macro, and save to file similar
 to stoermelders `STRIP`. The user can also use it to load macro files. 
 
 
-<a id="orgca91c47"></a>
+<a id="org153ca91"></a>
 
 ## M-PARAM
 
@@ -357,7 +358,7 @@ These mappings define the parameters of a macro.
 Placed on the left side of a strip of modules.
 
 
-<a id="org7de1610"></a>
+<a id="orge608020"></a>
 
 ## M-OUT
 
@@ -372,7 +373,7 @@ These ports define the output of the macro. they can be routed via OSC to any
 Placed on the right side of a strip of modules.
 
 
-<a id="orgb46a203"></a>
+<a id="orga32e8d6"></a>
 
 ## M-IN
 
@@ -383,7 +384,7 @@ These ports define the inputs for a macro. The signal on them can come from any 
 Placed on the left side of a strip of modules.
 
 
-<a id="org82024d0"></a>
+<a id="org5ac2287"></a>
 
 ## INTERFACE
 

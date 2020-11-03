@@ -39,7 +39,7 @@ If ~SCENE~'s position is between two scenes, the behaviour will depend on the
 - If set to  'smooth' it will output a weighted mix of both scenes, allowing for smooth crossfading between scenes. 
 - If set to 'discrete', the scene will snap to the nearest scene. 
 - If  set to 'sequence', the scene will snap to the nearest scene at the next
-  clk step, and will also play the scene on transitioning. 
+  clk step, and will also reset the play position of the scene on transitioning. 
 
 The port directly under ~SCENE~ modulates the parameter, allowing for
 interesting crossfade patterns, or voltage controlled scene sequencing.
@@ -62,49 +62,48 @@ and end points to mutiples of the clock period.
 
 Recording behaviour depends on whether ~FRAME~ is in /global/ mode, or /layer/
 mode. The ~DELTA_MODE~ button (up-right of ~DELTA~) toggles between these modes.
-The lower LED in the delta section indicates its state.
+The upper LED in the delta section indicates its state.
 
 Recording behaviour also depends on the direction of ~DELTA~'s rotation. If it
 moves clockwise, it activates the /extend/ record mode. If ~DELTA~ moves
 counter-clockwise, it activates /add/ mode. When ~DELTA~ returns to 12 o'clock,
-~FRAME~ finishes recording. The upper LED in the delta section indicates the
+~FRAME~ finishes recording. The lower LED in the delta section indicates the
 current recording mode.
 
 The record and delta modes create four recording behaviours when combined.
-**** Recording Behaviours
-***** /global/ and /extend/ mode
-~FRAME~ records the input signal into a new buffer, and loops the buffer when
+**** /global/ and /extend/ mode
+~FRAME~ records the input signal into a new layer, and loops the layer when
 ~DELTA~ returns to 12 o'clock.
 
 Used for dubbing a loop with elements that are longer than the current loop
 length - for example, adding a chord progression for a repeating phrase.
-***** /global/ and /add/ mode
-~FRAME~ records the input signal into a new buffer with the same length as the
-active buffer. On reaching the end, it repeats the process.
+**** /global/ and /add/ mode
+~FRAME~ records the input signal into a new layer with the same length as the
+active layer. On reaching the end, it repeats the process.
 
 Used for continuously recording multiple takes to audition and filter later
 on, or record new layers continuously.
   
-***** /layer/ and /extend/ mode
-  ~FRAME~ records the input signal into the active buffer, and upon reaching the
-  end, will continue recording as well as extend the active buffer by looping
+**** /layer/ and /extend/ mode
+  ~FRAME~ records the input signal into the active layer, and upon reaching the
+  end, will continue recording as well as extend the active layer by looping
   the old contents.
 
-  Used for creating variation at the xth repetition of a buffer.
-***** /layer/ and /add/ mode
-~FRAME~ records the input signal into the active buffer and when it reaches the
+  Used for creating variation at the xth repetition of a layer.
+**** /layer/ and /add/ mode
+~FRAME~ records the input signal into the active layer and when it reaches the
 loop end, it repeats the process.
 
-Used for continuously overdubbing a buffer.
-**** Buffer Attenuation
+Used for continuously overdubbing a layer.
+*** Layer Attenuation
 In all four mode combinations, if one twists further than the threshold
-position, it affects the amplitude of previous buffers at the current position,
+position, it affects the amplitude of previous layers at the current position,
 or in other words, the 'attenuation power' of the recording. If delta mode is
-/layer/, it only attenuates the active buffer, if delta mode is /global/, it
-attenuates all buffers.
+/layer/, it only attenuates the active layer, if delta mode is /global/, it
+attenuates all layers.
 
 The attenuation power grows exponentially as ~DELTA~ twists, and when it reaches
-a maximum, it will erase previous buffers.
+a maximum, it will erase previous layers.
 
 This attenuation behaviour allows for easily 'pushing back' previous layers in a
 live-looping performance to create more movement, and also, to create
@@ -118,8 +117,8 @@ track of states before and after engaging record modes, and ~UNDO~ recalls the
 previous states. When one presses ~UNDO~ in a record mode, ~FRAME~ will discard
 any changes, and try again on the next loop start of the selected layer.
 
-The ~LEFT~ and ~RIGHT~ buttons change the active buffer, and the ~PLAY~ button
-resets all buffer positions to the beginning.
+The ~LEFT~ and ~RIGHT~ buttons change the active layer, and the ~PLAY~ button
+resets all layer positions to the beginning.
 *** FRAME Additional Uses Cases
 **** Delay Unit
 ~FRAME~ can function as a delay unit in the case /add/ mode is consistently on
@@ -133,18 +132,18 @@ cool delay effects.
 ~SIGNAL~ takes a polyphonic (or monophonic) signal as input, sends it to
 ~FRAME~, and outputs a mix of the input signal and output from ~FRAME~.
 
-It also outputs ~FRAME~'s active/selected buffer. This is useful in the case of
-applying audio functions or (control voltage functions) to particular buffers in
-~FRAME~. To do this, one would select a buffer, route ~BUF~ into other VCV Rack
+It also outputs ~FRAME~'s active/selected layer. This is useful in the case of
+applying audio functions or (control voltage functions) to particular layers in
+~FRAME~. To do this, one would select a layer, route ~BUF~ into other VCV Rack
 modules, route the output of those modules back into the input, and modify the
-buffer by engaging recording in /layer/ mode.
+layer by engaging recording in /layer/ mode.
 
 **** MIX
 - At 7'oclock, ~SIG~ only outputs ~FRAME~ output, and the input signal is fully
   attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when ~FRAME~ enters a record mode.
 - At 12'oclock, the input signal is not attenuated.
 - At 2:30, the input signal is still not attenuated, and ~SIG~ outputs 100% of
-  ~FRAME~'s /active buffer/. Used for auditioning multiple takes that were loop
+  ~FRAME~'s /active layer/. Used for auditioning multiple takes that were loop
   recorded, and for using /layer/ mode without sonic clutter from other layers.
 - Past 2:30, ~SIG~ will attenuate the input signal until it is fully attenuated at  5'oclock (max cw).
 **** VCA
@@ -166,19 +165,18 @@ This module is an expander for ~FRAME~. When placed on its right side, it gives
 it extra ~RATE~, and ~POS~ parameters, as well as ports for controlling ~PREV~,
 ~NEXT~, and ~PLAY~.
 
-This module enables more ways to use ~FRAME~, checkout the footnotes section if
-interested.
+This module enables more ways to use ~FRAME~, checkout the footnotes section if interested.
 
-The ~POS~ parameter controls the start offset of the buffers in the scene.
+The ~POS~ parameter controls the start offset of the layers in the scene.
 
-The ~RATE~ parameter controls the speed at which ~FRAME~ plays back the buffers
+The ~RATE~ parameter controls the speed at which ~FRAME~ plays back the layers
 in the scene.
 
 All the button ports react to rising edges. The ports underneath ~POS~ and
 ~RATE~ modulate the parameters.
 **** FRAME-X Usage Ideas
 ***** Pitch Shifter
-When one sets up ~FRAME~ as a delay unit with a small buffer size and adjusts
+When one sets up ~FRAME~ as a delay unit with a small layer size and adjusts
 the ~RATE~ of ~FRAME-X~, it will seem like the pitch of the sound is higher or
 lower.
 
@@ -205,7 +203,7 @@ This use case applies to all the additional use cases below.
 
 ***** Wonky Audio Playback Unit 
 One may patch the ~RATE~ port to modulate the speed of playback and recording,
-and one may patch the ~POS~ port to modulate the offset of ~FRAME~ buffers.
+and one may patch the ~POS~ port to modulate the offset of ~FRAME~ layers.
 Using these, one could get some cool sounds with ~FRAME~ - especially if there
 is variation across channels. Have you ever wondered what playing back speech
 with a sin wave sounds like? I have.

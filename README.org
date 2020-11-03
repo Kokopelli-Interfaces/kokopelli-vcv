@@ -15,14 +15,15 @@ and sequence parameter automation, or as a keyframer.
 
 *** FRAME
 The function of ~FRAME~ is to record and loop the input signals of the modules on
-it's left. These modules - ~PLAY~, ~SIGNAL~, and ~SIGNAL4~, define the inputs and
-outputs of ~FRAME~. Multiple can
+it's left. These modules - ~PLAY~, ~SIGNAL~, and ~SIGNAL4~, - define the inputs and
+outputs of ~FRAME~. One can place multiple side by side to introduce more inputs
+and outputs.
 
 Despite the simple interface, one can use ~FRAME~ as a multi-track looper, a
 sequencer for musical sections, a delay unit, a sample & hold unit, a sequencer,
-and more! See the footnotes if interested in ~FRAME~ use cases.
+and more! 
 
-There is a non input-output expander for ~FRAME~ called ~FRAME-X~. This module
+There is also a non input-output expander for ~FRAME~ called ~FRAME-X~. This module
 provides additional ~RATE~ and ~POS~ parameters, as well as additional control
 ports.  It enables more creative ways to use ~FRAME~.
 
@@ -44,14 +45,13 @@ If ~SCENE~'s position is between two scenes, the behaviour will depend on the
 The port directly under ~SCENE~ modulates the parameter, allowing for
 interesting crossfade patterns, or voltage controlled scene sequencing.
 
-One may use multiple ~SCENEs~ to create different versions of a recording for
-variation, or, to sequence musical sections (such as a chorus, verse, etc..),
-or, in the case ~FRAME~ is capturing control voltage for other modules, a
-keyframer for control voltage. 
+One may use multiple ~SCENEs~ to sequence musical sections or, in the case ~FRAME~
+is capturing control voltage, a keyframer for control voltage.
 
-Scenes that have not recorded anything start with the buffers of the scene before, so
-one may progress to the next scene to leave behind a 'checkpoint', that
-one may return to.
+Scenes that have not recorded anything start with the layers of the scene
+before, so one may progress to the next scene to leave behind a 'checkpoint',
+that one may return to, or to just start developing a new scene by altering the
+current one.
 
 **** Recording with FRAME 
 When ~DELTA~ has moved a small threshold away from 12 o'clock, ~FRAME~ will
@@ -59,7 +59,7 @@ start recording. The scene that ~FRAME~ chooses for recording, is the scene that
 is closest to the sum of the ~SCENE~ parameter and ~SCENE~ port.
 
 If ~FRAME~ detects a clock signal on the ~CLK~ port, it will snap the  recording start
-and end points to mutiples of the clock period.
+and end points to mutiples of the clock period. 
 
 Recording behaviour depends on whether ~FRAME~ is in /global/ mode, or /layer/
 mode. The ~DELTA_MODE~ button (up-right of ~DELTA~) toggles between these modes.
@@ -144,13 +144,14 @@ buffer by engaging recording in /layer/ mode.
 - At 7'oclock, ~SIG~ only outputs ~FRAME~ output, and the input signal is fully
   attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when ~FRAME~ enters a record mode.
 - At 12'oclock, the input signal is not attenuated.
-- At 2:30, the input signal is still not attenuated, and ~SIG~ outputs 100% of ~FRAME~'s /active buffer/. Used for auditioning multiple takes that were loop recorded, and using /layer/ mode without sonic clutter from other layers.
+- At 2:30, the input signal is still not attenuated, and ~SIG~ outputs 100% of
+  ~FRAME~'s /active buffer/. Used for auditioning multiple takes that were loop
+  recorded, and for using /layer/ mode without sonic clutter from other layers.
 - Past 2:30, ~SIG~ will attenuate the input signal until it is fully attenuated at  5'oclock (max cw).
 ***** VCA
 A VCA for the output. Used for setting or modulating the output volume.
 **** 4SIGNAL
-
-~4IGNAL~ is ~SIGNAL~, just with 4 ports instead of 1. Useful for capturing
+~4IGNAL~ is ~SIGNAL~, just with 4 ports instead of 1. It's used for capturing
 multiple signals, as it saves space compared to 4 ~SIGNAL~ modules set side by
 side.
 **** PLAY
@@ -163,8 +164,8 @@ also removes GATE signals and holds VOCT signals.
 
 **** FRAME-X
 This module is an expander for ~FRAME~. When placed on its right side, it gives
-it extra ~RATE~, and ~POS~ parameters, as well as ports for controlling ~LEFT~,
-~RIGHT~, and ~PLAY~.
+it extra ~RATE~, and ~POS~ parameters, as well as ports for controlling ~PREV~,
+~NEXT~, and ~PLAY~.
 
 This module enables more ways to use ~FRAME~, checkout the footnotes section if
 interested.
@@ -313,7 +314,7 @@ well as recording. Optimally, the interface will be able to replace the current
 computer interface entirely, so one could just have the sound interface in front
 of them and be able to create full songs (as well as optionally a midi keyboard,
 midi controllers, microphones ... etc).
-*** The User Experience
+*** TODO The User Experience
 Note, this section is a work in progress. It's lacking a lot of pictures too.
 For now, I'm just implementing the modules for structure section, and will work
 on this part in the future.  It mostly just contains notes  for myself right now.
@@ -357,13 +358,6 @@ downloading and sharing of macros would be a useful thing.
 
 **** Creating Structure 
 ***** Macro Modules
-****** OUT
-8 in ports, with place to enter names, as well as labels about type of signal
-signal types
-- gates (blue), clks (purple), triggers (light blue), control (yellow), audio (red)
-
-these labels alter the color of the send in the 
-
 ***** The Signal Graph
 - Global and layer mode as well, either inter-macro routing or
   inter-layer routing
@@ -494,4 +488,9 @@ Similar to there being an interface frame, there is also an interface timelines.
 ****** M-MAP
 ****** M-IN
 ****** M-OUT
+8 in ports, with place to enter names, as well as labels about type of signal
+signal types
+- gates (blue), clks (purple), triggers (light blue), control (yellow), audio (red)
+
+these labels alter the color of the send in the 
 ***** OSC

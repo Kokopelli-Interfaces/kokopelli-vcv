@@ -242,7 +242,7 @@ This module is an expander for `FRAME`. When placed on its right side, it gives
 it extra `RATE`, and `POS` parameters, as well as ports for controlling `PREV`,
 `NEXT`, and `PLAY`.
 
-This module enables more ways to use `FRAME`, checkout the footnotes section if interested.
+This module enables more ways to use `FRAME`.
 
 The `POS` parameter controls the start offset of the layers in the scene.
 

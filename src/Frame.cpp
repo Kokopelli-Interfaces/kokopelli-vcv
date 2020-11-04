@@ -18,89 +18,97 @@ void Frame::modulateChannel(int c) {
   if (inputs[SCENE_INPUT].isConnected()) {
     e.scene_position *= clamp(inputs[SCENE_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
   }
-}
-
-
-void Frame::processChannel(const ProcessArgs& args, int c) {
-  Engine &e = *_engines[c];
 
   int active_scene_i = round(e.scene_position * 16);
-  Engine::Scene *active_scene = e.scenes[active_scene_i];
+  Frame::Engine::Scene *active_scene = e.scenes[active_scene_i];
   if (!active_scene) {
-    e.scenes[active_scene_i] = new Engine::Scene();
-    active_scene = e.scenes[active_scene_i];
+    active_scene = new Engine::Scene();
+    e.scenes[active_scene_i] = active_scene;
   }
 
-  // Record Engage
-  if (!e.recording && (e.delta > 0.50f + recordThreshold || e.delta < 0.50f - recordThreshold)) {
-    e.recording = true;
-    e.scene_number_of_recording = active_scene_i;
+  e.active_scene = active_scene;
+}
 
-    Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
-    active_scene->layers.push_back(new_layer);
-    active_scene->current_layer = active_scene->layers.size() - 1;
+void Frame::Engine::engageRecording() {
+  recording = true;
+  recording_dest_scene = active_scene;
 
-    if (e.delta > 0.50f + recordThreshold) {
-      active_scene->mode = Mode::EXTEND;
-    } else {
-      active_scene->mode = Mode::ADD;
-    }
+  Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
+  recording_dest_scene->layers.push_back(new_layer);
+  recording_dest_scene->current_layer = new_layer;
+
+  if (delta > 0.50f + recordThreshold) {
+    recording_dest_scene->mode = Mode::EXTEND;
+  } else {
+    recording_dest_scene->mode = Mode::ADD;
   }
+}
 
-  if (e.recording) {
-    Engine::Scene *rec_scene = e.scenes[e.scene_number_of_recording];
-    Engine::Scene::Layer *current_layer = rec_scene->layers[rec_scene->current_layer];
+bool Frame::Engine::deltaEngaged() {
+  return (delta > 0.50f + recordThreshold || delta < 0.50f - recordThreshold);
+}
 
-    bool recording_disengaged = !(e.delta > 0.50f + recordThreshold || e.delta < 0.50f - recordThreshold);
-
-    // Record Disengage
-    if (recording_disengaged) {
-        e.recording = false;
-        rec_scene->mode = Mode::READ;
-
-        unsigned int recording_length = current_layer->buffer.size();
-
-        printf("disengages: %d %d #layer: %d rec_lery: %d\n", recording_length,
-               rec_scene->scene_length, rec_scene->layers.size(),
-               rec_scene->current_layer);
-
-        if (recording_length > rec_scene->scene_length) {
-          printf("length!: %d\n", recording_length);
-          rec_scene->scene_length = recording_length;
-        }
-    } else if (rec_scene->mode == Mode::EXTEND) {
-      // TODO attenuation
-      current_layer->buffer.push_back(_fromSignal->signal[c]);
-    } else {
-      // TODO
-    }
-  }
-
+float Frame::Engine::step() {
   // TODO weighted mix
-  // TODO global phase for all scenes, or not,have config option
+  // TODO global phase for all scenes, or not, have config option
   active_scene->phase++;
   if (active_scene->phase == active_scene->scene_length) {
     active_scene->phase = 0;
   }
 
-  // TODO function Output next step
   float out = 0.0f;
-  for (unsigned int layer_i = 0; layer_i < active_scene->layers.size(); layer_i++) {
+
+  for (auto layer : active_scene->layers) {
     // don't output what we just put in, avoids FB
-    if (active_scene->mode != Mode::READ && layer_i == active_scene->current_layer) {
+    if (active_scene->mode != Mode::READ && layer == active_scene->current_layer) {
       continue;
     }
 
     // TODO attenuation envelopes
-    Engine::Scene::Layer *layer = active_scene->layers[layer_i];
-
     if (layer->buffer.size() > 0) {
-      unsigned int layer_sample_i = active_scene->phase % layer->buffer.size();
+      unsigned int layer_sample_i =
+          active_scene->phase % layer->buffer.size();
       out += layer->buffer[layer_sample_i];
     }
   }
 
-  _toSignal->signal[c] = out;
+  return out;
+}
+
+void Frame::processChannel(const ProcessArgs& args, int c) {
+  Engine &e = *_engines[c];
+
+  if (!e.recording && e.deltaEngaged()) {
+    e.engageRecording();
+  }
+
+  if (e.recording) {
+    Engine::Scene *rec_scene = e.recording_dest_scene;
+    Engine::Scene::Layer *rec_layer = rec_scene->current_layer;
+
+    if (!e.deltaEngaged()) {
+      e.recording = false;
+      rec_scene->mode = Mode::READ;
+
+      unsigned int recording_length = rec_layer->buffer.size();
+
+      printf("disengage -- length: %d #layers: %d\n", recording_length,
+             rec_scene->layers.size());
+
+      if (recording_length > rec_scene->scene_length) {
+        rec_scene->scene_length = recording_length;
+      }
+    } else if (rec_scene->mode == Mode::EXTEND) {
+      // TODO attenuation
+      float next_in = _fromSignal->signal[c];
+      rec_layer->buffer.push_back(next_in);
+    } else {
+      // TODO
+    }
+  }
+
+  float next_out = e.step();
+  _toSignal->signal[c] = next_out;
 }
 
 void Frame::postProcessAlways(const ProcessArgs &args) {
@@ -112,12 +120,10 @@ void Frame::postProcessAlways(const ProcessArgs &args) {
     if (e.recording) {
       channel_recording = true;
 
-      int active_scene_i = round(e.scene_position * 16);
-      Mode active_scene_mode = e.scenes[active_scene_i]->mode;
-      if (active_scene_mode == Mode::EXTEND) {
+      if (e.active_scene->mode == Mode::EXTEND) {
         lights[RECORD_MODE_LIGHT + 0].value = 1.0;
         lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-      } else if (active_scene_mode == Mode::ADD) {
+      } else if (e.active_scene->mode == Mode::ADD) {
         lights[RECORD_MODE_LIGHT + 0].value = 0.0;
         lights[RECORD_MODE_LIGHT + 2].value = 1.0;
       }

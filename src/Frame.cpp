@@ -92,7 +92,7 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
 
       unsigned int recording_length = rec_layer->buffer.size();
 
-      printf("disengage -- length: %d #layers: %d\n", recording_length,
+      printf("disengage -- length: %d #layers: %ld\n", recording_length,
              rec_scene->layers.size());
 
       if (recording_length > rec_scene->scene_length) {

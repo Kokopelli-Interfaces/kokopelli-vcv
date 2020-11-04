@@ -25,7 +25,6 @@ void Frame::modulateChannel(int c) {
     active_scene = new Engine::Scene();
     e.scenes[active_scene_i] = active_scene;
   }
-
   e.active_scene = active_scene;
 }
 
@@ -33,12 +32,16 @@ void Frame::modulateChannel(int c) {
 // decided not to use clk port - maybe manual entry? 
 // for now, size of first layer.
 unsigned int Frame::Engine::Scene::getDivisionLength() {
-  if (layers.size() > 0) {
+  if (layers.size() > 0  && layers[0]->buffer.size() > 0) {
     return layers[0]->buffer.size();
   }
 
   printf("no division yet\n");
   return 1;
+}
+
+bool Frame::Engine::deltaEngaged() {
+  return (delta > 0.50f + recordThreshold || delta < 0.50f - recordThreshold);
 }
 
 void Frame::Engine::startRecording() {
@@ -76,10 +79,6 @@ void Frame::Engine::startRecording() {
   recording_dest_scene->current_layer = new_layer;
 
   printf("start recording\n");
-}
-
-float Frame::Engine::Scene::Layer::readSample(float phase) {
-  return 0.0f;
 }
 
 void Frame::Engine::endRecording() {
@@ -121,36 +120,108 @@ void Frame::Engine::endRecording() {
   printf("end recording\n");
 }
 
-bool Frame::Engine::deltaEngaged() {
-  return (delta > 0.50f + recordThreshold || delta < 0.50f - recordThreshold);
-}
 
-float Frame::Engine::step() {
-  // TODO weighted mix
-  // TODO global phase for all scenes, or not, have config option
-  active_scene->phase++;
-  if (active_scene->phase >= active_scene->scene_length) {
-    active_scene->phase = 0;
+void Frame::Engine::Scene::step(float in, float attenuation_power) {
+  if ((mode == Mode::EXTEND || mode == Mode::ADD) && current_layer) {
+    current_layer->buffer.push_back(in);
+    current_layer->attenuation_envelope.push_back(attenuation_power);
   }
 
+  phase++;
+
+  if (mode != Mode::EXTEND && phase >= scene_length) {
+    phase = 0;
+
+    if (mode == Mode::ADD) {
+      // TODO end recording and start new one
+    }
+  }
+}
+
+// TODO customizable respoonse?
+float getAttenuationPower(float delta, float recording_threshold) {
+  float read_position = 0.50f;
+  float linear_attenuation_power;
+  if (delta < read_position - recording_threshold) {
+    linear_attenuation_power = read_position - recording_threshold - delta;
+  } else if (delta > read_position - recording_threshold) {
+    linear_attenuation_power = delta - read_position + recording_threshold;
+  } else {
+    linear_attenuation_power = 0.0f;
+  }
+
+  float range = read_position - recording_threshold;
+  float linear_attenuation_power_scaled = linear_attenuation_power / range;
+
+  // by taking to the power of 5, it is easier to create recordings that have no attenuation
+  float attenuation_power =
+      clamp(pow(linear_attenuation_power_scaled, 5), 0.0f, 1.0f);
+  return attenuation_power;
+}
+
+void Frame::Engine::step(float in) {
+  // TODO weighted mix
+  // TODO global phase for all scenes, or not, have config option
+  float attenuation_power = 0.0f;
+  if (recording) {
+    attenuation_power = getAttenuationPower(delta, recordThreshold);
+  }
+
+  for (auto scene : scenes) {
+    if (scene) {
+      scene->step(in, attenuation_power);
+    }
+  }
+}
+
+float Frame::Engine::Scene::Layer::read(unsigned int phase) {
   float out = 0.0f;
-
-  for (auto layer : active_scene->layers) {
-    // don't output what we just put in, avoids FB
-    if (active_scene->mode != Mode::READ && layer == active_scene->current_layer) {
-      continue;
-    }
-
-    // TODO attenuation envelopes
-    if (layer->buffer.size() > 0) {
-      unsigned int layer_sample_i =
-          active_scene->phase % layer->buffer.size();
-      out += layer->buffer[layer_sample_i];
-    }
+  if (buffer.size() > 0) {
+    // TODO use start offsets and end offets
+    // TODO smooth edges so no clicks
+    unsigned int layer_sample_i = phase % buffer.size();
+    out = buffer[layer_sample_i];
   }
 
   return out;
 }
+
+float Frame::Engine::Scene::read() {
+  float out = 0.0f;
+  for (auto layer : layers) {
+    // don't output what we are writing to avoid FB
+    bool layer_is_recording = (mode != Mode::READ && layer == current_layer);
+    if (layer_is_recording) {
+      continue;
+    }
+
+    float layer_out = layer->read(phase);
+
+    // ToDO atetnuation envelopes
+    out += layer_out;
+  }
+
+  return out;
+}
+
+float Frame::Engine::read() {
+  float out = 0.0f;
+
+  int scene_1 = floor(scene_position);
+  int scene_2 = ceil(scene_position);
+  float weight = scene_position - floor(scene_position);
+
+  if (scenes[scene_1]) {
+    out += scenes[scene_1]->read() * (1 - weight);
+  }
+
+  if (scenes[scene_2]) {
+    out += scenes[scene_2]->read() * (weight);
+  }
+
+  return out;
+}
+
 
 void Frame::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
@@ -163,21 +234,10 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
     e.endRecording();
   }
 
-  if (e.recording) {
-    Engine::Scene *rec_scene = e.recording_dest_scene;
-    Engine::Scene::Layer *rec_layer = rec_scene->current_layer;
-
-    if (!e.deltaEngaged()) {
-    } else if (rec_scene->mode == Mode::EXTEND) {
-      // TODO attenuation
-      float next_in = _fromSignal->signal[c];
-      rec_layer->buffer.push_back(next_in);
-    } else {
-      // TODO
-    }
-  }
-
-  float next_out = e.step();
+  // TODO
+  float next_in = _fromSignal->signal[c];
+  e.step(next_in);
+  float next_out = e.read();
   _toSignal->signal[c] = next_out;
 }
 
@@ -190,17 +250,19 @@ void Frame::updateLights(const ProcessArgs &args) {
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(position, args.sampleTime * lightDivider.getDivision());
 
+  float attenuation_power = getAttenuationPower(e.delta, recordThreshold);
+
   if (!e.recording) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
   } else if (e.active_scene->mode == Mode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
-        1.0f - e.attenuation_power, args.sampleTime * lightDivider.getDivision());
+        1.0f - attenuation_power, args.sampleTime * lightDivider.getDivision());
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
   } else if (e.active_scene->mode == Mode::ADD) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].setSmoothBrightness(
-        1.0f - e.attenuation_power,
+        1.0f - attenuation_power,
         args.sampleTime * lightDivider.getDivision());
   } else if (e.active_scene->mode == Mode::READ) {
     lights[RECORD_MODE_LIGHT + 0].value = 1.0;

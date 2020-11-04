@@ -48,11 +48,17 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       struct Layer {
         vector<float> buffer;
         vector<float> attenuation_envelope;
-        vector<int> attenuation_target_layers;
-        // TODO
-        unsigned int skip_samples;
+        vector<int> target_layers;
 
-        float readSample(float phase);
+        // depends on target layers and type
+        Mode type;
+        // TODO start offset for Extend mode is relative to division or target layers?
+        // start & end offset for add mode are relative to max length in target layers
+        // actually just start off with extend mode same as add mode
+        unsigned int start_offset = 0;
+        unsigned int end_offset = 0;
+
+        float read(unsigned int phase);
       };
 
       vector<Engine::Scene::Layer*> layers;
@@ -61,18 +67,18 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
       unsigned int scene_length = 0;
 
+      // position from start of first layer to end of longest layer
       unsigned int phase = 0;
       Mode mode = Mode::READ;
 
       unsigned int getDivisionLength();
+      void step(float in, float attenuation_power);
+      float read();
     };
-
-    static constexpr float recordThreshold = 0.05f;
 
     float scene_position = 0.0f;
     float delta = 0.0f;
     bool recording = false;
-    float attenuation_power = 0.0f;
 
     Scene* active_scene = NULL;
     Scene* recording_dest_scene = NULL;
@@ -80,10 +86,12 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
     void startRecording();
     void endRecording();
+    void step(float in);
+    float read();
     bool deltaEngaged();
-    float step();
   };
 
+  static constexpr float recordThreshold = 0.05f;
   Engine *_engines[maxChannels]{};
   dsp::ClockDivider lightDivider;
 

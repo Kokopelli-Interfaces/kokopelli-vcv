@@ -38,7 +38,6 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     READ
   };
 
-	static constexpr int maxLayers = 64;
 	static constexpr int numScenes = 16;
 
   SignalExpanderMessage *_toSignal = NULL;
@@ -50,6 +49,8 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
         vector<float> buffer;
         vector<float> attenuation_envelope;
         vector<int> attenuation_target_layers;
+        // TODO
+        unsigned int skip_samples;
       };
 
       vector<Engine::Scene::Layer*> layers;
@@ -57,13 +58,16 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       vector<Engine::Scene::Layer*> selected_layers;
 
       unsigned int scene_length = 0;
+
       unsigned int phase = 0;
       Mode mode = Mode::READ;
+
+      unsigned int getDivisionLength();
     };
 
-    float scene_position = 0.0f;
-
     static constexpr float recordThreshold = 0.05f;
+
+    float scene_position = 0.0f;
     float delta = 0.0f;
     bool recording = false;
 
@@ -71,7 +75,8 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     Scene* recording_dest_scene = NULL;
     Scene* scenes[numScenes]{};
 
-    void engageRecording();
+    void startRecording();
+    void endRecording();
     bool deltaEngaged();
     float step();
   };

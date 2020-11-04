@@ -29,19 +29,92 @@ void Frame::modulateChannel(int c) {
   e.active_scene = active_scene;
 }
 
-void Frame::Engine::engageRecording() {
+// TODO, how to define division length?
+// decided not to use clk port - maybe manual entry? 
+// for now, size of first layer.
+unsigned int Frame::Engine::Scene::getDivisionLength() {
+  if (layers.size() > 0) {
+    return layers[0]->buffer.size();
+  }
+
+  printf("no division yet\n");
+  return 1;
+}
+
+void Frame::Engine::startRecording() {
   recording = true;
   recording_dest_scene = active_scene;
 
-  Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
-  recording_dest_scene->layers.push_back(new_layer);
-  recording_dest_scene->current_layer = new_layer;
 
   if (delta > 0.50f + recordThreshold) {
     recording_dest_scene->mode = Mode::EXTEND;
   } else {
     recording_dest_scene->mode = Mode::ADD;
   }
+
+  Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
+
+  // TODO dependent on mode!
+  unsigned int division_length = recording_dest_scene->getDivisionLength();
+  unsigned int start_division_n = floor(recording_dest_scene->phase / division_length);
+  int start_padding = recording_dest_scene->phase - division_length * start_division_n;
+
+  printf("padding %d at start\n", start_padding);
+  auto beginning = new_layer->buffer.begin();
+  new_layer->buffer.insert(beginning, 0.0f, start_padding);
+
+  // TODO round not floor
+  // if (start_padding > 0) {
+  //   new_layer->buffer.insert(beginning, 0.0f, start_padding);
+  // } else {
+  //   new_layer->buffer.erase(beginning + start_padding, beginning);
+  // }
+
+ new_layer->buffer.insert(beginning, 0.0f, start_padding);
+
+  recording_dest_scene->layers.push_back(new_layer);
+  recording_dest_scene->current_layer = new_layer;
+
+  printf("start recording\n");
+}
+
+void Frame::Engine::endRecording() {
+  recording = false;
+  recording_dest_scene->mode = Mode::READ;
+  Frame::Engine::Scene::Layer* recorded_layer = recording_dest_scene->current_layer;
+
+  unsigned int unpadded_recording_length = recorded_layer->buffer.size();
+  printf("unpadded length: %d\n", unpadded_recording_length);
+
+  // TODO depend on mode
+  unsigned int division_length = recording_dest_scene->getDivisionLength();
+  printf("div length: %d\n", division_length);
+  unsigned int end_division_n = round(unpadded_recording_length / division_length);
+  if (end_division_n == 0) {
+    end_division_n++;
+  }
+
+  int end_padding = division_length * end_division_n - unpadded_recording_length;
+  printf("end_padding %d\n", end_padding);
+  auto ending = recorded_layer->buffer.end();
+  if (end_padding > 0) {
+    recorded_layer->buffer.insert(ending, 0.0f, end_padding);
+  } else {
+    recorded_layer->buffer.erase(ending + end_padding, ending);
+  }
+
+  unsigned int recording_length = recorded_layer->buffer.size();
+
+  printf("disengage -- length: %d #layers: %ld\n", recording_length,
+         recording_dest_scene->layers.size());
+
+
+  if (recording_length > recording_dest_scene->scene_length) {
+    recording_dest_scene->scene_length = recording_length;
+  }
+
+  recording_dest_scene = NULL;
+  printf("end recording\n");
 }
 
 bool Frame::Engine::deltaEngaged() {
@@ -52,7 +125,7 @@ float Frame::Engine::step() {
   // TODO weighted mix
   // TODO global phase for all scenes, or not, have config option
   active_scene->phase++;
-  if (active_scene->phase == active_scene->scene_length) {
+  if (active_scene->phase >= active_scene->scene_length) {
     active_scene->phase = 0;
   }
 
@@ -79,7 +152,11 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
 
   if (!e.recording && e.deltaEngaged()) {
-    e.engageRecording();
+    e.startRecording();
+  }
+
+  if (e.recording && !e.deltaEngaged()) {
+    e.endRecording();
   }
 
   if (e.recording) {
@@ -87,17 +164,6 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
     Engine::Scene::Layer *rec_layer = rec_scene->current_layer;
 
     if (!e.deltaEngaged()) {
-      e.recording = false;
-      rec_scene->mode = Mode::READ;
-
-      unsigned int recording_length = rec_layer->buffer.size();
-
-      printf("disengage -- length: %d #layers: %ld\n", recording_length,
-             rec_scene->layers.size());
-
-      if (recording_length > rec_scene->scene_length) {
-        rec_scene->scene_length = recording_length;
-      }
     } else if (rec_scene->mode == Mode::EXTEND) {
       // TODO attenuation
       float next_in = _fromSignal->signal[c];

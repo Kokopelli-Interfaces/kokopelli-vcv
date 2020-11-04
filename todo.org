@@ -15,7 +15,10 @@ Create a structure that holds buffers that frame reads back.
 CLOSED: [2020-11-03 Tue 16:42]
 * DONE Frame - scenes
 CLOSED: [2020-11-02 Mon 22:18]
-* TODO Frame - snap to multiples of initial recording
+* DONE Frame - snap to multiples of initial recording
+CLOSED: [2020-11-03 Tue 18:56]
+* TODO Frame - smooth out transitions
+so that there are no clicks and pops
 * TODO Frame - attenuation
 * TODO Frame - fix polyphony
 

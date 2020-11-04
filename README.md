@@ -66,15 +66,6 @@ A scene is simply a collection of looping buffers, or, in frame's terminology, a
 collection of 'layers'.
 
 The `SCENE` parameter adjusts which scene `FRAME` records and reads from.
-
-If `SCENE`'s position is between two scenes, the behaviour will depend on the
-"scene transition" option. 
-
--   If set to  'smooth' it will output a weighted mix of both scenes, allowing for smooth crossfading between scenes.
--   If set to 'discrete', the scene will snap to the nearest scene.
--   If  set to 'sequence', the scene will snap to the nearest scene at the next
-    clk step, and will also reset the play position of the scene on transitioning.
-
 The port directly under `SCENE` modulates the parameter, allowing for
 interesting crossfade patterns, or voltage controlled scene sequencing.
 
@@ -251,7 +242,7 @@ This module is an expander for `FRAME`. When placed on its right side, it gives
 it extra `RATE`, and `POS` parameters, as well as ports for controlling `PREV`,
 `NEXT`, and `PLAY`.
 
-This module enables more ways to use `FRAME`, checkout the footnotes section if interested.
+This module enables more ways to use `FRAME`.
 
 The `POS` parameter controls the start offset of the layers in the scene.
 

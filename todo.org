@@ -11,8 +11,11 @@ CLOSED: [2020-11-02 Mon 22:18]
 * DONE Frame - Buffer structure
 CLOSED: [2020-11-02 Mon 22:18]
 Create a structure that holds buffers that frame reads back.
-* TODO Frame - record modes
+* DONE Frame - record modes
+CLOSED: [2020-11-03 Tue 16:42]
 * DONE Frame - scenes
 CLOSED: [2020-11-02 Mon 22:18]
+* TODO Frame - snap to multiples of initial recording
 * TODO Frame - attenuation
+* TODO Frame - fix polyphony
 

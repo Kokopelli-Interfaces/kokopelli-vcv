@@ -27,7 +27,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 		NUM_OUTPUTS
 	};
 	enum LightIds {
-		DELTA_MODE_LIGHT,
+		ENUMS(PHASE_LIGHT, 3),
 		ENUMS(RECORD_MODE_LIGHT, 3),
 		NUM_LIGHTS
 	};
@@ -51,6 +51,8 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
         vector<int> attenuation_target_layers;
         // TODO
         unsigned int skip_samples;
+
+        float readSample(float phase);
       };
 
       vector<Engine::Scene::Layer*> layers;
@@ -70,6 +72,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     float scene_position = 0.0f;
     float delta = 0.0f;
     bool recording = false;
+    float attenuation_power = 0.0f;
 
     Scene* active_scene = NULL;
     Scene* recording_dest_scene = NULL;
@@ -82,6 +85,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   };
 
   Engine *_engines[maxChannels]{};
+  dsp::ClockDivider lightDivider;
 
   Frame() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -95,6 +99,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
     // TODO chainable
     setBaseModelPredicate([](Model *m) { return m == modelSignal; });
+    lightDivider.setDivision(16);
  }
 
   void modulateChannel(int c) override;
@@ -103,6 +108,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   void processAlways(const ProcessArgs &args) override;
   void processChannel(const ProcessArgs &args, int channel) override;
   void postProcessAlways(const ProcessArgs &args) override;
+  void updateLights(const ProcessArgs &args);
 };
 
 } // namespace myrisa

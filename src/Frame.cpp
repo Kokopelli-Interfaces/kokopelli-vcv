@@ -70,12 +70,16 @@ void Frame::Engine::startRecording() {
   //   new_layer->buffer.erase(beginning + start_padding, beginning);
   // }
 
- new_layer->buffer.insert(beginning, 0.0f, start_padding);
+  new_layer->buffer.insert(beginning, 0.0f, start_padding);
 
   recording_dest_scene->layers.push_back(new_layer);
   recording_dest_scene->current_layer = new_layer;
 
   printf("start recording\n");
+}
+
+float Frame::Engine::Scene::Layer::readSample(float phase) {
+  return 0.0f;
 }
 
 void Frame::Engine::endRecording() {
@@ -177,30 +181,36 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
   _toSignal->signal[c] = next_out;
 }
 
-void Frame::postProcessAlways(const ProcessArgs &args) {
-  // TODO function set lights
-  // TODO lightDivider similar to LFO.cpp
-  bool channel_recording = false;
-  for (int channel_i = 0; channel_i < 1; channel_i++) {
-    Engine &e = *_engines[channel_i];
-    if (e.recording) {
-      channel_recording = true;
-
-      if (e.active_scene->mode == Mode::EXTEND) {
-        lights[RECORD_MODE_LIGHT + 0].value = 1.0;
-        lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-      } else if (e.active_scene->mode == Mode::ADD) {
-        lights[RECORD_MODE_LIGHT + 0].value = 0.0;
-        lights[RECORD_MODE_LIGHT + 2].value = 1.0;
-      }
-
-      break;
-    }
+void Frame::updateLights(const ProcessArgs &args) {
+  Engine &e = *_engines[0];
+  float position = 0.0f;
+  if (e.active_scene->scene_length > 0) {
+    position = (float)(e.active_scene->phase) / (float)(e.active_scene->scene_length);
   }
 
-  if (!channel_recording) {
+  lights[PHASE_LIGHT + 1].setSmoothBrightness(position, args.sampleTime * lightDivider.getDivision());
+
+  if (!e.recording) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
+  } else if (e.active_scene->mode == Mode::EXTEND) {
+    lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
+        1.0f - e.attenuation_power, args.sampleTime * lightDivider.getDivision());
+    lights[RECORD_MODE_LIGHT + 2].value = 0.0;
+  } else if (e.active_scene->mode == Mode::ADD) {
+    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
+    lights[RECORD_MODE_LIGHT + 2].setSmoothBrightness(
+        1.0f - e.attenuation_power,
+        args.sampleTime * lightDivider.getDivision());
+  } else if (e.active_scene->mode == Mode::READ) {
+    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
+    lights[RECORD_MODE_LIGHT + 2].value = 1.0;
+  }
+}
+
+void Frame::postProcessAlways(const ProcessArgs &args) {
+  if (lightDivider.process()) {
+    updateLights(args);
   }
 }
 
@@ -236,7 +246,7 @@ struct FrameWidget : ModuleWidget {
 		addInput(createInput<PJ301MPort>(mm2px(Vec(5.79, 96.94)), module, Frame::DELTA_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(5.905, 109.113)), module, Frame::CLK_INPUT));
 
-		addChild(createLight<MediumLight<GreenLight>>(mm2px(Vec(8.528, 63.611)), module, Frame::DELTA_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(8.528, 63.611)), module, Frame::PHASE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(8.542, 67.836)), module, Frame::RECORD_MODE_LIGHT));
 
 		// mm2px(Vec(18.593, 7.115))

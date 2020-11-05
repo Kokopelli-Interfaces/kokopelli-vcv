@@ -19,6 +19,20 @@ CLOSED: [2020-11-02 Mon 22:18]
 CLOSED: [2020-11-03 Tue 18:56]
 * TODO Frame - smooth out transitions
 so that there are no clicks and pops
-* TODO Frame - attenuation
+put under layer::read()
+layer has start offset and end offset, just smooth that part out in the reading 
+* DONE Frame - attenuation
+CLOSED: [2020-11-04 Wed 16:00]
 * TODO Frame - fix polyphony
+* TODO Frame - delete buffers that are erased
+- don't delete if timeline is recording in futrue
+* TODO Frame - rework to have rotary knobs so no limit on scenes and layers
+- have rotary knob instead of buttons for layer switch
+- have selection button to add layer to seelction
+- have copy cutton to copy selected scenes
+- have mix knob control selection:all ratio
+- remove undo in favor of 
+* TODO Frame - scene insert / delete button
+* TODO Frame -  better scene length
+common multiple of all layer lengths 
 

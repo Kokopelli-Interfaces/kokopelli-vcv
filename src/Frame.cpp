@@ -37,7 +37,6 @@ unsigned int Frame::Engine::Scene::getDivisionLength() {
     return layers[0]->buffer.size();
   }
 
-  printf("no division yet\n");
   return 1;
 }
 
@@ -57,32 +56,24 @@ void Frame::Engine::startRecording() {
 
   Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
 
-  // TODO dependent on mode!
+  // TODO dependent?
   unsigned int division_length = recording_dest_scene->getDivisionLength();
-  unsigned int start_division_n = floor(recording_dest_scene->phase / division_length);
-  int start_padding = recording_dest_scene->phase - division_length * start_division_n;
 
-  printf("padding %d at start\n", start_padding);
-  auto beginning = new_layer->buffer.begin();
-  new_layer->buffer.insert(beginning, 0.0f, start_padding);
+  new_layer->start_division = floor(recording_dest_scene->phase / division_length);
+  new_layer->start_division_offset = recording_dest_scene->phase - new_layer->start_division * division_length;
 
-  for (auto existing_layer : recording_dest_scene->layers) {
-    new_layer->target_layers.push_back(existing_layer);
+  for (auto selected_layer : recording_dest_scene->selected_layers) {
+    if (selected_layer) {
+      new_layer->target_layers.push_back(selected_layer);
+    } else {
+      printf("No selected layers! error!");
+    }
   }
-
-  // TODO round not floor
-  // if (start_padding > 0) {
-  //   new_layer->buffer.insert(beginning, 0.0f, start_padding);
-  // } else {
-  //   new_layer->buffer.erase(beginning + start_padding, beginning);
-  // }
-
-  new_layer->buffer.insert(beginning, 0.0f, start_padding);
 
   recording_dest_scene->layers.push_back(new_layer);
   recording_dest_scene->current_layer = new_layer;
 
-  printf("start recording\n");
+  printf("Start recording\n");
 }
 
 
@@ -111,40 +102,37 @@ void Frame::Engine::endRecording() {
   recording_dest_scene->mode = Mode::READ;
   Frame::Engine::Scene::Layer* recorded_layer = recording_dest_scene->current_layer;
 
-  unsigned int unpadded_recording_length = recorded_layer->buffer.size();
-  printf("unpadded length: %d\n", unpadded_recording_length);
+  printf("END recording\n");
+
+  printf("-- recording buffer length: %ld\n", recorded_layer->buffer.size());
 
   // TODO depend on mode
   unsigned int division_length = recording_dest_scene->getDivisionLength();
-  printf("div length: %d\n", division_length);
-  unsigned int end_division_n = round(unpadded_recording_length / division_length);
-  if (end_division_n == 0) {
-    end_division_n++;
+  printf("-- div length: %d\n", division_length);
+
+  recorded_layer->end_division = round(recorded_layer->buffer.size() / division_length);
+  if (recorded_layer->end_division == 0) {
+    recorded_layer->end_division = 1;
   }
 
-  int end_padding = division_length * end_division_n - unpadded_recording_length;
-  printf("end_padding %d\n", end_padding);
-  auto ending = recorded_layer->buffer.end();
-  if (end_padding > 0) {
-    recorded_layer->buffer.insert(ending, 0.0f, end_padding);
-  } else {
-    recorded_layer->buffer.erase(ending + end_padding, ending);
-  }
+  recorded_layer->end_division_offset = recording_dest_scene->phase - recorded_layer->end_division * division_length;
 
-  unsigned int recording_length = recorded_layer->buffer.size();
-
+  unsigned int recording_length = recorded_layer->end_division - recorded_layer->start_division;
   if (recording_length > recording_dest_scene->scene_length) {
     vector<int> lengths;
     for (auto layer : recording_dest_scene->layers) {
-      lengths.push_back(layer->buffer.size());
+      lengths.push_back(layer->end_division - layer->start_division);
     }
-
     int lc_multiple = accumulate(lengths.begin(), lengths.end(), 1, lcm);
     recording_dest_scene->scene_length = lc_multiple;
   }
 
-  printf("disengage -- length: %d #layers: %ld scene_size:%d\n", recording_length / division_length,
-         recording_dest_scene->layers.size(), recording_dest_scene->scene_length / division_length);
+  printf("-- length: %d #layers: %ld scene_size:%d\n", recording_length,
+         recording_dest_scene->layers.size(), recording_dest_scene->scene_length);
+  printf("-- start_div: %d, start_division_offset: %d\n", recorded_layer->start_division, recorded_layer->start_division_offset);
+  printf("-- end_div: %d, end_division_offset: %d\n", recorded_layer->end_division, recorded_layer->end_division_offset);
+
+  recording_dest_scene->selected_layers.push_back(recorded_layer);
 
   recording_dest_scene = NULL;
 }
@@ -183,6 +171,7 @@ void Frame::Engine::step(float in) {
   for (auto scene : scenes) {
     if (scene) {
       if ((scene->mode == Mode::EXTEND || scene->mode == Mode::ADD) && scene->current_layer) {
+        // TODO only if input present
         scene->current_layer->buffer.push_back(in);
         // TODO attenuation divider, don't need to save every point
         scene->current_layer->attenuation_envelope.push_back(attenuation_power);
@@ -190,11 +179,15 @@ void Frame::Engine::step(float in) {
 
       scene->phase++;
 
-      if (scene->mode != Mode::EXTEND && scene->phase >= scene->scene_length) {
+      bool scene_end = scene->phase / scene->getDivisionLength() >= scene->scene_length;
+      if (scene_end && scene->mode != Mode::EXTEND) {
+        if (scene->mode == Mode::ADD) {
+          endRecording();
+        }
+
         scene->phase = 0;
 
         if (scene->mode == Mode::ADD) {
-          endRecording();
           startRecording();
         }
       }
@@ -202,13 +195,16 @@ void Frame::Engine::step(float in) {
   }
 }
 
-float Frame::Engine::Scene::Layer::read(unsigned int phase) {
+ float Frame::Engine::Scene::Layer::read(unsigned int phase, unsigned int division_length) {
   float out = 0.0f;
+  unsigned int layer_length = (end_division - start_division) * division_length;
   if (buffer.size() > 0) {
-    // TODO use start offsets and end offets
     // TODO smooth edges so no clicks
-    unsigned int layer_sample_i = phase % buffer.size();
-    out = buffer[layer_sample_i];
+    unsigned int layer_phase = phase % layer_length;
+    if (start_division_offset <= layer_phase && layer_phase <= layer_length + end_division_offset) {
+      unsigned int layer_sample_i = phase - start_division_offset;
+      out = buffer[layer_sample_i];
+    }
   }
 
   return out;
@@ -235,7 +231,7 @@ float Frame::Engine::Scene::read() {
       continue;
     }
 
-    float layer_out = layer->read(phase);
+    float layer_out = layer->read(phase, getDivisionLength());
 
     float layer_attenuation = 0.0f;
     for (auto other_layer : layers) {

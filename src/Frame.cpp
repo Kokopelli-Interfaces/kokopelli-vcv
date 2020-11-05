@@ -49,7 +49,7 @@ void Frame::Engine::startRecording() {
   recording = true;
   recording_dest_scene = active_scene;
 
-  if (delta > 0.50f + recordThreshold) {
+  if (delta > 0.50f + recordThreshold || recording_dest_scene->layers.size() == 0) {
     recording_dest_scene->mode = Mode::EXTEND;
   } else {
     recording_dest_scene->mode = Mode::ADD;
@@ -85,6 +85,7 @@ void Frame::Engine::startRecording() {
   printf("start recording\n");
 }
 
+// TODO delete layers that are now erased
 void Frame::Engine::endRecording() {
   recording = false;
   recording_dest_scene->mode = Mode::READ;
@@ -124,24 +125,9 @@ void Frame::Engine::endRecording() {
   printf("end recording\n");
 }
 
-void Frame::Engine::Scene::step(float in, float attenuation_power) {
-  if ((mode == Mode::EXTEND || mode == Mode::ADD) && current_layer) {
-    current_layer->buffer.push_back(in);
-    current_layer->attenuation_envelope.push_back(attenuation_power);
-  }
-
-  phase++;
-
-  if (mode != Mode::EXTEND && phase >= scene_length) {
-    phase = 0;
-
-    if (mode == Mode::ADD) {
-      // TODO end recording and start new one
-    }
-  }
-}
 
 // TODO customizable respoonse?
+// TODO attenuation clk divider, get smooth value
 float getAttenuationPower(float delta, float recording_threshold) {
   float read_position = 0.50f;
   float linear_attenuation_power;
@@ -158,7 +144,7 @@ float getAttenuationPower(float delta, float recording_threshold) {
 
   // by taking to the power of 5, it is easier to create recordings that have no attenuation
   float attenuation_power =
-      clamp(pow(linear_attenuation_power_scaled, 5), 0.0f, 1.0f);
+      clamp(pow(linear_attenuation_power_scaled, 4), 0.0f, 1.0f);
   return attenuation_power;
 }
 
@@ -172,7 +158,22 @@ void Frame::Engine::step(float in) {
 
   for (auto scene : scenes) {
     if (scene) {
-      scene->step(in, attenuation_power);
+      if ((scene->mode == Mode::EXTEND || scene->mode == Mode::ADD) && scene->current_layer) {
+        scene->current_layer->buffer.push_back(in);
+        // TODO attenuation divider, don't need to save every point
+        scene->current_layer->attenuation_envelope.push_back(attenuation_power);
+      }
+
+      scene->phase++;
+
+      if (scene->mode != Mode::EXTEND && scene->phase >= scene->scene_length) {
+        scene->phase = 0;
+
+        if (scene->mode == Mode::ADD) {
+          endRecording();
+          startRecording();
+        }
+      }
     }
   }
 }
@@ -308,7 +309,8 @@ void Frame::postProcessAlways(const ProcessArgs &args) {
 }
 
 void Frame::addChannel(int c) {
-    _engines[c] = new Engine(); }
+    _engines[c] = new Engine();
+}
 
 void Frame::removeChannel(int c) {
   delete _engines[c];

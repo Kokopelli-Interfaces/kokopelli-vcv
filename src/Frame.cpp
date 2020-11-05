@@ -85,6 +85,26 @@ void Frame::Engine::startRecording() {
   printf("start recording\n");
 }
 
+
+int gcd(int a, int b)
+{
+    for (;;)
+    {
+        if (a == 0) return b;
+        b %= a;
+        if (b == 0) return a;
+        a %= b;
+    }
+}
+
+int lcm(int a, int b)
+{
+    int temp = gcd(a, b);
+
+    return temp ? (a / temp * b) : 0;
+}
+
+
 // TODO delete layers that are now erased
 void Frame::Engine::endRecording() {
   recording = false;
@@ -116,9 +136,15 @@ void Frame::Engine::endRecording() {
   printf("disengage -- length: %d #layers: %ld\n", recording_length,
          recording_dest_scene->layers.size());
 
-
   if (recording_length > recording_dest_scene->scene_length) {
-    recording_dest_scene->scene_length = recording_length;
+    vector<int> arr;
+    for (auto layer : recording_dest_scene->layers) {
+      arr.push_back(layer->buffer.size());
+    }
+    int *lengths = arr.data();
+
+    int lc_multiple = accumulate(lengths, lengths + 4, 1, lcm);
+    recording_dest_scene->scene_length = lc_multiple;
   }
 
   recording_dest_scene = NULL;

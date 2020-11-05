@@ -33,6 +33,50 @@ CLOSED: [2020-11-04 Wed 16:00]
 - have mix knob control selection:all ratio
 - remove undo in favor of 
 * TODO Frame - scene insert / delete button
-* TODO Frame -  better scene length
-common multiple of all layer lengths 
+* DONE Frame -  better scene length
+CLOSED: [2020-11-04 Wed 19:16]
+lcm of all layer lengths 
+* TODO Frame - 
+* TODO Frame-MUX module
+ssame as frame, but has additional ~FRAME~ parameter to select active frame
+** TODO frame knob
+change which frame is active, is a frame multiplexer with this.
+* TODO Frame COPY / Delete button 
+copy / delete selected layers into a spot
+press once to copy selected into holding place
+hold to clear buffer, or to delete selected if no buffer 
+
+* TODO Timeline -
+#+ATTR_ORG: :width 500
+[[./img/todo_2020_11_04__20:41:37.png]]
+
+- a sequencer for frame scenes as well as states
+- make it an expander for either ~FRAME~ or ~FRAME-MUX~
+- timline is sectioned into SCENES which are sectioned into divisions
+  - events may occur at divisions, such as:
+    - scene transitions,
+    - new frame layers being introduced
+    
+
+- frame, scene, layer, and delta knob
+also serves as multi plexer for frames
+** TODO progress knob
+- when right, timeline is extended when scene end is reached by looping scene again
+- when default, progresses normally
+- when left, loops scene
+
+** TODO select some or all layers via visual
+selected layers are highlighted
+** TODO scrub knob
+move along timeline
+** TODO ability to offset layer contents
+** TODO visual
+top half is layers of active frame
+* TODO Frame-VIS 
+layers of change visualizer expander for frame
+can also use to select specific layers
+and also create offsets for buffers
+* TODO Timeline-VIS
+timeline visualizer for timeline
+can also use to click and drag events to different division points
 

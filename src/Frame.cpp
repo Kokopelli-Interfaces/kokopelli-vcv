@@ -133,22 +133,20 @@ void Frame::Engine::endRecording() {
 
   unsigned int recording_length = recorded_layer->buffer.size();
 
-  printf("disengage -- length: %d #layers: %ld\n", recording_length,
-         recording_dest_scene->layers.size());
-
   if (recording_length > recording_dest_scene->scene_length) {
-    vector<int> arr;
+    vector<int> lengths;
     for (auto layer : recording_dest_scene->layers) {
-      arr.push_back(layer->buffer.size());
+      lengths.push_back(layer->buffer.size());
     }
-    int *lengths = arr.data();
 
-    int lc_multiple = accumulate(lengths, lengths + 4, 1, lcm);
+    int lc_multiple = accumulate(lengths.begin(), lengths.end(), 1, lcm);
     recording_dest_scene->scene_length = lc_multiple;
   }
 
+  printf("disengage -- length: %d #layers: %ld scene_size:%d\n", recording_length / division_length,
+         recording_dest_scene->layers.size(), recording_dest_scene->scene_length / division_length);
+
   recording_dest_scene = NULL;
-  printf("end recording\n");
 }
 
 

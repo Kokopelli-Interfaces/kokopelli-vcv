@@ -18,8 +18,9 @@ void Frame::modulateChannel(int c) {
   if (inputs[SCENE_INPUT].isConnected()) {
     e.scene_position *= clamp(inputs[SCENE_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
   }
+  e.scene_position *= numScenes;
 
-  int active_scene_i = round(e.scene_position * 16);
+  int active_scene_i = round(e.scene_position);
   Frame::Engine::Scene *active_scene = e.scenes[active_scene_i];
   if (!active_scene) {
     active_scene = new Engine::Scene();
@@ -48,7 +49,6 @@ void Frame::Engine::startRecording() {
   recording = true;
   recording_dest_scene = active_scene;
 
-
   if (delta > 0.50f + recordThreshold) {
     recording_dest_scene->mode = Mode::EXTEND;
   } else {
@@ -65,6 +65,10 @@ void Frame::Engine::startRecording() {
   printf("padding %d at start\n", start_padding);
   auto beginning = new_layer->buffer.begin();
   new_layer->buffer.insert(beginning, 0.0f, start_padding);
+
+  for (auto existing_layer : recording_dest_scene->layers) {
+    new_layer->target_layers.push_back(existing_layer);
+  }
 
   // TODO round not floor
   // if (start_padding > 0) {
@@ -119,7 +123,6 @@ void Frame::Engine::endRecording() {
   recording_dest_scene = NULL;
   printf("end recording\n");
 }
-
 
 void Frame::Engine::Scene::step(float in, float attenuation_power) {
   if ((mode == Mode::EXTEND || mode == Mode::ADD) && current_layer) {
@@ -186,10 +189,22 @@ float Frame::Engine::Scene::Layer::read(unsigned int phase) {
   return out;
 }
 
+float Frame::Engine::Scene::Layer::readAttenuation(unsigned int phase) {
+  float out = 0.0f;
+  if (attenuation_envelope.size() > 0) {
+    // TODO use start offsets and end offets
+    // TODO smooth edges so no clicks
+    unsigned int layer_sample_i = phase % attenuation_envelope.size();
+    out = attenuation_envelope[layer_sample_i];
+  }
+
+  return out;
+}
+
 float Frame::Engine::Scene::read() {
   float out = 0.0f;
   for (auto layer : layers) {
-    // don't output what we are writing to avoid FB
+    // don't output what we are writing to avoid FB in case of self-routing
     bool layer_is_recording = (mode != Mode::READ && layer == current_layer);
     if (layer_is_recording) {
       continue;
@@ -197,7 +212,23 @@ float Frame::Engine::Scene::read() {
 
     float layer_out = layer->read(phase);
 
-    // ToDO atetnuation envelopes
+    float layer_attenuation = 0.0f;
+    for (auto other_layer : layers) {
+      if (layer == other_layer) {
+        continue;
+      }
+
+      for (auto target_layer : other_layer->target_layers) {
+        if (target_layer == layer) {
+          layer_attenuation += other_layer->readAttenuation(phase);
+          break;
+        }
+      }
+    }
+
+    // TODO attenuation envelopes
+    layer_attenuation = clamp(layer_attenuation, 0.0f, 1.0f);
+    layer_out *= (1 - layer_attenuation);
     out += layer_out;
   }
 

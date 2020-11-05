@@ -48,7 +48,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       struct Layer {
         vector<float> buffer;
         vector<float> attenuation_envelope;
-        vector<int> target_layers;
+        vector<Engine::Scene::Layer*> target_layers;
 
         // depends on target layers and type
         Mode type;
@@ -59,6 +59,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
         unsigned int end_offset = 0;
 
         float read(unsigned int phase);
+        float readAttenuation(unsigned int phase);
       };
 
       vector<Engine::Scene::Layer*> layers;

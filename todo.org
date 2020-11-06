@@ -37,15 +37,15 @@ CLOSED: [2020-11-04 Wed 16:00]
 CLOSED: [2020-11-04 Wed 19:16]
 lcm of all layer lengths 
 * TODO Frame - 
-* TODO Frame-MUX module
-ssame as frame, but has additional ~FRAME~ parameter to select active frame
-** TODO frame knob
-change which frame is active, is a frame multiplexer with this.
 * TODO Frame COPY / Delete button 
 copy / delete selected layers into a spot
 press once to copy selected into holding place
 hold to clear buffer, or to delete selected if no buffer 
 
+* TODO Frame-MUX module
+same as frame, but has additional ~FRAME~ parameter to select active frame
+** TODO frame knob
+change which frame is active, is a frame multiplexer with this.
 * TODO Timeline -
 #+ATTR_ORG: :width 500
 [[./img/todo_2020_11_04__20:41:37.png]]
@@ -57,9 +57,6 @@ hold to clear buffer, or to delete selected if no buffer
     - scene transitions,
     - new frame layers being introduced
     
-
-- frame, scene, layer, and delta knob
-also serves as multi plexer for frames
 ** TODO progress knob
 - when right, timeline is extended when scene end is reached by looping scene again
 - when default, progresses normally

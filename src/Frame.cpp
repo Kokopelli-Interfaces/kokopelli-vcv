@@ -280,6 +280,10 @@ float Frame::Engine::read() {
 
 
 void Frame::processChannel(const ProcessArgs& args, int c) {
+  if (!baseConnected()) {
+    return;
+  }
+
   Engine &e = *_engines[c];
 
   if (!e.recording && e.deltaEngaged()) {
@@ -290,11 +294,7 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
     e.endRecording();
   }
 
-  float next_in = 0.0f;
-  if (baseConnected()) {
-    next_in = _fromSignal->signal[c];
-  }
-
+  float next_in = _fromSignal->signal[c];
   e.step(next_in);
   float next_out = e.read();
   _toSignal->signal[c] = next_out;

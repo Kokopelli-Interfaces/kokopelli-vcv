@@ -290,8 +290,11 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
     e.endRecording();
   }
 
-  // TODO
-  float next_in = _fromSignal->signal[c];
+  float next_in = 0.0f;
+  if (baseConnected()) {
+    next_in = _fromSignal->signal[c];
+  }
+
   e.step(next_in);
   float next_out = e.read();
   _toSignal->signal[c] = next_out;

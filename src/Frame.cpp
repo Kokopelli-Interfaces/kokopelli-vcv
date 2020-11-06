@@ -66,7 +66,8 @@ void Frame::Engine::startRecording() {
     if (selected_layer && !selected_layer->fully_attenuated) {
       new_layer->target_layers.push_back(selected_layer);
     } else {
-      printf("No selected layers! error!");
+      // TODO is it okay?
+      // printf("No selected layers! error!");
     }
   }
 
@@ -111,8 +112,8 @@ void Frame::Engine::endRecording() {
   printf("-- div length: %d\n", division_length);
 
   recorded_layer->end_division = round(recording_dest_scene->phase / division_length);
-  if (recorded_layer->end_division == 0) {
-    recorded_layer->end_division = 1;
+  if (recorded_layer->end_division == recorded_layer->start_division) {
+    recorded_layer->end_division++;
   }
 
   recorded_layer->end_division_offset = recording_dest_scene->phase - recorded_layer->end_division * division_length;
@@ -128,6 +129,11 @@ void Frame::Engine::endRecording() {
     }
     int lc_multiple = accumulate(lengths.begin(), lengths.end(), 1, lcm);
     recording_dest_scene->scene_length = lc_multiple;
+
+    // the scene phase will reset, so we do not want a mini skip to occur
+    if (recorded_layer->end_division_offset > 0) {
+      recording_dest_scene->phase = 0 + recorded_layer->end_division_offset;
+    }
   }
 
   printf("-- length: %d #layers: %ld scene_size:%d\n", recording_length,

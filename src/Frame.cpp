@@ -110,7 +110,7 @@ void Frame::Engine::endRecording() {
   unsigned int division_length = recording_dest_scene->getDivisionLength();
   printf("-- div length: %d\n", division_length);
 
-  recorded_layer->end_division = round(recorded_layer->buffer.size() / division_length);
+  recorded_layer->end_division = round(recording_dest_scene->phase / division_length);
   if (recorded_layer->end_division == 0) {
     recorded_layer->end_division = 1;
   }
@@ -198,11 +198,14 @@ void Frame::Engine::step(float in) {
  float Frame::Engine::Scene::Layer::read(unsigned int phase, unsigned int division_length) {
   float out = 0.0f;
   unsigned int layer_length = (end_division - start_division) * division_length;
+
   if (buffer.size() > 0) {
     // TODO smooth edges so no clicks
+    // FIXME how to handle offset?
     unsigned int layer_phase = phase % layer_length;
+
     if (start_division_offset <= layer_phase && layer_phase <= layer_length + end_division_offset) {
-      unsigned int layer_sample_i = phase - start_division_offset;
+      unsigned int layer_sample_i = layer_phase - start_division_offset;
       out = buffer[layer_sample_i];
     }
   }
@@ -233,6 +236,7 @@ float Frame::Engine::Scene::read() {
 
     float layer_out = layer->read(phase, getDivisionLength());
 
+    // FIXME
     float layer_attenuation = 0.0f;
     for (auto other_layer : layers) {
       if (layer == other_layer) {
@@ -297,7 +301,7 @@ void Frame::updateLights(const ProcessArgs &args) {
   Engine &e = *_engines[0];
   float position = 0.0f;
   if (e.active_scene->scene_length > 0) {
-    position = (float)(e.active_scene->phase) / (float)(e.active_scene->scene_length);
+    position = (float)(e.active_scene->phase) / (float)(e.active_scene->scene_length * e.active_scene->getDivisionLength());
   }
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(position, args.sampleTime * lightDivider.getDivision());

@@ -48,6 +48,10 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       struct Layer {
         vector<float> buffer;
         vector<float> attenuation_envelope;
+
+        bool fully_attenuated = false;
+        bool attenuation_flag = false;
+
         vector<Engine::Scene::Layer*> target_layers;
 
         // depends on target layers and type
@@ -57,9 +61,9 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
         // actually just start off with extend mode same as add mode
         unsigned int start_division = 0;
         unsigned int start_division_offset = 0;
-
         unsigned int end_division = 0;
         unsigned int end_division_offset = 0;
+        unsigned int length = 0;
 
         float read(unsigned int phase, unsigned int division_length);
         float readAttenuation(unsigned int phase);
@@ -69,6 +73,9 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       Engine::Scene::Layer *current_layer = NULL;
       vector<Engine::Scene::Layer*> selected_layers;
 
+      // TODO 
+      vector<float> scene_buffer;
+
       unsigned int scene_length = 0;
 
       // position from start of first layer to end of longest layer
@@ -77,7 +84,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
       unsigned int getDivisionLength();
       void step(float in, float attenuation_power);
-      float read();
+      float read(float in, float attenuation_power);
     };
 
     float scene_position = 0.0f;

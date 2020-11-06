@@ -63,7 +63,7 @@ void Frame::Engine::startRecording() {
   new_layer->start_division_offset = recording_dest_scene->phase - new_layer->start_division * division_length;
 
   for (auto selected_layer : recording_dest_scene->selected_layers) {
-    if (selected_layer) {
+    if (selected_layer && !selected_layer->fully_attenuated) {
       new_layer->target_layers.push_back(selected_layer);
     } else {
       printf("No selected layers! error!");
@@ -118,6 +118,9 @@ void Frame::Engine::endRecording() {
   recorded_layer->end_division_offset = recording_dest_scene->phase - recorded_layer->end_division * division_length;
 
   unsigned int recording_length = recorded_layer->end_division - recorded_layer->start_division;
+
+  recorded_layer->length = recording_length * division_length;
+
   if (recording_length > recording_dest_scene->scene_length) {
     vector<int> lengths;
     for (auto layer : recording_dest_scene->layers) {
@@ -225,27 +228,29 @@ float Frame::Engine::Scene::Layer::readAttenuation(unsigned int phase) {
   return out;
 }
 
-float Frame::Engine::Scene::read() {
+float Frame::Engine::Scene::read(float delta, float recordThreshold) {
   float out = 0.0f;
-  for (auto layer : layers) {
+  for (unsigned int i=0; i < layers.size(); i++) {
     // don't output what we are writing to avoid FB in case of self-routing
-    bool layer_is_recording = (mode != Mode::READ && layer == current_layer);
-    if (layer_is_recording) {
+    bool layer_is_recording = (mode != Mode::READ && layers[i] == current_layer);
+    if (layer_is_recording || layers[i]->fully_attenuated) {
       continue;
     }
 
-    float layer_out = layer->read(phase, getDivisionLength());
+    float layer_out = layers[i]->read(phase, getDivisionLength());
 
     // FIXME
     float layer_attenuation = 0.0f;
-    for (auto other_layer : layers) {
-      if (layer == other_layer) {
-        continue;
-      }
+    for (unsigned int j=i+1; j < layers.size(); j++) {
+      for (auto target_layer : layers[j]->target_layers) {
+        if (target_layer == layers[i]) {
+          // FIXME hack to offset sample to attenuate live
+          if (mode != Mode::READ && layers[j] == current_layer && phase != 0) {
+            layer_attenuation += getAttenuationPower(delta, recordThreshold);
+          } else {
+            layer_attenuation += layers[j]->readAttenuation(phase);
+          }
 
-      for (auto target_layer : other_layer->target_layers) {
-        if (target_layer == layer) {
-          layer_attenuation += other_layer->readAttenuation(phase);
           break;
         }
       }
@@ -254,6 +259,18 @@ float Frame::Engine::Scene::read() {
     // TODO attenuation envelopes
     layer_attenuation = clamp(layer_attenuation, 0.0f, 1.0f);
     layer_out *= (1 - layer_attenuation);
+    if (layer_out > 0.00f) {
+      layers[i]->attenuation_flag = false;
+    }
+
+    if (phase == layers[i]->length - 1) {
+      if (layers[i]->attenuation_flag) {
+        layers[i]->fully_attenuated = true;
+      } else {
+        layers[i]->attenuation_flag = true;
+      }
+    }
+
     out += layer_out;
   }
 
@@ -268,11 +285,11 @@ float Frame::Engine::read() {
   float weight = scene_position - floor(scene_position);
 
   if (scenes[scene_1]) {
-    out += scenes[scene_1]->read() * (1 - weight);
+    out += scenes[scene_1]->read(delta, recordThreshold) * (1 - weight);
   }
 
   if (scenes[scene_2]) {
-    out += scenes[scene_2]->read() * (weight);
+    out += scenes[scene_2]->read(delta, recordThreshold) * (weight);
   }
 
   return out;

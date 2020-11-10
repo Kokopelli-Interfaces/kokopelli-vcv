@@ -20,13 +20,20 @@ float Frame::Engine::Scene::Layer::read(unsigned int phase,
   return out;
 }
 
-float Frame::Engine::Scene::Layer::readAttenuation(unsigned int phase) {
+float Frame::Engine::Scene::Layer::readAttenuation(int phase, int division_length) {
   float out = 0.0f;
+  unsigned int layer_length = (end_division - start_division) * division_length;
+
   if (attenuation_envelope.size() > 0) {
-    // TODO use start offsets and end offets
     // TODO smooth edges so no clicks
-    unsigned int layer_sample_i = phase % attenuation_envelope.size();
-    out = attenuation_envelope[layer_sample_i];
+    // FIXME how to handle offset?
+    unsigned int layer_phase = phase % layer_length;
+
+    if (start_division_offset <= layer_phase &&
+        layer_phase <= layer_length + end_division_offset) {
+      unsigned int layer_sample_i = layer_phase - start_division_offset;
+      out = attenuation_envelope[layer_sample_i];
+    }
   }
 
   return out;

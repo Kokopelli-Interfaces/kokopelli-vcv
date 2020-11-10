@@ -56,6 +56,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
         // depends on target layers and type
         Mode type;
+
         // TODO start offset for Extend mode is relative to division or target layers?
         // start & end offset for add mode are relative to max length in target layers
         // actually just start off with extend mode same as add mode
@@ -66,7 +67,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
         unsigned int length = 0;
 
         float read(unsigned int phase, unsigned int division_length);
-        float readAttenuation(unsigned int phase);
+        float readAttenuation(unsigned int phase, unsigned int division_length);
       };
 
       vector<Engine::Scene::Layer*> layers;

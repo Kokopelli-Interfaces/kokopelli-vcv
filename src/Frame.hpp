@@ -84,7 +84,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
       unsigned int getDivisionLength();
       void step(float in, float attenuation_power);
-      float read(float in, float attenuation_power);
+      float read(float attenuation_power);
     };
 
     float scene_position = 0.0f;

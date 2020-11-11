@@ -1,21 +1,5 @@
 #include "Frame.hpp"
 
-int gcd(int a, int b) {
-  for (;;) {
-    if (a == 0)
-      return b;
-    b %= a;
-    if (b == 0)
-      return a;
-    a %= b;
-  }
-}
-
-int lcm(int a, int b) {
-  int temp = gcd(a, b);
-  return temp ? (a / temp * b) : 0;
-}
-
 bool Frame::Engine::Scene::isEmpty() {
   return (layers.size() == 0);
 }
@@ -143,34 +127,11 @@ void Frame::Engine::Scene::step(float in, float attenuation_power, float sample_
   }
 }
 
-// void Frame::Engine::Scene::updateSceneLength() {
-//     vector<int> lengths;
-//     for (auto layer : layers) {
-//       lengths.push_back(layer->end_division - layer->start_division);
-//     }
-
-//     int lc_multiple = accumulate(lengths.begin(), lengths.end(), 1, lcm);
-//     n_scene_divisions = lc_multiple;
-//     length = n_scene_divisions * getDivisionLength();
-// }
-
 void Frame::Engine::Scene::setMode(Mode new_mode) {
   Mode prev_mode = mode;
   mode = new_mode;
   if (prev_mode != Mode::READ && mode == Mode::READ) {
     current_layer->endRecording();
-
-    // if (prev_mode == Mode::EXTEND) {
-      // updateSceneLength();
-      // printf("New Scene N Divisiosn: %d\n", n_scene_divisions);
-      // printf("New Scene Length: %d\n", length);
-
-      // the scene phase may reset, so we do not want a mini skip back to occur
-      // in the case the new layers length is rounded down
-      // if (current_layer->end_division_offset > 0 && current_layer->end_division * current_layer->division_length >= n_scene_divisions) {
-      //   phase = 0 + current_layer->end_division_offset;
-      // }
-    }
   }
 
   if (prev_mode == Mode::READ && mode != Mode::READ) {

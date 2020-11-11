@@ -71,7 +71,6 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       vector<Engine::Scene::Layer*> selected_layers;
 
       Mode mode = Mode::READ;
-      // unsigned int length = 0;
 
       unsigned division = 0;
       int samples_per_division = 0;

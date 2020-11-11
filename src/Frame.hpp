@@ -43,12 +43,11 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   struct Engine {
     struct Scene {
       struct Layer {
-        bool recording = false;
-
-        int start_division = 0;
+        unsigned int start_division = 0;
         int divisions = 0;
+        int length = 0;
         int samples_per_division = 0;
-        int undefined_phase_length = false;
+        int define_division_length = false;
 
         vector<vector<float>> division_buffers;
         vector<vector<float>> division_attenuation_sends;
@@ -58,12 +57,15 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
         bool fully_attenuated = false;
         bool attenuation_flag = false;
 
-        float read(unsigned int phase);
         void step(unsigned int phase, float in, float attenuation_power);
+        void write(unsigned int division, float phase, float sample, float send_attenuation);
         void startRecording(vector<Engine::Scene::Layer *> selected_layers, unsigned int phase, unsigned int division_length);
+
+        void addDivision();
         void endRecording(unsigned int phase, unsigned int division_length);
-        void attenuate(int phase, float attenuation);
-        float readAttenuation(unsigned int phase);
+        float readAttenuation(unsigned int current_division, float phase);
+        float readSample(unsigned int current_division, float phase);
+        float readGeneric(unsigned int current_division, float phase, bool read_attenuation);
       };
 
       vector<Engine::Scene::Layer*> layers;
@@ -71,17 +73,21 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       vector<Engine::Scene::Layer*> selected_layers;
 
       Mode mode = Mode::READ;
-
-      unsigned division = 0;
       int samples_per_division = 0;
 
+      unsigned division = 0;
+
       LowFrequencyOscillator phase_oscillator;
+      bool ext_phase = false;
       bool ext_phase_flipped = false;
       float last_ext_phase = 0.0f;
 
       void addLayer();
-      void setMode(Mode new_mode);
+      void setMode(Mode new_mode, float sample_time);
+      void setExtPhase(float ext_phase);
       Mode getMode();
+      float getPhase();
+      bool stepPhase(float sample_time);
       bool isEmpty();
       unsigned int getDivisionLength();
       void step(float in, float attenuation_power, float sample_time);
@@ -97,9 +103,9 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     Scene* recording_dest_scene = NULL;
     Scene* scenes[numScenes]{};
 
-    void startRecording();
-    void endRecording();
-    void step(float in);
+    void startRecording(float sample_time);
+    void endRecording(float sample_time);
+    void step(float in, float sample_time);
     float read();
     bool deltaEngaged();
   };

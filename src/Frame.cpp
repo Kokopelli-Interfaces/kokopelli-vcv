@@ -37,20 +37,20 @@ bool Frame::Engine::deltaEngaged() {
   return (delta > 0.50f + recordThreshold || delta < 0.50f - recordThreshold);
 }
 
-void Frame::Engine::startRecording() {
+void Frame::Engine::startRecording(float sample_time) {
   recording = true;
   recording_dest_scene = active_scene;
 
   if (delta > 0.50f + recordThreshold || recording_dest_scene->isEmpty()) {
-    recording_dest_scene->setMode(Mode::EXTEND);
+    recording_dest_scene->setMode(Mode::EXTEND, sample_time);
   } else {
-    recording_dest_scene->setMode(Mode::ADD);
+    recording_dest_scene->setMode(Mode::ADD, sample_time);
   }
 }
 
-void Frame::Engine::endRecording() {
+void Frame::Engine::endRecording(float sample_time) {
   recording = false;
-  recording_dest_scene->setMode(Mode::READ);
+  recording_dest_scene->setMode(Mode::READ, sample_time);
 }
 
 // TODO customizable respoonse?
@@ -127,11 +127,11 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
 
   if (!e.recording && e.deltaEngaged()) {
-    e.startRecording();
+    e.startRecording(_sampleTime);
   }
 
   if (e.recording && !e.deltaEngaged()) {
-    e.endRecording();
+    e.endRecording(_sampleTime);
   }
 
   float in = _fromSignal->signal[c];
@@ -143,9 +143,9 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   Engine &e = *_engines[0];
-  float position = e.active_scene->phase;
+  float phase = e.active_scene->getPhase();
 
-  lights[PHASE_LIGHT + 1].setSmoothBrightness(position, args.sampleTime * lightDivider.getDivision());
+  lights[PHASE_LIGHT + 1].setSmoothBrightness(phase, _sampleTime * lightDivider.getDivision());
 
   float attenuation_power = getAttenuationPower(e.delta, recordThreshold);
 

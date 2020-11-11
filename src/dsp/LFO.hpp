@@ -12,16 +12,6 @@ struct LowFrequencyOscillator {
   float phase = 0.0f;
   float lastPhase = 0.0f;
   float freq = 1.0f;
-  float freqCorrection = 0.0f;
-
-  int PPQN = 1;
-
-  rack::dsp::SchmittTrigger clockTrigger;
-
-  struct NormalizationResult {
-    float value;
-    bool normalized;
-  };
 
   LowFrequencyOscillator() {}
 
@@ -31,11 +21,10 @@ struct LowFrequencyOscillator {
 
   void reset(float value) {
     this->phase = std::fmod(value, 1.0f);
-    this->freqCorrection = 0.0f;
   }
 
   bool step(float dt) {
-    float deltaPhase = (freq + this->freqCorrection) * dt;
+    float deltaPhase = freq * dt;
     float summ = phase + deltaPhase;
     this->lastPhase = this->phase;
     this->phase = rack::math::eucMod(summ, 1.0f);

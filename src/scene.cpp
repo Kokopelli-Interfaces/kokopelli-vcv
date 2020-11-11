@@ -68,11 +68,19 @@ void Frame::Engine::Scene::Layer::write(unsigned int current_division, float pha
     }
 
     // TODO what if phase == 1?
-    int division_sample_i = floor(samples_per_division * phase);
+    float division_position = samples_per_division * phase;
+    int sample_1 = floor(division_position);
+    int sample_2 = ceil(division_position);
+    if (sample_2 == samples_per_division) {
+      sample_2 = 0;
+    }
 
-    division_buffers[division][division_sample_i] = sample;
-    // TODO divider
-    division_attenuation_sends[division][division_sample_i] = send_attenuation;
+    float weight = division_position - sample_1;
+    division_buffers[division][sample_1] += sample * (1 - weight);
+    division_buffers[division][sample_2] += sample * weight;
+
+    division_attenuation_sends[division][sample_1] += send_attenuation * (1 - weight);
+    division_attenuation_sends[division][sample_2] += send_attenuation * weight;
   }
 }
 
@@ -88,7 +96,11 @@ float Frame::Engine::Scene::Layer::readGeneric(unsigned int current_division, fl
     if (read_attenuation) {
       return division_attenuation_sends[layer_division][division_sample_i];
     } else {
-      return division_buffers[layer_division][division_sample_i];
+      float sample = division_buffers[layer_division][division_sample_i];
+      if (divisions > length && layer_division == 0) {
+        sample += division_buffers[divisions-1][division_sample_i];
+      }
+      return sample;
     }
   }
 
@@ -207,6 +219,12 @@ void Frame::Engine::Scene::setMode(Mode new_mode, float sample_time) {
       current_layer->samples_per_division = samples_per_division;
       phase_oscillator.setPitch(1 / (samples_per_division * sample_time));
       // phase_oscillator.reset(0.0f);
+    }
+
+    if (prev_mode == Mode::EXTEND) {
+      if (getPhase() <= 0.50f && current_layer->length > 1) {
+        current_layer->length--;
+      }
     }
   }
 

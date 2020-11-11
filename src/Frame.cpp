@@ -25,9 +25,9 @@ void Frame::modulateChannel(int c) {
   e.scene_position *= numScenes;
 
   int active_scene_i = round(e.scene_position);
-  Frame::Engine::Scene *active_scene = e.scenes[active_scene_i];
+  Scene *active_scene = e.scenes[active_scene_i];
   if (!active_scene) {
-    active_scene = new Engine::Scene();
+    active_scene = new Scene();
     e.scenes[active_scene_i] = active_scene;
   }
   e.active_scene = active_scene;
@@ -42,15 +42,15 @@ void Frame::Engine::startRecording(float sample_time) {
   recording_dest_scene = active_scene;
 
   if (delta > 0.50f + recordThreshold || recording_dest_scene->isEmpty()) {
-    recording_dest_scene->setMode(Mode::EXTEND, sample_time);
+    recording_dest_scene->setMode(Scene::Mode::EXTEND, sample_time);
   } else {
-    recording_dest_scene->setMode(Mode::ADD, sample_time);
+    recording_dest_scene->setMode(Scene::Mode::ADD, sample_time);
   }
 }
 
 void Frame::Engine::endRecording(float sample_time) {
   recording = false;
-  recording_dest_scene->setMode(Mode::READ, sample_time);
+  recording_dest_scene->setMode(Scene::Mode::READ, sample_time);
 }
 
 // TODO customizable respoonse?
@@ -152,16 +152,16 @@ void Frame::updateLights(const ProcessArgs &args) {
   if (!e.recording) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->mode == Mode::EXTEND) {
+  } else if (e.active_scene->mode == Scene::Mode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * lightDivider.getDivision());
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->mode == Mode::ADD) {
+  } else if (e.active_scene->mode == Scene::Mode::ADD) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].setSmoothBrightness(
         1.0f - attenuation_power,
         _sampleTime * lightDivider.getDivision());
-  } else if (e.active_scene->mode == Mode::READ) {
+  } else if (e.active_scene->mode == Scene::Mode::READ) {
     lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;
   }

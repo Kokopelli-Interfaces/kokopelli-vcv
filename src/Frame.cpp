@@ -1,5 +1,9 @@
 #include "Frame.hpp"
 
+void Frame::sampleRateChange() {
+  _sampleTime = APP->engine->getSampleTime();
+}
+
 void Frame::processAlways(const ProcessArgs &args) {
   if (baseConnected()) {
     _fromSignal = fromBase();
@@ -70,7 +74,7 @@ float getAttenuationPower(float delta, float recording_threshold) {
   return attenuation_power;
 }
 
-void Frame::Engine::step(float in) {
+void Frame::Engine::step(float in, float sample_time) {
   // printf("ENGINE: %f\n", in);
   // TODO weighted mix
   // TODO global pha for all scenes, or not, have config option
@@ -81,7 +85,7 @@ void Frame::Engine::step(float in) {
 
   for (auto scene : scenes) {
     if (scene) {
-      scene->step(in, attenuation_power);
+      scene->step(in, attenuation_power, sample_time);
     }
   }
 }
@@ -131,9 +135,7 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
   }
 
   float in = _fromSignal->signal[c];
-  // printf("SIG:::: %f\n", in);
-
-  e.step(in);
+  e.step(in, _sampleTime);
 
   float out = e.read();
   _toSignal->signal[c] = out;
@@ -141,10 +143,7 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   Engine &e = *_engines[0];
-  float position = 0.0f;
-  if (e.active_scene->n_scene_divisions > 0) {
-    position = (float)(e.active_scene->phase) / (float)(e.active_scene->n_scene_divisions * e.active_scene->getDivisionLength());
-  }
+  float position = e.active_scene->phase;
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(position, args.sampleTime * lightDivider.getDivision());
 
@@ -155,13 +154,13 @@ void Frame::updateLights(const ProcessArgs &args) {
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
   } else if (e.active_scene->mode == Mode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
-        1.0f - attenuation_power, args.sampleTime * lightDivider.getDivision());
+        1.0f - attenuation_power, _sampleTime * lightDivider.getDivision());
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
   } else if (e.active_scene->mode == Mode::ADD) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].setSmoothBrightness(
         1.0f - attenuation_power,
-        args.sampleTime * lightDivider.getDivision());
+        _sampleTime * lightDivider.getDivision());
   } else if (e.active_scene->mode == Mode::READ) {
     lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;

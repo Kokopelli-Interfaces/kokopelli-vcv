@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Frame_IO.hpp"
+#include "dsp/LFO.hpp"
 
 using namespace std;
 
@@ -32,41 +33,30 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 		NUM_LIGHTS
 	};
 
+  enum Mode { ADD, EXTEND, READ };
 
-	static constexpr int numScenes = 16;
+  static constexpr int numScenes = 16;
 
   SignalExpanderMessage *_toSignal = NULL;
   SignalExpanderMessage *_fromSignal = NULL;
 
-  enum Mode { ADD, EXTEND, READ };
-
   struct Engine {
     struct Scene {
       struct Layer {
-        vector<float> rendered_buffer;
-        vector<float> buffer;
+        bool recording = false;
 
-        vector<float> attenuation_envelope;
+        int start_division = 0;
+        int divisions = 0;
+        int samples_per_division = 0;
+        int undefined_phase_length = false;
+
+        vector<vector<float>> division_buffers;
+        vector<vector<float>> division_attenuation_sends;
+
+        vector<Engine::Scene::Layer*> target_layers;
+
         bool fully_attenuated = false;
         bool attenuation_flag = false;
-
-        vector<Engine::Scene::Layer *> target_layers;
-        // TODO sparse encoding structure
-        vector<float> target_attenuation_envelope;
-
-        // TODO start offset for Extend mode is relative to division or target layers?
-        // start & end offset for add mode are relative to max length in target layers
-        // actually just start off with extend mode same as add mode
-        unsigned int start_division = 0;
-        unsigned int start_division_offset = 0;
-        unsigned int end_division = 0;
-        unsigned int end_division_offset = 0;
-        unsigned int length = 0;
-        unsigned int n_divisions = 0;
-
-        unsigned int division_length = 0;
-
-        bool recording = false;
 
         float read(unsigned int phase);
         void step(unsigned int phase, float in, float attenuation_power);
@@ -81,18 +71,21 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
       vector<Engine::Scene::Layer*> selected_layers;
 
       Mode mode = Mode::READ;
-      unsigned int n_scene_divisions = 0;
-      unsigned int length = 0;
+      // unsigned int length = 0;
 
-      // position from start of first layer to end of longest layer
-      unsigned int phase = 0;
+      unsigned division = 0;
+      int samples_per_division = 0;
+
+      LowFrequencyOscillator phase_oscillator;
+      bool ext_phase_flipped = false;
+      float last_ext_phase = 0.0f;
 
       void addLayer();
       void setMode(Mode new_mode);
       Mode getMode();
       bool isEmpty();
       unsigned int getDivisionLength();
-      void step(float in, float attenuation_power);
+      void step(float in, float attenuation_power, float sample_time);
       void updateSceneLength();
       float read();
     };
@@ -113,6 +106,8 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   };
 
   static constexpr float recordThreshold = 0.05f;
+
+  float _sampleTime = 1.0f;
   Engine *_engines[maxChannels]{};
   dsp::ClockDivider lightDivider;
 
@@ -131,6 +126,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     lightDivider.setDivision(16);
  }
 
+  void sampleRateChange() override;
   int channels() override;
   void modulateChannel(int c) override;
   void addChannel(int c) override;

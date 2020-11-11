@@ -16,64 +16,18 @@ int lcm(int a, int b) {
   return temp ? (a / temp * b) : 0;
 }
 
-// TODO, how to define division length?
-// decided not to use clk port - maybe manual entry?
-// for now, size of first layer.
-unsigned int Frame::Engine::Scene::getDivisionLength() {
-  if (layers.size() > 0 && layers[0]->buffer.size() > 0) {
-    return layers[0]->buffer.size();
-  }
-
-  return 1;
-}
-
 bool Frame::Engine::Scene::isEmpty() {
   return (layers.size() == 0);
 }
 
-void Frame::Engine::Scene::Layer::attenuate(int phase, float attenuation) {
-  if (fully_attenuated) {
-    return;
-  }
-
-  unsigned int layer_phase = phase % length;
-  bool in_recorded_area = (start_division_offset <= layer_phase &&
-                           layer_phase <= length + end_division_offset);
-  if (in_recorded_area) {
-    unsigned int layer_sample_i = layer_phase - start_division_offset;
-    float current_attenuation = attenuation_envelope[layer_sample_i];
-    attenuation_envelope[layer_sample_i] =
-        clamp(current_attenuation + attenuation, 0.0f, 1.0f);
-  }
-}
-
-void Frame::Engine::Scene::Layer::endRecording(unsigned int phase, unsigned int division_length) {
+void Frame::Engine::Scene::Layer::endRecording() {
   recording = false;
-
-  end_division = round(phase / division_length);
-  if (end_division == start_division) {
-    end_division++;
-  }
-
-  if (end_division <= start_division) {
-    printf("FRAME:: ERROR, end_division %d > start_division %d", end_division, start_division);
-  }
-
-  end_division_offset = phase - end_division * division_length;
-  n_divisions = end_division - start_division;
-  length = n_divisions * division_length;
-
   printf("END recording\n");
-  printf("-- start_div: %d, start_division_offset: %d\n", start_division, start_division_offset);
-  printf("-- end_div: %d, end_division_offset: %d\n", end_division, end_division_offset);
-  printf("-- div length: %d\n", division_length);
-  printf("-- phase end: %d\n", phase);
-  printf("-- buffer length: %ld\n", buffer.size());
+  printf("-- start div: end division: %d\n", start_division, start_division + divisions);
 }
 
-void Frame::Engine::Scene::Layer::startRecording(vector<Engine::Scene::Layer *> selected_layers, unsigned int phase, unsigned int current_division_length) {
+void Frame::Engine::Scene::Layer::startRecording(vector<Engine::Scene::Layer *> selected_layers, unsigned int current_division) {
   recording = true;
-  division_length = current_division_length;
 
   for (auto selected_layer : selected_layers) {
     if (selected_layer && !selected_layer->fully_attenuated) {
@@ -81,102 +35,135 @@ void Frame::Engine::Scene::Layer::startRecording(vector<Engine::Scene::Layer *> 
     }
   }
 
-  start_division = floor(phase / division_length);
-  start_division_offset = phase - start_division * division_length;
+  start_division = current_division;
 
   printf("START recording\n");
-  printf("-- phase start: %d\n", phase);
-  printf("-- start div: %d, start div offset: %d\n", start_division, start_division_offset);
-  printf("-- div length: %d\n", division_length);
+  printf("-- start div: %d", start_division);
 }
 
 void Frame::Engine::Scene::addLayer() {
   Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
 
   printf("NEW LAYER ~~~~ Mode:: %d\n", mode);
+  if (mode == Mode::READ) {
+    printf("FRAME ERROR: Add layer was called but scene is in READ mode.");
+    return;
+  }
 
-  if (mode != Mode::READ) {
-    // TODO
-    selected_layers = layers;
-    new_layer->startRecording(selected_layers, phase, getDivisionLength());
+  // TODO
+  selected_layers = layers;
+  new_layer->startRecording(selected_layers, division);
 
-    if (mode == Mode::ADD && current_layer) {
-      // TODO better way? instead of reaching in?
-      new_layer->n_divisions = current_layer->n_divisions;
-      new_layer->length = current_layer->length;
-    } else if (mode == Mode::EXTEND) {
-      // so to extend the scene instead of scene phase looping
-      n_scene_divisions = -1;
-    }
+  if (mode == Mode::ADD && current_layer) {
+    // TODO better way? instead of reaching in?
+    new_layer->divisions = current_layer->divisions;
+  } else if (mode == Mode::EXTEND) {
+    // TODO ???
+    // new_layer->divisions = -1;
   }
 
   current_layer = new_layer;
   layers.push_back(new_layer);
 }
 
-void Frame::Engine::Scene::Layer::step(unsigned int phase, float in,
-                                       float attenuation_power) {
-  if (recording) {
-    // TODO only if input present
+void Frame::Engine::Scene::Layer::addDivision(int samples_per_division) {
+  vector<float> division_buffer(samples_per_division, 0.0f);
+  division_buffers.push_back(division_buffer);
 
-    buffer.push_back(in);
-    // TODO attenuation divider, don't need to save every point
-    target_attenuation_envelope.push_back(attenuation_power);
+  vector<float> division_attenuation_send(samples_per_division, 0.0f);
+  division_attenuation_sends.push_back(division_attenuation_send);
 
-    // FIXME
-    // for (auto target_layer : target_layers) {
-    //   target_layer->attenuate(phase, attenuation_power);
-    // }
-  }
-
-  // TODO
-  // target_layer->attenuation = new_attenuation;
-  // if (new_attenuation > 1.0f) {
-  //   target_fully_attenuated = false;
-  // }
-  // target_layer->fully_attenuated = target_fully_attenuated;
+  divisions++;
 }
 
-void Frame::Engine::Scene::step(float in_p, float attenuation_power) {
-  phase++;
-  for (auto layer : layers) {
-    layer->step(phase, in_p, attenuation_power);
-  }
-
-  if (mode == Mode::ADD && phase % current_layer->length == 0) {
-    current_layer->endRecording(phase, getDivisionLength());
-    if (phase >= length) {
-      phase = 0;
-    }
-    addLayer();
-  }
-
-  if (mode == Mode::READ && phase >= length) {
-    phase = 0;
-  }
-}
-
-void Frame::Engine::Scene::updateSceneLength() {
-    vector<int> lengths;
-    for (auto layer : layers) {
-      lengths.push_back(layer->end_division - layer->start_division);
+void Frame::Engine::Scene::Layer::write(unsigned int division, float phase, float sample, float send_attenuation, int samples_per_division) {
+  if (undefined_phase_length) {
+    if (divisions == 0) {
+      addDivision(0);
     }
 
-    int lc_multiple = accumulate(lengths.begin(), lengths.end(), 1, lcm);
-    n_scene_divisions = lc_multiple;
-    length = n_scene_divisions * getDivisionLength();
+    division_buffers[0].push_back(in);
+    division_attenuation_sends[0].push_back(attenuation);
+  } else {
+    int layer_division = division - start_division;
+    if (divisions == layer_division) {
+      addDivision(samples_per_division);
+    }
+
+    division_buffers[layer_division][division_sample_i] = in;
+    // TODO divider
+    division_attenuation_sends[layer_division][division_sample_i] = send_attenuation;
+  }
 }
+
+void Frame::Engine::Scene::setExtPhase(float ext_phase) {
+  float delta = ext_phase - last_ext_phase;
+  float abs_delta = fabsf(delta);
+  ext_phase_flipped = (abs_delta > 9.5f && abs_delta <= 10.0f);
+}
+
+bool Frame::Engine::Scene::stepPhase(float sample_time) {
+  if (ext_phase) {
+    if (ext_phase_flipped) {
+      ext_phase_flipped = false;
+      return true;
+    }
+
+    return false;
+  }
+
+  return phase_oscillator.step(sample_time);
+}
+
+float Frame::Engine::Scene::getPhase() {
+  if (ext_phase) {
+    return last_ext_phase;
+  }
+
+  return phase_oscillator->getPhase();
+}
+
+void Frame::Engine::Scene::step(float in, float attenuation_power, float sample_time) {
+  bool phase_flip = this->stepPhase();
+  float phase = this->getPhase();
+
+  if (phase_flip) {
+    division++;
+
+    int layer_end_division = current_layer->start_division + current_layer->divisions;
+    if (mode == Mode::ADD && layer_end_division == division) {
+      current_layer->endRecording();
+      this->addLayer();
+    }
+    // TODO if reached lcm, reset
+  }
+
+  if (current_layer->recording) {
+    current_layer->write(division, phase, in, attenuation_power, samples_per_division);
+  }
+}
+
+// void Frame::Engine::Scene::updateSceneLength() {
+//     vector<int> lengths;
+//     for (auto layer : layers) {
+//       lengths.push_back(layer->end_division - layer->start_division);
+//     }
+
+//     int lc_multiple = accumulate(lengths.begin(), lengths.end(), 1, lcm);
+//     n_scene_divisions = lc_multiple;
+//     length = n_scene_divisions * getDivisionLength();
+// }
 
 void Frame::Engine::Scene::setMode(Mode new_mode) {
   Mode prev_mode = mode;
   mode = new_mode;
   if (prev_mode != Mode::READ && mode == Mode::READ) {
-    current_layer->endRecording(phase, getDivisionLength());
+    current_layer->endRecording();
 
-    if (prev_mode == Mode::EXTEND) {
-      updateSceneLength();
-      printf("New Scene N Divisiosn: %d\n", n_scene_divisions);
-      printf("New Scene Length: %d\n", length);
+    // if (prev_mode == Mode::EXTEND) {
+      // updateSceneLength();
+      // printf("New Scene N Divisiosn: %d\n", n_scene_divisions);
+      // printf("New Scene Length: %d\n", length);
 
       // the scene phase may reset, so we do not want a mini skip back to occur
       // in the case the new layers length is rounded down
@@ -195,50 +182,36 @@ Frame::Mode Frame::Engine::Scene::getMode() {
   return mode;
 }
 
-float Frame::Engine::Scene::Layer::read(unsigned int phase) {
-  // don't output what we are writing to avoid FB in case of self-routing
-  if (recording || fully_attenuated || length == 0 || buffer.size() == 0) {
-    return 0.0f;
-  }
+float Frame::Engine::Scene::Layer::readGeneric(unsigned int current_division, float phase, bool read_attenuation) {
+  int layer_division = current_division % divisions;
 
-  // TODO smooth edges so no clicks
-  // FIXME how to handle offset?
-  unsigned int layer_phase = phase % length;
-
-  bool in_recorded_area = (start_division_offset <= layer_phase && layer_phase <= length + end_division_offset);
   if (in_recorded_area) {
-    int layer_sample_i = layer_phase - start_division_offset;
-    // FIXME
-    // return buffer[layer_sample_i] * (1 - attenuation_envelope[layer_sample_i]);
-    return buffer[layer_sample_i];
+    int division_sample_i = floor(samples_per_division * phase);
+    if (read_attenuation) {
+      return division_attenuation_sends[layer_division][division_sample_i];
+    } else {
+      return division_buffers[layer_division][division_sample_i];
+    }
   }
 
   return 0.0f;
 }
 
-float Frame::Engine::Scene::Layer::readAttenuation(unsigned int phase) {
+float Frame::Engine::Scene::Layer::readSample(unsigned int current_division, float phase) {
   // don't output what we are writing to avoid FB in case of self-routing
-  if (target_attenuation_envelope.size() ==  0) {
+  if (recording || fully_attenuated) {
     return 0.0f;
   }
 
-  if (recording) {
-    return target_attenuation_envelope.back();
+  return readGeneric(current_division, phase, false);
+}
+
+float Frame::Engine::Scene::Layer::readAttenuation(unsigned int current_division, float phase) {
+  if (division_attenuation_sends.size() == 0) {
+    return 0.0f;
   }
 
-
-  // TODO smooth edges so no clicks
-  // FIXME how to handle offset?
-  unsigned int layer_phase = phase % length;
-
-  bool in_recorded_area = (start_division_offset <= layer_phase &&
-                           layer_phase <= length + end_division_offset);
-  if (in_recorded_area) {
-    int layer_sample_i = layer_phase - start_division_offset;
-    return target_attenuation_envelope[layer_sample_i];
-  }
-
-  return 0.0f;
+  return readGeneric(current_division, phase, true);
 }
 
 float Frame::Engine::Scene::read() {
@@ -251,14 +224,14 @@ float Frame::Engine::Scene::read() {
       continue;
     }
 
-    float layer_out = layers[i]->read(phase);
+    float layer_out = layers[i]->readSample(division, phase);
 
     // FIXME have rendered envelope to save cpu
     float layer_attenuation = 0.0f;
     for (unsigned int j = i + 1; j < layers.size(); j++) {
       for (auto target_layer : layers[j]->target_layers) {
         if (target_layer == layers[i]) {
-          layer_attenuation += layers[j]->readAttenuation(phase);
+          layer_attenuation += layers[j]->readAttenuation(division, phase);
         }
       }
     }

@@ -54,17 +54,21 @@ void Frame::Engine::Scene::Layer::endRecording(unsigned int phase, unsigned int 
   if (end_division == start_division) {
     end_division++;
   }
+
+  if (end_division <= start_division) {
+    printf("FRAME:: ERROR, end_division %d > start_division %d", end_division, start_division);
+  }
+
   end_division_offset = phase - end_division * division_length;
   n_divisions = end_division - start_division;
   length = n_divisions * division_length;
 
   printf("END recording\n");
+  printf("-- start_div: %d, start_division_offset: %d\n", start_division, start_division_offset);
+  printf("-- end_div: %d, end_division_offset: %d\n", end_division, end_division_offset);
   printf("-- div length: %d\n", division_length);
   printf("-- phase end: %d\n", phase);
-  printf("-- end_div: %d, end_division_offset: %d\n", end_division, end_division_offset);
   printf("-- buffer length: %ld\n", buffer.size());
-  printf("-- recording n divisions: %d\n", n_divisions);
-  printf("-- rec length: %d\n", length);
 }
 
 void Frame::Engine::Scene::Layer::startRecording(vector<Engine::Scene::Layer *> selected_layers, unsigned int phase, unsigned int current_division_length) {
@@ -98,8 +102,6 @@ void Frame::Engine::Scene::addLayer() {
 
     if (mode == Mode::ADD && current_layer) {
       // TODO better way? instead of reaching in?
-      new_layer->start_division = current_layer->start_division;
-      new_layer->end_division = current_layer->end_division;
       new_layer->n_divisions = current_layer->n_divisions;
       new_layer->length = current_layer->length;
     } else if (mode == Mode::EXTEND) {

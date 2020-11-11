@@ -131,6 +131,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     lightDivider.setDivision(16);
  }
 
+  int channels() override;
   void modulateChannel(int c) override;
   void addChannel(int c) override;
   void removeChannel(int c) override;

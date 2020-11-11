@@ -96,12 +96,12 @@ struct ExpanderModule : BASE {
 	}
 
   // TODO instead, define based off frame
-	int channels() override final {
-		if (baseConnected()) {
-			return fromBase()->channels;
-		}
-		return 1;
-	}
+	// int channels() override final {
+	// 	if (baseConnected()) {
+	// 		return fromBase()->channels;
+	// 	}
+	// 	return 1;
+	// }
 
 	void process(const MyrisaModule::ProcessArgs& args) override {
 		BASE::process(args);

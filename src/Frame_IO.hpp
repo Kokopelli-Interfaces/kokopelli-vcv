@@ -10,6 +10,7 @@ namespace myrisa {
 
 struct SignalExpanderMessage : ExpanderMessage {
   float signal[MyrisaModule::maxChannels]{};
+  int n_channels;
 };
 
 // TODO

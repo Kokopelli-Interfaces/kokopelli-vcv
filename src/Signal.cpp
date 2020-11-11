@@ -37,6 +37,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
     auto fromFrame = fromExpander();
 
     toFrame->signal[c] = in;
+    toFrame->channels = _channels;
     out += fromFrame->signal[c];
   }
 

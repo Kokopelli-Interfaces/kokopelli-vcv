@@ -32,30 +32,27 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 		NUM_LIGHTS
 	};
 
-  enum Mode {
-    ADD,
-    EXTEND,
-    READ
-  };
 
 	static constexpr int numScenes = 16;
 
   SignalExpanderMessage *_toSignal = NULL;
   SignalExpanderMessage *_fromSignal = NULL;
 
+  enum Mode { ADD, EXTEND, READ };
+
   struct Engine {
     struct Scene {
       struct Layer {
+        vector<float> rendered_buffer;
         vector<float> buffer;
-        vector<float> attenuation_envelope;
 
+        vector<float> attenuation_envelope;
         bool fully_attenuated = false;
         bool attenuation_flag = false;
 
-        vector<Engine::Scene::Layer*> target_layers;
-
-        // depends on target layers and type
-        Mode type;
+        vector<Engine::Scene::Layer *> target_layers;
+        // TODO sparse encoding structure
+        vector<float> target_attenuation_envelope;
 
         // TODO start offset for Extend mode is relative to division or target layers?
         // start & end offset for add mode are relative to max length in target layers
@@ -65,27 +62,39 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
         unsigned int end_division = 0;
         unsigned int end_division_offset = 0;
         unsigned int length = 0;
+        unsigned int n_divisions = 0;
 
-        float read(unsigned int phase, unsigned int division_length);
-        float readAttenuation(unsigned int phase, unsigned int division_length);
+        unsigned int division_length = 0;
+
+        bool recording = false;
+
+        float read(unsigned int phase);
+        void step(unsigned int phase, float in, float attenuation_power);
+        void startRecording(vector<Engine::Scene::Layer *> selected_layers, unsigned int phase, unsigned int division_length);
+        void endRecording(unsigned int phase, unsigned int division_length);
+        void attenuate(int phase, float attenuation);
+        float readAttenuation(unsigned int phase);
       };
 
       vector<Engine::Scene::Layer*> layers;
       Engine::Scene::Layer *current_layer = NULL;
       vector<Engine::Scene::Layer*> selected_layers;
 
-      // TODO 
-      vector<float> scene_buffer;
-
-      unsigned int scene_length = 0;
+      Mode mode = Mode::READ;
+      unsigned int n_scene_divisions = 0;
+      unsigned int length = 0;
 
       // position from start of first layer to end of longest layer
       unsigned int phase = 0;
-      Mode mode = Mode::READ;
 
+      void addLayer();
+      void setMode(Mode new_mode);
+      Mode getMode();
+      bool isEmpty();
       unsigned int getDivisionLength();
       void step(float in, float attenuation_power);
-      float read(float attenuation_power);
+      void updateSceneLength();
+      float read();
     };
 
     float scene_position = 0.0f;

@@ -1,8 +1,4 @@
-* DONE Signal - Frame Connection
-CLOSED: [2020-11-01 Sun 17:23]
-Signal sends it's input to Frame, and receives frames pass-through output.
 
-see bogaudios peq for expader module inspiration
 * DONE Frame - Basic Loop Functionality
 CLOSED: [2020-11-02 Mon 22:18]
 No clk, just twist to engage, and loop upon exitting. 
@@ -76,4 +72,24 @@ and also create offsets for buffers
 * TODO Timeline-VIS
 timeline visualizer for timeline
 can also use to click and drag events to different division points
+* TODO Frame refractor
+** TODO remove start & end division from layer
+division may change
+NOTE this may create a VERY large GCD and resulting scene length
+** TODO have 'effective envelope for layer' to speed up reading
+** TODO division & clk behaviour
+3 ways to set division
+- via entry into panel in middle
+- via clk
+- via length of first recording
+
+in all cases, a division length is defined
+& recordings are snapped to intervals of the length.
+
+can the division length be changed after scene is created?
+is it a property of a scene?
+
+
+
+
 

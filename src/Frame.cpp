@@ -29,17 +29,6 @@ void Frame::modulateChannel(int c) {
   e.active_scene = active_scene;
 }
 
-// TODO, how to define division length?
-// decided not to use clk port - maybe manual entry? 
-// for now, size of first layer.
-unsigned int Frame::Engine::Scene::getDivisionLength() {
-  if (layers.size() > 0  && layers[0]->buffer.size() > 0) {
-    return layers[0]->buffer.size();
-  }
-
-  return 1;
-}
-
 bool Frame::Engine::deltaEngaged() {
   return (delta > 0.50f + recordThreshold || delta < 0.50f - recordThreshold);
 }
@@ -48,104 +37,17 @@ void Frame::Engine::startRecording() {
   recording = true;
   recording_dest_scene = active_scene;
 
-  if (delta > 0.50f + recordThreshold || recording_dest_scene->layers.size() == 0) {
-    recording_dest_scene->mode = Mode::EXTEND;
+  if (delta > 0.50f + recordThreshold || recording_dest_scene->isEmpty()) {
+    recording_dest_scene->setMode(Mode::EXTEND);
   } else {
-    recording_dest_scene->mode = Mode::ADD;
+    recording_dest_scene->setMode(Mode::ADD);
   }
-
-  Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
-
-  // TODO dependent?
-  unsigned int division_length = recording_dest_scene->getDivisionLength();
-
-  new_layer->start_division = floor(recording_dest_scene->phase / division_length);
-  new_layer->start_division_offset = recording_dest_scene->phase - new_layer->start_division * division_length;
-
-  for (auto selected_layer : recording_dest_scene->selected_layers) {
-    if (selected_layer && !selected_layer->fully_attenuated) {
-      new_layer->target_layers.push_back(selected_layer);
-    } else {
-      // TODO is it okay?
-      // printf("No selected layers! error!");
-    }
-  }
-
-  recording_dest_scene->layers.push_back(new_layer);
-  recording_dest_scene->current_layer = new_layer;
-
-  printf("Start recording\n");
 }
 
-
-int gcd(int a, int b)
-{
-    for (;;)
-    {
-        if (a == 0) return b;
-        b %= a;
-        if (b == 0) return a;
-        a %= b;
-    }
-}
-
-int lcm(int a, int b)
-{
-    int temp = gcd(a, b);
-
-    return temp ? (a / temp * b) : 0;
-}
-
-
-// TODO delete layers that are now erased
 void Frame::Engine::endRecording() {
   recording = false;
-  recording_dest_scene->mode = Mode::READ;
-  Frame::Engine::Scene::Layer* recorded_layer = recording_dest_scene->current_layer;
-
-  printf("END recording\n");
-
-  printf("-- recording buffer length: %ld\n", recorded_layer->buffer.size());
-
-  // TODO depend on mode
-  unsigned int division_length = recording_dest_scene->getDivisionLength();
-  printf("-- div length: %d\n", division_length);
-
-  recorded_layer->end_division = round(recording_dest_scene->phase / division_length);
-  if (recorded_layer->end_division == recorded_layer->start_division) {
-    recorded_layer->end_division++;
-  }
-
-  recorded_layer->end_division_offset = recording_dest_scene->phase - recorded_layer->end_division * division_length;
-
-  unsigned int recording_length = recorded_layer->end_division - recorded_layer->start_division;
-
-  recorded_layer->length = recording_length * division_length;
-
-  if (recording_length > recording_dest_scene->scene_length) {
-    vector<int> lengths;
-    for (auto layer : recording_dest_scene->layers) {
-      lengths.push_back(layer->end_division - layer->start_division);
-    }
-    int lc_multiple = accumulate(lengths.begin(), lengths.end(), 1, lcm);
-    recording_dest_scene->scene_length = lc_multiple;
-
-    // the scene phase will reset, so we do not want a mini skip to occur
-    if (recorded_layer->end_division_offset > 0) {
-      recording_dest_scene->phase = 0 + recorded_layer->end_division_offset;
-    }
-  }
-
-  printf("-- length: %d #layers: %ld scene_size:%d\n", recording_length,
-         recording_dest_scene->layers.size(), recording_dest_scene->scene_length);
-  printf("-- start_div: %d, start_division_offset: %d\n", recorded_layer->start_division, recorded_layer->start_division_offset);
-  printf("-- end_div: %d, end_division_offset: %d\n", recorded_layer->end_division, recorded_layer->end_division_offset);
-
-  recording_dest_scene->selected_layers.push_back(recorded_layer);
-
-  recording_dest_scene = NULL;
+  recording_dest_scene->setMode(Mode::READ);
 }
-
 
 // TODO customizable respoonse?
 // TODO attenuation clk divider, get smooth value
@@ -163,15 +65,15 @@ float getAttenuationPower(float delta, float recording_threshold) {
   float range = read_position - recording_threshold;
   float linear_attenuation_power_scaled = linear_attenuation_power / range;
 
-  // by taking to the power of 5, it is easier to create recordings that have no attenuation
-  float attenuation_power =
-      clamp(pow(linear_attenuation_power_scaled, 4), 0.0f, 1.0f);
+  // I found that taking to the power 3 gives the most intuitive attenuation power curve
+  float attenuation_power = clamp(pow(linear_attenuation_power_scaled, 3), 0.0f, 1.0f);
   return attenuation_power;
 }
 
 void Frame::Engine::step(float in) {
+  // printf("ENGINE: %f\n", in);
   // TODO weighted mix
-  // TODO global phase for all scenes, or not, have config option
+  // TODO global pha for all scenes, or not, have config option
   float attenuation_power = 0.0f;
   if (recording) {
     attenuation_power = getAttenuationPower(delta, recordThreshold);
@@ -179,27 +81,7 @@ void Frame::Engine::step(float in) {
 
   for (auto scene : scenes) {
     if (scene) {
-      if ((scene->mode == Mode::EXTEND || scene->mode == Mode::ADD) && scene->current_layer) {
-        // TODO only if input present
-        scene->current_layer->buffer.push_back(in);
-        // TODO attenuation divider, don't need to save every point
-        scene->current_layer->attenuation_envelope.push_back(attenuation_power);
-      }
-
-      scene->phase++;
-
-      bool scene_end = scene->phase / scene->getDivisionLength() >= scene->scene_length;
-      if (scene_end && scene->mode != Mode::EXTEND) {
-        if (scene->mode == Mode::ADD) {
-          endRecording();
-        }
-
-        scene->phase = 0;
-
-        if (scene->mode == Mode::ADD) {
-          startRecording();
-        }
-      }
+      scene->step(in, attenuation_power);
     }
   }
 }
@@ -208,16 +90,15 @@ float Frame::Engine::read() {
   int scene_1 = floor(scene_position);
   int scene_2 = ceil(scene_position);
   float weight = scene_position - floor(scene_position);
-  float attenuation = getAttenuationPower(delta, recordThreshold);
 
   float out = 0.0f;
 
   if (scenes[scene_1]) {
-    out += scenes[scene_1]->read(attenuation) * (1 - weight);
+    out += scenes[scene_1]->read() * (1 - weight);
   }
 
   if (scenes[scene_2]) {
-    out += scenes[scene_2]->read(attenuation) * (weight);
+    out += scenes[scene_2]->read() * (weight);
   }
 
   return out;
@@ -239,17 +120,20 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
     e.endRecording();
   }
 
-  float next_in = _fromSignal->signal[c];
-  e.step(next_in);
-  float next_out = e.read();
-  _toSignal->signal[c] = next_out;
+  float in = _fromSignal->signal[c];
+  // printf("SIG:::: %f\n", in);
+
+  e.step(in);
+
+  float out = e.read();
+  _toSignal->signal[c] = out;
 }
 
 void Frame::updateLights(const ProcessArgs &args) {
   Engine &e = *_engines[0];
   float position = 0.0f;
-  if (e.active_scene->scene_length > 0) {
-    position = (float)(e.active_scene->phase) / (float)(e.active_scene->scene_length * e.active_scene->getDivisionLength());
+  if (e.active_scene->n_scene_divisions > 0) {
+    position = (float)(e.active_scene->phase) / (float)(e.active_scene->n_scene_divisions * e.active_scene->getDivisionLength());
   }
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(position, args.sampleTime * lightDivider.getDivision());

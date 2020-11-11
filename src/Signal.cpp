@@ -23,11 +23,6 @@ void Signal::modulateChannel(int c) {
 void Signal::processAlways(const ProcessArgs &args) {
   outputs[OUT_OUTPUT].setChannels(_channels);
   outputs[SEL_OUTPUT].setChannels(_channels);
-
-  if (expanderConnected()) {
-    _toFrame = toExpander();
-    _fromFrame = fromExpander();
-  }
 }
 
 void Signal::processChannel(const ProcessArgs& args, int c) {
@@ -36,18 +31,16 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   // TODO mix knob with SEL
   float in = inputs[IN_INPUT].getPolyVoltage(c) * e.mix;
 
-  if(_toFrame) {
-    _toFrame->signal[c] = in;
+  float out = in;
+  if (expanderConnected()) {
+    auto toFrame = toExpander();
+    auto fromFrame = fromExpander();
+
+    toFrame->signal[c] = in;
+    out += fromFrame->signal[c];
   }
 
   if (outputs[OUT_OUTPUT].isConnected()) {
-    float out = 0.0f;
-    if (_fromFrame) {
-      // TODO mix instead of add
-      out += _fromFrame->signal[c];
-    }
-    // TODO uncomment
-    out += in;
     outputs[OUT_OUTPUT].setVoltage(out * e.vca, c);
   }
 }

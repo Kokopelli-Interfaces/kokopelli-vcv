@@ -105,9 +105,11 @@ float Frame::Engine::read() {
 }
 
 int Frame::channels() {
-  int input_channels = _fromSignal->channels;
-  if (_channels < input_channels) {
-    return input_channels;
+  if (baseConnected()) {
+    int input_channels = _fromSignal->channels;
+    if (_channels < input_channels) {
+      return input_channels;
+    }
   }
 
   return _channels;

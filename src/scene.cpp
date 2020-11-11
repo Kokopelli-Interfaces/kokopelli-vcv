@@ -89,16 +89,19 @@ void Frame::Engine::Scene::Layer::startRecording(vector<Engine::Scene::Layer *> 
 void Frame::Engine::Scene::addLayer() {
   Engine::Scene::Layer *new_layer = new Engine::Scene::Layer();
 
+  printf("NEW LAYER ~~~~ Mode:: %d\n", mode);
+
   if (mode != Mode::READ) {
     // TODO
     selected_layers = layers;
-
     new_layer->startRecording(selected_layers, phase, getDivisionLength());
 
-    if (mode == Mode::ADD) {
+    if (mode == Mode::ADD && current_layer) {
       // TODO better way? instead of reaching in?
-      new_layer->length = current_layer->length;
+      new_layer->start_division = current_layer->start_division;
+      new_layer->end_division = current_layer->end_division;
       new_layer->n_divisions = current_layer->n_divisions;
+      new_layer->length = current_layer->length;
     } else if (mode == Mode::EXTEND) {
       // so to extend the scene instead of scene phase looping
       n_scene_divisions = -1;
@@ -140,11 +143,13 @@ void Frame::Engine::Scene::step(float in_p, float attenuation_power) {
 
   if (mode == Mode::ADD && phase % current_layer->length == 0) {
     current_layer->endRecording(phase, getDivisionLength());
-    phase = 0;
+    if (phase >= length) {
+      phase = 0;
+    }
     addLayer();
   }
 
-  if (mode != Mode::EXTEND && phase >= length) {
+  if (mode == Mode::READ && phase >= length) {
     phase = 0;
   }
 }
@@ -173,9 +178,9 @@ void Frame::Engine::Scene::setMode(Mode new_mode) {
 
       // the scene phase may reset, so we do not want a mini skip back to occur
       // in the case the new layers length is rounded down
-      if (current_layer->end_division_offset > 0) {
-        phase = 0 + current_layer->end_division_offset;
-      }
+      // if (current_layer->end_division_offset > 0 && current_layer->end_division * current_layer->division_length >= n_scene_divisions) {
+      //   phase = 0 + current_layer->end_division_offset;
+      // }
     }
   }
 

@@ -8,6 +8,7 @@ bool Scene::isEmpty() {
 
 void Scene::addLayer() {
   ASSERT(mode, !=, Mode::READ);
+  antipop_filter.trigger();
 
   Layer *new_layer = new Layer();
 
@@ -65,8 +66,6 @@ float Scene::read(float sample_time) {
     out += layer_out * (1 - layer_attenuation);
   }
 
-  out = antipop_filter.process(out, sample_time);
-
   return out;
 }
 
@@ -107,7 +106,8 @@ void Scene::step(float in, float attenuation_power, float sample_time, bool use_
   }
 
   if (mode != Mode::READ) {
-    current_layer->write(division, phase, in, attenuation_power);
+    float layer_in = antipop_filter.process(in, sample_time);
+    current_layer->write(division, phase, layer_in, attenuation_power);
   }
 }
 

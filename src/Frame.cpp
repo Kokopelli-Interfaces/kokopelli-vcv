@@ -31,13 +31,6 @@ void Frame::modulateChannel(int c) {
     e.scenes[active_scene_i] = active_scene;
   }
   e.active_scene = active_scene;
-
-  if (inputs[CLK_INPUT].isConnected()) {
-    e.use_ext_phase = true;
-    e.ext_phase = clamp(inputs[CLK_INPUT].getPolyVoltage(c) / 10, -1.0f, 1.0f);
-  } else {
-    e.use_ext_phase = false;
-  }
 }
 
 bool Frame::Engine::deltaEngaged() {
@@ -82,9 +75,6 @@ float getAttenuationPower(float delta, float recording_threshold) {
 }
 
 void Frame::Engine::step(float in, float sample_time) {
-  // printf("ENGINE: %f\n", in);
-  // TODO weighted mix
-  // TODO global pha for all scenes, or not, have config option
   float attenuation_power = 0.0f;
   if (recording) {
     attenuation_power = getAttenuationPower(delta, recordThreshold);
@@ -103,12 +93,11 @@ float Frame::Engine::read(float sample_time) {
   float weight = scene_position - floor(scene_position);
 
   float out = 0.0f;
-
   if (scenes[scene_1]) {
     out += scenes[scene_1]->read(sample_time) * (1 - weight);
   }
 
-  if (scenes[scene_2]) {
+  if (scenes[scene_2] && scene_1 != scene_2 && scene_2 < numScenes) {
     out += scenes[scene_2]->read(sample_time) * (weight);
   }
 
@@ -132,6 +121,13 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
   }
 
   Engine &e = *_engines[c];
+
+  if (inputs[CLK_INPUT].isConnected()) {
+    e.use_ext_phase = true;
+    e.ext_phase = clamp(inputs[CLK_INPUT].getPolyVoltage(c) / 10, 0.0f, 1.0f);
+  } else {
+    e.use_ext_phase = false;
+  }
 
   if (!e.recording && e.deltaEngaged()) {
     e.startRecording(_sampleTime);

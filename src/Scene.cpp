@@ -7,7 +7,7 @@ bool Scene::isEmpty() {
 }
 
 void Scene::addLayer() {
-  // ASSERT(mode, !=, Mode::READ);
+  ASSERT(mode, !=, Mode::READ);
 
   Layer *new_layer = new Layer();
 
@@ -20,9 +20,14 @@ void Scene::addLayer() {
   }
 
   new_layer->start_division = division;
-  auto most_recent_target_layer = new_layer->target_layers.back();
-  if (mode == Mode::ADD && most_recent_target_layer) {
-    new_layer->length = most_recent_target_layer->length;
+
+  if (mode == Mode::ADD) {
+    auto most_recent_target_layer = new_layer->target_layers.back();
+    if (most_recent_target_layer) {
+      new_layer->length = most_recent_target_layer->length;
+    } else {
+      new_layer->length = 1;
+    }
   }
 
   new_layer->samples_per_division = samples_per_division;
@@ -60,6 +65,8 @@ float Scene::read(float sample_time) {
     out += layer_out * (1 - layer_attenuation);
   }
 
+  out = antipop_filter.process(out, sample_time);
+
   return out;
 }
 
@@ -67,7 +74,7 @@ void Scene::step(float in, float attenuation_power, float sample_time, bool use_
   last_phase = phase;
   if (use_ext_phase) {
     ASSERT(0, <=, ext_phase);
-    ASSERT(ext_phase, <, 1.0f);
+    ASSERT(ext_phase, <=, 1.0f);
     phase = ext_phase;
     phase_defined = true;
   } else if (!phase_defined) {
@@ -77,18 +84,25 @@ void Scene::step(float in, float attenuation_power, float sample_time, bool use_
     phase = phase_oscillator.getPhase();
   }
 
-  float delta = fabsf(phase - last_phase);
-  bool phase_flip = (delta > 0.95f && delta <= 1.0f);
-
+  float delta = phase - last_phase;
+  bool phase_flip = (fabsf(delta) > 0.95f && fabsf(delta) <= 1.0f);
   if (phase_flip) {
-    division++;
+    antipop_filter.trigger();
 
-    unsigned int layer_end_division = current_layer->start_division + current_layer->length;
-    if (mode == Mode::ADD && layer_end_division == division) {
-      printf("END recording via overdub\n");
-      printf("-- start div: %d, length: %d\n", current_layer->start_division, current_layer->length);
-      endRecording(sample_time);
-      addLayer();
+    if (0 < delta && 0 < division) {
+      division--;
+    } else if (delta < 0) {
+      division++;
+    }
+
+    if (mode == Mode::ADD) {
+      unsigned int layer_end_division = current_layer->start_division + current_layer->length;
+      if (layer_end_division == division) {
+        printf("END recording via overdub\n");
+        printf("-- start div: %d, length: %d\n", current_layer->start_division, current_layer->length);
+        endRecording(sample_time);
+        addLayer();
+      }
     }
   }
 

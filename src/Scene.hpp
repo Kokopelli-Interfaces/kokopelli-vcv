@@ -3,8 +3,9 @@
 #include <vector>
 
 #include "Layer.hpp"
-#include "dsp/LFO.hpp"
 #include "assert.hpp"
+#include "dsp/Antipop.hpp"
+#include "dsp/LFO.hpp"
 #include "rack.hpp"
 
 using namespace std;
@@ -38,6 +39,8 @@ private:
 
   LowFrequencyOscillator phase_oscillator;
   float last_phase = 0.0f;
+
+  AntipopFilter antipop_filter;
 
   Mode mode = Mode::READ;
 

@@ -37,12 +37,11 @@ void Layer::write(unsigned int current_division, float phase, float sample, floa
       sample_2 = 0;
     }
 
-    float weight = division_position - sample_1;
-
     ASSERT(division_buffers.size(), >, division);
     ASSERT(division_buffers[division].size(), >, sample_1);
     ASSERT(division_buffers[division].size(), >, sample_2);
 
+    float weight = division_position - sample_1;
     division_buffers[division][sample_1] += sample * (1 - weight);
     division_buffers[division][sample_2] += sample * weight;
 
@@ -71,31 +70,6 @@ float getSampleAtPhase(vector<float> &buffer, double phase, Interpolations inter
   }
 }
 
-float Layer::readGeneric(unsigned int current_division, float phase, bool read_attenuation, float sample_time) {
-  if (current_division < start_division) {
-    return 0.0f;
-  }
-
-  float sample = 0.0f;
-  int layer_division = (current_division - start_division) % length;
-  if (layer_division < divisions) {
-    double division_phase = samples_per_division * phase;
-
-    if (read_attenuation) {
-      sample = getSampleAtPhase(division_attenuation_sends[layer_division], division_phase, Interpolations::LINEAR);
-    } else {
-      sample = getSampleAtPhase(division_buffers[layer_division], division_phase, Interpolations::HERMITE);
-      if (divisions > length && layer_division == 0) {
-        sample += getSampleAtPhase(division_buffers[divisions - 1], division_phase, Interpolations::HERMITE);
-      }
-
-      sample = antipop_filter.process(sample, sample_time);
-    }
-  }
-
-  return sample;
-}
-
 float Layer::readSample(unsigned int current_division, float phase,
                         float sample_time) {
   if (fully_attenuated || current_division < start_division) {
@@ -114,8 +88,6 @@ float Layer::readSample(unsigned int current_division, float phase,
       sample += getSampleAtPhase(division_buffers[divisions - 1],
                                   division_phase, Interpolations::HERMITE);
     }
-
-    sample = antipop_filter.process(sample, sample_time);
   }
 
   return sample;

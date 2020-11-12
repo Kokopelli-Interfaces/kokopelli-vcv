@@ -3,7 +3,6 @@
 #include <math.h>
 #include <vector>
 
-#include "dsp/Antipop.hpp"
 #include "dsp/Interpolation.hpp"
 #include "assert.hpp"
 
@@ -17,8 +16,6 @@ private:
 
   vector<vector<float>> division_buffers;
   vector<vector<float>> division_attenuation_sends;
-
-  AntipopFilter antipop_filter;
 
   bool attenuation_flag = false;
 

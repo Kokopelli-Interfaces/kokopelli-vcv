@@ -42,15 +42,17 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     float scene_position = 0.0f;
     float delta = 0.0f;
     bool recording = false;
+    bool use_ext_phase = false;
+    float ext_phase = 0.0f;
 
-    Scene* active_scene = NULL;
+    Scene *active_scene = NULL;
     Scene* recording_dest_scene = NULL;
     Scene* scenes[numScenes]{};
 
     void startRecording(float sample_time);
     void endRecording(float sample_time);
     void step(float in, float sample_time);
-    float read();
+    float read(float sample_time);
     bool deltaEngaged();
   };
 

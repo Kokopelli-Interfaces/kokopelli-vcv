@@ -7,17 +7,12 @@ bool Scene::isEmpty() {
 }
 
 void Scene::addLayer() {
+  // ASSERT(mode, !=, Mode::READ);
+
   Layer *new_layer = new Layer();
 
-  printf("NEW LAYER ~~~~ Mode:: %d\n", mode);
-  if (mode == Mode::READ) {
-    printf("FRAME ERROR: Add layer was called but scene is in READ mode.");
-    return;
-  }
-
-  // TODO
+  // TODO FIXME
   selected_layers = layers;
-
   for (auto selected_layer : selected_layers) {
     if (selected_layer && !selected_layer->fully_attenuated) {
       new_layer->target_layers.push_back(selected_layer);
@@ -31,7 +26,7 @@ void Scene::addLayer() {
   }
 
   new_layer->samples_per_division = samples_per_division;
-  if (isEmpty() && !ext_phase) {
+  if (isEmpty()) {
     new_layer->define_division_length = true;
   }
 
@@ -41,23 +36,22 @@ void Scene::addLayer() {
   printf("START recording\n");
 }
 
-float Scene::read() {
+float Scene::read(float sample_time) {
   float out = 0.0f;
-  float phase = getPhase();
   for (unsigned int i = 0; i < layers.size(); i++) {
     // don't output what we are writing to avoid FB in case of self-routing
     if (mode != Mode::READ && layers[i] == current_layer) {
       continue;
     }
 
-    float layer_out = layers[i]->readSample(division, phase);
+    float layer_out = layers[i]->readSample(division, phase, sample_time);
 
     // FIXME clk divide to save cpu
     float layer_attenuation = 0.0f;
     for (unsigned int j = i + 1; j < layers.size(); j++) {
       for (auto target_layer : layers[j]->target_layers) {
         if (target_layer == layers[i]) {
-          layer_attenuation += layers[j]->readAttenuation(division, phase);
+          layer_attenuation += layers[j]->readAttenuation(division, phase, sample_time);
         }
       }
     }
@@ -69,61 +63,46 @@ float Scene::read() {
   return out;
 }
 
-void Scene::setExtPhase(float ext_phase) {
-  float delta = ext_phase - last_ext_phase;
-  float abs_delta = fabsf(delta);
-  ext_phase_flipped = (abs_delta > 9.5f && abs_delta <= 10.0f);
-}
-
-bool Scene::stepPhase(float sample_time) {
-  if (ext_phase) {
-    if (ext_phase_flipped) {
-      ext_phase_flipped = false;
-      return true;
-    }
-
-    return false;
+void Scene::step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase) {
+  last_phase = phase;
+  if (use_ext_phase) {
+    ASSERT(0, <=, ext_phase);
+    ASSERT(ext_phase, <, 1.0f);
+    phase = ext_phase;
+    phase_defined = true;
+  } else if (!phase_defined) {
+    phase = 0.0f;
+  } else {
+    phase_oscillator.step(sample_time);
+    phase = phase_oscillator.getPhase();
   }
 
-  if (isEmpty() || (current_layer->define_division_length && mode != Mode::READ)) {
-    return false;
-  }
-
-  return phase_oscillator.step(sample_time);
-}
-
-float Scene::getPhase() {
-  if (ext_phase) {
-    return last_ext_phase;
-  }
-
-  if (isEmpty() || (current_layer->define_division_length && mode != Mode::READ)) {
-    return 0.0f;
-  }
-
-  return phase_oscillator.getPhase();
-}
-
-void Scene::step(float in, float attenuation_power, float sample_time) {
-  bool phase_flip = stepPhase(sample_time);
-  float phase = getPhase();
+  float delta = fabsf(phase - last_phase);
+  bool phase_flip = (delta > 0.95f && delta <= 1.0f);
 
   if (phase_flip) {
     division++;
 
-    unsigned int layer_end_division = current_layer->start_division + current_layer->divisions;
+    unsigned int layer_end_division = current_layer->start_division + current_layer->length;
     if (mode == Mode::ADD && layer_end_division == division) {
-      printf("END recording\n");
-      printf("-- start div: %d, end division: %d\n", current_layer->start_division, layer_end_division);
-      printf("-- divisions: %d, length: %d\n",
-             current_layer->divisions, current_layer->length);
+      printf("END recording via overdub\n");
+      printf("-- start div: %d, length: %d\n", current_layer->start_division, current_layer->length);
+      endRecording(sample_time);
       addLayer();
     }
-    // TODO if reached lcm, reset
   }
 
   if (mode != Mode::READ) {
     current_layer->write(division, phase, in, attenuation_power);
+  }
+}
+
+void Scene::endRecording(float sample_time) {
+  // FIXME  just using last layer as example
+  if (!isEmpty() && current_layer->define_division_length) {
+    samples_per_division = current_layer->samples_per_division;
+    phase_oscillator.setPitch(1 / (samples_per_division * sample_time));
+    phase_defined = true;
   }
 }
 
@@ -132,22 +111,15 @@ void Scene::setMode(Mode new_mode, float sample_time) {
   mode = new_mode;
   if (prev_mode != Mode::READ && mode == Mode::READ) {
     printf("END recording\n");
-    printf("-- start div: %d, divisions: %d\n", current_layer->start_division, current_layer->divisions);
-    printf("-- divisions: %d, length: %d\n", current_layer->divisions,
-           current_layer->length);
-
-    if (current_layer->define_division_length) {
-      samples_per_division = current_layer->division_buffers[0].size();
-      current_layer->samples_per_division = samples_per_division;
-      phase_oscillator.setPitch(1 / (samples_per_division * sample_time));
-      // phase_oscillator.reset(0.0f);
-    }
+    printf("-- start div: %d, length: %d\n", current_layer->start_division, current_layer->length);
 
     if (prev_mode == Mode::EXTEND) {
-      if (getPhase() <= 0.50f && current_layer->length > 1) {
+      if (phase <= 0.50f && current_layer->length > 1) {
         current_layer->length--;
       }
     }
+
+    endRecording(sample_time);
   }
 
   if (prev_mode == Mode::READ && mode != Mode::READ) {

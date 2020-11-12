@@ -1,45 +1,51 @@
 #pragma once
 
-#include <assert.h>
 #include <vector>
 
-#include "rack.hpp"
 #include "Layer.hpp"
 #include "dsp/LFO.hpp"
+#include "assert.hpp"
+#include "rack.hpp"
 
 using namespace std;
 
 namespace myrisa {
 
 struct Scene {
+public:
   enum Mode { ADD, EXTEND, READ };
 
+  float phase = 0.0f;
+
+  Scene::Mode getMode();
+  void setMode(Mode new_mode, float sample_time);
+  bool isEmpty();
+  void undo();
+  void step(float in, float attenuation_power, float sample_time);
+  void step(float in, float attenuation_power, float sample_time,
+            bool use_ext_phase, float ext_phase);
+  float read(float sample_time);
+
+private:
   vector<Layer *> layers;
   vector<Layer *> selected_layers;
   Layer *current_layer = NULL;
 
-  Mode mode = Mode::READ;
   int samples_per_division = 0;
-
   unsigned division = 0;
 
+  bool phase_defined = false;
+
   LowFrequencyOscillator phase_oscillator;
-  bool ext_phase = false;
-  bool ext_phase_flipped = false;
-  float last_ext_phase = 0.0f;
+  float last_phase = 0.0f;
+
+  Mode mode = Mode::READ;
 
   void addLayer();
   void removeLayer();
-  void setMode(Mode new_mode, float sample_time);
-  void setExtPhase(float ext_phase);
-  Mode getMode();
-  float getPhase();
-  bool stepPhase(float sample_time);
-  bool isEmpty();
+  void endRecording(float sample_time);
   unsigned int getDivisionLength();
-  void step(float in, float attenuation_power, float sample_time);
   void updateSceneLength();
-  float read();
 };
 
 } // namespace myrisa

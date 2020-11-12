@@ -31,6 +31,13 @@ void Frame::modulateChannel(int c) {
     e.scenes[active_scene_i] = active_scene;
   }
   e.active_scene = active_scene;
+
+  if (inputs[CLK_INPUT].isConnected()) {
+    e.use_ext_phase = true;
+    e.ext_phase = clamp(inputs[CLK_INPUT].getPolyVoltage(c) / 10, -1.0f, 1.0f);
+  } else {
+    e.use_ext_phase = false;
+  }
 }
 
 bool Frame::Engine::deltaEngaged() {
@@ -85,12 +92,12 @@ void Frame::Engine::step(float in, float sample_time) {
 
   for (auto scene : scenes) {
     if (scene) {
-      scene->step(in, attenuation_power, sample_time);
+      scene->step(in, attenuation_power, sample_time, use_ext_phase, ext_phase);
     }
   }
 }
 
-float Frame::Engine::read() {
+float Frame::Engine::read(float sample_time) {
   int scene_1 = floor(scene_position);
   int scene_2 = ceil(scene_position);
   float weight = scene_position - floor(scene_position);
@@ -98,11 +105,11 @@ float Frame::Engine::read() {
   float out = 0.0f;
 
   if (scenes[scene_1]) {
-    out += scenes[scene_1]->read() * (1 - weight);
+    out += scenes[scene_1]->read(sample_time) * (1 - weight);
   }
 
   if (scenes[scene_2]) {
-    out += scenes[scene_2]->read() * (weight);
+    out += scenes[scene_2]->read(sample_time) * (weight);
   }
 
   return out;
@@ -137,13 +144,13 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
   float in = _fromSignal->signal[c];
   e.step(in, _sampleTime);
 
-  float out = e.read();
+  float out = e.read(_sampleTime);
   _toSignal->signal[c] = out;
 }
 
 void Frame::updateLights(const ProcessArgs &args) {
   Engine &e = *_engines[0];
-  float phase = e.active_scene->getPhase();
+  float phase = e.active_scene->phase;
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(phase, _sampleTime * lightDivider.getDivision());
 
@@ -152,16 +159,16 @@ void Frame::updateLights(const ProcessArgs &args) {
   if (!e.recording) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->mode == Scene::Mode::EXTEND) {
+  } else if (e.active_scene->getMode() == Scene::Mode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * lightDivider.getDivision());
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->mode == Scene::Mode::ADD) {
+  } else if (e.active_scene->getMode() == Scene::Mode::ADD) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].setSmoothBrightness(
         1.0f - attenuation_power,
         _sampleTime * lightDivider.getDivision());
-  } else if (e.active_scene->mode == Scene::Mode::READ) {
+  } else if (e.active_scene->getMode() == Scene::Mode::READ) {
     lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;
   }

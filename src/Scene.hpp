@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple> 
 #include <vector>
 
 #include "Layer.hpp"
@@ -16,7 +17,7 @@ struct Scene {
 public:
   enum Mode { ADD, EXTEND, READ };
 
-  float phase = 0.0f;
+  double phase = 0.0f;
 
   Scene::Mode getMode();
   void setMode(Mode new_mode, float sample_time);
@@ -30,15 +31,14 @@ public:
 private:
   vector<Layer *> layers;
   vector<Layer *> selected_layers;
+
   Layer *current_layer = NULL;
 
-  int samples_per_division = 0;
-  unsigned division = 0;
-
-  bool phase_defined = false;
+  unsigned int division = 0;
 
   LowFrequencyOscillator phase_oscillator;
-  float last_phase = 0.0f;
+  bool phase_defined = false;
+  double last_phase = 0.0f;
 
   AntipopFilter antipop_filter;
 

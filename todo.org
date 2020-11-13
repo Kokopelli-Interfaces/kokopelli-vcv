@@ -88,8 +88,9 @@ in all cases, a division length is defined
 
 can the division length be changed after scene is created?
 is it a property of a scene?
-
-
-
+* FRAME - bugs
+- addition on write causes too much amplitude when low phase, don't add, replace
+- layers should go by a phase start phase end basis, as the samples per division for the first layer
+  is lower than the actual amounnt, and causes it to play slower
 
 

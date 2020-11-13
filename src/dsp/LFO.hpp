@@ -6,7 +6,7 @@
 namespace myrisa {
 
 struct LowFrequencyOscillator {
-  float phase = 0.0f;
+  double phase = 0.0f;
   float freq = 1.0f;
 
   LowFrequencyOscillator() {}

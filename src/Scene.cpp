@@ -8,12 +8,14 @@ bool Scene::isEmpty() {
 
 void Scene::addLayer() {
   ASSERT(mode, !=, Mode::READ);
+
   antipop_filter.trigger();
 
   Layer *new_layer = new Layer();
 
-  // TODO FIXME
+  // TODO FIXME have this selectable and depend on mode
   selected_layers = layers;
+
   for (auto selected_layer : selected_layers) {
     if (selected_layer && !selected_layer->fully_attenuated) {
       new_layer->target_layers.push_back(selected_layer);

@@ -56,10 +56,10 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     bool deltaEngaged();
   };
 
-  static constexpr float recordThreshold = 0.05f;
+  static constexpr float record_threshold = 0.05f;
   float _sampleTime = 1.0f;
   Engine *_engines[maxChannels]{};
-  dsp::ClockDivider lightDivider;
+  dsp::ClockDivider light_divider;
 
   Frame() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -72,7 +72,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 		configParam(DELTA_PARAM, 0.f, 1.f, 0.5f, "Delta");
 
     setBaseModelPredicate([](Model *m) { return m == modelSignal; });
-    lightDivider.setDivision(16);
+    light_divider.setDivision(16);
  }
 
   void sampleRateChange() override;
@@ -87,3 +87,4 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 };
 
 } // namespace myrisa
+

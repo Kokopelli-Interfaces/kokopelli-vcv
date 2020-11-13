@@ -45,7 +45,7 @@ inline float interpolateLinearD(float* data, double index) {
 }
 
 /** The array at `p` must be at least length `floor(x) + 3`.
-*/
+*
 inline float InterpolateHermite(float* data, double index) {
     int x1 = floor(index);
     float t = index - x1;

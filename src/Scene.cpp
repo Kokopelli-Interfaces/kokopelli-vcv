@@ -12,8 +12,8 @@ void Scene::startNewLayer(Mode layer_mode) {
   // TODO FIXME have this selectable and depend on mode
   selected_layers = layers;
 
-  int length;
-  int start_division;
+  double length;
+  double start_division;
   if (layer_mode == Mode::DUB) {
     start_division = floor(position);
     auto most_recent_target_layer = selected_layers.back();
@@ -79,7 +79,7 @@ void Scene::stepPhase(float sample_time, bool use_ext_phase, float ext_phase) {
     phase = ext_phase;
     phase_defined = true;
   } else if (!phase_defined) {
-    phase = 0.0f;
+    phase = 0.0;
   } else {
     phase_oscillator.step(sample_time);
     phase = phase_oscillator.getPhase();
@@ -89,10 +89,10 @@ void Scene::stepPhase(float sample_time, bool use_ext_phase, float ext_phase) {
 void Scene::step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase) {
 
   stepPhase(sample_time, use_ext_phase, ext_phase);
-  float phase_change = phase - last_phase;
-  bool phase_flip = (fabsf(phase_change) > 0.95f && fabsf(phase_change) <= 1.0f);
+  double phase_change = phase - last_phase;
+  bool phase_flip = (fabsf(phase_change) > 0.95 && fabsf(phase_change) <= 1.0);
 
-  int division = phase == 1.0f ? floor(phase - 0.01f) : floor(phase);
+  double division = phase == 1.0f ? floor(phase - 0.01f) : floor(phase);
 
   if (phase_flip) {
     if (0 < phase_change && 0 < division) {
@@ -120,13 +120,14 @@ void Scene::step(float in, float attenuation_power, float sample_time, bool use_
     }
   }
 
-  position = division + phase;
   if (mode != Mode::READ) {
     assert(new_layer != NULL);
     new_layer->write(position, in, attenuation_power);
     // FIXME do not need to set every loop..
     new_layer->sample_time = sample_time;
   }
+
+  position = division + phase;
 }
 
 void Scene::finishNewLayer() {

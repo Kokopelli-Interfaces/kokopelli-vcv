@@ -34,7 +34,7 @@ private:
   }
 
 public:
-  Layer(int layer_start_division, int layer_length) {
+  Layer(double layer_start_division, double layer_length) {
     start_division = layer_start_division;
     length = layer_length;
     // TODO more buffers in future, according to frame IO modules
@@ -48,8 +48,8 @@ public:
     delete send_attenuation;
   }
 
-  int start_division;
-  int length;
+  double start_division;
+  double length;
   int num_samples = 0;
 
   vector<Layer *> target_layers;
@@ -78,7 +78,9 @@ public:
       recording_offset_in_layer.second = position_relative_to_start_division;
       num_samples++;
     } else {
-      buffer->replace(getBufferPhase(scene_position), sample);
+      double buffer_phase = getBufferPhase(scene_position);
+      printf("REPALCING: buf phase %f, pos_rel_start %f, recording_offsets: %f %f, lyaer len %f\n", buffer_phase, position_relative_to_start_division, recording_offset_in_layer.first, recording_offset_in_layer.second, length);
+      buffer->replace(buffer_phase, sample);
       send_attenuation->replace(getBufferPhase(scene_position), attenuation);
     }
   }

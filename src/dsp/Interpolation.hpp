@@ -45,15 +45,14 @@ inline float interpolateLinearD(float* data, double index) {
 }
 
 /** The array at `p` must be at least length `floor(x) + 3`.
-*
+ */
 inline float InterpolateHermite(float* data, double index) {
     int x1 = floor(index);
     float t = index - x1;
     return Hermite4pt3oX(data[x1 - 1], data[x1], data[x1 + 1], data[x1 + 2], t);
 }
 
-/** The array at `p` must be at least length `floor(x) + 3`.
-*/
+/* The array at `p` must be at least length `floor(x) + 3`. */
 inline float interpolateBSpline(const float* data, double index) {
     int x1 = floor(index);
     float t = index - x1;

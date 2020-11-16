@@ -5,11 +5,11 @@
 
 namespace myrisa {
 
-struct LowFrequencyOscillator {
+struct PhaseOscillator {
   double phase = 0.0f;
   float freq = 1.0f;
 
-  LowFrequencyOscillator() {}
+  PhaseOscillator() {}
 
   void setPitch(float pitch) {
     freq = pitch;

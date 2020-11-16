@@ -49,11 +49,17 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     Scene* recording_dest_scene = NULL;
     Scene* scenes[numScenes]{};
 
-    void startRecording(float sample_time);
-    void endRecording(float sample_time);
+    void startRecording();
+    void endRecording();
     void step(float in, float sample_time);
-    float read(float sample_time);
+    float read();
     bool deltaEngaged();
+
+    virtual ~Engine() {
+      for (auto scene : scenes) {
+        delete scene;
+      }
+    }
   };
 
   static constexpr float record_threshold = 0.05f;

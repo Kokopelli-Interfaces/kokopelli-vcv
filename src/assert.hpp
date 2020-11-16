@@ -4,7 +4,7 @@
   {                                                                                                \
     if (!((left) operator(right))) {                                                               \
       std::cerr                                                                                     \
-          << "ASSERT FAILED: " << #left                                                            \
+          << "Myrisa Modules:: ASSERT FAILED: " << #left                                                            \
           << #                                                                                     \
              operator<< #right << " @ " << __FILE__ << " (" << __LINE__ << ")"                     \
                                                                            "."                     \

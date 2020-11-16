@@ -1,54 +1,55 @@
 #pragma once
 
-#include <tuple> 
+#include <tuple>
 #include <vector>
 
 #include "Layer.hpp"
-#include "assert.hpp"
-#include "dsp/Antipop.hpp"
-#include "dsp/LFO.hpp"
+#include "dsp/PhaseOscillator.hpp"
 #include "rack.hpp"
+#include <assert.h>
+#include "assert.hpp"
 
 using namespace std;
 
 namespace myrisa {
 
 struct Scene {
-public:
-  enum Mode { ADD, EXTEND, READ };
-
-  double phase = 0.0f;
-
-  Scene::Mode getMode();
-  void setMode(Mode new_mode, float sample_time);
-  bool isEmpty();
-  void undo();
-  void step(float in, float attenuation_power, float sample_time);
-  void step(float in, float attenuation_power, float sample_time,
-            bool use_ext_phase, float ext_phase);
-  float read(float sample_time);
+  enum Mode { DEFINE_DIVISION, DUB, EXTEND, READ };
 
 private:
-  vector<Layer *> layers;
-  vector<Layer *> selected_layers;
+  vector<Layer*> layers;
+  vector<Layer*> selected_layers;
 
-  Layer *current_layer = NULL;
+  Layer *new_layer = NULL;
 
-  unsigned int division = 0;
-
-  LowFrequencyOscillator phase_oscillator;
+  PhaseOscillator phase_oscillator;
   bool phase_defined = false;
   double last_phase = 0.0f;
+  double position = 0.0f;
 
-  AntipopFilter antipop_filter;
+  float getLayerAttenuation(int layer_i);
+  void startNewLayer(Mode layer_mode);
+  void finishNewLayer();
+  void stepPhase(float sample_time, bool use_ext_phase, float ext_phase);
 
+public:
+  virtual ~Scene() {
+    for (auto layer : layers) {
+      delete layer;
+    }
+
+    if (new_layer) {
+      delete new_layer;
+    }
+  }
+
+  double phase = 0.0f;
   Mode mode = Mode::READ;
 
-  void addLayer();
-  void removeLayer();
-  void endRecording(float sample_time);
-  unsigned int getDivisionLength();
-  void updateSceneLength();
+  void setMode(Mode new_mode);
+  bool isEmpty();
+  void undo();
+  void step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase);
+  float read();
 };
-
 } // namespace myrisa

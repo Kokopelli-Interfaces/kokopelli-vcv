@@ -37,20 +37,22 @@ bool Frame::Engine::deltaEngaged() {
   return (delta > 0.50f + record_threshold || delta < 0.50f - record_threshold);
 }
 
-void Frame::Engine::startRecording(float sample_time) {
+void Frame::Engine::startRecording() {
   recording = true;
   recording_dest_scene = active_scene;
 
-  if (delta > 0.50f + record_threshold || recording_dest_scene->isEmpty()) {
-    recording_dest_scene->setMode(Scene::Mode::EXTEND, sample_time);
+  if (recording_dest_scene->isEmpty() && !use_ext_phase) {
+    recording_dest_scene->setMode(Scene::Mode::DEFINE_DIVISION);
+  } else if (delta > 0.50f + record_threshold) {
+    recording_dest_scene->setMode(Scene::Mode::EXTEND);
   } else {
-    recording_dest_scene->setMode(Scene::Mode::ADD, sample_time);
+    recording_dest_scene->setMode(Scene::Mode::DUB);
   }
 }
 
-void Frame::Engine::endRecording(float sample_time) {
+void Frame::Engine::endRecording() {
   recording = false;
-  recording_dest_scene->setMode(Scene::Mode::READ, sample_time);
+  recording_dest_scene->setMode(Scene::Mode::READ);
 }
 
 // TODO customizable respoonse?
@@ -87,18 +89,18 @@ void Frame::Engine::step(float in, float sample_time) {
   }
 }
 
-float Frame::Engine::read(float sample_time) {
+float Frame::Engine::read() {
   int scene_1 = floor(scene_position);
   int scene_2 = ceil(scene_position);
   float weight = scene_position - floor(scene_position);
 
   float out = 0.0f;
   if (scenes[scene_1]) {
-    out += scenes[scene_1]->read(sample_time) * (1 - weight);
+    out += scenes[scene_1]->read() * (1 - weight);
   }
 
   if (scenes[scene_2] && scene_1 != scene_2 && scene_2 < numScenes) {
-    out += scenes[scene_2]->read(sample_time) * (weight);
+    out += scenes[scene_2]->read() * (weight);
   }
 
   return out;
@@ -130,17 +132,17 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
   }
 
   if (!e.recording && e.deltaEngaged()) {
-    e.startRecording(_sampleTime);
+    e.startRecording();
   }
 
   if (e.recording && !e.deltaEngaged()) {
-    e.endRecording(_sampleTime);
+    e.endRecording();
   }
 
   float in = _fromSignal->signal[c];
   e.step(in, _sampleTime);
 
-  float out = e.read(_sampleTime);
+  float out = e.read();
   _toSignal->signal[c] = out;
 }
 
@@ -154,18 +156,22 @@ void Frame::updateLights(const ProcessArgs &args) {
 
   if (!e.recording) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->getMode() == Scene::Mode::EXTEND) {
+  } else if (e.active_scene->mode == Scene::Mode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
+    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->getMode() == Scene::Mode::ADD) {
+  } else if (e.active_scene->mode == Scene::Mode::DUB) {
+    lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
+        1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
+    lights[RECORD_MODE_LIGHT + 1].setSmoothBrightness(
+        1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
+    lights[RECORD_MODE_LIGHT + 2].value = 0.0;
+  } else if (e.active_scene->mode == Scene::Mode::DEFINE_DIVISION) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 2].setSmoothBrightness(
-        1.0f - attenuation_power,
-        _sampleTime * light_divider.getDivision());
-  } else if (e.active_scene->getMode() == Scene::Mode::READ) {
-    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;
   }
 }

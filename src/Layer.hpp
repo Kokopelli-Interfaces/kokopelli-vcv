@@ -5,7 +5,6 @@
 
 #include "rack.hpp"
 #include "dsp/PhaseBuffer.hpp"
-#include "dsp/Interpolation.hpp"
 
 using namespace std;
 
@@ -13,65 +12,98 @@ namespace myrisa {
 
 struct Layer {
 private:
-  PhaseBuffer buffer;
-  PhaseBuffer attenuation_send;
-  // TODO maybe have this a part of a scene to avoid duplication
-  rack::dsp::ClockDivider attenuation_write_divider;
+  PhaseBuffer *buffer;
+  PhaseBuffer *send_attenuation;
 
+  // relative to start_division
+  pair<double, double> recording_offset_in_layer;
 
-  double rescalePhase(double scene_phase) {
-    int scene_division = floor(scene_phase);
-    double length = position.second - position.first;
-    return (scene_phase - position.first) / length;
+  bool inBounds(double scene_position) {
+    if (scene_position < start_division + recording_offset_in_layer.first) {
+      return false;
+    }
+
+    double layer_position = fmod(scene_position - start_division, length);
+    return (recording_offset_in_layer.first <= layer_position && layer_position <= recording_offset_in_layer.second);
+  }
+
+  double getBufferPhase(double scene_position) {
+    double recording_length = recording_offset_in_layer.second - recording_offset_in_layer.first;
+    double layer_position = fmod(scene_position - start_division, length);
+    return (layer_position - recording_offset_in_layer.first) / recording_length;
   }
 
 public:
-  Layer() {
-    attenuation_write_divider.setDivision(256);
+  Layer(int layer_start_division, int layer_length) {
+    start_division = layer_start_division;
+    length = layer_length;
+    // TODO more buffers in future, according to frame IO modules
+    // TODO free buffers ?
+    buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
+    send_attenuation = new PhaseBuffer(PhaseBuffer::Type::PARAM);
   }
+
+  virtual ~Layer() {
+    delete buffer;
+    delete send_attenuation;
+  }
+
+  int start_division;
+  int length;
+  int num_samples = 0;
 
   vector<Layer *> target_layers;
-  pair<double, double> scene_position = NULL;
-
   bool fully_attenuated = false;
+  float sample_time = 1.0;
 
-  bool inRange(double scene_phase) {
-    int scene_division = floor(scene_phase);
+  void write(double scene_position, float sample, float attenuation) {
+    // have to consider case where we are recording with external phase
+    // e.g. one could start recording forward and then go in reverse
+    double position_relative_to_start_division = scene_position - start_division;
 
-  }
-
-  void append(double phase, float sample, float attenuation) {
-    buffer.append(sample);
-
-    if (attenuation_write_divider.process()) {
-      attenuation_send.append(attenuation);
+    if (num_samples == 0) {
+      recording_offset_in_layer.first = position_relative_to_start_division;
+      recording_offset_in_layer.second = position_relative_to_start_division;
+      buffer->addToBack(sample);
+      send_attenuation->addToBack(attenuation);
+      num_samples++;
+    } else if (position_relative_to_start_division < recording_offset_in_layer.first) {
+      buffer->addToFront(sample);
+      send_attenuation->addToFront(attenuation);
+      recording_offset_in_layer.first = position_relative_to_start_division;
+      num_samples++;
+    } else if (recording_offset_in_layer.second <= position_relative_to_start_division) {
+      buffer->addToBack(sample);
+      send_attenuation->addToBack(attenuation);
+      recording_offset_in_layer.second = position_relative_to_start_division;
+      num_samples++;
+    } else {
+      buffer->replace(getBufferPhase(scene_position), sample);
+      send_attenuation->replace(getBufferPhase(scene_position), attenuation);
     }
   }
 
-  float replace(double phase, float sample, float attenuation) {
-    ASSERT(position, !=, NULL);
-
-    buffer.replace(rescalePhase(phase), sample);
-
-    if (attenuation_write_divider.process()) {
-      attenuation_send.replace(rescalePhase(phase), attenuation);
+  float readSample(double scene_position) {
+    if (!inBounds(scene_position)) {
+      return 0.0f;
     }
+    return buffer->read(getBufferPhase(scene_position));
   }
 
-  float readSample(double phase) {
-    ASSERT(position, !=, NULL);
+  float readSampleWithAttenuation(double scene_position, double attenuation) {
+    float sample = readSample(scene_position);
+    if (sample == 0.0f) {
+      return 0.0f;
+    }
+    return buffer->getAttenuatedSample(sample, attenuation);
+  }
 
-    if (fully_attenuated || !inRange(phase)) {
+  float readSendAttenuation(double scene_position) {
+    if (!inBounds(scene_position)) {
       return 0.0f;
     }
 
-    return buffer.read(rescalePhase(phase), Interpolations::HERMITE);
-  }
-
-  float readAttenuation(double phase) {
-    ASSERT(position, !=, NULL);
-
-    return send_attenuation.read(rescalePhase(phase), Interpolations::LINEAR);
+    return send_attenuation->read(getBufferPhase(scene_position));
   }
 };
 

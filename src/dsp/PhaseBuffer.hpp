@@ -18,38 +18,48 @@ namespace myrisa {
 struct PhaseBuffer {
 private:
   vector<float> buffer;
-  AntipopFilter antipop_filter;
+  // TODO ???
+  // AntipopFilter antipop_filter;
   rack::dsp::ClockDivider divider;
-  float last_sample;
 
 public:
-  enum BufferType { AUDIO, PARAM, CV, GATE, VOCT, VEL };
-  BufferType type;
+  enum Type { AUDIO, PARAM, CV, GATE, VOCT, VEL };
+  Type type;
 
-  PhaseBuffer(BufferType type) {
+  PhaseBuffer(Type type) {
     type = type;
     switch (type) {
-    case BufferType::AUDIO: case BufferType::CV:
+    case Type::AUDIO: case Type::CV:
       divider.setDivision(1);
       break;
-    case BufferType::GATE: case BufferType::VOCT: case BufferType::VEL:
+    case Type::GATE: case Type::VOCT: case Type::VEL:
       divider.setDivision(100); // approx every ~.25ms
       break;
-    case BufferType::PARAM:
+    case Type::PARAM:
       divider.setDivision(2000); // approx every ~5ms
       break;
     }
   }
 
+  int size() {
+    return buffer.size();
+  }
+
   void addToBack(float sample) {
-    if (divider.process()) {
+    if (size() == 0) {
+      buffer.push_back(sample);
+      divider.reset();
+    } else if (divider.process()) {
       buffer.push_back(sample);
     }
   }
 
   void addToFront(float sample) {
-    if (divider.process()) {
-      buffer.insert(sample, buffer.front(), 1);
+    if (size() == 0) {
+      buffer.insert(buffer.begin(), sample);
+      divider.reset();
+    } else if (divider.process()) {
+      buffer.insert(buffer.begin(), sample);
     }
   }
 
@@ -61,12 +71,12 @@ public:
     if (divider.process()) {
       int length = buffer.size();
       float position = length * phase;
-      int i = floor(position) == length ? floor(position) : length - 1;
+      int i = floor(position) == length ? length - 1 : floor(position);
 
       // TODO different more sophisticated ways to write?
       // FIXME explodes if in oscillator mode
-      if (type == BufferType::AUDIO)  {
-        int i2 = ceil(position) == length ? ceil(position) : 0;
+      if (type == Type::AUDIO)  {
+        int i2 = ceil(position) == length ? 0 : ceil(position);
         float w = position - i;
         buffer[i] += sample * (1 - w);
         buffer[i2] += sample * (w);
@@ -76,19 +86,19 @@ public:
     }
   }
 
-  float getAttenuatedBufferSample(double buffer_sample, double attenuation) {
+  float getAttenuatedSample(float buffer_sample, float attenuation) {
     ASSERT(0.0f, <=, attenuation);
 
     double clamped_attenuation = rack::clamp(attenuation, 0.0f, 1.0f);
 
     switch (type) {
-    case BufferType::GATE:
+    case Type::GATE:
       if (clamped_attenuation == 1.0f) {
         return 0.0f;
       } else {
         return buffer_sample;
       }
-    case BufferType::VOCT:
+    case Type::VOCT:
       return buffer_sample;
     default:
       return buffer_sample * (1.0f - clamped_attenuation);
@@ -108,24 +118,20 @@ public:
 
     int min_samples_for_interpolation = 4;
     if (size < min_samples_for_interpolation) {
-      last_sample = buffer[floor(buffer_position)];
-      return last_sample;
+      return buffer[floor(buffer_position)];
     }
 
-    double interpolated_sample;
     switch (type) {
-    case BufferType::AUDIO:
-      interpolated_sample = InterpolateHermite(buffer.data(), buffer_position, size);
-    case BufferType::CV:
-      interpolated_sample = interpolateLinearD(buffer.data(), buffer_position);
-    case BufferType::PARAM:
-      interpolated_sample = interpolateBSpline(buffer.data(), buffer_position);
-    case BufferType::GATE: case BufferType::VOCT: case BufferType::VEL:
-      interpolated_sample = buffer[floor(buffer_position)];
+    case Type::AUDIO:
+      // TODO fix clicks?
+      return InterpolateHermite(buffer.data(), buffer_position, size);
+    case Type::CV:
+      return interpolateLinearD(buffer.data(), buffer_position);
+    case Type::PARAM:
+      return interpolateBSpline(buffer.data(), buffer_position);
+    default:
+      return buffer[floor(buffer_position)];
     }
-
-    last_sample = interpolated_sample;
-    return last_sample;
   }
 };
 

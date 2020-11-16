@@ -12,10 +12,14 @@ void Scene::startNewLayer(Mode layer_mode) {
   // TODO FIXME have this selectable and depend on mode
   selected_layers = layers;
 
-  double length;
-  double start_division;
+  float length;
+  float start_division;
   if (layer_mode == Mode::DUB) {
-    start_division = floor(position);
+    if (fmod(position, 1.0f) < 0.95f) {
+      start_division = floor(position);
+    } else {
+      start_division = ceil(position);
+    }
     auto most_recent_target_layer = selected_layers.back();
     if (most_recent_target_layer) {
       length = most_recent_target_layer->length;
@@ -35,27 +39,27 @@ void Scene::startNewLayer(Mode layer_mode) {
   }
 
   // layers.push_back(new_layer);
-  printf("START recording\n");
+  printf("START recording, start div: %f, len %f\n", start_division, length);
 }
 
 // FIXME performance
 float Scene::getLayerAttenuation(int layer_i) {
   float layer_attenuation = 0.0f;
-  for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
-    for (auto target_layer : layers[j]->target_layers) {
-      if (target_layer == layers[layer_i]) {
-        layer_attenuation += layers[j]->readSendAttenuation(position);
-      }
-    }
-  }
+  // for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
+  //   for (auto target_layer : layers[j]->target_layers) {
+  //     if (target_layer == layers[layer_i]) {
+  //       layer_attenuation += layers[j]->readSendAttenuation(position);
+  //     }
+  //   }
+  // }
 
-  if (new_layer) {
-    for (auto target_layer : new_layer->target_layers) {
-      if (target_layer == layers[layer_i]) {
-        layer_attenuation += target_layer->readSendAttenuation(position);
-      }
-    }
-  }
+  // if (new_layer) {
+  //   for (auto target_layer : new_layer->target_layers) {
+  //     if (target_layer == layers[layer_i]) {
+  //       layer_attenuation += target_layer->readSendAttenuation(position);
+  //     }
+  //   }
+  // }
 
   return layer_attenuation;
 }
@@ -71,7 +75,7 @@ float Scene::read() {
   return out;
 }
 
-void Scene::stepPhase(float sample_time, bool use_ext_phase, float ext_phase) {
+void Scene::advancePosition(float sample_time, bool use_ext_phase, float ext_phase) {
   last_phase = phase;
   if (use_ext_phase) {
     ASSERT(0, <=, ext_phase);
@@ -79,55 +83,59 @@ void Scene::stepPhase(float sample_time, bool use_ext_phase, float ext_phase) {
     phase = ext_phase;
     phase_defined = true;
   } else if (!phase_defined) {
-    phase = 0.0;
+    phase = 0;
   } else {
     phase_oscillator.step(sample_time);
     phase = phase_oscillator.getPhase();
   }
-}
 
-void Scene::step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase) {
+  float phase_change = phase - last_phase;
+  bool phase_flip = (fabsf(phase_change) > 0.95f && fabsf(phase_change) <= 1.0f);
 
-  stepPhase(sample_time, use_ext_phase, ext_phase);
-  double phase_change = phase - last_phase;
-  bool phase_flip = (fabsf(phase_change) > 0.95 && fabsf(phase_change) <= 1.0);
-
-  double division = phase == 1.0f ? floor(phase - 0.01f) : floor(phase);
-
+  float division = position == 1.0f ? floor(position - 0.01f) : floor(position);
   if (phase_flip) {
     if (0 < phase_change && 0 < division) {
       division--;
     } else if (phase_change < 0) {
       division++;
     }
-
-    if (mode == Mode::DUB) {
-      assert(new_layer != NULL);
-      printf("END recording via overdub\n");
-      printf("-- start div: %d, length: %d\n", new_layer->start_division, new_layer->length);
-
-      if (new_layer->start_division + new_layer->length == division) {
-        finishNewLayer();
-        startNewLayer(Mode::DUB);
-      }
-    }
   }
+
+  position = division + phase;
+}
+
+void Scene::step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase) {
+  float division = position == 1.0f ? floor(position - 0.01f) : floor(position);
 
   if (mode == Mode::EXTEND) {
     assert(new_layer != NULL);
     if (0.50f < phase && new_layer->start_division + new_layer->length <= division) {
       new_layer->length++;
     }
+  } else if (mode == Mode::DUB) {
+    assert(new_layer != NULL);
+    if (new_layer->start_division + new_layer->length == division) {
+      printf("END recording via overdub\n");
+      printf("-- start div: %f, length: %f\n", new_layer->start_division, new_layer->length);
+      finishNewLayer();
+      startNewLayer(Mode::DUB);
+    }
   }
 
   if (mode != Mode::READ) {
     assert(new_layer != NULL);
-    new_layer->write(position, in, attenuation_power);
+
+    if (mode == Mode::DEFINE_DIVISION) {
+      new_layer->writeByCreatingDivision(in, attenuation_power);
+    } else {
+      new_layer->write(position, in, attenuation_power);
+    }
+
     // FIXME do not need to set every loop..
     new_layer->sample_time = sample_time;
   }
 
-  position = division + phase;
+  advancePosition(sample_time, use_ext_phase, ext_phase);
 }
 
 void Scene::finishNewLayer() {
@@ -142,7 +150,7 @@ void Scene::finishNewLayer() {
   }
 
   printf("END recording\n");
-  printf("-- start div: %d, length: %d\n", new_layer->start_division,
+  printf("-- start div: %f, length: %f\n", new_layer->start_division,
          new_layer->length);
 
   layers.push_back(new_layer);

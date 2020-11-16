@@ -63,7 +63,7 @@ public:
     }
   }
 
-  void replace(double phase, float sample) {
+  void replace(float phase, float sample) {
     ASSERT(0, <, buffer.size());
     ASSERT(0.0f, <=, phase);
     ASSERT(phase, <=, 1.0f);
@@ -89,7 +89,7 @@ public:
   float getAttenuatedSample(float buffer_sample, float attenuation) {
     ASSERT(0.0f, <=, attenuation);
 
-    double clamped_attenuation = rack::clamp(attenuation, 0.0f, 1.0f);
+    float clamped_attenuation = rack::clamp(attenuation, 0.0f, 1.0f);
 
     switch (type) {
     case Type::GATE:
@@ -105,7 +105,7 @@ public:
     }
   }
 
-  float read(double phase) {
+  float read(float phase) {
     ASSERT(0.0f, <=, phase);
     ASSERT(phase, <=, 1.0f);
 
@@ -114,7 +114,7 @@ public:
       return 0.0f;
     }
 
-    double buffer_position = size * phase;
+    float buffer_position = size * phase;
 
     int min_samples_for_interpolation = 4;
     if (size < min_samples_for_interpolation) {

@@ -24,13 +24,14 @@ private:
 
   PhaseOscillator phase_oscillator;
   bool phase_defined = false;
-  double last_phase = 0.0;
-  double position = 0.0;
+  float last_phase = 0.0;
+  float position = 0.0;
 
   float getLayerAttenuation(int layer_i);
   void startNewLayer(Mode layer_mode);
   void finishNewLayer();
   void stepPhase(float sample_time, bool use_ext_phase, float ext_phase);
+  void advancePosition(float sample_time, bool use_ext_phase, float ext_phase);
 
 public:
   virtual ~Scene() {
@@ -43,13 +44,13 @@ public:
     }
   }
 
-  double phase = 0.0f;
+  float phase = 0.0f;
   Mode mode = Mode::READ;
 
   void setMode(Mode new_mode);
   bool isEmpty();
   void undo();
-  void step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase);
   float read();
+  void step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase);
 };
 } // namespace myrisa

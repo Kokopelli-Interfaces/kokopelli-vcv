@@ -16,25 +16,27 @@ private:
   PhaseBuffer *send_attenuation;
 
   // relative to start_division
-  pair<double, double> recording_offset_in_layer;
+  pair<float, float> recording_offset_in_layer;
 
-  bool inBounds(double scene_position) {
+  bool inBounds(float scene_position) {
     if (scene_position < start_division + recording_offset_in_layer.first) {
       return false;
     }
 
-    double layer_position = fmod(scene_position - start_division, length);
+    float layer_position = fmod(scene_position - start_division, length);
     return (recording_offset_in_layer.first <= layer_position && layer_position <= recording_offset_in_layer.second);
   }
 
-  double getBufferPhase(double scene_position) {
-    double recording_length = recording_offset_in_layer.second - recording_offset_in_layer.first;
-    double layer_position = fmod(scene_position - start_division, length);
-    return (layer_position - recording_offset_in_layer.first) / recording_length;
+  float getBufferPhase(float scene_position) {
+    float recording_length = recording_offset_in_layer.second - recording_offset_in_layer.first;
+    float layer_position = fmod(scene_position - start_division, length);
+    ASSERT(0, <, recording_length);
+    float buffer_phase = (layer_position - recording_offset_in_layer.first) / recording_length;
+    return buffer_phase;
   }
 
 public:
-  Layer(double layer_start_division, double layer_length) {
+  Layer(float layer_start_division, float layer_length) {
     start_division = layer_start_division;
     length = layer_length;
     // TODO more buffers in future, according to frame IO modules
@@ -48,18 +50,29 @@ public:
     delete send_attenuation;
   }
 
-  double start_division;
-  double length;
+  float start_division;
+  float length;
   int num_samples = 0;
 
   vector<Layer *> target_layers;
   bool fully_attenuated = false;
-  float sample_time = 1.0;
+  float sample_time = 1.0f;
 
-  void write(double scene_position, float sample, float attenuation) {
+  void writeByCreatingDivision(float sample, float attenuation) {
+    if (num_samples == 0) {
+      recording_offset_in_layer.first = 0.0f;
+      recording_offset_in_layer.second = 1.0f;
+    }
+
+    buffer->addToBack(sample);
+    send_attenuation->addToBack(attenuation);
+    num_samples++;
+  }
+
+  void write(float scene_position, float sample, float attenuation) {
     // have to consider case where we are recording with external phase
     // e.g. one could start recording forward and then go in reverse
-    double position_relative_to_start_division = scene_position - start_division;
+    float position_relative_to_start_division = scene_position - start_division;
 
     if (num_samples == 0) {
       recording_offset_in_layer.first = position_relative_to_start_division;
@@ -72,27 +85,36 @@ public:
       send_attenuation->addToFront(attenuation);
       recording_offset_in_layer.first = position_relative_to_start_division;
       num_samples++;
-    } else if (recording_offset_in_layer.second <= position_relative_to_start_division) {
+    } else if (recording_offset_in_layer.second < position_relative_to_start_division) {
       buffer->addToBack(sample);
       send_attenuation->addToBack(attenuation);
       recording_offset_in_layer.second = position_relative_to_start_division;
       num_samples++;
+      // printf("ADDTOBACK: pos_rel_start %f, recording_offsets: %f "
+      //        "%f, lyaer len %f\n",
+      //        position_relative_to_start_division,
+      //        recording_offset_in_layer.first, recording_offset_in_layer.second,
+      //        length);
     } else {
-      double buffer_phase = getBufferPhase(scene_position);
-      printf("REPALCING: buf phase %f, pos_rel_start %f, recording_offsets: %f %f, lyaer len %f\n", buffer_phase, position_relative_to_start_division, recording_offset_in_layer.first, recording_offset_in_layer.second, length);
+      float buffer_phase = getBufferPhase(scene_position);
+      // printf("REPALCING: scene pos %f, buf phase %f, pos_rel_start %f, "
+      //        "recording_offsets: %f %f, lyaer len %f\n",
+      //        scene_position, buffer_phase, position_relative_to_start_division,
+      //        recording_offset_in_layer.first, recording_offset_in_layer.second,
+      //        length);
       buffer->replace(buffer_phase, sample);
       send_attenuation->replace(getBufferPhase(scene_position), attenuation);
     }
   }
 
-  float readSample(double scene_position) {
+  float readSample(float scene_position) {
     if (!inBounds(scene_position)) {
       return 0.0f;
     }
     return buffer->read(getBufferPhase(scene_position));
   }
 
-  float readSampleWithAttenuation(double scene_position, double attenuation) {
+  float readSampleWithAttenuation(float scene_position, float attenuation) {
     float sample = readSample(scene_position);
     if (sample == 0.0f) {
       return 0.0f;
@@ -100,7 +122,7 @@ public:
     return buffer->getAttenuatedSample(sample, attenuation);
   }
 
-  float readSendAttenuation(double scene_position) {
+  float readSendAttenuation(float scene_position) {
     if (!inBounds(scene_position)) {
       return 0.0f;
     }

@@ -148,7 +148,7 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   Engine &e = *_engines[0];
-  double phase = e.active_scene->phase;
+  float phase = e.active_scene->phase;
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(phase, _sampleTime * light_divider.getDivision());
 

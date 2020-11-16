@@ -15,7 +15,7 @@ enum Interpolations
 };
 
 // https://github.com/chen0040/cpp-spline
-inline float BSpline(const float P0, const float P1, const float P2, const float P3, double u)
+inline float BSpline(const float P0, const float P1, const float P2, const float P3, float u)
 {
     float point;
     point = u * u * u * ((-1) * P0 + 3 * P1 - 3 * P2 + P3) / 6;
@@ -35,10 +35,10 @@ inline float Hermite4pt3oX(float x0, float x1, float x2, float x3, float t)
     return (((((c3 * t) + c2) * t) + c1) * t) + c0;
 }
 
-/** Double precission index `x`.
+/** Float precission index `x`.
 The array at `p` must be at least length `floor(x) + 2`.
 */
-inline float interpolateLinearD(float* data, double index) {
+inline float interpolateLinearD(float* data, float index) {
     int x1 = floor(index);
     float t = index - x1;
     return rack::crossfade(data[x1], data[x1+1], t);
@@ -46,21 +46,21 @@ inline float interpolateLinearD(float* data, double index) {
 
 /** The array at `p` must be at least length `floor(x) + 3`.
  */
-inline float InterpolateHermite(float* data, double index) {
+inline float InterpolateHermite(float* data, float index) {
     int x1 = floor(index);
     float t = index - x1;
     return Hermite4pt3oX(data[x1 - 1], data[x1], data[x1 + 1], data[x1 + 2], t);
 }
 
 /* The array at `p` must be at least length `floor(x) + 3`. */
-inline float interpolateBSpline(const float* data, double index) {
+inline float interpolateBSpline(const float* data, float index) {
     int x1 = floor(index);
     float t = index - x1;
     return BSpline(data[x1 - 1], data[x1], data[x1 + 1], data[x1 + 2], t);
 }
 
 /** interpolates an array. Warps. */
-inline float interpolateLineard(float* data, double index, int dataLen) {
+inline float interpolateLineard(float* data, float index, int dataLen) {
     int x1 = floor(index);
     int x2 = (x1 + 1) % dataLen;
     float t = index - x1;
@@ -68,7 +68,7 @@ inline float interpolateLineard(float* data, double index, int dataLen) {
 }
 
 /** interpolates an array. Warps. */
-inline float InterpolateHermite(float* data, double index, int dataLen) {
+inline float InterpolateHermite(float* data, float index, int dataLen) {
     int x1 = (int)floor(index);
     int x0 = (x1 < 1) ? dataLen - 1 : x1 - 1;
     int x2 = (x1 + 1) % dataLen;
@@ -78,7 +78,7 @@ inline float InterpolateHermite(float* data, double index, int dataLen) {
 }
 
 /** interpolates an array. Warps. */
-inline float interpolateBSpline(const float* data, double index, int dataLen) {
+inline float interpolateBSpline(const float* data, float index, int dataLen) {
     int x1 = (int)floor(index);
     int x0 = (x1 < 1) ? dataLen - 1 : x1 - 1;
     int x2 = (x1 + 1) % dataLen;

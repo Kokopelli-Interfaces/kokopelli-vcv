@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Frame_IO.hpp"
-#include "Scene.hpp"
+#include "components/Scene.hpp"
 
 using namespace std;
 

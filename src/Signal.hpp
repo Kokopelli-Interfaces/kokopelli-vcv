@@ -11,6 +11,7 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
   struct Engine {
     float mix = 0.5f;
     float vca = 0.0f;
+    float last_out = 0.0f;
   };
 
   Engine *_engines[maxChannels] {};

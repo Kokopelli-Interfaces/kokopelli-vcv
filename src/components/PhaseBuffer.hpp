@@ -3,7 +3,7 @@
 #include <math.h>
 #include <vector>
 
-#include "../Layer.hpp"
+#include "Layer.hpp"
 #include "../assert.hpp"
 #include "Antipop.hpp"
 #include "Interpolation.hpp"
@@ -19,7 +19,7 @@ struct PhaseBuffer {
 private:
   vector<float> buffer;
   // TODO ???
-  // AntipopFilter antipop_filter;
+  AntipopFilter antipop_filter;
   rack::dsp::ClockDivider divider;
 
 public:
@@ -115,20 +115,19 @@ public:
     }
 
     float buffer_position = size * phase;
-
     int min_samples_for_interpolation = 4;
     if (size < min_samples_for_interpolation) {
       return buffer[floor(buffer_position)];
     }
 
     switch (type) {
-    case Type::AUDIO:
-      // TODO fix clicks?
-      return InterpolateHermite(buffer.data(), buffer_position, size);
-    case Type::CV:
-      return interpolateLinearD(buffer.data(), buffer_position);
-    case Type::PARAM:
-      return interpolateBSpline(buffer.data(), buffer_position);
+    // case Type::AUDIO:
+    //   // TODO fix clicks?
+    //   return InterpolateHermite(buffer.data(), buffer_position, size);
+    // case Type::CV:
+    //   return interpolateLinearD(buffer.data(), buffer_position);
+    // case Type::PARAM:
+    //   return interpolateBSpline(buffer.data(), buffer_position);
     default:
       return buffer[floor(buffer_position)];
     }

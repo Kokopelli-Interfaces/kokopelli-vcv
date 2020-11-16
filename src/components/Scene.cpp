@@ -12,15 +12,24 @@ void Scene::startNewLayer(Mode layer_mode) {
   // TODO FIXME have this selectable and depend on mode
   selected_layers = layers;
 
-  float length = 1;
+  float length;
+  float start_division;
   if (layer_mode == Mode::DUB) {
+    if (fmod(position, 1.0f) < 0.95f) {
+      start_division = floor(position);
+    } else {
+      start_division = ceil(position);
+    }
     auto most_recent_target_layer = selected_layers.back();
     if (most_recent_target_layer) {
       length = most_recent_target_layer->length;
+    } else {
+      length = 1;
     }
+  } else {
+    start_division = round(position);
+    length = 1;
   }
-
-  float start_division = floor(position);
   new_layer = new Layer(start_division, length);
 
   for (auto selected_layer : selected_layers) {

@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "rack.hpp"
-#include "dsp/PhaseBuffer.hpp"
+#include "PhaseBuffer.hpp"
 
 using namespace std;
 
@@ -108,10 +108,12 @@ public:
   }
 
   float readSample(float scene_position) {
-    if (!inBounds(scene_position)) {
-      return 0.0f;
+    float sample = 0.0f;
+    if (inBounds(scene_position)) {
+      sample = buffer->read(getBufferPhase(scene_position));
     }
-    return buffer->read(getBufferPhase(scene_position));
+
+    return sample;
   }
 
   float readSampleWithAttenuation(float scene_position, float attenuation) {

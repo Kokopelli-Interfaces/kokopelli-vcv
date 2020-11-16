@@ -4,10 +4,10 @@
 #include <vector>
 
 #include "Layer.hpp"
-#include "dsp/PhaseOscillator.hpp"
+#include "PhaseOscillator.hpp"
 #include "rack.hpp"
 #include <assert.h>
-#include "assert.hpp"
+#include "../assert.hpp"
 
 using namespace std;
 

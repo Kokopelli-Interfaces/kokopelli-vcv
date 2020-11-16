@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Frame_IO.hpp"
-#include "components/Scene.hpp"
+#include "Scene.hpp"
 
 using namespace std;
 
@@ -51,8 +51,8 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
     void startRecording();
     void endRecording();
-    void step(float in, float sample_time);
-    float read();
+    inline void step(float in, float sample_time);
+    inline float read();
     bool deltaEngaged();
 
     virtual ~Engine() {

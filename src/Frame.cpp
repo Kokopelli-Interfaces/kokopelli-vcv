@@ -57,7 +57,7 @@ void Frame::Engine::endRecording() {
 
 // TODO customizable respoonse?
 // TODO attenuation clk divider, get smooth value
-float getAttenuationPower(float delta, float recording_threshold) {
+inline float getAttenuationPower(float delta, float recording_threshold) {
   float read_position = 0.50f;
   float linear_attenuation_power;
   if (delta < read_position - recording_threshold) {
@@ -76,7 +76,7 @@ float getAttenuationPower(float delta, float recording_threshold) {
   return attenuation_power;
 }
 
-void Frame::Engine::step(float in, float sample_time) {
+inline void Frame::Engine::step(float in, float sample_time) {
   float attenuation_power = 0.0f;
   if (recording) {
     attenuation_power = getAttenuationPower(delta, record_threshold);
@@ -89,7 +89,7 @@ void Frame::Engine::step(float in, float sample_time) {
   }
 }
 
-float Frame::Engine::read() {
+inline float Frame::Engine::read() {
   int scene_1 = floor(scene_position);
   int scene_2 = ceil(scene_position);
   float weight = scene_position - floor(scene_position);

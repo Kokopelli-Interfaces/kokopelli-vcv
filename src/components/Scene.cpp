@@ -1,35 +1,23 @@
-#include "components/Scene.hpp"
+#include "Scene.hpp"
 
 using namespace myrisa;
 
-bool Scene::isEmpty() {
-  return (layers.size() == 0);
-}
 
-void Scene::startNewLayer(Mode layer_mode) {
+inline void Scene::startNewLayer(Mode layer_mode) {
   ASSERT(layer_mode, !=, Mode::READ);
 
   // TODO FIXME have this selectable and depend on mode
   selected_layers = layers;
 
-  float length;
-  float start_division;
+  float length = 1;
   if (layer_mode == Mode::DUB) {
-    if (fmod(position, 1.0f) < 0.95f) {
-      start_division = floor(position);
-    } else {
-      start_division = ceil(position);
-    }
     auto most_recent_target_layer = selected_layers.back();
     if (most_recent_target_layer) {
       length = most_recent_target_layer->length;
-    } else {
-      length = 1;
     }
-  } else {
-    start_division = round(position);
-    length = 1;
   }
+
+  float start_division = floor(position);
   new_layer = new Layer(start_division, length);
 
   for (auto selected_layer : selected_layers) {
@@ -42,24 +30,44 @@ void Scene::startNewLayer(Mode layer_mode) {
   printf("START recording, start div: %f, len %f\n", start_division, length);
 }
 
-// FIXME performance
-float Scene::getLayerAttenuation(int layer_i) {
-  float layer_attenuation = 0.0f;
-  // for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
-  //   for (auto target_layer : layers[j]->target_layers) {
-  //     if (target_layer == layers[layer_i]) {
-  //       layer_attenuation += layers[j]->readSendAttenuation(position);
-  //     }
-  //   }
-  // }
+inline void Scene::finishNewLayer() {
+  assert(new_layer != NULL);
+  // FIXME  just using last layer as example
+  if (isEmpty() || mode == Mode::DEFINE_DIVISION) {
+    int samples_per_division = new_layer->num_samples;
+    ASSERT(1, <, samples_per_division);
+    phase_oscillator.setPitch(1 /
+                              (samples_per_division * new_layer->sample_time));
+    phase_defined = true;
+    printf("phase defined\n");
+  }
 
-  // if (new_layer) {
-  //   for (auto target_layer : new_layer->target_layers) {
-  //     if (target_layer == layers[layer_i]) {
-  //       layer_attenuation += target_layer->readSendAttenuation(position);
-  //     }
-  //   }
-  // }
+  printf("END recording\n");
+  printf("-- start div: %f, length: %f\n", new_layer->start_division,
+         new_layer->length);
+
+  layers.push_back(new_layer);
+  new_layer = NULL;
+}
+
+// FIXME performance
+inline float Scene::getLayerAttenuation(int layer_i) {
+  float layer_attenuation = 0.0f;
+  for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
+    for (auto target_layer : layers[j]->target_layers) {
+      if (target_layer == layers[layer_i]) {
+        layer_attenuation += layers[j]->readSendAttenuation(position);
+      }
+    }
+  }
+
+  if (new_layer) {
+    for (auto target_layer : new_layer->target_layers) {
+      if (target_layer == layers[layer_i]) {
+        layer_attenuation += target_layer->readSendAttenuation(position);
+      }
+    }
+  }
 
   return layer_attenuation;
 }
@@ -75,7 +83,7 @@ float Scene::read() {
   return out;
 }
 
-void Scene::advancePosition(float sample_time, bool use_ext_phase, float ext_phase) {
+inline void Scene::advancePosition(float sample_time, bool use_ext_phase, float ext_phase) {
   last_phase = phase;
   if (use_ext_phase) {
     ASSERT(0, <=, ext_phase);
@@ -138,24 +146,6 @@ void Scene::step(float in, float attenuation_power, float sample_time, bool use_
   advancePosition(sample_time, use_ext_phase, ext_phase);
 }
 
-void Scene::finishNewLayer() {
-  assert(new_layer != NULL);
-  // FIXME  just using last layer as example
-  if (isEmpty() || mode == Mode::DEFINE_DIVISION) {
-    int samples_per_division = new_layer->num_samples;
-    ASSERT(1, <, samples_per_division);
-    phase_oscillator.setPitch(1 / (samples_per_division * new_layer->sample_time));
-    phase_defined = true;
-    printf("phase defined\n");
-  }
-
-  printf("END recording\n");
-  printf("-- start div: %f, length: %f\n", new_layer->start_division,
-         new_layer->length);
-
-  layers.push_back(new_layer);
-  new_layer = NULL;
-}
 
 void Scene::setMode(Mode new_mode) {
   if (mode != Mode::READ && new_mode == Mode::READ) {
@@ -168,3 +158,5 @@ void Scene::setMode(Mode new_mode) {
 
   mode = new_mode;
 }
+
+bool Scene::isEmpty() { return (layers.size() == 0); }

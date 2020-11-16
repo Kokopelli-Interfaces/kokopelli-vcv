@@ -18,7 +18,7 @@ private:
   // relative to start_division
   pair<float, float> recording_offset_in_layer;
 
-  bool inBounds(float scene_position) {
+  inline bool inBounds(float scene_position) {
     if (scene_position < start_division + recording_offset_in_layer.first) {
       return false;
     }
@@ -27,7 +27,7 @@ private:
     return (recording_offset_in_layer.first <= layer_position && layer_position <= recording_offset_in_layer.second);
   }
 
-  float getBufferPhase(float scene_position) {
+  inline float getBufferPhase(float scene_position) {
     float recording_length = recording_offset_in_layer.second - recording_offset_in_layer.first;
     float layer_position = fmod(scene_position - start_division, length);
     ASSERT(0, <, recording_length);
@@ -58,7 +58,7 @@ public:
   bool fully_attenuated = false;
   float sample_time = 1.0f;
 
-  void writeByCreatingDivision(float sample, float attenuation) {
+  inline void writeByCreatingDivision(float sample, float attenuation) {
     if (num_samples == 0) {
       recording_offset_in_layer.first = 0.0f;
       recording_offset_in_layer.second = 1.0f;
@@ -69,7 +69,7 @@ public:
     num_samples++;
   }
 
-  void write(float scene_position, float sample, float attenuation) {
+  inline void write(float scene_position, float sample, float attenuation) {
     // have to consider case where we are recording with external phase
     // e.g. one could start recording forward and then go in reverse
     float position_relative_to_start_division = scene_position - start_division;
@@ -107,7 +107,7 @@ public:
     }
   }
 
-  float readSample(float scene_position) {
+  inline float readSample(float scene_position) {
     float sample = 0.0f;
     if (inBounds(scene_position)) {
       sample = buffer->read(getBufferPhase(scene_position));
@@ -116,7 +116,7 @@ public:
     return sample;
   }
 
-  float readSampleWithAttenuation(float scene_position, float attenuation) {
+  inline float readSampleWithAttenuation(float scene_position, float attenuation) {
     float sample = readSample(scene_position);
     if (sample == 0.0f) {
       return 0.0f;
@@ -124,7 +124,7 @@ public:
     return buffer->getAttenuatedSample(sample, attenuation);
   }
 
-  float readSendAttenuation(float scene_position) {
+  inline float readSendAttenuation(float scene_position) {
     if (!inBounds(scene_position)) {
       return 0.0f;
     }

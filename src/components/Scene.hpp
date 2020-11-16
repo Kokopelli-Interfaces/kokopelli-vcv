@@ -3,11 +3,12 @@
 #include <tuple>
 #include <vector>
 
+#include "../assert.hpp"
 #include "Layer.hpp"
 #include "PhaseOscillator.hpp"
+
 #include "rack.hpp"
 #include <assert.h>
-#include "../assert.hpp"
 
 using namespace std;
 
@@ -27,11 +28,10 @@ private:
   float last_phase = 0.0;
   float position = 0.0;
 
-  float getLayerAttenuation(int layer_i);
-  void startNewLayer(Mode layer_mode);
-  void finishNewLayer();
-  void stepPhase(float sample_time, bool use_ext_phase, float ext_phase);
-  void advancePosition(float sample_time, bool use_ext_phase, float ext_phase);
+  inline void startNewLayer(Mode layer_mode);
+  inline void finishNewLayer();
+  inline float getLayerAttenuation(int layer_i);
+  inline void advancePosition(float sample_time, bool use_ext_phase, float ext_phase);
 
 public:
   virtual ~Scene() {

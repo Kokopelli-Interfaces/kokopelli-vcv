@@ -11,21 +11,21 @@ struct PhaseOscillator {
 
   PhaseOscillator() {}
 
-  void setPitch(float pitch) {
+  inline void setPitch(float pitch) {
     freq = pitch;
   }
 
-  void reset(float value) {
+  inline void reset(float value) {
     this->phase = std::fmod(value, 1.0f);
   }
 
-  void step(float dt) {
+  inline void step(float dt) {
     float deltaPhase = freq * dt;
     float sum = phase + deltaPhase;
     this->phase = rack::math::eucMod(sum, 1.0f);
   }
 
-  float getPhase() {
+  inline float getPhase() {
     return this->phase;
   }
 };

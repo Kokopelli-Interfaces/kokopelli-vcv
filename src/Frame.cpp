@@ -18,11 +18,11 @@ void Frame::modulateChannel(int c) {
     e.delta *= clamp(inputs[DELTA_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
   }
 
-  e.scene_position = params[SCENE_PARAM].getValue();
+  e.scene_position = params[SCENE_PARAM].getValue() * (numScenes - 1);
   if (inputs[SCENE_INPUT].isConnected()) {
-    e.scene_position *= clamp(inputs[SCENE_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
+    e.scene_position += clamp(inputs[SCENE_INPUT].getPolyVoltage(c), -5.0f, 5.0f);
   }
-  e.scene_position *= numScenes;
+  e.scene_position = clamp(e.scene_position, 0.0f, 15.0f);
 
   int active_scene_i = round(e.scene_position);
   Scene *active_scene = e.scenes[active_scene_i];

@@ -2,7 +2,6 @@
 
 using namespace myrisa;
 
-
 inline void Scene::startNewLayer(Mode layer_mode) {
   ASSERT(layer_mode, !=, Mode::READ);
 
@@ -53,18 +52,26 @@ inline void Scene::finishNewLayer() {
 // FIXME performance
 inline float Scene::getLayerAttenuation(int layer_i) {
   float layer_attenuation = 0.0f;
-  for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
-    for (auto target_layer : layers[j]->target_layers) {
+  if (new_layer) {
+    for (auto target_layer : new_layer->target_layers) {
       if (target_layer == layers[layer_i]) {
-        layer_attenuation += layers[j]->readSendAttenuation(position);
+        layer_attenuation += last_attenuation;
+        break;
       }
     }
   }
 
-  if (new_layer) {
-    for (auto target_layer : new_layer->target_layers) {
+  if (1.0f <= layer_attenuation) {
+    return 1.0f;
+  }
+
+  for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
+    for (auto target_layer : layers[j]->target_layers) {
       if (target_layer == layers[layer_i]) {
-        layer_attenuation += target_layer->readSendAttenuation(position);
+        layer_attenuation += layers[j]->readSendAttenuation(position);
+        if (1.0f <= layer_attenuation) {
+          return 1.0f;
+        }
       }
     }
   }
@@ -76,8 +83,10 @@ float Scene::read() {
   float out = 0.0f;
   for (unsigned int i = 0; i < layers.size(); i++) {
     float layer_attenuation = getLayerAttenuation(i);
-    float layer_out = layers[i]->readSampleWithAttenuation(position, layer_attenuation);
-    out += layer_out;
+    if (layer_attenuation < 1.0f) {
+      float layer_out = layers[i]->readSampleWithAttenuation(position, layer_attenuation);
+      out += layer_out;
+    }
   }
 
   return out;
@@ -114,6 +123,7 @@ inline void Scene::advancePosition(float sample_time, bool use_ext_phase, float 
 
 void Scene::step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase) {
   float division = position == 1.0f ? floor(position - 0.01f) : floor(position);
+  last_attenuation = attenuation_power;
 
   if (mode == Mode::EXTEND) {
     assert(new_layer != NULL);

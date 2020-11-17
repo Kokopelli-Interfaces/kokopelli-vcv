@@ -25,8 +25,9 @@ private:
 
   PhaseOscillator phase_oscillator;
   bool phase_defined = false;
-  float last_phase = 0.0;
-  float position = 0.0;
+  float last_phase = 0.0f;
+  float last_attenuation = 0.0f;
+  float position = 0.0f;
 
   inline void startNewLayer(Mode layer_mode);
   inline void finishNewLayer();

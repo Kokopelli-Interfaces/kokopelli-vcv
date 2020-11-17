@@ -5,7 +5,6 @@
 
 #include "Layer.hpp"
 #include "../assert.hpp"
-#include "Antipop.hpp"
 #include "Interpolation.hpp"
 #include "rack.hpp"
 
@@ -19,7 +18,6 @@ struct PhaseBuffer {
 private:
   vector<float> buffer;
   // TODO ???
-  AntipopFilter antipop_filter;
   rack::dsp::ClockDivider divider;
 
 public:
@@ -47,8 +45,8 @@ public:
 
   void addToBack(float sample) {
     if (size() == 0) {
-      buffer.push_back(sample);
       divider.reset();
+      buffer.push_back(sample);
     } else if (divider.process()) {
       buffer.push_back(sample);
     }
@@ -105,6 +103,26 @@ public:
     }
   }
 
+  inline float rescale(float x2, float x1, float y2, float y1) {
+    return (x2 - x1) / (y2 - y1);
+  }
+
+  inline float crossfadeSample(float sample, float phase) {
+    const int num_audio_samples_to_fade = 50;
+    float fade_length = (float)num_audio_samples_to_fade / (float)buffer.size();
+    if (1.0f < fade_length) {
+      fade_length = 0.5f;
+    }
+
+    if (fade_length <= phase) {
+      return sample;
+    }
+
+    float fade_amount = rescale(phase, 0.0f, fade_length, 0.0f);
+    printf("fade: %f\n", fade_amount);
+    return rack::crossfade(buffer[buffer.size()-1], sample, fade_amount);
+  }
+
   float read(float phase) {
     ASSERT(0.0f, <=, phase);
     ASSERT(phase, <=, 1.0f);
@@ -120,15 +138,14 @@ public:
       return buffer[floor(buffer_position)];
     }
 
-    switch (type) {
-    // case Type::AUDIO:
-    //   // TODO fix clicks?
-    //   return InterpolateHermite(buffer.data(), buffer_position, size);
-    // case Type::CV:
-    //   return interpolateLinearD(buffer.data(), buffer_position);
-    // case Type::PARAM:
-    //   return interpolateBSpline(buffer.data(), buffer_position);
-    default:
+    if (type == Type::AUDIO) {
+      float interpolated_sample = InterpolateHermite(buffer.data(), buffer_position);
+      return crossfadeSample(interpolated_sample, phase);
+    } else if (type == Type::CV) {
+      return interpolateLinearD(buffer.data(), buffer_position);
+    } else if (type == Type::PARAM) {
+      return interpolateBSpline(buffer.data(), buffer_position);
+    } else {
       return buffer[floor(buffer_position)];
     }
   }

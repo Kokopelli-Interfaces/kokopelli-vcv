@@ -7,17 +7,17 @@ struct AntipopFilter {
     float alpha_ = 0.00001f;
     float filter_;
 
-    void trigger() {
+    inline void trigger() {
         alpha_ = 0.0f;
     }
 
-    float process(float in, float sample_time) {
+    inline float process(float in) {
         if (alpha_ >= 1.0f) {
             filter_ = in;
             return in;
         }
 
-        alpha_ += sample_time * 1500; //  (args.sampleRate / 32);
+        alpha_ += 3000.0 / 44100.0; // recovers in ~30 samples
 
         filter_ += alpha_ * (in - filter_);
 

@@ -3,8 +3,8 @@
 #include <math.h>
 #include <vector>
 
-#include "rack.hpp"
 #include "PhaseBuffer.hpp"
+#include "rack.hpp"
 
 using namespace std;
 
@@ -90,18 +90,8 @@ public:
       send_attenuation->addToBack(attenuation);
       recording_offset_in_layer.second = position_relative_to_start_division;
       num_samples++;
-      // printf("ADDTOBACK: pos_rel_start %f, recording_offsets: %f "
-      //        "%f, lyaer len %f\n",
-      //        position_relative_to_start_division,
-      //        recording_offset_in_layer.first, recording_offset_in_layer.second,
-      //        length);
     } else {
       float buffer_phase = getBufferPhase(scene_position);
-      // printf("REPALCING: scene pos %f, buf phase %f, pos_rel_start %f, "
-      //        "recording_offsets: %f %f, lyaer len %f\n",
-      //        scene_position, buffer_phase, position_relative_to_start_division,
-      //        recording_offset_in_layer.first, recording_offset_in_layer.second,
-      //        length);
       buffer->replace(buffer_phase, sample);
       send_attenuation->replace(getBufferPhase(scene_position), attenuation);
     }
@@ -129,7 +119,9 @@ public:
       return 0.0f;
     }
 
-    return send_attenuation->read(getBufferPhase(scene_position));
+    float attenuation = send_attenuation->read(getBufferPhase(scene_position));
+
+    return rack::clamp(attenuation, 0.0f, 1.0f);
   }
 };
 

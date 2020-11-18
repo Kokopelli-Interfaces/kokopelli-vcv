@@ -14,8 +14,8 @@ using namespace std;
 
 namespace myrisa {
 
-struct Scene {
-  enum Mode { DEFINE_DIVISION, DUB, EXTEND, READ };
+struct Section {
+  enum Mode { DEFINE_DIVISION_LENGTH, DUB, EXTEND, READ };
 
 private:
   vector<Layer*> layers;
@@ -27,15 +27,15 @@ private:
   bool phase_defined = false;
   float last_phase = 0.0f;
   float last_attenuation = 0.0f;
-  float position = 0.0f;
+  float last_sample_time = 1.0f;
 
-  inline void startNewLayer(Mode layer_mode);
+  inline void startNewLayer();
   inline void finishNewLayer();
   inline float getLayerAttenuation(int layer_i);
   inline void advancePosition(float sample_time, bool use_ext_phase, float ext_phase);
 
 public:
-  virtual ~Scene() {
+  virtual ~Section() {
     for (auto layer : layers) {
       delete layer;
     }
@@ -45,6 +45,7 @@ public:
     }
   }
 
+  int division = 0;
   float phase = 0.0f;
   Mode mode = Mode::READ;
 

@@ -18,19 +18,19 @@ void Frame::modulateChannel(int c) {
     e.delta *= clamp(inputs[DELTA_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
   }
 
-  e.scene_position = params[SCENE_PARAM].getValue() * (numScenes - 1);
-  if (inputs[SCENE_INPUT].isConnected()) {
-    e.scene_position += clamp(inputs[SCENE_INPUT].getPolyVoltage(c), -5.0f, 5.0f);
+  e.section_position = params[SECTION_PARAM].getValue() * (numSections - 1);
+  if (inputs[SECTION_INPUT].isConnected()) {
+    e.section_position += clamp(inputs[SECTION_INPUT].getPolyVoltage(c), -5.0f, 5.0f);
   }
-  e.scene_position = clamp(e.scene_position, 0.0f, 15.0f);
+  e.section_position = clamp(e.section_position, 0.0f, 15.0f);
 
-  int active_scene_i = round(e.scene_position);
-  Scene *active_scene = e.scenes[active_scene_i];
-  if (!active_scene) {
-    active_scene = new Scene();
-    e.scenes[active_scene_i] = active_scene;
+  int active_section_i = round(e.section_position);
+  Section *active_section = e.sections[active_section_i];
+  if (!active_section) {
+    active_section = new Section();
+    e.sections[active_section_i] = active_section;
   }
-  e.active_scene = active_scene;
+  e.active_section = active_section;
 }
 
 bool Frame::Engine::deltaEngaged() {
@@ -39,20 +39,20 @@ bool Frame::Engine::deltaEngaged() {
 
 void Frame::Engine::startRecording() {
   recording = true;
-  recording_dest_scene = active_scene;
+  recording_dest_section = active_section;
 
-  if (recording_dest_scene->isEmpty() && !use_ext_phase) {
-    recording_dest_scene->setMode(Scene::Mode::DEFINE_DIVISION);
+  if (recording_dest_section->isEmpty() && !use_ext_phase) {
+    recording_dest_section->setRecordMode(RecordMode::DEFINE_DIVISION_LENGTH);
   } else if (delta > 0.50f + record_threshold) {
-    recording_dest_scene->setMode(Scene::Mode::EXTEND);
+    recording_dest_section->setRecordMode(RecordMode::EXTEND);
   } else {
-    recording_dest_scene->setMode(Scene::Mode::DUB);
+    recording_dest_section->setRecordMode(RecordMode::DUB);
   }
 }
 
 void Frame::Engine::endRecording() {
   recording = false;
-  recording_dest_scene->setMode(Scene::Mode::READ);
+  recording_dest_section->setRecordMode(RecordMode::READ);
 }
 
 // TODO customizable respoonse?
@@ -82,25 +82,25 @@ inline void Frame::Engine::step(float in, float sample_time) {
     attenuation_power = getAttenuationPower(delta, record_threshold);
   }
 
-  for (auto scene : scenes) {
-    if (scene) {
-      scene->step(in, attenuation_power, sample_time, use_ext_phase, ext_phase);
+  for (auto section : sections) {
+    if (section) {
+      section->step(in, attenuation_power, sample_time, use_ext_phase, ext_phase);
     }
   }
 }
 
 inline float Frame::Engine::read() {
-  int scene_1 = floor(scene_position);
-  int scene_2 = ceil(scene_position);
-  float weight = scene_position - floor(scene_position);
+  int section_1 = floor(section_position);
+  int section_2 = ceil(section_position);
+  float weight = section_position - floor(section_position);
 
   float out = 0.0f;
-  if (scenes[scene_1]) {
-    out += scenes[scene_1]->read() * (1 - weight);
+  if (sections[section_1]) {
+    out += sections[section_1]->read() * (1 - weight);
   }
 
-  if (scenes[scene_2] && scene_1 != scene_2 && scene_2 < numScenes) {
-    out += scenes[scene_2]->read() * (weight);
+  if (sections[section_2] && section_1 != section_2 && section_2 < numSections) {
+    out += sections[section_2]->read() * (weight);
   }
 
   return out;
@@ -148,7 +148,7 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   Engine &e = *_engines[0];
-  float phase = e.active_scene->phase;
+  float phase = e.active_section->phase;
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(phase, _sampleTime * light_divider.getDivision());
 
@@ -158,18 +158,18 @@ void Frame::updateLights(const ProcessArgs &args) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->mode == Scene::Mode::EXTEND) {
+  } else if (e.active_section->mode == RecordMode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->mode == Scene::Mode::DUB) {
+  } else if (e.active_section->mode == RecordMode::DUB) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 1].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_scene->mode == Scene::Mode::DEFINE_DIVISION) {
+  } else if (e.active_section->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;
@@ -203,7 +203,7 @@ struct FrameWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<Rogan4PSGray>(mm2px(Vec(2.247, 18.399)), module, Frame::SCENE_PARAM));
+		addParam(createParam<Rogan4PSGray>(mm2px(Vec(2.247, 18.399)), module, Frame::SECTION_PARAM));
 		addParam(createParam<TL1105>(mm2px(Vec(7.365, 48.24)), module, Frame::PLAY_PARAM));
 		addParam(createParam<TL1105>(mm2px(Vec(13.909, 48.28)), module, Frame::NEXT_PARAM));
 		addParam(createParam<TL1105>(mm2px(Vec(0.848, 48.282)), module, Frame::PREV_PARAM));
@@ -211,7 +211,7 @@ struct FrameWidget : ModuleWidget {
 		addParam(createParam<TL1105>(mm2px(Vec(11.408, 71.22)), module, Frame::RECORD_MODE_PARAM));
 		addParam(createParam<Rogan3PBlue>(mm2px(Vec(2.74, 81.455)), module, Frame::DELTA_PARAM));
 
-		addInput(createInput<PJ301MPort>(mm2px(Vec(5.79, 34.444)), module, Frame::SCENE_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(5.79, 34.444)), module, Frame::SECTION_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(5.79, 96.94)), module, Frame::DELTA_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(5.905, 109.113)), module, Frame::CLK_INPUT));
 

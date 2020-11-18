@@ -6,6 +6,7 @@
 #include "../assert.hpp"
 #include "Layer.hpp"
 #include "PhaseOscillator.hpp"
+#include "Frame_shared.hpp"
 
 #include "rack.hpp"
 #include <assert.h>
@@ -15,7 +16,6 @@ using namespace std;
 namespace myrisa {
 
 struct Section {
-  enum Mode { DEFINE_DIVISION_LENGTH, DUB, EXTEND, READ };
 
 private:
   vector<Layer*> layers;
@@ -32,7 +32,7 @@ private:
   inline void startNewLayer();
   inline void finishNewLayer();
   inline float getLayerAttenuation(int layer_i);
-  inline void advancePosition(float sample_time, bool use_ext_phase, float ext_phase);
+  inline void advance(float sample_time, bool use_ext_phase, float ext_phase);
 
 public:
   virtual ~Section() {
@@ -47,9 +47,9 @@ public:
 
   int division = 0;
   float phase = 0.0f;
-  Mode mode = Mode::READ;
+  RecordMode mode = RecordMode::READ;
 
-  void setMode(Mode new_mode);
+  void setRecordMode(RecordMode new_mode);
   bool isEmpty();
   void undo();
   float read();

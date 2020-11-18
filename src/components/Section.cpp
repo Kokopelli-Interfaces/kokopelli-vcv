@@ -2,15 +2,6 @@
 
 using namespace myrisa;
 
-inline void Section::finishNewLayer() {
-  assert(new_layer != NULL);
-  // FIXME  just using last layer as example
-
-  printf("END recording\n");
-  printf("-- start div: %f, length: %f\n", new_layer->start_division, new_layer->length);
-
-}
-
 // FIXME performance
 inline float Section::getLayerAttenuation(int layer_i) {
   float layer_attenuation = 0.0f;
@@ -30,7 +21,7 @@ inline float Section::getLayerAttenuation(int layer_i) {
   for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
     for (auto target_layer : layers[j]->target_layers) {
       if (target_layer == layers[layer_i]) {
-        layer_attenuation += layers[j]->readSendAttenuation(position);
+        layer_attenuation += layers[j]->readSendAttenuation(division, phase);
         if (1.0f <= layer_attenuation) {
           return 1.0f;
         }
@@ -54,7 +45,7 @@ float Section::read() {
   return out;
 }
 
-inline void Section::advancePosition(float sample_time, bool use_ext_phase, float ext_phase) {
+inline void Section::advance(float sample_time, bool use_ext_phase, float ext_phase) {
   last_sample_time = sample_time;
   last_phase = phase;
   if (use_ext_phase) {
@@ -73,6 +64,7 @@ inline void Section::advancePosition(float sample_time, bool use_ext_phase, floa
   bool phase_flip = (fabsf(phase_change) > 0.95f && fabsf(phase_change) <= 1.0f);
 
   if (phase_flip) {
+    printf("flip: phase: %f last_phase %f\n", phase, last_phase);
     if (0 < phase_change && 0 < division) {
       division--;
     } else if (phase_change < 0) {
@@ -84,39 +76,51 @@ inline void Section::advancePosition(float sample_time, bool use_ext_phase, floa
 void Section::step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase) {
   last_attenuation = attenuation_power;
 
-  if (mode != Mode::READ) {
+  if (mode != RecordMode::READ) {
     assert(new_layer != NULL);
   }
 
-  if (mode == Mode::DUB && (new_layer->start_division + new_layer->n_divisions == division)) {
+  if (mode == RecordMode::DUB && (new_layer->start_division + new_layer->n_divisions == division)) {
     printf("END recording via overdub\n");
-    printf("-- start div: %f, length: %f\n", new_layer->start_division, new_layer->length);
-    finishNewLayer();
-    new_layer = new Layer(Mode::DUB, division, selected_layers);
+    printf("-- start div: %d, length: %d\n", new_layer->start_division, new_layer->n_divisions);
+    layers.push_back(new_layer);
+
+    // TODO FIXME
+    selected_layers = layers;
+
+    new_layer = new Layer(RecordMode::DUB, division, selected_layers);
   }
 
-  if (mode != Mode::READ) {
+  if (mode != RecordMode::READ) {
     new_layer->write(division, phase, in, attenuation_power);
   }
 
-  advancePosition(sample_time, use_ext_phase, ext_phase);
+  advance(sample_time, use_ext_phase, ext_phase);
 }
 
 
-void Section::setMode(Mode new_mode) {
-  if (mode != Mode::READ && new_mode == Mode::READ) {
+void Section::setRecordMode(RecordMode new_mode) {
+  if (mode != RecordMode::READ && new_mode == RecordMode::READ) {
     assert(new_layer != NULL);
-    if (new_layer->mode == Mode::DEFINE_DIVISION_LENGTH) {
+    if (new_layer->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
       phase_oscillator.setPitch(1 / (new_layer->samples_per_division * last_sample_time));
       phase_defined = true;
+      printf("phase defined with pitch %f\n", phase_oscillator.freq);
     }
 
     layers.push_back(new_layer);
+
+    printf("END recording\n");
+    printf("-- mode %d, start div: %d, length: %d\n", new_layer->mode, new_layer->start_division, new_layer->n_divisions);
+
     new_layer = NULL;
   }
 
-  if (mode == Mode::READ && new_mode != Mode::READ) {
-    startNewLayer(new_mode);
+  if (mode == RecordMode::READ && new_mode != RecordMode::READ) {
+    // TODO FIXME
+    selected_layers = layers;
+    new_layer = new Layer(new_mode, division, selected_layers);
+
   }
 
   mode = new_mode;

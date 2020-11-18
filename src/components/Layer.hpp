@@ -4,9 +4,12 @@
 #include <vector>
 
 #include "PhaseBuffer.hpp"
+#include "Section.hpp"
+#include "Frame_shared.hpp"
 #include "rack.hpp"
 
 using namespace std;
+using namespace myrisa::util;
 
 namespace myrisa {
 
@@ -15,34 +18,39 @@ private:
   PhaseBuffer *buffer;
   PhaseBuffer *send_attenuation;
 
-  // relative to start_division
-  pair<float, float> recording_offset_in_layer;
-
-  inline bool inBounds(float scene_position) {
-    if (scene_position < start_division + recording_offset_in_layer.first) {
-      return false;
-    }
-
-    float layer_position = fmod(scene_position - start_division, length);
-    return (recording_offset_in_layer.first <= layer_position && layer_position <= recording_offset_in_layer.second);
-  }
-
-  inline float getBufferPhase(float scene_position) {
-    float recording_length = recording_offset_in_layer.second - recording_offset_in_layer.first;
-    float layer_position = fmod(scene_position - start_division, length);
-    ASSERT(0, <, recording_length);
-    float buffer_phase = (layer_position - recording_offset_in_layer.first) / recording_length;
-    return buffer_phase;
-  }
-
 public:
-  Layer(float layer_start_division, float layer_length) {
-    start_division = layer_start_division;
-    length = layer_length;
-    // TODO more buffers in future, according to frame IO modules
-    // TODO free buffers ?
+  Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers) {
+    ASSERT(record_mode, !=, RecordMode::READ);
+
     buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
     send_attenuation = new PhaseBuffer(PhaseBuffer::Type::PARAM);
+
+    start_division = division;
+    mode = record_mode;
+
+    if (mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+      n_divisions = 1;
+    } else {
+      ASSERT(0, <, selected_layers.size())
+
+      for (auto selected_layer : selected_layers) {
+        if (selected_layer && !selected_layer->fully_attenuated) {
+          target_layers.push_back(selected_layer);
+        }
+      }
+
+      auto most_recent_target_layer = selected_layers.back();
+      samples_per_division = most_recent_target_layer->samples_per_division;
+
+      if (mode == RecordMode::DUB) {
+        n_divisions = most_recent_target_layer->n_divisions;
+      } else if (mode == RecordMode::EXTEND) {
+        n_divisions = 0;
+      }
+    }
+
+    printf("START recording\n");
+    printf("-- mode: %d start div: %d, length: %d\n", mode, start_division, n_divisions);
   }
 
   virtual ~Layer() {
@@ -50,78 +58,87 @@ public:
     delete send_attenuation;
   }
 
-  float start_division;
-  float length;
-  int num_samples = 0;
+  int start_division;
+  RecordMode mode;
+  int n_divisions;
+  int samples_per_division;
 
-  vector<Layer *> target_layers;
+  vector<Layer*> target_layers;
   bool fully_attenuated = false;
-  float sample_time = 1.0f;
 
-  inline void writeByCreatingDivision(float sample, float attenuation) {
-    if (num_samples == 0) {
-      recording_offset_in_layer.first = 0.0f;
-      recording_offset_in_layer.second = 1.0f;
-    }
-
-    buffer->addToBack(sample);
-    send_attenuation->addToBack(attenuation);
-    num_samples++;
-  }
-
-  inline void write(float scene_position, float sample, float attenuation) {
-    // have to consider case where we are recording with external phase
+  inline void write(int division, float phase, float sample, float attenuation) {
+    // TODO have to consider case where we are recording with external phase
     // e.g. one could start recording forward and then go in reverse
-    float position_relative_to_start_division = scene_position - start_division;
+    ASSERT(0.0, <=, phase);
+    ASSERT(phase, <=, 1.0);
+    ASSERT(start_division, <=, division);
 
-    if (num_samples == 0) {
-      recording_offset_in_layer.first = position_relative_to_start_division;
-      recording_offset_in_layer.second = position_relative_to_start_division;
-      buffer->addToBack(sample);
-      send_attenuation->addToBack(attenuation);
-      num_samples++;
-    } else if (position_relative_to_start_division < recording_offset_in_layer.first) {
-      buffer->addToFront(sample);
-      send_attenuation->addToFront(attenuation);
-      recording_offset_in_layer.first = position_relative_to_start_division;
-      num_samples++;
-    } else if (recording_offset_in_layer.second < position_relative_to_start_division) {
-      buffer->addToBack(sample);
-      send_attenuation->addToBack(attenuation);
-      recording_offset_in_layer.second = position_relative_to_start_division;
-      num_samples++;
+    if (mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+      ASSERT(division, ==, 0);
+      buffer->pushBack(sample);
+      send_attenuation->pushBack(sample);
+      samples_per_division++;
     } else {
-      float buffer_phase = getBufferPhase(scene_position);
-      buffer->replace(buffer_phase, sample);
-      send_attenuation->replace(getBufferPhase(scene_position), attenuation);
+      ASSERT(samples_per_division, !=, 0);
+
+      if (mode == RecordMode::DUB) {
+        ASSERT(n_divisions, !=, 0);
+
+        if (buffer->size() == 0) {
+          buffer->resize(n_divisions * samples_per_division);
+          send_attenuation->resize(n_divisions * samples_per_division);
+        }
+
+        float buffer_phase = getBufferPhase(division, phase);
+        buffer->write(buffer_phase, sample);
+        send_attenuation->write(buffer_phase, attenuation);
+
+      } else if (mode == RecordMode::EXTEND) {
+        while (start_division + n_divisions <= division) {
+          buffer->resize(buffer->size() + samples_per_division);
+          send_attenuation->resize(send_attenuation->size() + samples_per_division);
+          n_divisions++;
+        }
+
+        float buffer_phase = getBufferPhase(division, phase);
+        buffer->write(buffer_phase, sample);
+        send_attenuation->write(buffer_phase, attenuation);
+
+      } else if (mode == RecordMode::READ) {
+        printf("Myrisa Frame: Write in read mode?? Frame is broken.\n");
+        return;
+      }
     }
   }
 
-  inline float readSample(float scene_position) {
-    float sample = 0.0f;
-    if (inBounds(scene_position)) {
-      sample = buffer->read(getBufferPhase(scene_position));
-    }
-
-    return sample;
+  inline float getBufferPhase(int division, float phase) {
+    ASSERT(0, <=, n_divisions);
+    int layer_division = (division - start_division) % n_divisions;
+    float buffer_phase = (layer_division + phase) / n_divisions;
+    return buffer_phase;
   }
 
-  inline float readSampleWithAttenuation(float scene_position, float attenuation) {
-    float sample = readSample(scene_position);
+  inline float readSample(int division, float phase) {
+    if (division < start_division) {
+      return 0.0f;
+    }
+
+    return buffer->read(getBufferPhase(division, phase));
+  }
+
+  inline float readSampleWithAttenuation(int division, float phase, float attenuation) {
+    float sample = readSample(division, phase);
     if (sample == 0.0f) {
       return 0.0f;
     }
     return buffer->getAttenuatedSample(sample, attenuation);
   }
 
-  inline float readSendAttenuation(float scene_position) {
-    if (!inBounds(scene_position)) {
+  inline float readSendAttenuation(int division, float phase) {
+    if (division < start_division) {
       return 0.0f;
     }
-
-    float attenuation = send_attenuation->read(getBufferPhase(scene_position));
-
-    return rack::clamp(attenuation, 0.0f, 1.0f);
+    return send_attenuation->read(getBufferPhase(division, phase));
   }
 };
 

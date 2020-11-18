@@ -3,12 +3,14 @@
 #include <math.h>
 #include <vector>
 
+#include "../util/math.hpp"
 #include "Layer.hpp"
 #include "../assert.hpp"
 #include "Interpolation.hpp"
 #include "rack.hpp"
 
 using namespace std;
+using namespace myrisa::util;
 
 namespace myrisa {
 
@@ -39,11 +41,15 @@ public:
     }
   }
 
-  int size() {
-    return buffer.size();
+  inline void resize(int new_size) {
+    buffer.resize(new_size / divider.getDivision());
   }
 
-  void addToBack(float sample) {
+  inline int size() {
+    return buffer.size() * divider.getDivision();
+  }
+
+  inline void pushBack(float sample) {
     if (size() == 0) {
       divider.reset();
       buffer.push_back(sample);
@@ -52,19 +58,12 @@ public:
     }
   }
 
-  void addToFront(float sample) {
-    if (size() == 0) {
-      buffer.insert(buffer.begin(), sample);
-      divider.reset();
-    } else if (divider.process()) {
-      buffer.insert(buffer.begin(), sample);
-    }
-  }
-
-  void replace(float phase, float sample) {
-    ASSERT(0, <, buffer.size());
+  inline void write(float phase, float sample) {
     ASSERT(0.0f, <=, phase);
     ASSERT(phase, <=, 1.0f);
+    if (type == Type::PARAM) {
+      ASSERT(0.0f, <=, sample);
+    }
 
     if (divider.process()) {
       int length = buffer.size();
@@ -84,9 +83,7 @@ public:
     }
   }
 
-  float getAttenuatedSample(float buffer_sample, float attenuation) {
-    ASSERT(0.0f, <=, attenuation);
-
+  inline float getAttenuatedSample(float buffer_sample, float attenuation) {
     float clamped_attenuation = rack::clamp(attenuation, 0.0f, 1.0f);
 
     switch (type) {
@@ -103,10 +100,6 @@ public:
     }
   }
 
-  inline float rescale(float x2, float x1, float y2, float y1) {
-    return (x2 - x1) / (y2 - y1);
-  }
-
   inline float crossfadeSample(float sample, float phase) {
     const int num_audio_samples_to_fade = 50;
     float fade_length = (float)num_audio_samples_to_fade / (float)buffer.size();
@@ -119,11 +112,10 @@ public:
     }
 
     float fade_amount = rescale(phase, 0.0f, fade_length, 0.0f);
-    printf("fade: %f\n", fade_amount);
     return rack::crossfade(buffer[buffer.size()-1], sample, fade_amount);
   }
 
-  float read(float phase) {
+  inline float read(float phase) {
     ASSERT(0.0f, <=, phase);
     ASSERT(phase, <=, 1.0f);
 
@@ -144,7 +136,7 @@ public:
     } else if (type == Type::CV) {
       return interpolateLinearD(buffer.data(), buffer_position);
     } else if (type == Type::PARAM) {
-      return interpolateBSpline(buffer.data(), buffer_position);
+      return rack::clamp(interpolateBSpline(buffer.data(), buffer_position), 0.0, 1.0);
     } else {
       return buffer[floor(buffer_position)];
     }

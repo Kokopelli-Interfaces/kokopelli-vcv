@@ -58,10 +58,10 @@ public:
     delete send_attenuation;
   }
 
-  int start_division;
   RecordMode mode;
-  int n_divisions;
-  int samples_per_division;
+  int start_division = 0;
+  int n_divisions = 0;
+  int samples_per_division = 0;
 
   vector<Layer*> target_layers;
   bool fully_attenuated = false;
@@ -79,7 +79,7 @@ public:
       send_attenuation->pushBack(sample);
       samples_per_division++;
     } else {
-      ASSERT(samples_per_division, !=, 0);
+      ASSERT(0, <, samples_per_division);
 
       if (mode == RecordMode::DUB) {
         ASSERT(n_divisions, !=, 0);

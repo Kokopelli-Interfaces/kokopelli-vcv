@@ -64,7 +64,6 @@ inline void Section::advance(float sample_time, bool use_ext_phase, float ext_ph
   bool phase_flip = (fabsf(phase_change) > 0.95f && fabsf(phase_change) <= 1.0f);
 
   if (phase_flip) {
-    printf("flip: phase: %f last_phase %f\n", phase, last_phase);
     if (0 < phase_change && 0 < division) {
       division--;
     } else if (phase_change < 0) {
@@ -105,7 +104,7 @@ void Section::setRecordMode(RecordMode new_mode) {
     if (new_layer->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
       phase_oscillator.setPitch(1 / (new_layer->samples_per_division * last_sample_time));
       phase_defined = true;
-      printf("phase defined with pitch %f\n", phase_oscillator.freq);
+      printf("phase defined with pitch %f, s/div %d, s_time %f\n", phase_oscillator.freq, new_layer->samples_per_division, last_sample_time);
     }
 
     layers.push_back(new_layer);

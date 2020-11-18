@@ -30,7 +30,6 @@ private:
 
   rack::dsp::ClockDivider _ext_phase_freq_calculator;
   float _freq_calculator_last_capture_phase_distance = 0.0f;
-  bool _ext_phase_forward = true;
 
   bool _use_ext_phase = false;
   float _ext_phase = 0.0f;

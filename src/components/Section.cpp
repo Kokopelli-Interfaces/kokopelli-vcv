@@ -78,20 +78,28 @@ inline void Section::advance() {
     } else if (phase_flip && phase_change < 0) {
       _freq_calculator_last_capture_phase_distance += phase_change + 1;
     } else {
-      _freq_calculator_last_capture_phase_distance += phase_change;
-    }
-  }
+      bool in_division_phase_flip =
+          (0 < _freq_calculator_last_capture_phase_distance &&
+           phase_change < 0) ||
+          (_freq_calculator_last_capture_phase_distance < 0 &&
+           0 < phase_change);
 
-  if (_use_ext_phase && _ext_phase_freq_calculator.process()) {
-    float ext_phase_change = _freq_calculator_last_capture_phase_distance;
-    float phase_change_per_sample = ext_phase_change / _ext_phase_freq_calculator.getDivision();
-    if (phase_change_per_sample == 0) {
-      return;
+      if (!in_division_phase_flip) {
+        _freq_calculator_last_capture_phase_distance += phase_change;
+      }
     }
-    _division_time_s = _sample_time / phase_change_per_sample;
-    printf("div time: %f phase change %f \n", _division_time_s, ext_phase_change);
-    _phase_defined = true;
-    _freq_calculator_last_capture_phase_distance = 0;
+
+    if (_ext_phase_freq_calculator.process()) {
+      float ext_phase_change = fabs(_freq_calculator_last_capture_phase_distance);
+      float phase_change_per_sample = ext_phase_change / _ext_phase_freq_calculator.getDivision();
+      if (phase_change_per_sample == 0) {
+        return;
+      }
+      _division_time_s = _sample_time / phase_change_per_sample;
+      printf("div time: %f phase change %f \n", _division_time_s, ext_phase_change);
+      _phase_defined = true;
+      _freq_calculator_last_capture_phase_distance = 0;
+    }
   }
 }
 

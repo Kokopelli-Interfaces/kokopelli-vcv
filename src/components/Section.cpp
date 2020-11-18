@@ -96,7 +96,6 @@ inline void Section::advance() {
         return;
       }
       _division_time_s = _sample_time / phase_change_per_sample;
-      printf("div time: %f phase change %f \n", _division_time_s, ext_phase_change);
       _phase_defined = true;
       _freq_calculator_last_capture_phase_distance = 0;
     }

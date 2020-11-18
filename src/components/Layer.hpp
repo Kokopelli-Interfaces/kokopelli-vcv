@@ -19,11 +19,12 @@ private:
   PhaseBuffer *send_attenuation;
 
 public:
-  Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers) {
+  Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division) {
     ASSERT(record_mode, !=, RecordMode::READ);
 
     buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
     send_attenuation = new PhaseBuffer(PhaseBuffer::Type::PARAM);
+    samples_per_division = layer_samples_per_division;
 
     start_division = division;
     mode = record_mode;
@@ -31,26 +32,23 @@ public:
     if (mode == RecordMode::DEFINE_DIVISION_LENGTH) {
       n_divisions = 1;
     } else {
-      ASSERT(0, <, selected_layers.size())
-
       for (auto selected_layer : selected_layers) {
         if (selected_layer && !selected_layer->fully_attenuated) {
           target_layers.push_back(selected_layer);
         }
       }
 
-      auto most_recent_target_layer = selected_layers.back();
-      samples_per_division = most_recent_target_layer->samples_per_division;
-
       if (mode == RecordMode::DUB) {
-        n_divisions = most_recent_target_layer->n_divisions;
+        if (0 < selected_layers.size()) {
+          auto most_recent_target_layer = selected_layers.back();
+          n_divisions = most_recent_target_layer->n_divisions;
+        } else {
+          n_divisions = 1;
+        }
       } else if (mode == RecordMode::EXTEND) {
         n_divisions = 0;
       }
     }
-
-    printf("START recording\n");
-    printf("-- mode: %d start div: %d, length: %d\n", mode, start_division, n_divisions);
   }
 
   virtual ~Layer() {
@@ -74,7 +72,7 @@ public:
     ASSERT(start_division, <=, division);
 
     if (mode == RecordMode::DEFINE_DIVISION_LENGTH) {
-      ASSERT(division, ==, 0);
+      // ASSERT(division, ==, 0);
       buffer->pushBack(sample);
       send_attenuation->pushBack(sample);
       samples_per_division++;

@@ -5,10 +5,10 @@ using namespace myrisa;
 // FIXME performance
 inline float Section::getLayerAttenuation(int layer_i) {
   float layer_attenuation = 0.0f;
-  if (new_layer) {
-    for (auto target_layer : new_layer->target_layers) {
-      if (target_layer == layers[layer_i]) {
-        layer_attenuation += last_attenuation;
+  if (_active_layer) {
+    for (auto target_layer : _active_layer->target_layers) {
+      if (target_layer == _layers[layer_i]) {
+        layer_attenuation += _attenuation;
         break;
       }
     }
@@ -18,10 +18,10 @@ inline float Section::getLayerAttenuation(int layer_i) {
     return 1.0f;
   }
 
-  for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
-    for (auto target_layer : layers[j]->target_layers) {
-      if (target_layer == layers[layer_i]) {
-        layer_attenuation += layers[j]->readSendAttenuation(division, phase);
+  for (unsigned int j = layer_i + 1; j < _layers.size(); j++) {
+    for (auto target_layer : _layers[j]->target_layers) {
+      if (target_layer == _layers[layer_i]) {
+        layer_attenuation += _layers[j]->readSendAttenuation(division, phase);
         if (1.0f <= layer_attenuation) {
           return 1.0f;
         }
@@ -34,10 +34,10 @@ inline float Section::getLayerAttenuation(int layer_i) {
 
 float Section::read() {
   float out = 0.0f;
-  for (unsigned int i = 0; i < layers.size(); i++) {
+  for (unsigned int i = 0; i < _layers.size(); i++) {
     float layer_attenuation = getLayerAttenuation(i);
     if (layer_attenuation < 1.0f) {
-      float layer_out = layers[i]->readSampleWithAttenuation(division, phase, layer_attenuation);
+      float layer_out = _layers[i]->readSampleWithAttenuation(division, phase, layer_attenuation);
       out += layer_out;
     }
   }
@@ -45,23 +45,23 @@ float Section::read() {
   return out;
 }
 
-inline void Section::advance(float sample_time, bool use_ext_phase, float ext_phase) {
-  last_sample_time = sample_time;
-  last_phase = phase;
-  if (use_ext_phase) {
-    ASSERT(0, <=, ext_phase);
-    ASSERT(ext_phase, <=, 1.0f);
-    phase = ext_phase;
-    phase_defined = true;
-  } else if (!phase_defined) {
-    phase = 0;
+inline void Section::advance() {
+  float prev_phase = phase;
+
+  if (_use_ext_phase) {
+    ASSERT(0, <=, _ext_phase);
+    ASSERT(_ext_phase, <=, 1.0f);
+    phase = _ext_phase;
+  } else if (_phase_defined) {
+    _phase_oscillator.step(_sample_time);
+    phase = _phase_oscillator.getPhase();
   } else {
-    phase_oscillator.step(sample_time);
-    phase = phase_oscillator.getPhase();
+    phase = 0;
   }
 
-  float phase_change = phase - last_phase;
-  bool phase_flip = (fabsf(phase_change) > 0.95f && fabsf(phase_change) <= 1.0f);
+  float phase_change = phase - prev_phase;
+  float phase_abs_change = fabs(phase_change);
+  bool phase_flip = (phase_abs_change > 0.95 && phase_abs_change <= 1.0);
 
   if (phase_flip) {
     if (0 < phase_change && 0 < division) {
@@ -70,59 +70,101 @@ inline void Section::advance(float sample_time, bool use_ext_phase, float ext_ph
       division++;
     }
   }
+
+  // FIXME has a hard time with internal division loops
+  if (_use_ext_phase) {
+    if (phase_flip && 0 < phase_change) {
+      _freq_calculator_last_capture_phase_distance += phase_change - 1;
+    } else if (phase_flip && phase_change < 0) {
+      _freq_calculator_last_capture_phase_distance += phase_change + 1;
+    } else {
+      _freq_calculator_last_capture_phase_distance += phase_change;
+    }
+  }
+
+  if (_use_ext_phase && _ext_phase_freq_calculator.process()) {
+    float ext_phase_change = _freq_calculator_last_capture_phase_distance;
+    float phase_change_per_sample = ext_phase_change / _ext_phase_freq_calculator.getDivision();
+    if (phase_change_per_sample == 0) {
+      return;
+    }
+    _division_time_s = _sample_time / phase_change_per_sample;
+    printf("div time: %f phase change %f \n", _division_time_s, ext_phase_change);
+    _phase_defined = true;
+    _freq_calculator_last_capture_phase_distance = 0;
+  }
 }
 
-void Section::step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase) {
-  last_attenuation = attenuation_power;
-
-  if (mode != RecordMode::READ) {
-    assert(new_layer != NULL);
+void Section::newLayer(RecordMode layer_mode) {
+  if (layer_mode != RecordMode::DEFINE_DIVISION_LENGTH && !_phase_defined) {
+    // TODO
+    printf("Myrisa Frame Error: New layer that isn't define division, but no phase defined.\n");
+    return;
   }
 
-  if (mode == RecordMode::DUB && (new_layer->start_division + new_layer->n_divisions == division)) {
+  // TODO FIXME
+  _selected_layers = _layers;
+
+
+  int samples_per_division = floor(_division_time_s / _sample_time);
+  printf("NEW LAYER: division: %d, div time s %f sample time %f sapls per %d\n", division, _division_time_s, _sample_time, samples_per_division);
+
+  _active_layer = new Layer(layer_mode, division, _selected_layers,
+                        samples_per_division);
+}
+
+void Section::step(float in, float attenuation, float sample_time, bool use_ext_phase, float ext_phase) {
+
+  _attenuation = attenuation;
+  _use_ext_phase = use_ext_phase;
+  _ext_phase = ext_phase;
+  _sample_time = sample_time;
+
+  if (mode != RecordMode::READ) {
+    assert(_active_layer != NULL);
+  }
+
+  if (mode == RecordMode::DUB && (_active_layer->start_division + _active_layer->n_divisions == division)) {
     printf("END recording via overdub\n");
-    printf("-- start div: %d, length: %d\n", new_layer->start_division, new_layer->n_divisions);
-    layers.push_back(new_layer);
+    printf("-- start div: %d, length: %d\n", _active_layer->start_division, _active_layer->n_divisions);
+    _layers.push_back(_active_layer);
 
     // TODO FIXME
-    selected_layers = layers;
-
-    new_layer = new Layer(RecordMode::DUB, division, selected_layers);
+    _selected_layers = _layers;
+    newLayer(RecordMode::DUB);
   }
 
   if (mode != RecordMode::READ) {
-    new_layer->write(division, phase, in, attenuation_power);
+    _active_layer->write(division, phase, in, _attenuation);
   }
 
-  advance(sample_time, use_ext_phase, ext_phase);
+  advance();
 }
 
 
 void Section::setRecordMode(RecordMode new_mode) {
   if (mode != RecordMode::READ && new_mode == RecordMode::READ) {
-    assert(new_layer != NULL);
-    if (new_layer->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
-      phase_oscillator.setPitch(1 / (new_layer->samples_per_division * last_sample_time));
-      phase_defined = true;
-      printf("phase defined with pitch %f, s/div %d, s_time %f\n", phase_oscillator.freq, new_layer->samples_per_division, last_sample_time);
+    assert(_active_layer != NULL);
+    if (_active_layer->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+      _phase_oscillator.setPitch(1 / (_active_layer->samples_per_division * _sample_time));
+      _phase_defined = true;
+      printf("phase defined with pitch %f, s/div %d, s_time %f\n", _phase_oscillator.freq, _active_layer->samples_per_division, _sample_time);
+      _division_time_s = 1 / _phase_oscillator.freq;
     }
 
-    layers.push_back(new_layer);
+    _layers.push_back(_active_layer);
 
     printf("END recording\n");
-    printf("-- mode %d, start div: %d, length: %d\n", new_layer->mode, new_layer->start_division, new_layer->n_divisions);
+    printf("-- mode %d, start div: %d, length: %d\n", _active_layer->mode, _active_layer->start_division, _active_layer->n_divisions);
 
-    new_layer = NULL;
+    _active_layer = NULL;
   }
 
   if (mode == RecordMode::READ && new_mode != RecordMode::READ) {
-    // TODO FIXME
-    selected_layers = layers;
-    new_layer = new Layer(new_mode, division, selected_layers);
-
+    newLayer(new_mode);
   }
 
   mode = new_mode;
 }
 
-bool Section::isEmpty() { return (layers.size() == 0); }
+bool Section::isEmpty() { return (_layers.size() == 0); }

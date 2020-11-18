@@ -131,7 +131,8 @@ public:
     }
 
     if (type == Type::AUDIO) {
-      float interpolated_sample = InterpolateHermite(buffer.data(), buffer_position);
+      // float interpolated_sample = InterpolateHermite(buffer.data(),
+      float interpolated_sample = interpolateBSpline(buffer.data(), buffer_position);
       return crossfadeSample(interpolated_sample, phase);
     } else if (type == Type::CV) {
       return interpolateLinearD(buffer.data(), buffer_position);

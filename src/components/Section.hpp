@@ -18,30 +18,43 @@ namespace myrisa {
 struct Section {
 
 private:
-  vector<Layer*> layers;
-  vector<Layer*> selected_layers;
+  vector<Layer*> _layers;
+  vector<Layer*> _selected_layers;
 
-  Layer *new_layer = NULL;
+  Layer *_active_layer = NULL;
 
-  PhaseOscillator phase_oscillator;
-  bool phase_defined = false;
-  float last_phase = 0.0f;
-  float last_attenuation = 0.0f;
-  float last_sample_time = 1.0f;
+  PhaseOscillator _phase_oscillator;
+  bool _phase_defined = false;
 
+  float _sample_time = 1.0f;
+
+  rack::dsp::ClockDivider _ext_phase_freq_calculator;
+  float _freq_calculator_last_capture_phase_distance = 0.0f;
+  bool _ext_phase_forward = true;
+
+  bool _use_ext_phase = false;
+  float _ext_phase = 0.0f;
+  float _division_time_s = 0.0f;
+
+  float _attenuation = 0.0f;
+
+  inline void newLayer(RecordMode layer_mode);
   inline void startNewLayer();
   inline void finishNewLayer();
   inline float getLayerAttenuation(int layer_i);
-  inline void advance(float sample_time, bool use_ext_phase, float ext_phase);
+  inline void advance();
 
 public:
+  Section() {
+    _ext_phase_freq_calculator.setDivision(20000);
+  }
   virtual ~Section() {
-    for (auto layer : layers) {
+    for (auto layer : _layers) {
       delete layer;
     }
 
-    if (new_layer) {
-      delete new_layer;
+    if (_active_layer) {
+      delete _active_layer;
     }
   }
 

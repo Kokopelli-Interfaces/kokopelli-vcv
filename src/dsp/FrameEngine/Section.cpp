@@ -1,6 +1,6 @@
 #include "Section.hpp"
 
-using namespace myrisa;
+using namespace myrisa::dsp;
 
 // FIXME performance
 inline float Section::getLayerAttenuation(int layer_i) {

@@ -5,8 +5,8 @@
 
 #include "util/assert.hpp"
 #include "Layer.hpp"
-#include "components/PhaseOscillator.hpp"
-#include "modules/Frame/interface.hpp"
+#include "dsp/PhaseOscillator.hpp"
+#include "modules/Frame_interface.hpp"
 
 #include "rack.hpp"
 #include <assert.h>
@@ -14,8 +14,9 @@
 using namespace std;
 
 namespace myrisa {
+namespace dsp {
 
-struct Section {
+class Section {
 
 private:
   vector<Layer*> _layers;
@@ -67,4 +68,6 @@ public:
   float read();
   void step(float in, float attenuation_power, float sample_time, bool use_ext_phase, float ext_phase);
 };
+
+} // namespace dsp
 } // namespace myrisa

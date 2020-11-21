@@ -4,14 +4,15 @@
 #include <vector>
 
 #include "Section.hpp"
-#include "components/PhaseBuffer.hpp"
-#include "modules/Frame/interface.hpp"
+#include "dsp/PhaseBuffer.hpp"
+#include "modules/Frame_interface.hpp"
 #include "rack.hpp"
 
 using namespace std;
 using namespace myrisa::util;
 
 namespace myrisa {
+namespace dsp {
 
 struct Layer {
 private:
@@ -140,4 +141,5 @@ public:
   }
 };
 
+} // namespace dsp
 } // namespace myrisa

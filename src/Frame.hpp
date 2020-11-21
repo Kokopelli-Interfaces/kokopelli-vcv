@@ -62,7 +62,6 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     }
   };
 
-  static constexpr float record_threshold = 0.05f;
   float _sampleTime = 1.0f;
   Engine *_engines[maxChannels]{};
   dsp::ClockDivider light_divider;

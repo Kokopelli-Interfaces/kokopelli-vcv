@@ -12,13 +12,16 @@ void Frame::processAlways(const ProcessArgs &args) {
 }
 
 void Frame::modulateChannel(int c) {
-  Engine &e = *_engines[c];
-  e.delta = params[DELTA_PARAM].getValue();
+  FrameEngine &e = *_engines[c];
+  float delta = params[DELTA_PARAM].getValue();
   if (inputs[DELTA_INPUT].isConnected()) {
-    e.delta *= clamp(inputs[DELTA_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
+    float delta_port = clamp(inputs[DELTA_INPUT].getPolyVoltage(c) / 5.0f, -5.0f, 5.0f);
+    delta = clamp(delta_port + delta, -5.0f, 5.0f);
   }
+  e.delta = delta;
 
-  e.section_position = params[SECTION_PARAM].getValue() * (numSections - 1);
+  // TODO FIXME
+  e.section_position = params[SECTION_PARAM].getValue() * (15);
   if (inputs[SECTION_INPUT].isConnected()) {
     e.section_position += clamp(inputs[SECTION_INPUT].getPolyVoltage(c), -5.0f, 5.0f);
   }
@@ -31,79 +34,6 @@ void Frame::modulateChannel(int c) {
     e.sections[active_section_i] = active_section;
   }
   e.active_section = active_section;
-}
-
-bool Frame::Engine::deltaEngaged() {
-  return (delta > 0.50f + record_threshold || delta < 0.50f - record_threshold);
-}
-
-void Frame::Engine::startRecording() {
-  recording = true;
-  recording_dest_section = active_section;
-
-  if (recording_dest_section->isEmpty() && !use_ext_phase) {
-    recording_dest_section->setRecordMode(RecordMode::DEFINE_DIVISION_LENGTH);
-  } else if (delta > 0.50f + record_threshold) {
-    recording_dest_section->setRecordMode(RecordMode::EXTEND);
-  } else {
-    recording_dest_section->setRecordMode(RecordMode::DUB);
-  }
-}
-
-void Frame::Engine::endRecording() {
-  recording = false;
-  recording_dest_section->setRecordMode(RecordMode::READ);
-}
-
-// TODO customizable respoonse?
-// TODO attenuation clk divider, get smooth value
-inline float getAttenuationPower(float delta, float recording_threshold) {
-  float read_position = 0.50f;
-  float linear_attenuation_power;
-  if (delta < read_position - recording_threshold) {
-    linear_attenuation_power = read_position - recording_threshold - delta;
-  } else if (delta > read_position - recording_threshold) {
-    linear_attenuation_power = delta - read_position + recording_threshold;
-  } else {
-    linear_attenuation_power = 0.0f;
-  }
-
-  float range = read_position - recording_threshold;
-  float linear_attenuation_power_scaled = linear_attenuation_power / range;
-
-  // I found that taking to the power 3 gives the most intuitive attenuation power curve
-  float attenuation_power = clamp(pow(linear_attenuation_power_scaled, 3), 0.0f, 1.0f);
-  return attenuation_power;
-}
-
-inline void Frame::Engine::step(float in, float sample_time) {
-  float attenuation_power = 0.0f;
-  if (recording) {
-    attenuation_power = getAttenuationPower(delta, record_threshold);
-  }
-
-  for (auto section : sections) {
-    if (section) {
-      section->step(in, attenuation_power, sample_time, use_ext_phase, ext_phase);
-    }
-  }
-}
-
-inline float Frame::Engine::read() {
-  int section_1 = floor(section_position);
-  int section_2 = ceil(section_position);
-  float weight = section_position - floor(section_position);
-
-  float out = 0.0f;
-  if (sections[section_1]) {
-    out += sections[section_1]->read() * (1 - weight);
-  }
-
-  if (sections[section_2] && section_1 != section_2 && section_2 < numSections) {
-    out += sections[section_2]->read() * (weight);
-  }
-
-  return out;
 }
 
 int Frame::channels() {
@@ -122,21 +52,13 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
     return;
   }
 
-  Engine &e = *_engines[c];
+  FrameEngine &e = *_engines[c];
 
   if (inputs[CLK_INPUT].isConnected()) {
     e.use_ext_phase = true;
     e.ext_phase = clamp(inputs[CLK_INPUT].getPolyVoltage(c) / 10, 0.0f, 1.0f);
   } else {
     e.use_ext_phase = false;
-  }
-
-  if (!e.recording && e.deltaEngaged()) {
-    e.startRecording();
-  }
-
-  if (e.recording && !e.deltaEngaged()) {
-    e.endRecording();
   }
 
   float in = _fromSignal->signal[c];
@@ -147,12 +69,13 @@ void Frame::processChannel(const ProcessArgs& args, int c) {
 }
 
 void Frame::updateLights(const ProcessArgs &args) {
-  Engine &e = *_engines[0];
+  FrameEngine &e = *_engines[0];
   float phase = e.active_section->phase;
 
   lights[PHASE_LIGHT + 1].setSmoothBrightness(phase, _sampleTime * light_divider.getDivision());
 
-  float attenuation_power = getAttenuationPower(e.delta, record_threshold);
+  // FIXME
+  float attenuation_power = 0.0f;
 
   if (!e.recording) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
@@ -183,7 +106,7 @@ void Frame::postProcessAlways(const ProcessArgs &args) {
 }
 
 void Frame::addChannel(int c) {
-    _engines[c] = new Engine();
+  _engines[c] = new FrameEngine();
 }
 
 void Frame::removeChannel(int c) {

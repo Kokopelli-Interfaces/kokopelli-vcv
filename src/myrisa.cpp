@@ -1,6 +1,6 @@
 #include "myrisa.hpp"
 
-#include "modules/Frame/Frame.hpp"
+#include "modules/Frame.hpp"
 #include "modules/Signal.hpp"
 #include "modules/Signal4.hpp"
 #include "modules/Play.hpp"

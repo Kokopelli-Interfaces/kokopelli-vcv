@@ -14,8 +14,8 @@ LDFLAGS +=
 SOURCES += $(wildcard src/*cpp)
 SOURCES += $(wildcard src/util/*cpp)
 SOURCES += $(wildcard src/modules/*cpp)
-SOURCES += $(wildcard src/modules/Frame/*cpp)
-SOURCES += $(wildcard src/modules/Frame/Engine/*cpp)
+SOURCES += $(wildcard src/dsp/*cpp)
+SOURCES += $(wildcard src/dsp/FrameEngine/*cpp)
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.

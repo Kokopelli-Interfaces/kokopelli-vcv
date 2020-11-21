@@ -124,7 +124,7 @@ void Frame::addChannel(int channel_index) {
 
 void Frame::removeChannel(int channel_index) {
   delete _engines[channel_index];
-  _engines[channel_index] = NULL;
+  _engines[channel_index] = nullptr;
 }
 
 struct FrameWidget : ModuleWidget {

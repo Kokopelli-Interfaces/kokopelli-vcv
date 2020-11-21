@@ -22,7 +22,7 @@ private:
   vector<Layer*> _layers;
   vector<Layer*> _selected_layers;
 
-  Layer *_active_layer = NULL;
+  Layer *_active_layer = nullptr;
 
   PhaseOscillator _phase_oscillator;
   bool _phase_defined = false;

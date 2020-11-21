@@ -23,8 +23,8 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
 
   Engine *_engines[maxChannels] {};
 
-  SignalExpanderMessage *_toFrame = NULL;
-  SignalExpanderMessage *_fromFrame = NULL;
+  SignalExpanderMessage *_toFrame = nullptr;
+  SignalExpanderMessage *_fromFrame = nullptr;
 
   Signal() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);

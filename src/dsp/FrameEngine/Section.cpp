@@ -128,7 +128,7 @@ void Section::step(float in, float attenuation, float sample_time, bool use_ext_
   _sample_time = sample_time;
 
   if (mode != RecordMode::READ) {
-    assert(_active_layer != NULL);
+    assert(_active_layer != nullptr);
   }
 
   if (mode == RecordMode::DUB && (_active_layer->start_division + _active_layer->n_divisions == division)) {
@@ -151,7 +151,7 @@ void Section::step(float in, float attenuation, float sample_time, bool use_ext_
 
 void Section::setRecordMode(RecordMode new_mode) {
   if (mode != RecordMode::READ && new_mode == RecordMode::READ) {
-    assert(_active_layer != NULL);
+    assert(_active_layer != nullptr);
     if (_active_layer->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
       _phase_oscillator.setPitch(1 / (_active_layer->samples_per_division * _sample_time));
       _phase_defined = true;
@@ -164,7 +164,7 @@ void Section::setRecordMode(RecordMode new_mode) {
     printf("END recording\n");
     printf("-- mode %d, start div: %d, length: %d\n", _active_layer->mode, _active_layer->start_division, _active_layer->n_divisions);
 
-    _active_layer = NULL;
+    _active_layer = nullptr;
   }
 
   if (mode == RecordMode::READ && new_mode != RecordMode::READ) {

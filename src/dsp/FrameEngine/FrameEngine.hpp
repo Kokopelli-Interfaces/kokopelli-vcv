@@ -20,8 +20,8 @@ public:
   const int numSections = 16;
   const float record_threshold = 0.05f;
 
-  Section *active_section = NULL;
-  Section *recording_dest_section = NULL;
+  Section *active_section = nullptr;
+  Section *recording_dest_section = nullptr;
   array<Section*, numSections> sections;
 
 public:

@@ -52,7 +52,7 @@ void Signal::addChannel(int c) {
 
 void Signal::removeChannel(int c) {
   delete _engines[c];
-  _engines[c] = NULL;
+  _engines[c] = nullptr;
 }
 
 struct SignalWidget : ModuleWidget {

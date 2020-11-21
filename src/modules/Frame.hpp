@@ -39,8 +39,8 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 		NUM_LIGHTS
 	};
 
-  SignalExpanderMessage *_toSignal = NULL;
-  SignalExpanderMessage *_fromSignal = NULL;
+  SignalExpanderMessage *_toSignal = nullptr;
+  SignalExpanderMessage *_fromSignal = nullptr;
 
   const float record_threshold = 0.05f;
   float _sampleTime = 1.0f;

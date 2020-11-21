@@ -43,10 +43,11 @@ private:
   inline void advance();
 
 public:
-  Section() {
-    _ext_phase_freq_calculator.setDivision(20000);
-  }
+  int division = 0;
+  float phase = 0.0f;
+  RecordMode mode = RecordMode::READ;
 
+  Section();
   virtual ~Section() {
     for (auto layer : _layers) {
       delete layer;
@@ -56,10 +57,6 @@ public:
       delete _active_layer;
     }
   }
-
-  int division = 0;
-  float phase = 0.0f;
-  RecordMode mode = RecordMode::READ;
 
   void setRecordMode(RecordMode new_mode);
   bool isEmpty();

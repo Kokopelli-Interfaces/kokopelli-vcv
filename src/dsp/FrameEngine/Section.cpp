@@ -2,6 +2,10 @@
 
 using namespace myrisa::dsp;
 
+Section::Section() {
+  _ext_phase_freq_calculator.setDivision(20000);
+}
+
 // FIXME performance
 inline float Section::getLayerAttenuation(int layer_i) {
   float layer_attenuation = 0.0f;
@@ -140,9 +144,7 @@ void Section::step(float in, float attenuation, float sample_time, bool use_ext_
   }
 
   if (mode != RecordMode::READ) {
-    printf("write\n");
     _active_layer->write(division, phase, in, _attenuation);
-    printf("finiish write\n");
   }
 
   advance();

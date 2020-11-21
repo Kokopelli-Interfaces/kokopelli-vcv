@@ -39,14 +39,6 @@ void Frame::modulateChannel(int channel_index) {
     e.section_position += clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
   e.section_position = clamp(e.section_position, 0.0f, 15.0f);
-
-  int active_section_i = round(e.section_position);
-  Section *active_section = e.sections[active_section_i];
-  if (!active_section) {
-    active_section = new Section();
-    e.sections[active_section_i] = active_section;
-  }
-  e.active_section = active_section;
 }
 
 int Frame::channels() {
@@ -90,7 +82,7 @@ void Frame::updateLights(const ProcessArgs &args) {
   // FIXME
   float attenuation_power = 0.0f;
 
-  if (!e.recording) {
+  if (!e.recording || !e.active_section) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;

@@ -3,6 +3,7 @@
 #include "Section.hpp"
 
 using namespace myrisa::dsp;
+using namespace std;
 
 namespace myrisa {
 namespace dsp {
@@ -16,12 +17,12 @@ public:
   float ext_phase = 0.0f;
   float attenuation = 0.0f;
 
-  static constexpr int numSections = 16;
-  static constexpr float record_threshold = 0.05f;
+  const int numSections = 16;
+  const float record_threshold = 0.05f;
 
   Section *active_section = NULL;
   Section *recording_dest_section = NULL;
-  Section *sections[numSections]{};
+  array<Section*, numSections> sections;
 
 public:
   void startRecording();

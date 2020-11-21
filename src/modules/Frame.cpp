@@ -128,7 +128,7 @@ void Frame::removeChannel(int channel_index) {
 }
 
 struct FrameWidget : ModuleWidget {
-  static constexpr int hp = 4;
+  const int hp = 4;
 
   FrameWidget(Frame *module) {
     setModule(module);

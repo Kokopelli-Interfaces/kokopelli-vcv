@@ -1,10 +1,15 @@
 #pragma once
 
 #include "Frame_interface.hpp"
+#include "Signal.hpp"
 #include "dsp/FrameEngine/FrameEngine.hpp"
+#include "expanders.hpp"
+#include "myrisa.hpp"
 
 using namespace std;
 using namespace myrisa::dsp;
+
+extern Model *modelFrame;
 
 namespace myrisa {
 
@@ -37,7 +42,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   SignalExpanderMessage *_toSignal = NULL;
   SignalExpanderMessage *_fromSignal = NULL;
 
-  static constexpr float record_threshold = 0.05f;
+  const float record_threshold = 0.05f;
   float _sampleTime = 1.0f;
 
   array<FrameEngine*, maxChannels> _engines;

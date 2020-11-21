@@ -1,4 +1,11 @@
+#pragma once
+
+#include "expanders.hpp"
+#include "modules/Frame.hpp"
 #include "modules/Frame_interface.hpp"
+#include "myrisa.hpp"
+
+extern Model *modelSignal;
 
 namespace myrisa {
 

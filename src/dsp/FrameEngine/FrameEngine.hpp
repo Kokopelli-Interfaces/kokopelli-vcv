@@ -22,7 +22,7 @@ public:
   Section *active_section = nullptr;
   Section *recording_dest_section = nullptr;
 
-  std::vector<Section> sections;
+  std::vector<Section*> sections;
 
 public:
   FrameEngine();

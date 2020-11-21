@@ -4,7 +4,7 @@ using namespace myrisa::dsp;
 
 FrameEngine::FrameEngine() {
   for (int i = 0; i < numSections; i++) {
-    sections.push_back(Section());
+    sections.push_back(new Section());
   }
 }
 
@@ -51,7 +51,7 @@ void FrameEngine::endRecording() {
 
 void FrameEngine::step(float in, float sample_time) {
   int active_section_i = round(section_position);
-  active_section = &sections[active_section_i];
+  active_section = sections[active_section_i];
 
   bool delta_engaged = record_threshold <= std::fabs(delta - .50);
   if (!recording && delta_engaged) {
@@ -61,7 +61,7 @@ void FrameEngine::step(float in, float sample_time) {
   }
 
   for (auto section : sections) {
-    section.step(in, attenuation, sample_time, use_ext_phase, ext_phase);
+    section->step(in, attenuation, sample_time, use_ext_phase, ext_phase);
   }
 }
 
@@ -71,9 +71,9 @@ float FrameEngine::read() {
   float weight = section_position - floor(section_position);
 
   float out = 0.0f;
-  out += sections[section_1].read() * (1 - weight);
+  out += sections[section_1]->read() * (1 - weight);
   if (section_1 != section_2 && section_2 < numSections) {
-    out += sections[section_2].read() * (weight);
+    out += sections[section_2]->read() * (weight);
   }
 
   return out;

@@ -53,7 +53,9 @@ public:
       divider.reset();
       buffer.push_back(sample);
     } else if (divider.process()) {
+      printf("??\n");
       buffer.push_back(sample);
+      printf("xx\n");
     }
   }
 

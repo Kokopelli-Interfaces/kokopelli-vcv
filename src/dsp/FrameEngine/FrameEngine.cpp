@@ -2,6 +2,12 @@
 
 using namespace myrisa::dsp;
 
+FrameEngine::FrameEngine() {
+  for (int i = 0; i < numSections; i++) {
+    sections.push_back(Section);
+  }
+}
+
 // TODO customizable respoonse?
 // TODO attenuation clk divider, get smooth value
 inline float getAttenuationPower(float delta, float recording_threshold) {

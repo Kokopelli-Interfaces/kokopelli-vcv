@@ -25,12 +25,7 @@ public:
   std::vector<Section> sections;
 
 public:
-  FrameEngine() {
-    for (int i=0; i<numSections; i++) {
-      sections.push_back(Section());
-    }
-  }
-
+  FrameEngine();
   void startRecording();
   void endRecording();
   void step(float in, float sample_time);

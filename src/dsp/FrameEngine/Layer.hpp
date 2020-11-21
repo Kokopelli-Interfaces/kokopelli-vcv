@@ -73,7 +73,6 @@ public:
     ASSERT(start_division, <=, division);
 
     if (mode == RecordMode::DEFINE_DIVISION_LENGTH) {
-      // ASSERT(division, ==, 0);
       buffer->pushBack(sample);
       send_attenuation->pushBack(sample);
       samples_per_division++;

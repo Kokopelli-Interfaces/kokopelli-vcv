@@ -39,8 +39,6 @@ private:
   float _attenuation = 0.0f;
 
   inline void newLayer(RecordMode layer_mode);
-  inline void startNewLayer();
-  inline void finishNewLayer();
   inline float getLayerAttenuation(int layer_i);
   inline void advance();
 
@@ -48,6 +46,7 @@ public:
   Section() {
     _ext_phase_freq_calculator.setDivision(20000);
   }
+
   virtual ~Section() {
     for (auto layer : _layers) {
       delete layer;

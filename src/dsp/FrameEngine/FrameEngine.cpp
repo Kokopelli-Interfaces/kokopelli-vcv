@@ -4,7 +4,7 @@ using namespace myrisa::dsp;
 
 FrameEngine::FrameEngine() {
   for (int i = 0; i < numSections; i++) {
-    sections.push_back(Section);
+    sections.push_back(Section());
   }
 }
 

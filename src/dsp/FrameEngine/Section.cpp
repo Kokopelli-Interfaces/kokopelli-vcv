@@ -112,12 +112,10 @@ void Section::newLayer(RecordMode layer_mode) {
   // TODO FIXME
   _selected_layers = _layers;
 
-
   int samples_per_division = floor(_division_time_s / _sample_time);
-  printf("NEW LAYER: division: %d, div time s %f sample time %f sapls per %d\n", division, _division_time_s, _sample_time, samples_per_division);
+  printf("NEW LAYER: division: %d, div time s %f sample time %f sapls per %d mode %d sel size %d\n", division, _division_time_s, _sample_time, samples_per_division, layer_mode, _selected_layers.size());
 
-  _active_layer = new Layer(layer_mode, division, _selected_layers,
-                        samples_per_division);
+  _active_layer = new Layer(layer_mode, division, _selected_layers, samples_per_division);
 }
 
 void Section::step(float in, float attenuation, float sample_time, bool use_ext_phase, float ext_phase) {
@@ -159,11 +157,11 @@ void Section::setRecordMode(RecordMode new_mode) {
       _division_time_s = 1 / _phase_oscillator.freq;
     }
 
-    _layers.push_back(_active_layer);
-
     printf("END recording\n");
-    printf("-- mode %d, start div: %d, length: %d\n", _active_layer->mode, _active_layer->start_division, _active_layer->n_divisions);
+    printf("-- mode %d, start div: %d, length: %d\n", _active_layer->mode,
+           _active_layer->start_division, _active_layer->n_divisions);
 
+    _layers.push_back(_active_layer);
     _active_layer = nullptr;
   }
 

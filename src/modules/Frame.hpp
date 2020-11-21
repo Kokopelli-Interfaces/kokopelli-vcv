@@ -1,15 +1,10 @@
 #pragma once
 
-#include "Frame_interface.hpp"
-#include "Signal.hpp"
+#include "Frame_shared.hpp"
 #include "dsp/FrameEngine/FrameEngine.hpp"
-#include "expanders.hpp"
-#include "myrisa.hpp"
 
 using namespace std;
 using namespace myrisa::dsp;
-
-extern Model *modelFrame;
 
 namespace myrisa {
 

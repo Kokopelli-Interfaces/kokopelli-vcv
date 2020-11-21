@@ -17,7 +17,7 @@ public:
   float ext_phase = 0.0f;
   float attenuation = 0.0f;
 
-  const int numSections = 16;
+  constexpr int numSections = 16;
   const float record_threshold = 0.05f;
 
   Section *active_section = nullptr;

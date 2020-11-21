@@ -5,7 +5,7 @@
 
 #include "Section.hpp"
 #include "dsp/PhaseBuffer.hpp"
-#include "modules/Frame_interface.hpp"
+#include "modules/Frame_shared.hpp"
 #include "rack.hpp"
 
 using namespace std;

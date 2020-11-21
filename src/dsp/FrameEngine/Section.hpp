@@ -6,7 +6,7 @@
 #include "util/assert.hpp"
 #include "Layer.hpp"
 #include "dsp/PhaseOscillator.hpp"
-#include "modules/Frame_interface.hpp"
+#include "modules/Frame_shared.hpp"
 
 #include "rack.hpp"
 #include <assert.h>

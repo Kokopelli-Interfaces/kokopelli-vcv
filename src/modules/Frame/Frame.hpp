@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Frame_shared.hpp"
+#include "interface.hpp"
 #include "Engine/Section.hpp"
 
 using namespace std;

@@ -3,11 +3,10 @@
 #include <math.h>
 #include <vector>
 
-#include "../util/math.hpp"
-#include "Layer.hpp"
-#include "../assert.hpp"
 #include "Interpolation.hpp"
 #include "rack.hpp"
+#include "util/assert.hpp"
+#include "util/math.hpp"
 
 using namespace std;
 using namespace myrisa::util;

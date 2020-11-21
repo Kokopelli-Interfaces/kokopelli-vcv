@@ -1,4 +1,4 @@
-#include "Frame_shared.hpp"
+#include "modules/Frame/interface.hpp"
 
 namespace myrisa {
 

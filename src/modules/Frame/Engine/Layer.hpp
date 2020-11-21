@@ -3,9 +3,9 @@
 #include <math.h>
 #include <vector>
 
-#include "PhaseBuffer.hpp"
 #include "Section.hpp"
-#include "Frame_shared.hpp"
+#include "components/PhaseBuffer.hpp"
+#include "modules/Frame/interface.hpp"
 #include "rack.hpp"
 
 using namespace std;

@@ -3,10 +3,10 @@
 #include <tuple>
 #include <vector>
 
-#include "../assert.hpp"
+#include "util/assert.hpp"
 #include "Layer.hpp"
-#include "PhaseOscillator.hpp"
-#include "Frame_shared.hpp"
+#include "components/PhaseOscillator.hpp"
+#include "modules/Frame/interface.hpp"
 
 #include "rack.hpp"
 #include <assert.h>

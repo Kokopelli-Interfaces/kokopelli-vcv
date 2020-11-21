@@ -8,7 +8,7 @@
 
 #include "rack.hpp"
 
-#include "assert.hpp"
+#include "util/assert.hpp"
 #include "module.hpp"
 #include "widgets.hpp"
 

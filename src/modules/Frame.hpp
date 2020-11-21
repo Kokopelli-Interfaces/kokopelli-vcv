@@ -40,22 +40,10 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   static constexpr float record_threshold = 0.05f;
   float _sampleTime = 1.0f;
 
-  FrameEngine *_engines[maxChannels]{};
+  array<FrameEngine*, maxChannels> _engines;
   rack::dsp::ClockDivider light_divider;
 
-  Frame() {
-		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-		configParam(SECTION_PARAM, 0.f, 1.f, 0.f, "Section");
-		configParam(PLAY_PARAM, 0.f, 1.f, 0.f, "Play Layer");
-		configParam(NEXT_PARAM, 0.f, 1.f, 0.f, "Next Layer");
-		configParam(PREV_PARAM, 0.f, 1.f, 0.f, "Prev Layer");
-		configParam(UNDO_PARAM, 0.f, 1.f, 0.f, "Undo");
-		configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
-		configParam(DELTA_PARAM, 0.f, 1.f, 0.5f, "Delta");
-
-    setBaseModelPredicate([](Model *m) { return m == modelSignal; });
-    light_divider.setDivision(16);
- }
+  Frame();
 
   void sampleRateChange() override;
   int channels() override;

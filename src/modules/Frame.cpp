@@ -1,5 +1,18 @@
 #include "Frame.hpp"
 
+Frame::Frame() {
+  config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
+  configParam(SECTION_PARAM, 0.f, 1.f, 0.f, "Section");
+  configParam(PLAY_PARAM, 0.f, 1.f, 0.f, "Play Layer");
+  configParam(NEXT_PARAM, 0.f, 1.f, 0.f, "Next Layer");
+  configParam(PREV_PARAM, 0.f, 1.f, 0.f, "Prev Layer");
+  configParam(UNDO_PARAM, 0.f, 1.f, 0.f, "Undo");
+  configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
+  configParam(DELTA_PARAM, 0.f, 1.f, 0.5f, "Delta");
+  setBaseModelPredicate([](Model *m) { return m == modelSignal; });
+  light_divider.setDivision(16);
+}
+
 void Frame::sampleRateChange() {
   _sampleTime = APP->engine->getSampleTime();
 }
@@ -11,11 +24,11 @@ void Frame::processAlways(const ProcessArgs &args) {
   }
 }
 
-void Frame::modulateChannel(int c) {
-  FrameEngine &e = *_engines[c];
+void Frame::modulateChannel(int channel_index) {
+  FrameEngine &e = *_engines[channel_index];
   float delta = params[DELTA_PARAM].getValue();
   if (inputs[DELTA_INPUT].isConnected()) {
-    float delta_port = clamp(inputs[DELTA_INPUT].getPolyVoltage(c) / 5.0f, -5.0f, 5.0f);
+    float delta_port = clamp(inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 5.0f, -5.0f, 5.0f);
     delta = clamp(delta_port + delta, -5.0f, 5.0f);
   }
   e.delta = delta;
@@ -23,7 +36,7 @@ void Frame::modulateChannel(int c) {
   // TODO FIXME
   e.section_position = params[SECTION_PARAM].getValue() * (15);
   if (inputs[SECTION_INPUT].isConnected()) {
-    e.section_position += clamp(inputs[SECTION_INPUT].getPolyVoltage(c), -5.0f, 5.0f);
+    e.section_position += clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
   e.section_position = clamp(e.section_position, 0.0f, 15.0f);
 
@@ -47,25 +60,25 @@ int Frame::channels() {
   return _channels;
 }
 
-void Frame::processChannel(const ProcessArgs& args, int c) {
+void Frame::processChannel(const ProcessArgs& args, int channel_index) {
   if (!baseConnected()) {
     return;
   }
 
-  FrameEngine &e = *_engines[c];
+  FrameEngine &e = *_engines[channel_index];
 
   if (inputs[CLK_INPUT].isConnected()) {
     e.use_ext_phase = true;
-    e.ext_phase = clamp(inputs[CLK_INPUT].getPolyVoltage(c) / 10, 0.0f, 1.0f);
+    e.ext_phase = clamp(inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
   } else {
     e.use_ext_phase = false;
   }
 
-  float in = _fromSignal->signal[c];
+  float in = _fromSignal->signal[channel_index];
   e.step(in, _sampleTime);
 
   float out = e.read();
-  _toSignal->signal[c] = out;
+  _toSignal->signal[channel_index] = out;
 }
 
 void Frame::updateLights(const ProcessArgs &args) {
@@ -105,13 +118,13 @@ void Frame::postProcessAlways(const ProcessArgs &args) {
   }
 }
 
-void Frame::addChannel(int c) {
-  _engines[c] = new FrameEngine();
+void Frame::addChannel(int channel_index) {
+  _engines[channel_index] = new FrameEngine();
 }
 
-void Frame::removeChannel(int c) {
-  delete _engines[c];
-  _engines[c] = NULL;
+void Frame::removeChannel(int channel_index) {
+  delete _engines[channel_index];
+  _engines[channel_index] = NULL;
 }
 
 struct FrameWidget : ModuleWidget {

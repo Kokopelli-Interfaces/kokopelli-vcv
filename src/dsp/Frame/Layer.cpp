@@ -1,9 +1,8 @@
-#include "FrameEngine.hpp"
+#include "Engine.hpp"
 
-using namespace myrisa::dsp;
+using namespace myrisa::dsp::frame;
 
-
-FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division, bool phase_defined) {
+Layer::Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division, bool phase_defined) {
   ASSERT(record_mode, !=, RecordMode::READ);
 
   buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
@@ -37,12 +36,12 @@ FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<
   }
 }
 
-FrameEngine::Section::Layer::~Layer() {
+Layer::~Layer() {
   delete buffer;
   delete send_attenuation;
 }
 
-void FrameEngine::Section::Layer::write(int division, float phase, float sample, float attenuation) {
+void Layer::write(int division, float phase, float sample, float attenuation) {
   // TODO have to consider case where we are recording with external phase
   // e.g. one could start recording forward and then go in reverse
   ASSERT(0.0, <=, phase);
@@ -86,14 +85,14 @@ void FrameEngine::Section::Layer::write(int division, float phase, float sample,
   }
 }
 
-float FrameEngine::Section::Layer::getBufferPhase(int division, float phase) {
+float Layer::getBufferPhase(int division, float phase) {
   ASSERT(0, <=, n_divisions);
   int layer_division = (division - start_division) % n_divisions;
   float buffer_phase = (layer_division + phase) / n_divisions;
   return buffer_phase;
 }
 
-float FrameEngine::Section::Layer::readSample(int division, float phase) {
+float Layer::readSample(int division, float phase) {
   if (division < start_division) {
     return 0.0f;
   }
@@ -101,7 +100,7 @@ float FrameEngine::Section::Layer::readSample(int division, float phase) {
   return buffer->read(getBufferPhase(division, phase));
 }
 
-float FrameEngine::Section::Layer::readSampleWithAttenuation(int division, float phase,
+float Layer::readSampleWithAttenuation(int division, float phase,
                                        float attenuation) {
   float sample = readSample(division, phase);
   if (sample == 0.0f) {
@@ -110,7 +109,7 @@ float FrameEngine::Section::Layer::readSampleWithAttenuation(int division, float
   return buffer->getAttenuatedSample(sample, attenuation);
 }
 
-float FrameEngine::Section::Layer::readSendAttenuation(int division, float phase) {
+float Layer::readSendAttenuation(int division, float phase) {
   if (division < start_division) {
     return 0.0f;
   }

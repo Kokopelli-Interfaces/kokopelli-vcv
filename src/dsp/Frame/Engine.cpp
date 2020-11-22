@@ -1,14 +1,14 @@
-#include "FrameEngine.hpp"
+#include "Engine.hpp"
 
-using namespace myrisa::dsp;
+using namespace myrisa::dsp::frame;
 
-FrameEngine::FrameEngine() {
+Engine::Engine() {
   for (int i = 0; i < numSections; i++) {
     _sections.push_back(new Section());
   }
 }
 
-void FrameEngine::handleModeChange() {
+void Engine::handleModeChange() {
   if (_active_section) {
     printf("MODE CHANGE:: %d -> %d\n", _active_mode, _mode);
 
@@ -53,7 +53,7 @@ void FrameEngine::handleModeChange() {
   }
 }
 
-void FrameEngine::updateSectionPosition(float section_position) {
+void Engine::updateSectionPosition(float section_position) {
   _section_position = section_position;
   int active_section_i = round(section_position);
   if (active_section_i == numSections) {
@@ -62,7 +62,7 @@ void FrameEngine::updateSectionPosition(float section_position) {
   _active_section = _sections[active_section_i];
 }
 
-void FrameEngine::step() {
+void Engine::step() {
   if (_active_mode != _mode) {
     handleModeChange();
   }
@@ -76,7 +76,7 @@ void FrameEngine::step() {
   }
 }
 
-float FrameEngine::read() {
+float Engine::read() {
   int section_1 = floor(_section_position);
   int section_2 = ceil(_section_position);
   float weight = _section_position - floor(_section_position);
@@ -91,9 +91,9 @@ float FrameEngine::read() {
 }
 
 
-void FrameEngine::stepSection(Section* section) {
+void Engine::stepSection(Section* section) {
   if (section == _active_section) {
-    Section::Layer* _active_layer = section->_active_layer;
+    Layer* _active_layer = section->_active_layer;
     if (_active_mode != RecordMode::READ) {
       assert(_active_layer != nullptr);
     }
@@ -143,7 +143,7 @@ void FrameEngine::stepSection(Section* section) {
   }
 }
 
-bool FrameEngine::addLayer(Section *section, RecordMode layer_mode) {
+bool Engine::addLayer(Section *section, RecordMode layer_mode) {
   // TODO FIXME
   section->_selected_layers = section->_layers;
 
@@ -164,7 +164,7 @@ bool FrameEngine::addLayer(Section *section, RecordMode layer_mode) {
 
   bool phase_def = _use_ext_phase ? true : section->_internal_phase_defined;
 
-  section->_active_layer = new Section::Layer(layer_mode, section->_section_division, section->_selected_layers, samples_per_division, phase_def);
+  section->_active_layer = new Layer(layer_mode, section->_section_division, section->_selected_layers, samples_per_division, phase_def);
 
   return true;
 }

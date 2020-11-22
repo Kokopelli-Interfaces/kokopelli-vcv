@@ -50,7 +50,7 @@ inline float getAttenuationPower(float delta, float recording_threshold) {
   return attenuation_power;
 }
 
-inline RecordMode getEngineMode(float delta, float record_threshold, FrameEngine *e) {
+inline RecordMode getEngineMode(float delta, float record_threshold, myrisa::dsp::frame::Engine *e) {
   if (delta < 0.50f - record_threshold) {
     return RecordMode::DUB;
   } else if (0.50f + record_threshold < delta) {
@@ -61,7 +61,7 @@ inline RecordMode getEngineMode(float delta, float record_threshold, FrameEngine
 }
 
 void Frame::modulateChannel(int channel_index) {
-  FrameEngine *e = _engines[channel_index];
+  myrisa::dsp::frame::Engine *e = _engines[channel_index];
 
   e->_use_ext_phase = inputs[CLK_INPUT].isConnected();
 
@@ -97,7 +97,7 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
     return;
   }
 
-  FrameEngine *e = _engines[channel_index];
+  myrisa::dsp::frame::Engine *e = _engines[channel_index];
 
   if (e->_use_ext_phase) {
     e->_ext_phase = rack::clamp(
@@ -110,7 +110,7 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 }
 
 void Frame::updateLights(const ProcessArgs &args) {
-  FrameEngine *e = _engines[0];
+  myrisa::dsp::frame::Engine *e = _engines[0];
 
   if (e->_active_section) {
     float phase = e->_active_section->_phase;
@@ -154,7 +154,7 @@ void Frame::postProcessAlways(const ProcessArgs &args) {
 }
 
 void Frame::addChannel(int channel_index) {
-  _engines[channel_index] = new FrameEngine();
+  _engines[channel_index] = new myrisa::dsp::frame::Engine();
   _engines[channel_index]->_sample_time = _sampleTime;
 }
 

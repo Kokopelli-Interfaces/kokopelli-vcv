@@ -1,8 +1,8 @@
-#include "FrameEngine.hpp"
+#include "Section.hpp"
 
-using namespace myrisa::dsp;
+using namespace myrisa::dsp::frame;
 
-FrameEngine::Section::~Section() {
+Section::~Section() {
   for (auto layer : _layers) {
     delete layer;
   }
@@ -13,7 +13,7 @@ FrameEngine::Section::~Section() {
 }
 
 // FIXME performance
-float FrameEngine::Section::getLayerAttenuation(int layer_i, float current_attenuation) {
+float Section::getLayerAttenuation(int layer_i, float current_attenuation) {
   float layer_attenuation = 0.0f;
   if (_active_layer) {
     for (auto target_layer : _active_layer->target_layers) {
@@ -42,7 +42,7 @@ float FrameEngine::Section::getLayerAttenuation(int layer_i, float current_atten
   return layer_attenuation;
 }
 
-float FrameEngine::Section::read(float current_attenuation) {
+float Section::read(float current_attenuation) {
   float out = 0.0f;
   for (unsigned int i = 0; i < _layers.size(); i++) {
     float layer_attenuation = getLayerAttenuation(i, current_attenuation);
@@ -55,4 +55,4 @@ float FrameEngine::Section::read(float current_attenuation) {
   return out;
 }
 
-bool FrameEngine::Section::isEmpty() { return (_layers.size() == 0); }
+bool Section::isEmpty() { return (_layers.size() == 0); }

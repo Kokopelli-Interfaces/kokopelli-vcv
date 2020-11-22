@@ -1,10 +1,8 @@
 #pragma once
 
 #include "Frame_shared.hpp"
-#include "dsp/FrameEngine/FrameEngine.hpp"
+#include "dsp/Frame/Engine.hpp"
 #include <math.h>
-
-using namespace myrisa::dsp;
 
 namespace myrisa {
 
@@ -40,7 +38,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   const float recordThreshold = 0.05f;
   float _sampleTime = 1.0f;
 
-  std::array<FrameEngine*, maxChannels> _engines;
+  std::array<myrisa::dsp::frame::Engine*, maxChannels> _engines;
   rack::dsp::ClockDivider light_divider;
 
   Frame();

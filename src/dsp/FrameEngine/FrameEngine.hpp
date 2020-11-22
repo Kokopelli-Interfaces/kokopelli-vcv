@@ -44,14 +44,16 @@ public:
 
 private:
   void handleModeChange();
+  void stepSection(Section *section);
+  void addLayer(Section *section, RecordMode mode);
 };
 
+/**
+   A Section is a collection of layers.
+*/
 class FrameEngine::Section {
 public:
   bool _phase_defined = false;
-
-private:
-  FrameEngine *_engine;
 
   class Layer;
 
@@ -69,23 +71,21 @@ private:
 
   float _division_time_s = 0.0f;
 
-  float getLayerAttenuation(int layer_i);
-  void newLayer(RecordMode layer_mode);
-  void advance();
+  float getLayerAttenuation(int layer_i, float current_attenuation);
 
 public:
   int _section_division = 0;
   float _phase = 0.0f;
   RecordMode _mode = RecordMode::READ;
 
-  Section(FrameEngine *engine);
+  Section();
   ~Section();
 
   void setRecordMode(RecordMode new_mode);
   bool isEmpty();
   void undo();
-  float read();
-  void step();
+  float read(float current_attenuation);
+
 };
 
 class FrameEngine::Section::Layer {

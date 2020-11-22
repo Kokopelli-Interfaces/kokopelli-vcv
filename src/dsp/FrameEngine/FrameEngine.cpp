@@ -27,7 +27,7 @@ inline float getAttenuationPower(float delta, float recording_threshold) {
   // I found that taking to the power 3 gives the most intuitive attenuation
   // power curve
   float attenuation_power =
-      clamp(pow(linear_attenuation_power_scaled, 3), 0.0f, 1.0f);
+      rack::clamp(pow(linear_attenuation_power_scaled, 3), 0.0f, 1.0f);
   return attenuation_power;
 }
 

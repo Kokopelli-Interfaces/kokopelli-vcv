@@ -28,17 +28,17 @@ void Frame::modulateChannel(int channel_index) {
   FrameEngine &e = *_engines[channel_index];
   float delta = params[DELTA_PARAM].getValue();
   if (inputs[DELTA_INPUT].isConnected()) {
-    float delta_port = clamp(inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 5.0f, -5.0f, 5.0f);
-    delta = clamp(delta_port + delta, -5.0f, 5.0f);
+    float delta_port = rack::clamp(inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 5.0f, -5.0f, 5.0f);
+    delta = rack::clamp(delta_port + delta, -5.0f, 5.0f);
   }
   e.delta = delta;
 
   // TODO FIXME
   e.section_position = params[SECTION_PARAM].getValue() * (15);
   if (inputs[SECTION_INPUT].isConnected()) {
-    e.section_position += clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
+    e.section_position += rack::clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
-  e.section_position = clamp(e.section_position, 0.0f, 15.0f);
+  e.section_position = rack::clamp(e.section_position, 0.0f, 15.0f);
 }
 
 int Frame::channels() {
@@ -61,7 +61,7 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 
   if (inputs[CLK_INPUT].isConnected()) {
     e.use_ext_phase = true;
-    e.ext_phase = clamp(inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
+    e.ext_phase = rack::clamp(inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
   } else {
     e.use_ext_phase = false;
   }

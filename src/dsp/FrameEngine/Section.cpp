@@ -1,13 +1,23 @@
-#include "Section.hpp"
+#include "FrameEngine.hpp"
 
 using namespace myrisa::dsp;
 
-Section::Section() {
+FrameEngine::Section::Section() {
   _ext_phase_freq_calculator.setDivision(20000);
 }
 
+FrameEngine::Section::~Section() {
+  for (auto layer : _layers) {
+    delete layer;
+  }
+
+  if (_active_layer) {
+    delete _active_layer;
+  }
+}
+
 // FIXME performance
-inline float Section::getLayerAttenuation(int layer_i) {
+inline float FrameEngine::Section::getLayerAttenuation(int layer_i) {
   float layer_attenuation = 0.0f;
   if (_active_layer) {
     for (auto target_layer : _active_layer->target_layers) {
@@ -36,7 +46,7 @@ inline float Section::getLayerAttenuation(int layer_i) {
   return layer_attenuation;
 }
 
-float Section::read() {
+float FrameEngine::Section::read() {
   float out = 0.0f;
   for (unsigned int i = 0; i < _layers.size(); i++) {
     float layer_attenuation = getLayerAttenuation(i);
@@ -49,7 +59,7 @@ float Section::read() {
   return out;
 }
 
-inline void Section::advance() {
+inline void FrameEngine::Section::advance() {
   float prev_phase = phase;
 
   if (_use_ext_phase) {
@@ -106,7 +116,7 @@ inline void Section::advance() {
   }
 }
 
-void Section::newLayer(RecordMode layer_mode) {
+void FrameEngine::Section::newLayer(RecordMode layer_mode) {
   if (layer_mode != RecordMode::DEFINE_DIVISION_LENGTH && !_phase_defined) {
     // TODO
     printf("Myrisa Frame Error: New layer that isn't define division, but no phase defined.\n");
@@ -122,7 +132,7 @@ void Section::newLayer(RecordMode layer_mode) {
   _active_layer = new Layer(layer_mode, division, _selected_layers, samples_per_division);
 }
 
-void Section::step(float in, float attenuation, float sample_time, bool use_ext_phase, float ext_phase) {
+void FrameEngine::Section::step(float in, float attenuation, float sample_time, bool use_ext_phase, float ext_phase) {
 
   _attenuation = attenuation;
   _use_ext_phase = use_ext_phase;
@@ -151,7 +161,7 @@ void Section::step(float in, float attenuation, float sample_time, bool use_ext_
 }
 
 
-void Section::setRecordMode(RecordMode new_mode) {
+void FrameEngine::Section::setRecordMode(RecordMode new_mode) {
   if (mode != RecordMode::READ && new_mode == RecordMode::READ) {
     assert(_active_layer != nullptr);
     if (_active_layer->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
@@ -176,4 +186,4 @@ void Section::setRecordMode(RecordMode new_mode) {
   mode = new_mode;
 }
 
-bool Section::isEmpty() { return (_layers.size() == 0); }
+bool FrameEngine::Section::isEmpty() { return (_layers.size() == 0); }

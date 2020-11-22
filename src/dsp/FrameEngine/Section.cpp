@@ -118,27 +118,21 @@ void FrameEngine::Section::advance() {
 }
 
 void FrameEngine::Section::newLayer(RecordMode layer_mode) {
-  if (layer_mode != RecordMode::DEFINE_DIVISION_LENGTH && !_phase_defined) {
-    // TODO
-    printf("Myrisa Frame Error: New layer that isn't define _section_division, but no _phase defined.\n");
-    return;
-  }
-
   // TODO FIXME
   _selected_layers = _layers;
 
   int samples_per_division = floor(_division_time_s / _engine->_sample_time);
-  printf("NEW LAYER: _section_division: %d, div time s %f sample time %f sapls per %d _mode %d sel size %d\n", _section_division, _division_time_s, _engine->_sample_time, samples_per_division, layer_mode, _selected_layers.size());
+  printf("NEW LAYER: _section_division: %d, div time s %f sample time %f sapls per %d _section_mode %d sel size %d\n", _section_division, _division_time_s, _engine->_sample_time, samples_per_division, layer_mode, _selected_layers.size());
 
-  _active_layer = new Layer(layer_mode, _section_division, _selected_layers, samples_per_division);
+  _active_layer = new Layer(layer_mode, _section_division, _selected_layers, samples_per_division, _phase_defined);
 }
 
 void FrameEngine::Section::step() {
-  if (_mode != RecordMode::READ) {
+  if (_section_mode != RecordMode::READ) {
     assert(_active_layer != nullptr);
   }
 
-  if (_mode == RecordMode::DUB && (_active_layer->start_division + _active_layer->n_divisions == _section_division)) {
+  if (_section_mode == RecordMode::DUB && (_active_layer->start_division + _active_layer->n_divisions == _section_division)) {
     printf("END recording via overdub\n");
     printf("-- start div: %d, length: %d\n", _active_layer->start_division, _active_layer->n_divisions);
     _layers.push_back(_active_layer);
@@ -148,7 +142,7 @@ void FrameEngine::Section::step() {
     newLayer(RecordMode::DUB);
   }
 
-  if (_mode != RecordMode::READ) {
+  if (_section_mode != RecordMode::READ) {
     _active_layer->write(_section_division, _phase, _engine->_in, _engine->_attenuation);
   }
 
@@ -156,9 +150,9 @@ void FrameEngine::Section::step() {
 }
 
 void FrameEngine::Section::setRecordMode(RecordMode new_mode) {
-  if (_mode != RecordMode::READ && new_mode == RecordMode::READ) {
+  if (_section_mode != RecordMode::READ && new_mode == RecordMode::READ) {
     assert(_active_layer != nullptr);
-    if (_active_layer->_mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+    if (isEmpty() && !_phase_defined) {
       _phase_oscillator.setPitch(1 / (_active_layer->samples_per_division * _engine->_sample_time));
       _phase_defined = true;
       printf("_phase defined with pitch %f, s/div %d, s_time %f\n", _phase_oscillator.freq, _active_layer->samples_per_division, _engine->_sample_time);
@@ -166,18 +160,18 @@ void FrameEngine::Section::setRecordMode(RecordMode new_mode) {
     }
 
     printf("END recording\n");
-    printf("-- _mode %d, start div: %d, length: %d\n", _active_layer->_mode,
+    printf("-- _section_mode %d, start div: %d, length: %d\n", _section_mode,
            _active_layer->start_division, _active_layer->n_divisions);
 
     _layers.push_back(_active_layer);
     _active_layer = nullptr;
   }
 
-  if (_mode == RecordMode::READ && new_mode != RecordMode::READ) {
+  if (_section_mode == RecordMode::READ && new_mode != RecordMode::READ) {
     newLayer(new_mode);
   }
 
-  _mode = new_mode;
+  _section_mode = new_mode;
 }
 
 bool FrameEngine::Section::isEmpty() { return (_layers.size() == 0); }

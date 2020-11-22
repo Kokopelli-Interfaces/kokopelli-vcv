@@ -3,8 +3,7 @@
 using namespace myrisa::dsp;
 
 
-
-FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division) {
+FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division, bool phase_defined) {
   ASSERT(record_mode, !=, RecordMode::READ);
 
   buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
@@ -13,8 +12,9 @@ FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<
 
   start_division = division;
   _mode = record_mode;
+  _phase_defined = phase_defined;
 
-  if (_mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+  if (!phase_defined) {
     n_divisions = 1;
   } else {
     for (auto selected_layer : selected_layers) {
@@ -48,7 +48,7 @@ void FrameEngine::Section::Layer::write(int division, float phase, float sample,
   ASSERT(phase, <=, 1.0);
   ASSERT(start_division, <=, division);
 
-  if (_mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+  if (!_phase_defined) {
     buffer->pushBack(sample);
     send_attenuation->pushBack(sample);
     samples_per_division++;

@@ -30,21 +30,55 @@ void Frame::processAlways(const ProcessArgs &args) {
   }
 }
 
+inline float getAttenuationPower(float delta, float recording_threshold) {
+  float read_position = 0.50f;
+  float linear_attenuation_power;
+  if (delta < read_position - recording_threshold) {
+    linear_attenuation_power = read_position - recording_threshold - delta;
+  } else if (delta > read_position - recording_threshold) {
+    linear_attenuation_power = delta - read_position + recording_threshold;
+  } else {
+    linear_attenuation_power = 0.0f;
+  }
+
+  float range = read_position - recording_threshold;
+  float linear_attenuation_power_scaled = linear_attenuation_power / range;
+
+  // I found that taking to the power 3 gives the most intuitive attenuation
+  // power curve
+  float attenuation_power = rack::clamp(pow(linear_attenuation_power_scaled, 3), 0.0f, 1.0f);
+  return attenuation_power;
+}
+
+inline RecordMode getEngineMode(float delta, float record_threshold, FrameEngine *e) {
+  if (delta < 0.50f - record_threshold) {
+    return RecordMode::DUB;
+  } else if (0.50f + record_threshold < delta) {
+    return RecordMode::EXTEND;
+  }
+
+  return RecordMode::READ;
+}
+
 void Frame::modulateChannel(int channel_index) {
-  FrameEngine &e = *_engines[channel_index];
+  FrameEngine *e = _engines[channel_index];
+
+  e->_use_ext_phase = inputs[CLK_INPUT].isConnected();
+
   float delta = params[DELTA_PARAM].getValue();
   if (inputs[DELTA_INPUT].isConnected()) {
     float delta_port = rack::clamp(inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 5.0f, -5.0f, 5.0f);
     delta = rack::clamp(delta_port + delta, -5.0f, 5.0f);
   }
-  e._delta = delta;
+  e->_mode = getEngineMode(delta, recordThreshold, e);
+  e->_attenuation = getAttenuationPower(delta, recordThreshold);
 
-  // TODO FIXME
-  e._section_position = params[SECTION_PARAM].getValue() * (15);
+  float section_position = params[SECTION_PARAM].getValue() * (15);
   if (inputs[SECTION_INPUT].isConnected()) {
-    e._section_position += rack::clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
+    section_position += rack::clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
-  e._section_position = rack::clamp(e._section_position, 0.0f, 15.0f);
+  section_position = rack::clamp(section_position, 0.0f, 15.0f);
+  e->updateSectionPosition(section_position);
 }
 
 int Frame::channels() {
@@ -63,27 +97,23 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
     return;
   }
 
-  FrameEngine &e = *_engines[channel_index];
+  FrameEngine *e = _engines[channel_index];
 
-  if (inputs[CLK_INPUT].isConnected()) {
-    e._use_ext_phase = true;
-    e._ext_phase = rack::clamp(inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
-  } else {
-    e._use_ext_phase = false;
+  if (e->_use_ext_phase) {
+    e->_ext_phase = rack::clamp(
+        inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
   }
 
-  e._in = _fromSignal->signal[channel_index];
-  e.step();
-
-  float out = e.read();
-  _toSignal->signal[channel_index] = out;
+  e->_in = _fromSignal->signal[channel_index];
+  e->step();
+  _toSignal->signal[channel_index] = e->read();
 }
 
 void Frame::updateLights(const ProcessArgs &args) {
-  FrameEngine &e = *_engines[0];
+  FrameEngine *e = _engines[0];
 
-  if (e._active_section) {
-    float phase = e._active_section->_phase;
+  if (e->_active_section) {
+    float phase = e->_active_section->_phase;
     lights[PHASE_LIGHT + 1].setSmoothBrightness(
         phase, _sampleTime * light_divider.getDivision());
   }
@@ -91,25 +121,29 @@ void Frame::updateLights(const ProcessArgs &args) {
   // FIXME
   float attenuation_power = 0.0f;
 
-  if (!e._recording || !e._active_section) {
+  if (e->_active_section->isEmpty() && e->_mode == RecordMode::READ) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e._active_section->_mode == RecordMode::EXTEND) {
+  } else if (e->_mode == RecordMode::READ) {
+    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 1.0;
+    lights[RECORD_MODE_LIGHT + 2].value = 0.0;
+  } else if (!e->_active_section->_phase_defined) {
+    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
+    lights[RECORD_MODE_LIGHT + 2].value = 1.0;
+  } else if (e->_mode == RecordMode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e._active_section->_mode == RecordMode::DUB) {
+  } else if (e->_mode == RecordMode::DUB) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 1].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e._active_section->_mode == RecordMode::DEFINE_DIVISION_LENGTH) {
-    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 2].value = 1.0;
   }
 }
 

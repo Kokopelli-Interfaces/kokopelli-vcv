@@ -25,31 +25,31 @@ public:
   float _ext_phase = 0.0f;
   float _in = 0.0f;
   float _sample_time = 1.0f;
-  float _delta = 0.0f;
   float _section_position = 0.0f;
+  float _attenuation = 0.0f;
+  RecordMode _mode = RecordMode::READ;
   Section *_active_section = nullptr;
-  bool _recording = false;
 
 private:
-  float _attenuation = 0.0f;
-
   const int numSections = 16;
-  const float record_threshold = 0.05f;
-
   Section *recording_dest_section = nullptr;
-
-  std::vector<Section*> sections;
+  std::vector<Section*> _sections;
+  RecordMode _prev_mode = RecordMode::READ;
 
 public:
   FrameEngine();
-  void startRecording();
-  Section getActiveSection();
-  void endRecording();
+  void updateSectionPosition(float section_position);
   void step();
   float read();
+
+private:
+  void handleModeChange();
 };
 
 class FrameEngine::Section {
+public:
+  bool _phase_defined = false;
+
 private:
   FrameEngine *_engine;
 
@@ -60,10 +60,12 @@ private:
   Layer *_active_layer = nullptr;
 
   PhaseOscillator _phase_oscillator;
-  bool _phase_defined = false;
 
   rack::dsp::ClockDivider _ext_phase_freq_calculator;
   float _freq_calculator_last_capture_phase_distance = 0.0f;
+
+  // TODO remove me
+  RecordMode _section_mode = RecordMode::READ;
 
   float _division_time_s = 0.0f;
 
@@ -97,11 +99,14 @@ public:
   int n_divisions = 0;
   int samples_per_division = 0;
 
+  // TODO
+  bool _phase_defined = true;
+
   vector<Layer *> target_layers;
   bool fully_attenuated = false;
 
   Layer(RecordMode record_mode, int division, vector<Layer *> selected_layers,
-        int layer_samples_per_division);
+        int layer_samples_per_division, bool phase_defined);
   ~Layer();
 
   void write(int division, float phase, float sample, float attenuation);

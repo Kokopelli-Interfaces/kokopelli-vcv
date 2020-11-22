@@ -12,6 +12,7 @@ FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<
 
   start_division = division;
   _mode = record_mode;
+  // TODO remove me
   _phase_defined = phase_defined;
 
   if (!phase_defined) {

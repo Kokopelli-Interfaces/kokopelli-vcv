@@ -4,6 +4,7 @@
 #include <math.h>
 
 namespace myrisa {
+namespace dsp {
 
 struct PhaseOscillator {
   float phase = 0.0f;
@@ -30,4 +31,5 @@ struct PhaseOscillator {
   }
 };
 
+} // namespace dsp
 } // namespace myrisa

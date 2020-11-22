@@ -129,7 +129,7 @@ void Frame::updateLights(const ProcessArgs &args) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (!e->_active_section->_phase_defined) {
+  } else if (!e->_active_section->_internal_phase_defined) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;

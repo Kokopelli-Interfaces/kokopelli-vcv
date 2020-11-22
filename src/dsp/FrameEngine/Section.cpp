@@ -2,10 +2,6 @@
 
 using namespace myrisa::dsp;
 
-FrameEngine::Section::Section() {
-  _ext_phase_freq_calculator.setDivision(20000);
-}
-
 FrameEngine::Section::~Section() {
   for (auto layer : _layers) {
     delete layer;

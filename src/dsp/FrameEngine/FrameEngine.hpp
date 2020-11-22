@@ -3,6 +3,7 @@
 #include "dsp/PhaseBuffer.hpp"
 #include "definitions.hpp"
 #include "dsp/PhaseOscillator.hpp"
+#include "dsp/PhaseAnalyzer.hpp"
 #include "rack.hpp"
 #include "util/assert.hpp"
 #include <assert.h>
@@ -34,7 +35,9 @@ private:
   const int numSections = 16;
   Section *recording_dest_section = nullptr;
   std::vector<Section*> _sections;
-  RecordMode _prev_mode = RecordMode::READ;
+  RecordMode _active_mode = RecordMode::READ;
+
+  PhaseAnalyzer _phase_analyzer;
 
 public:
   FrameEngine();
@@ -45,7 +48,7 @@ public:
 private:
   void handleModeChange();
   void stepSection(Section *section);
-  void addLayer(Section *section, RecordMode mode);
+  bool addLayer(Section *section, RecordMode mode);
 };
 
 /**
@@ -53,7 +56,7 @@ private:
 */
 class FrameEngine::Section {
 public:
-  bool _phase_defined = false;
+  bool _internal_phase_defined = false;
 
   class Layer;
 
@@ -63,11 +66,6 @@ public:
 
   PhaseOscillator _phase_oscillator;
 
-  rack::dsp::ClockDivider _ext_phase_freq_calculator;
-  float _freq_calculator_last_capture_phase_distance = 0.0f;
-
-  float _division_time_s = 0.0f;
-
   float getLayerAttenuation(int layer_i, float current_attenuation);
 
 public:
@@ -75,7 +73,6 @@ public:
   float _phase = 0.0f;
   RecordMode _mode = RecordMode::READ;
 
-  Section();
   ~Section();
 
   void setRecordMode(RecordMode new_mode);
@@ -99,7 +96,7 @@ public:
   // TODO
   bool _phase_defined = true;
 
-  vector<Layer *> target_layers;
+  std::vector<Layer *> target_layers;
   bool fully_attenuated = false;
 
   Layer(RecordMode record_mode, int division, vector<Layer *> selected_layers,

@@ -10,17 +10,26 @@ FrameEngine::FrameEngine() {
 
 void FrameEngine::handleModeChange() {
   if (_active_section) {
-    printf("MODE CHANGE:: %d -> %d\n", _prev_mode, _mode);
+    printf("MODE CHANGE:: %d -> %d\n", _active_mode, _mode);
 
     // FIXME BLOAT vv
-    if (_prev_mode != RecordMode::READ && _mode == RecordMode::READ) {
+    if (_active_mode != RecordMode::READ && _mode == RecordMode::READ) {
       assert(_active_section->_active_layer != nullptr);
 
-      if (_active_section->isEmpty() && !_active_section->_phase_defined) {
-        _active_section->_phase_oscillator.setPitch(1 / (_active_section->_active_layer->samples_per_division * _sample_time));
-        _active_section->_phase_defined = true;
+      if (_active_section->isEmpty() && !_active_section->_internal_phase_defined) {
+
+        float division_period = 0;
+        if (_use_ext_phase) {
+          division_period = _phase_analyzer._phase_period_estimate;
+        } else {
+          division_period = _active_section->_active_layer->samples_per_division * _sample_time;
+        }
+
+        ASSERT(0.0, <, division_period);
+        _active_section->_phase_oscillator.setPitch(1 / division_period);
+
+        _active_section->_internal_phase_defined = true;
         printf("_phase defined with pitch %f, s/div %d, s_time %f\n", _active_section->_phase_oscillator.freq, _active_section->_active_layer->samples_per_division, _sample_time);
-        _active_section->_division_time_s = 1 / _active_section->_phase_oscillator.freq;
       }
 
       printf("END recording\n");
@@ -31,13 +40,16 @@ void FrameEngine::handleModeChange() {
       _active_section->_active_layer = nullptr;
     }
 
-    if (_prev_mode == RecordMode::READ && _mode != RecordMode::READ) {
-      addLayer(_active_section, _mode);
+    if (_active_mode == RecordMode::READ && _mode != RecordMode::READ) {
+      if (addLayer(_active_section, _mode)) {
+        _active_mode = _mode;
+      }
+    } else {
+      _active_mode = _mode;
     }
 
     // FIXME ^^ BLOAT
 
-    _prev_mode = _mode;
   }
 }
 
@@ -51,8 +63,12 @@ void FrameEngine::updateSectionPosition(float section_position) {
 }
 
 void FrameEngine::step() {
-  if (_prev_mode != _mode) {
+  if (_active_mode != _mode) {
     handleModeChange();
+  }
+
+  if (_use_ext_phase) {
+    _phase_analyzer.process(_ext_phase, _sample_time);
   }
 
   for (auto section : _sections) {
@@ -78,21 +94,21 @@ float FrameEngine::read() {
 void FrameEngine::stepSection(Section* section) {
   if (section == _active_section) {
     Section::Layer* _active_layer = section->_active_layer;
-    if (_mode != RecordMode::READ) {
+    if (_active_mode != RecordMode::READ) {
       assert(_active_layer != nullptr);
     }
 
-    if (_mode == RecordMode::DUB && (_active_layer->start_division + _active_layer->n_divisions == section->_section_division)) {
+    if (_active_mode == RecordMode::DUB && (_active_layer->start_division + _active_layer->n_divisions == section->_section_division)) {
       printf("END recording via overdub\n");
       printf("-- start div: %d, length: %d\n", _active_layer->start_division, _active_layer->n_divisions);
       section->_layers.push_back(_active_layer);
 
       // TODO FIXME depends on inputs
       section->_selected_layers = section->_layers;
-      addLayer(section, RecordMode::DUB);
+      addLayer(section, _active_mode);
     }
 
-    if (_mode != RecordMode::READ) {
+    if (_active_mode != RecordMode::READ) {
       _active_layer->write(section->_section_division, section->_phase, _in, _attenuation);
     }
   }
@@ -106,7 +122,7 @@ void FrameEngine::stepSection(Section* section) {
     ASSERT(0, <=, _ext_phase);
     ASSERT(_ext_phase, <=, 1.0f);
     section->_phase = _ext_phase;
-  } else if (section->_phase_defined) {
+  } else if (section->_internal_phase_defined) {
     section->_phase_oscillator.step(_sample_time);
     section->_phase = section->_phase_oscillator.getPhase();
   } else {
@@ -119,49 +135,36 @@ void FrameEngine::stepSection(Section* section) {
 
   if (phase_flip) {
     if (0 < phase_change && 0 < section->_section_division) {
+      // TODO loop back to end if in loop mode
       section->_section_division--;
     } else if (phase_change < 0) {
       section->_section_division++;
     }
   }
-
-  // FIXME has a hard time with internal _section_division loops
-  if (_use_ext_phase) {
-    if (phase_flip && 0 < phase_change) {
-      section->_freq_calculator_last_capture_phase_distance += phase_change - 1;
-    } else if (phase_flip && phase_change < 0) {
-      section->_freq_calculator_last_capture_phase_distance += phase_change + 1;
-    } else {
-      bool in_division_phase_flip =
-          (0 < section->_freq_calculator_last_capture_phase_distance &&
-           phase_change < 0) ||
-          (section->_freq_calculator_last_capture_phase_distance < 0 &&
-           0 < phase_change);
-
-      if (!in_division_phase_flip) {
-        section->_freq_calculator_last_capture_phase_distance += phase_change;
-      }
-    }
-
-    if (section->_ext_phase_freq_calculator.process()) {
-      float ext_phase_change = fabs(section->_freq_calculator_last_capture_phase_distance);
-      float phase_change_per_sample = ext_phase_change / section->_ext_phase_freq_calculator.getDivision();
-      if (phase_change_per_sample == 0) {
-        return;
-      }
-      section->_division_time_s = _sample_time / phase_change_per_sample;
-      section->_phase_defined = true;
-      section->_freq_calculator_last_capture_phase_distance = 0;
-    }
-  }
 }
 
-void FrameEngine::addLayer(Section *section, RecordMode layer_mode) {
+bool FrameEngine::addLayer(Section *section, RecordMode layer_mode) {
   // TODO FIXME
   section->_selected_layers = section->_layers;
 
-  int samples_per_division = floor(section->_division_time_s / _sample_time);
-  printf("NEW LAYER: _section_division: %d, div time s %f sample time %f sapls per %d mode %d sel size %d\n", section->_section_division, section->_division_time_s, _sample_time, samples_per_division, layer_mode, section->_selected_layers.size());
+  float phase_period = 0.0;
+  if (_use_ext_phase) {
+    phase_period = _phase_analyzer._phase_period_estimate;
+    // indicates infinity, signal is not moving, don't add layer
+    if (phase_period == -1) {
+      return false;
+    }
+  } else if (section->_internal_phase_defined) {
+    phase_period = 1 / section->_phase_oscillator.freq;
+  }
 
-  section->_active_layer = new Section::Layer(layer_mode, section->_section_division, section->_selected_layers, samples_per_division, section->_phase_defined);
+  int samples_per_division = floor(phase_period / _sample_time);
+
+  printf("NEW LAYER: _section_division: %d, phase period s %f sample time %f sapls per %d mode %d sel size %d\n", section->_section_division, phase_period, _sample_time, samples_per_division, layer_mode, section->_selected_layers.size());
+
+  bool phase_def = _use_ext_phase ? true : section->_internal_phase_defined;
+
+  section->_active_layer = new Section::Layer(layer_mode, section->_section_division, section->_selected_layers, samples_per_division, phase_def);
+
+  return true;
 }

@@ -4,7 +4,7 @@ using namespace myrisa::dsp;
 
 FrameEngine::FrameEngine() {
   for (int i = 0; i < numSections; i++) {
-    sections.push_back(new Section());
+    sections.push_back(new Section(this));
   }
 }
 
@@ -32,12 +32,12 @@ inline float getAttenuationPower(float delta, float recording_threshold) {
 }
 
 void FrameEngine::startRecording() {
-  recording = true;
-  recording_dest_section = active_section;
+  _recording = true;
+  recording_dest_section = _active_section;
 
-  if (recording_dest_section->isEmpty() && !use_ext_phase) {
+  if (recording_dest_section->isEmpty() && !_use_ext_phase) {
     recording_dest_section->setRecordMode(RecordMode::DEFINE_DIVISION_LENGTH);
-  } else if (delta > 0.50f + record_threshold) {
+  } else if (_delta > 0.50f + record_threshold) {
     recording_dest_section->setRecordMode(RecordMode::EXTEND);
   } else {
     recording_dest_section->setRecordMode(RecordMode::DUB);
@@ -45,30 +45,30 @@ void FrameEngine::startRecording() {
 }
 
 void FrameEngine::endRecording() {
-  recording = false;
+  _recording = false;
   recording_dest_section->setRecordMode(RecordMode::READ);
 }
 
-void FrameEngine::step(float in, float sample_time) {
-  int active_section_i = round(section_position);
-  active_section = sections[active_section_i];
+void FrameEngine::step() {
+  int active_section_i = round(_section_position);
+  _active_section = sections[active_section_i];
 
-  bool delta_engaged = record_threshold <= std::fabs(delta - .50);
-  if (!recording && delta_engaged) {
+  bool delta_engaged = record_threshold <= std::fabs(_delta - .50);
+  if (!_recording && delta_engaged) {
     startRecording();
-  } else if (recording && !delta_engaged) {
+  } else if (_recording && !delta_engaged) {
     endRecording();
   }
 
   for (auto section : sections) {
-    section->step(in, attenuation, sample_time, use_ext_phase, ext_phase);
+    section->step();
   }
 }
 
 float FrameEngine::read() {
-  int section_1 = floor(section_position);
-  int section_2 = ceil(section_position);
-  float weight = section_position - floor(section_position);
+  int section_1 = floor(_section_position);
+  int section_2 = ceil(_section_position);
+  float weight = _section_position - floor(_section_position);
 
   float out = 0.0f;
   out += sections[section_1]->read() * (1 - weight);

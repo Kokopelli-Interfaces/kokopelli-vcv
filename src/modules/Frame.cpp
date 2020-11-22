@@ -15,6 +15,12 @@ Frame::Frame() {
 
 void Frame::sampleRateChange() {
   _sampleTime = APP->engine->getSampleTime();
+  // FIXME
+  // for (auto engine : _engines) {
+  //   if (engine) {
+  //     engine->_sample_time = _sampleTime;
+  //   }
+  // }
 }
 
 void Frame::processAlways(const ProcessArgs &args) {
@@ -31,14 +37,14 @@ void Frame::modulateChannel(int channel_index) {
     float delta_port = rack::clamp(inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 5.0f, -5.0f, 5.0f);
     delta = rack::clamp(delta_port + delta, -5.0f, 5.0f);
   }
-  e.delta = delta;
+  e._delta = delta;
 
   // TODO FIXME
-  e.section_position = params[SECTION_PARAM].getValue() * (15);
+  e._section_position = params[SECTION_PARAM].getValue() * (15);
   if (inputs[SECTION_INPUT].isConnected()) {
-    e.section_position += rack::clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
+    e._section_position += rack::clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
-  e.section_position = rack::clamp(e.section_position, 0.0f, 15.0f);
+  e._section_position = rack::clamp(e._section_position, 0.0f, 15.0f);
 }
 
 int Frame::channels() {
@@ -60,14 +66,14 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
   FrameEngine &e = *_engines[channel_index];
 
   if (inputs[CLK_INPUT].isConnected()) {
-    e.use_ext_phase = true;
-    e.ext_phase = rack::clamp(inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
+    e._use_ext_phase = true;
+    e._ext_phase = rack::clamp(inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
   } else {
-    e.use_ext_phase = false;
+    e._use_ext_phase = false;
   }
 
-  float in = _fromSignal->signal[channel_index];
-  e.step(in, _sampleTime);
+  e._in = _fromSignal->signal[channel_index];
+  e.step();
 
   float out = e.read();
   _toSignal->signal[channel_index] = out;
@@ -75,29 +81,32 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   FrameEngine &e = *_engines[0];
-  float phase = e.active_section->phase;
 
-  lights[PHASE_LIGHT + 1].setSmoothBrightness(phase, _sampleTime * light_divider.getDivision());
+  if (e._active_section) {
+    float phase = e._active_section->_phase;
+    lights[PHASE_LIGHT + 1].setSmoothBrightness(
+        phase, _sampleTime * light_divider.getDivision());
+  }
 
   // FIXME
   float attenuation_power = 0.0f;
 
-  if (!e.recording || !e.active_section) {
+  if (!e._recording || !e._active_section) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_section->mode == RecordMode::EXTEND) {
+  } else if (e._active_section->_mode == RecordMode::EXTEND) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_section->mode == RecordMode::DUB) {
+  } else if (e._active_section->_mode == RecordMode::DUB) {
     lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 1].setSmoothBrightness(
         1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e.active_section->mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+  } else if (e._active_section->_mode == RecordMode::DEFINE_DIVISION_LENGTH) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;
@@ -112,6 +121,7 @@ void Frame::postProcessAlways(const ProcessArgs &args) {
 
 void Frame::addChannel(int channel_index) {
   _engines[channel_index] = new FrameEngine();
+  _engines[channel_index]->_sample_time = _sampleTime;
 }
 
 void Frame::removeChannel(int channel_index) {

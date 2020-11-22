@@ -12,9 +12,9 @@ FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<
   samples_per_division = layer_samples_per_division;
 
   start_division = division;
-  mode = record_mode;
+  _mode = record_mode;
 
-  if (mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+  if (_mode == RecordMode::DEFINE_DIVISION_LENGTH) {
     n_divisions = 1;
   } else {
     for (auto selected_layer : selected_layers) {
@@ -23,14 +23,14 @@ FrameEngine::Section::Layer::Layer(RecordMode record_mode, int division, vector<
       }
     }
 
-    if (mode == RecordMode::DUB) {
+    if (_mode == RecordMode::DUB) {
       if (0 < selected_layers.size()) {
         auto most_recent_target_layer = selected_layers.back();
         n_divisions = most_recent_target_layer->n_divisions;
       } else {
         n_divisions = 1;
       }
-    } else if (mode == RecordMode::EXTEND) {
+    } else if (_mode == RecordMode::EXTEND) {
       n_divisions = 0;
     }
   }
@@ -48,14 +48,14 @@ void FrameEngine::Section::Layer::write(int division, float phase, float sample,
   ASSERT(phase, <=, 1.0);
   ASSERT(start_division, <=, division);
 
-  if (mode == RecordMode::DEFINE_DIVISION_LENGTH) {
+  if (_mode == RecordMode::DEFINE_DIVISION_LENGTH) {
     buffer->pushBack(sample);
     send_attenuation->pushBack(sample);
     samples_per_division++;
   } else {
     ASSERT(0, <, samples_per_division);
 
-    if (mode == RecordMode::DUB) {
+    if (_mode == RecordMode::DUB) {
       ASSERT(n_divisions, !=, 0);
 
       if (buffer->size() == 0) {
@@ -67,7 +67,7 @@ void FrameEngine::Section::Layer::write(int division, float phase, float sample,
       buffer->write(buffer_phase, sample);
       send_attenuation->write(buffer_phase, attenuation);
 
-    } else if (mode == RecordMode::EXTEND) {
+    } else if (_mode == RecordMode::EXTEND) {
       while (start_division + n_divisions <= division) {
         buffer->resize(buffer->size() + samples_per_division);
         send_attenuation->resize(send_attenuation->size() + samples_per_division);
@@ -78,8 +78,8 @@ void FrameEngine::Section::Layer::write(int division, float phase, float sample,
       buffer->write(buffer_phase, sample);
       send_attenuation->write(buffer_phase, attenuation);
 
-    } else if (mode == RecordMode::READ) {
-      printf("Myrisa Frame: Write in read mode?? Frame is broken.\n");
+    } else if (_mode == RecordMode::READ) {
+      printf("Myrisa Frame: Write in read _mode?? Frame is broken.\n");
       return;
     }
   }

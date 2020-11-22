@@ -43,7 +43,7 @@ same as frame, but has additional ~FRAME~ parameter to select active frame
 ** TODO frame knob
 change which frame is active, is a frame multiplexer with this.
 * TODO Timeline -
-#+ATTR_ORG: :width 500
+#+ATTR_ORG: :width 700
 [[./img/todo_2020_11_04__20:41:37.png]]
 
 - a sequencer for frame scenes as well as states

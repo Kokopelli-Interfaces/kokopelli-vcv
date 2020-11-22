@@ -13,8 +13,9 @@ void FrameEngine::handleModeChange() {
     printf("MODE CHANGE:: %d -> %d\n", _prev_mode, _mode);
 
     // FIXME BLOAT vv
-    if (_active_section->_section_mode != RecordMode::READ && _mode == RecordMode::READ) {
+    if (_prev_mode != RecordMode::READ && _mode == RecordMode::READ) {
       assert(_active_section->_active_layer != nullptr);
+
       if (_active_section->isEmpty() && !_active_section->_phase_defined) {
         _active_section->_phase_oscillator.setPitch(1 / (_active_section->_active_layer->samples_per_division * _sample_time));
         _active_section->_phase_defined = true;
@@ -23,18 +24,16 @@ void FrameEngine::handleModeChange() {
       }
 
       printf("END recording\n");
-      printf("-- _section_mode %d, start div: %d, length: %d\n", _active_section->_section_mode,
+      printf("-- mode %d, start div: %d, length: %d\n", _mode,
              _active_section->_active_layer->start_division, _active_section->_active_layer->n_divisions);
 
       _active_section->_layers.push_back(_active_section->_active_layer);
       _active_section->_active_layer = nullptr;
     }
 
-    if (_active_section->_section_mode == RecordMode::READ && _mode != RecordMode::READ) {
+    if (_prev_mode == RecordMode::READ && _mode != RecordMode::READ) {
       addLayer(_active_section, _mode);
     }
-
-    _active_section->_section_mode = _mode;
 
     // FIXME ^^ BLOAT
 
@@ -162,7 +161,7 @@ void FrameEngine::addLayer(Section *section, RecordMode layer_mode) {
   section->_selected_layers = section->_layers;
 
   int samples_per_division = floor(section->_division_time_s / _sample_time);
-  printf("NEW LAYER: _section_division: %d, div time s %f sample time %f sapls per %d _section_mode %d sel size %d\n", section->_section_division, section->_division_time_s, _sample_time, samples_per_division, layer_mode, section->_selected_layers.size());
+  printf("NEW LAYER: _section_division: %d, div time s %f sample time %f sapls per %d mode %d sel size %d\n", section->_section_division, section->_division_time_s, _sample_time, samples_per_division, layer_mode, section->_selected_layers.size());
 
   section->_active_layer = new Section::Layer(layer_mode, section->_section_division, section->_selected_layers, samples_per_division, section->_phase_defined);
 }

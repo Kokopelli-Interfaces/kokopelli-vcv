@@ -66,9 +66,6 @@ public:
   rack::dsp::ClockDivider _ext_phase_freq_calculator;
   float _freq_calculator_last_capture_phase_distance = 0.0f;
 
-  // TODO remove me
-  RecordMode _section_mode = RecordMode::READ;
-
   float _division_time_s = 0.0f;
 
   float getLayerAttenuation(int layer_i, float current_attenuation);

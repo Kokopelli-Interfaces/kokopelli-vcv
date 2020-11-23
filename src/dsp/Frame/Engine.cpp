@@ -8,6 +8,12 @@ Engine::Engine() {
   }
 }
 
+Engine::~Engine() {
+  for (int i = 0; i < numSections; i++) {
+    delete _sections[i];
+  }
+}
+
 void Engine::handleModeChange() {
   if (_active_section) {
     printf("MODE CHANGE:: %d -> %d\n", _active_mode, _mode);

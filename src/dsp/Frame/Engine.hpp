@@ -35,6 +35,7 @@ private:
 
 public:
   Engine();
+  ~Engine();
   void updateSectionPosition(float section_position);
   void step();
   float read();

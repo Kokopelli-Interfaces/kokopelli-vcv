@@ -94,3 +94,17 @@ is it a property of a scene?
   is lower than the actual amounnt, and causes it to play slower
 * TODO refractor frame
 - change static arrays to std:array
+- unique pointers for section
+
+* TODO 360 DELTA KNOB! -- Extend full attenuation into Dub full attenuation is much easier
+* TODO SCENE & TIME Record Modes
+TIME + Extend: 
+- insertion and deletion of time
+- inserts new scenes that are the clipboard contents, 
+- erase time if full attenuation
+- progres
+
+TIME + Dub:
+- add non repeating  recordings
+* TODO Progress 
+

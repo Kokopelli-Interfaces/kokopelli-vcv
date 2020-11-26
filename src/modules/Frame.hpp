@@ -28,10 +28,10 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     NUM_LIGHTS
   };
 
-  SignalExpanderMessage *_toSignal = nullptr;
-  SignalExpanderMessage *_fromSignal = nullptr;
+  SignalExpanderMessage *_to_signal = nullptr;
+  SignalExpanderMessage *_from_signal = nullptr;
 
-  const float recordThreshold = 0.05f;
+  const float _recordThreshold = 0.05f;
   float _sampleTime = 1.0f;
 
   std::array<myrisa::dsp::frame::Engine*, maxChannels> _engines;

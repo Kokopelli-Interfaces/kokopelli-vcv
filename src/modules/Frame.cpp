@@ -27,29 +27,9 @@ void Frame::sampleRateChange() {
 
 void Frame::processAlways(const ProcessArgs &args) {
   if (baseConnected()) {
-    _fromSignal = fromBase();
-    _toSignal = toBase();
+    _from_signal = fromBase();
+    _to_signal = toBase();
   }
-}
-
-inline float getAttenuationPower(float delta, float recording_threshold) {
-  float read_position = 0.50f;
-  float linear_attenuation_power;
-  if (delta < read_position - recording_threshold) {
-    linear_attenuation_power = read_position - recording_threshold - delta;
-  } else if (delta > read_position - recording_threshold) {
-    linear_attenuation_power = delta - read_position + recording_threshold;
-  } else {
-    linear_attenuation_power = 0.0f;
-  }
-
-  float range = read_position - recording_threshold;
-  float linear_attenuation_power_scaled = linear_attenuation_power / range;
-
-  // I found that taking to the power 3 gives the most intuitive attenuation
-  // power curve
-  float attenuation_power = rack::clamp(pow(linear_attenuation_power_scaled, 3), 0.0f, 1.0f);
-  return attenuation_power;
 }
 
 inline RecordMode getEngineMode(float delta, float record_threshold, myrisa::dsp::frame::Engine *e) {
@@ -67,13 +47,19 @@ void Frame::modulateChannel(int channel_index) {
 
   e->_use_ext_phase = inputs[CLK_INPUT].isConnected();
 
-  float delta = params[DELTA_PARAM].getValue();
+  float widget_delta = params[DELTA_PARAM].getValue();
   if (inputs[DELTA_INPUT].isConnected()) {
-    float delta_port = rack::clamp(inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 5.0f, -5.0f, 5.0f);
-    delta = rack::clamp(delta_port + delta, -5.0f, 5.0f);
+    float delta_port = inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 10;
+    widget_delta = rack::clamp(delta_port + widget_delta, 0.0f, 1.0f);
   }
-  e->_mode = getEngineMode(delta, recordThreshold, e);
-  e->_attenuation = getAttenuationPower(delta, recordThreshold);
+
+  // taking to the power of 3 gives a more intuitive curve
+  e->_delta.attenuation = rack::clamp(pow(widget_delta, 3), 0.0f, 1.0f);
+ e->_delta.recording = _recordThreshold < widget_delta ? true : false;
+
+  // TODO FIXME
+  // delta.mode = RecordMode::CREATE;
+  // delta.context = RecordContext::STRUCTURE;
 
   float scene_position = params[SCENE_PARAM].getValue() * (15);
   if (inputs[SCENE_INPUT].isConnected()) {
@@ -85,7 +71,7 @@ void Frame::modulateChannel(int channel_index) {
 
 int Frame::channels() {
   if (baseConnected()) {
-    int input_channels = _fromSignal->channels;
+    int input_channels = _from_signal->channels;
     if (_channels < input_channels) {
       return input_channels;
     }
@@ -106,9 +92,9 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
         inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
   }
 
-  e->_in = _fromSignal->signal[channel_index];
+  e->_in = _from_signal->signal[channel_index];
   e->step();
-  _toSignal->signal[channel_index] = e->read();
+  _to_signal->signal[channel_index] = e->read();
 }
 
 void Frame::updateLights(const ProcessArgs &args) {

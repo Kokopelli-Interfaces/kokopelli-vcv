@@ -25,6 +25,8 @@ public:
   RecordMode _mode = RecordMode::READ;
   Scene *_active_scene = nullptr;
 
+  Delta _delta;
+
 private:
   const int numScenes = 16;
   Scene *recording_dest_scene = nullptr;

@@ -2,6 +2,7 @@
 
 #include "Frame_shared.hpp"
 #include "dsp/Frame/Engine.hpp"
+#include "dsp/LongPressButton.hpp"
 #include "widgets.hpp"
 #include "util/gui.hpp"
 #include <math.h>
@@ -20,13 +21,13 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     DELTA_PARAM,
     NUM_PARAMS
   };
-  enum InputIds { SCENE_INPUT, DELTA_INPUT, CLK_INPUT, NUM_INPUTS };
+  enum InputIds { SCENE_INPUT, DELTA_INPUT, PHASE_INPUT, NUM_INPUTS };
   enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
   enum LightIds {
     ENUMS(SELECT_LIGHT, 3),
     ENUMS(MODE_SWITCH_LIGHT, 3),
     ENUMS(LOOP_LIGHT, 3),
-    ENUMS(STRUCTURE_LIGHT, 3),
+    ENUMS(DELTA_LIGHT, 3),
     ENUMS(RECORD_MODE_LIGHT, 3),
     ENUMS(RECORD_CONTEXT_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
@@ -36,11 +37,20 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   SignalExpanderMessage *_to_signal = nullptr;
   SignalExpanderMessage *_from_signal = nullptr;
 
+  RecordMode _rec_mode = RecordMode::DUB;
+  RecordContext _rec_context = RecordContext::SCENE;
+  LoopMode _loop_mode = LoopMode::LOOP_TIME;
+
   const float _recordThreshold = 0.05f;
   float _sampleTime = 1.0f;
 
+  LongPressButton _rec_mode_button;
+  LongPressButton _rec_context_button;
+  LongPressButton _loop_button;
+
   std::array<myrisa::dsp::frame::Engine*, maxChannels> _engines;
-  rack::dsp::ClockDivider light_divider;
+  rack::dsp::ClockDivider _light_divider;
+  rack::dsp::ClockDivider _button_divider;
 
   Frame();
 
@@ -53,6 +63,9 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   void processChannel(const ProcessArgs &args, int channel) override;
   void postProcessAlways(const ProcessArgs &args) override;
   void updateLights(const ProcessArgs &args);
+
+private:
+  void processButtons();
 };
 
 } // namespace myrisa

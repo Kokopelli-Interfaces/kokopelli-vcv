@@ -69,6 +69,13 @@ void Engine::updateScenePosition(float scene_position) {
 }
 
 void Engine::step() {
+  // FIXME hack to work with old method
+  _mode = _delta.rec_mode;
+  if (!_delta.active) {
+    _mode = RecordMode::READ;
+  }
+  _attenuation = _delta.attenuation;
+
   if (_active_mode != _mode) {
     handleModeChange();
   }

@@ -25,7 +25,13 @@ public:
   RecordMode _mode = RecordMode::READ;
   Scene *_active_scene = nullptr;
 
-  Delta _delta;
+  // all scenes have the same phase. the way users can create new scenes of different bpm, is to use
+  // another Frame to automate the rate of the external phase and section
+  float _phase = 0.f;
+
+  LoopMode loop_mode;
+
+  Delta _delta = Delta();
 
 private:
   const int numScenes = 16;

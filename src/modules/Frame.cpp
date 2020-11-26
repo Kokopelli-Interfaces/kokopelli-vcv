@@ -6,13 +6,18 @@ Frame::Frame() {
   configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "Select");
   configParam(SCENE_PARAM, 0.f, 1.f, 0.f, "Scene");
   configParam(MODE_SWITCH_PARAM, 0.f, 1.f, 0.f, "Mode");
-  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
+  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop Section");
   configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
   configParam(RECORD_CONTEXT_PARAM, 0.f, 1.f, 0.f, "Record Context");
   configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "Delta");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
-  light_divider.setDivision(16);
+  _light_divider.setDivision(512);
+  _button_divider.setDivision(4);
+
+  _rec_mode_button.param = &params[RECORD_MODE_PARAM];
+  _rec_context_button.param = &params[RECORD_CONTEXT_PARAM];
+  _loop_button.param = &params[LOOP_PARAM];
 }
 
 void Frame::sampleRateChange() {
@@ -25,27 +30,75 @@ void Frame::sampleRateChange() {
   // }
 }
 
+void Frame::processButtons() {
+  float sampleTime = _sampleTime * _button_divider.division;
+  switch (_rec_mode_button.process(sampleTime)) {
+  default:
+  case LongPressButton::NO_PRESS:
+    break;
+  case LongPressButton::SHORT_PRESS:
+    printf("SHORT %d\n", _rec_mode);
+    if (_rec_mode == RecordMode::DUB) {
+      _rec_mode = RecordMode::EXTEND;
+    } else {
+      _rec_mode = RecordMode::DUB;
+    }
+    printf("SHORT AFTER %d\n", _rec_mode);
+    break;
+  case LongPressButton::LONG_PRESS:
+    _rec_mode = RecordMode::REPLACE;
+    break;
+  }
+
+  switch (_rec_context_button.process(sampleTime)) {
+  default:
+  case LongPressButton::NO_PRESS:
+    break;
+  case LongPressButton::SHORT_PRESS:
+    if (_rec_context == RecordContext::SCENE) {
+      _rec_context = RecordContext::TIME;
+    } else {
+      _rec_context = RecordContext::SCENE;
+    }
+    break;
+  case LongPressButton::LONG_PRESS:
+    _rec_context = RecordContext::LAYER;
+    break;
+  }
+
+  switch (_loop_button.process(sampleTime)) {
+  default:
+  case LongPressButton::NO_PRESS:
+    break;
+  case LongPressButton::SHORT_PRESS:
+    if (_loop_mode == LoopMode::LOOP_SECTION) {
+      _loop_mode = LoopMode::LOOP_TIME;
+    } else {
+      _loop_mode = LoopMode::LOOP_SECTION;
+    }
+    break;
+  case LongPressButton::LONG_PRESS:
+    _loop_mode = LoopMode::LOOP_LAYER;
+    break;
+  }
+}
+
 void Frame::processAlways(const ProcessArgs &args) {
   if (baseConnected()) {
     _from_signal = fromBase();
     _to_signal = toBase();
   }
-}
 
-inline RecordMode getEngineMode(float delta, float record_threshold, myrisa::dsp::frame::Engine *e) {
-  if (delta < 0.50f - record_threshold) {
-    return RecordMode::DUB;
-  } else if (0.50f + record_threshold < delta) {
-    return RecordMode::EXTEND;
+  // Buttons
+  if (_button_divider.process()) {
+    processButtons();
   }
-
-  return RecordMode::READ;
 }
 
 void Frame::modulateChannel(int channel_index) {
   myrisa::dsp::frame::Engine *e = _engines[channel_index];
 
-  e->_use_ext_phase = inputs[CLK_INPUT].isConnected();
+  e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
   float widget_delta = params[DELTA_PARAM].getValue();
   if (inputs[DELTA_INPUT].isConnected()) {
@@ -55,11 +108,11 @@ void Frame::modulateChannel(int channel_index) {
 
   // taking to the power of 3 gives a more intuitive curve
   e->_delta.attenuation = rack::clamp(pow(widget_delta, 3), 0.0f, 1.0f);
-  e->_delta.recording = _recordThreshold < widget_delta ? true : false;
+  e->_delta.active = _recordThreshold < widget_delta ? true : false;
+  e->_delta.rec_mode = _rec_mode;
+  e->_delta.rec_context = _rec_context;
 
-  // TODO FIXME
-  // delta.mode = RecordMode::CREATE;
-  // delta.context = RecordContext::STRUCTURE;
+  e->loop_mode = _loop_mode;
 
   float scene_position = params[SCENE_PARAM].getValue() * (15);
   if (inputs[SCENE_INPUT].isConnected()) {
@@ -89,7 +142,7 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 
   if (e->_use_ext_phase) {
     e->_ext_phase = rack::clamp(
-        inputs[CLK_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
+        inputs[PHASE_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
   }
 
   e->_in = _from_signal->signal[channel_index];
@@ -98,45 +151,88 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 }
 
 void Frame::updateLights(const ProcessArgs &args) {
-  myrisa::dsp::frame::Engine *e = _engines[0];
+  Delta delta = _engines[0]->_delta;
+  LoopMode loop_mode = _engines[0]->loop_mode;
+  float phase = _engines[0]->_active_scene ? _engines[0]->_active_scene->_phase : 0.f;
+  // display the engine with an active delta
 
-  if (e->_active_scene) {
-    float phase = e->_active_scene->_phase;
-    lights[PHASE_LIGHT + 1].setSmoothBrightness(
-        phase, _sampleTime * light_divider.getDivision());
+  bool poly_delta = (inputs[DELTA_INPUT].isConnected() && 1 < inputs[DELTA_INPUT].getChannels());
+  bool poly_phase = (inputs[PHASE_INPUT].isConnected() && 1 < inputs[PHASE_INPUT].getChannels());
+
+  lights[DELTA_LIGHT + 1].value = !delta.active;
+
+  if (poly_delta) {
+    lights[DELTA_LIGHT + 0].value = 0.f;
+    lights[DELTA_LIGHT + 2].setSmoothBrightness(
+        delta.active - delta.attenuation,
+        _sampleTime * _light_divider.getDivision());
+  } else {
+    lights[DELTA_LIGHT + 0].setSmoothBrightness(
+        delta.active - delta.attenuation,
+        _sampleTime * _light_divider.getDivision());
+    lights[DELTA_LIGHT + 2].value = 0.f;
   }
 
-  // FIXME
-  float attenuation_power = 0.0f;
+  if (poly_phase) {
+    lights[PHASE_LIGHT + 1].value = 0.f;
+    lights[PHASE_LIGHT + 2].setSmoothBrightness(phase, _sampleTime * _light_divider.getDivision());
+  } else {
+    lights[PHASE_LIGHT + 1].setSmoothBrightness(
+        phase, _sampleTime * _light_divider.getDivision());
+    lights[PHASE_LIGHT + 2].value = 0.f;
+  }
 
-  if (e->_active_scene->isEmpty() && e->_mode == RecordMode::READ) {
-    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
+  switch (delta.rec_mode) {
+  default:
+  case RecordMode::EXTEND:
+    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e->_mode == RecordMode::READ) {
+    break;
+  case RecordMode::DUB:
+    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 1.0;
+    break;
+  case RecordMode::REPLACE:
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
-    lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (!e->_active_scene->_internal_phase_defined) {
-    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 2].value = 1.0;
-  } else if (e->_mode == RecordMode::EXTEND) {
-    lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
-        1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
-    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (e->_mode == RecordMode::DUB) {
-    lights[RECORD_MODE_LIGHT + 0].setSmoothBrightness(
-        1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
-    lights[RECORD_MODE_LIGHT + 1].setSmoothBrightness(
-        1.0f - attenuation_power, _sampleTime * light_divider.getDivision());
-    lights[RECORD_MODE_LIGHT + 2].value = 0.0;
+    break;
+  }
+
+  switch (delta.rec_context) {
+  default:
+  case RecordContext::TIME:
+    lights[RECORD_CONTEXT_LIGHT + 0].value = 1.0;
+    lights[RECORD_CONTEXT_LIGHT + 1].value = 0.0;
+    break;
+  case RecordContext::SCENE:
+    lights[RECORD_CONTEXT_LIGHT + 0].value = 1.0;
+    lights[RECORD_CONTEXT_LIGHT + 1].value = 1.0;
+    break;
+  case RecordContext::LAYER:
+    lights[RECORD_CONTEXT_LIGHT + 0].value = 0.0;
+    lights[RECORD_CONTEXT_LIGHT + 1].value = 1.0;
+    break;
+  }
+
+  switch (loop_mode) {
+  default:
+  case LoopMode::LOOP_TIME:
+    lights[LOOP_LIGHT + 0].value = 1.0;
+    lights[LOOP_LIGHT + 1].value = 0.0;
+    break;
+  case LoopMode::LOOP_SECTION:
+    lights[LOOP_LIGHT + 0].value = 1.0;
+    lights[LOOP_LIGHT + 1].value = 1.0;
+    break;
+  case LoopMode::LOOP_LAYER:
+    lights[LOOP_LIGHT + 0].value = 0.0;
+    lights[LOOP_LIGHT + 1].value = 1.0;
+    break;
   }
 }
 
 void Frame::postProcessAlways(const ProcessArgs &args) {
-  if (light_divider.process()) {
+  if (_light_divider.process()) {
     updateLights(args);
   }
 }
@@ -155,8 +251,6 @@ void Frame::removeChannel(int channel_index) {
 struct FrameValueDisplay : TextBox {
 	Frame *_module;
 	int _previous_displayed_value = 0;
-	float _value_display_time = 2.f;
-	GUITimer _value_display_timer;
 
 	FrameValueDisplay(Frame *m) : TextBox() {
       _module = m;
@@ -181,10 +275,6 @@ struct FrameValueDisplay : TextBox {
       s = string::f("%d", v);
       setText(s);
 		}
-	}
-
-	void triggerValueDisplay() {
-		_value_display_timer.trigger(_value_display_time);
 	}
 
 	void step() override {
@@ -223,19 +313,19 @@ struct FrameWidget : ModuleWidget {
 		// addParam(createParam<LEDButton>(mm2px(Vec(17.878, 48.367)), module, Frame::MODE_SWITCH_PARAM));
 		addParam(createParam<LEDButton>(mm2px(Vec(9.715, 62.232)), module, Frame::LOOP_PARAM));
 		addParam(createParam<LEDButton>(mm2px(Vec(16.926, 76.376)), module, Frame::RECORD_CONTEXT_PARAM));
-		addParam(createParam<ToggleLEDButton>(mm2px(Vec(2.596, 76.389)), module, Frame::RECORD_MODE_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(2.596, 76.389)), module, Frame::RECORD_MODE_PARAM));
 		addParam(createParam<Rogan3PBlue>(mm2px(Vec(5.333, 82.157)), module, Frame::DELTA_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 51.114)), module, Frame::SCENE_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 97.419)), module, Frame::DELTA_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 109.491)), module, Frame::CLK_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 109.491)), module, Frame::PHASE_INPUT));
 
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 109.491)), module, Frame::PHASE_OUTPUT));
 
 		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.309, 25.518)), module, Frame::SELECT_LIGHT));
 		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.308, 49.797)), module, Frame::MODE_SWITCH_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.16, 63.676)), module, Frame::LOOP_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 72.898)), module, Frame::STRUCTURE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 72.898)), module, Frame::DELTA_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(18.357, 77.807)), module, Frame::RECORD_CONTEXT_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.027, 77.82)), module, Frame::RECORD_MODE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.046, 111.955)), module, Frame::PHASE_LIGHT));

@@ -13,13 +13,15 @@ CLOSED: [2020-11-03 Tue 16:42]
 CLOSED: [2020-11-02 Mon 22:18]
 * DONE Frame - snap to multiples of initial recording
 CLOSED: [2020-11-03 Tue 18:56]
-* TODO Frame - smooth out transitions
+* DONE Frame - smooth out transitions
+CLOSED: [2020-11-25 Wed 13:37]
 so that there are no clicks and pops
 put under layer::read()
 layer has start offset and end offset, just smooth that part out in the reading 
 * DONE Frame - attenuation
 CLOSED: [2020-11-04 Wed 16:00]
-* TODO Frame - fix polyphony
+* DONE Frame - fix polyphony
+CLOSED: [2020-11-25 Wed 13:37]
 * TODO Frame - delete buffers that are erased
 - don't delete if timeline is recording in futrue
 * TODO Frame - rework to have rotary knobs so no limit on scenes and layers
@@ -40,7 +42,7 @@ hold to clear buffer, or to delete selected if no buffer
 
 * TODO Frame-MUX module
 same as frame, but has additional ~FRAME~ parameter to select active frame
-** TODO frame knob
+* TODO frame knob
 change which frame is active, is a frame multiplexer with this.
 * TODO Timeline -
 #+ATTR_ORG: :width 700
@@ -88,23 +90,9 @@ in all cases, a division length is defined
 
 can the division length be changed after scene is created?
 is it a property of a scene?
-* FRAME - bugs
-- addition on write causes too much amplitude when low phase, don't add, replace
-- layers should go by a phase start phase end basis, as the samples per division for the first layer
-  is lower than the actual amounnt, and causes it to play slower
 * TODO refractor frame
 - change static arrays to std:array
 - unique pointers for section
 
-* TODO 360 DELTA KNOB! -- Extend full attenuation into Dub full attenuation is much easier
-* TODO SCENE & TIME Record Modes
-TIME + Extend: 
-- insertion and deletion of time
-- inserts new scenes that are the clipboard contents, 
-- erase time if full attenuation
-- progres
-
-TIME + Dub:
-- add non repeating  recordings
 * TODO Progress 
 

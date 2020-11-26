@@ -164,8 +164,8 @@ struct FrameWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(7.631, 18.94)), module, Frame::LAYER_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(5.333, 35.894)), module, Frame::SCENE_PARAM));
+		addParam(createParam<Rogan1PGray>(mm2px(Vec(7.631, 18.94)), module, Frame::LAYER_PARAM));
+		addParam(createParam<Rogan1HPSWhite>(mm2px(Vec(5.333, 35.894)), module, Frame::SCENE_PARAM));
 
 		addParam(createParam<TL1105>(mm2px(Vec(18.254, 24.044)), module, Frame::SELECT_PARAM));
 		addParam(createParam<TL1105>(mm2px(Vec(18.206, 48.57)), module, Frame::MODE_SWITCH_PARAM));

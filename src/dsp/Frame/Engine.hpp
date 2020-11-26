@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Section.hpp"
+#include "Scene.hpp"
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "Layer.hpp"
@@ -10,7 +10,7 @@
 #include <math.h>
 #include <vector>
 
-    namespace myrisa {
+namespace myrisa {
 namespace dsp {
 namespace frame {
 
@@ -20,15 +20,15 @@ public:
   float _ext_phase = 0.0f;
   float _in = 0.0f;
   float _sample_time = 1.0f;
-  float _section_position = 0.0f;
+  float _scene_position = 0.0f;
   float _attenuation = 0.0f;
   RecordMode _mode = RecordMode::READ;
-  Section *_active_section = nullptr;
+  Scene *_active_scene = nullptr;
 
 private:
-  const int numSections = 16;
-  Section *recording_dest_section = nullptr;
-  std::vector<Section*> _sections;
+  const int numScenes = 16;
+  Scene *recording_dest_scene = nullptr;
+  std::vector<Scene*> _scenes;
   RecordMode _active_mode = RecordMode::READ;
 
   PhaseAnalyzer _phase_analyzer;
@@ -36,14 +36,14 @@ private:
 public:
   Engine();
   ~Engine();
-  void updateSectionPosition(float section_position);
+  void updateScenePosition(float scene_position);
   void step();
   float read();
 
 private:
   void handleModeChange();
-  void stepSection(Section *section);
-  bool addLayer(Section *section, RecordMode mode);
+  void stepScene(Scene *scene);
+  bool addLayer(Scene *scene, RecordMode mode);
 };
 
 } // namespace frame

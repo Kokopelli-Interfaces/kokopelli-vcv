@@ -2,13 +2,15 @@
 
 Frame::Frame() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(SECTION_PARAM, 0.f, 1.f, 0.f, "Section");
-  configParam(PLAY_PARAM, 0.f, 1.f, 0.f, "Play Layer");
-  configParam(NEXT_PARAM, 0.f, 1.f, 0.f, "Next Layer");
-  configParam(PREV_PARAM, 0.f, 1.f, 0.f, "Prev Layer");
-  configParam(UNDO_PARAM, 0.f, 1.f, 0.f, "Undo");
-  configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
-  configParam(DELTA_PARAM, 0.f, 1.f, 0.5f, "Delta");
+  configParam(LAYER_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(MODE_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(SCENE_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(SCENE_OR_TIME_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(ADD_OR_REPLACE_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "");
+
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   light_divider.setDivision(16);
 }
@@ -73,12 +75,12 @@ void Frame::modulateChannel(int channel_index) {
   e->_mode = getEngineMode(delta, recordThreshold, e);
   e->_attenuation = getAttenuationPower(delta, recordThreshold);
 
-  float section_position = params[SECTION_PARAM].getValue() * (15);
-  if (inputs[SECTION_INPUT].isConnected()) {
-    section_position += rack::clamp(inputs[SECTION_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
+  float scene_position = params[SCENE_PARAM].getValue() * (15);
+  if (inputs[SCENE_INPUT].isConnected()) {
+    scene_position += rack::clamp(inputs[SCENE_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
-  section_position = rack::clamp(section_position, 0.0f, 15.0f);
-  e->updateSectionPosition(section_position);
+  scene_position = rack::clamp(scene_position, 0.0f, 15.0f);
+  e->updateScenePosition(scene_position);
 }
 
 int Frame::channels() {
@@ -112,8 +114,8 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 void Frame::updateLights(const ProcessArgs &args) {
   myrisa::dsp::frame::Engine *e = _engines[0];
 
-  if (e->_active_section) {
-    float phase = e->_active_section->_phase;
+  if (e->_active_scene) {
+    float phase = e->_active_scene->_phase;
     lights[PHASE_LIGHT + 1].setSmoothBrightness(
         phase, _sampleTime * light_divider.getDivision());
   }
@@ -121,7 +123,7 @@ void Frame::updateLights(const ProcessArgs &args) {
   // FIXME
   float attenuation_power = 0.0f;
 
-  if (e->_active_section->isEmpty() && e->_mode == RecordMode::READ) {
+  if (e->_active_scene->isEmpty() && e->_mode == RecordMode::READ) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
@@ -129,7 +131,7 @@ void Frame::updateLights(const ProcessArgs &args) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     lights[RECORD_MODE_LIGHT + 2].value = 0.0;
-  } else if (!e->_active_section->_internal_phase_defined) {
+  } else if (!e->_active_scene->_internal_phase_defined) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     lights[RECORD_MODE_LIGHT + 2].value = 1.0;
@@ -171,27 +173,42 @@ struct FrameWidget : ModuleWidget {
     box.size = Vec(RACK_GRID_WIDTH * hp, RACK_GRID_HEIGHT);
     setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Frame.svg")));
 
+		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<Rogan4PSGray>(mm2px(Vec(2.247, 18.399)), module, Frame::SECTION_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(7.365, 48.24)), module, Frame::PLAY_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(13.909, 48.28)), module, Frame::NEXT_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(0.848, 48.282)), module, Frame::PREV_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(3.485, 71.081)), module, Frame::UNDO_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(11.408, 71.22)), module, Frame::RECORD_MODE_PARAM));
-		addParam(createParam<Rogan3PBlue>(mm2px(Vec(2.74, 81.455)), module, Frame::DELTA_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(7.631, 18.94)), module, Frame::LAYER_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(1.859, 24.043)), module, Frame::MODE_SWITCH_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(18.254, 24.044)), module, Frame::SELECT_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(5.333, 35.894)), module, Frame::SCENE_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(9.371, 62.829)), module, Frame::LOOP_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(17.954, 78.199)), module, Frame::SCENE_OR_TIME_SWITCH_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(2.172, 78.199)), module, Frame::ADD_OR_REPLACE_SWITCH_PARAM));
+		addParam(createParam<RoundBlackKnob>(mm2px(Vec(5.333, 82.998)), module, Frame::DELTA_PARAM));
 
-		addInput(createInput<PJ301MPort>(mm2px(Vec(5.79, 34.444)), module, Frame::SECTION_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(5.79, 96.94)), module, Frame::DELTA_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(5.905, 109.113)), module, Frame::CLK_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 51.114)), module, Frame::SCENE_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 98.703)), module, Frame::DELTA_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(2.172, 109.113)), module, Frame::CLK_INPUT));
 
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(8.528, 63.611)), module, Frame::PHASE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(8.542, 67.836)), module, Frame::RECORD_MODE_LIGHT));
+		addOutput(createOutput<PJ301MPort>(mm2px(Vec(14.873, 109.114)), module, Frame::PHASE_OUTPUT));
 
-		// mm2px(Vec(18.593, 7.115))
-		addChild(createWidget<Widget>(mm2px(Vec(0.758, 54.214))));
+		addChild(createLight<MediumLight<RedLight>>(mm2px(Vec(-22.472, 14.547)), module, Frame::LAYER_LIGHT));
+		addChild(createLight<MediumLight<RedLight>>(mm2px(Vec(11.181, 76.714)), module, Frame::DELTA_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedLight>>(mm2px(Vec(11.181, 111.913)), module, Frame::PHASE_LIGHT));
+
+		// mm2px(Vec(10.219, 3.514))
+		// addChild(createWidget<Widget>(mm2px(Vec(7.591, 14.293))));
+		// // mm2px(Vec(10.029, 3.514))
+		// addChild(createWidget<Widget>(mm2px(Vec(7.685, 31.288))));
+		// // mm2px(Vec(5.195, 3.514))
+		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 62.299))));
+		// // mm2px(Vec(5.195, 3.514))
+		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 62.453))));
+		// // mm2px(Vec(5.195, 3.514))
+		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 66.77))));
+		// // mm2px(Vec(5.195, 3.514))
+		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 66.924))));
   }
 };
 

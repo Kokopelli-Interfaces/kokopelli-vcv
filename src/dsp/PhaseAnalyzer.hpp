@@ -25,7 +25,7 @@ struct PhaseAnalyzer {
     float phase_abs_change = fabs(phase_change);
     bool phase_flip = (phase_abs_change > 0.95 && phase_abs_change <= 1.0);
 
-    // FIXME has a hard time with internal _section_division loops
+    // FIXME has a hard time with internal _scene_division loops
     if (phase_flip && 0 < phase_change) {
       _offset_from_last_sample += phase_change - 1;
     } else if (phase_flip && phase_change < 0) {

@@ -10,9 +10,9 @@ namespace dsp {
 namespace frame {
 
 /**
-   A Section is a collection of layers.
+   A Scene is a collection of layers.
 */
-class Section {
+class Scene {
 public:
   bool _internal_phase_defined = false;
 
@@ -25,11 +25,11 @@ public:
   float getLayerAttenuation(int layer_i, float current_attenuation);
 
 public:
-  int _section_division = 0;
+  int _scene_division = 0;
   float _phase = 0.0f;
   RecordMode _mode = RecordMode::READ;
 
-  ~Section();
+  ~Scene();
 
   void setRecordMode(RecordMode new_mode);
   bool isEmpty();

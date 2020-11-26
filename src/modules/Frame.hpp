@@ -7,30 +7,26 @@
 namespace myrisa {
 
 struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
-	enum ParamIds {
-		SECTION_PARAM,
-		PLAY_PARAM,
-		NEXT_PARAM,
-		PREV_PARAM,
-		UNDO_PARAM,
-		RECORD_MODE_PARAM,
-		DELTA_PARAM,
-		NUM_PARAMS
-	};
-	enum InputIds {
-		SECTION_INPUT,
-		DELTA_INPUT,
-		CLK_INPUT,
-		NUM_INPUTS
-	};
-	enum OutputIds {
-		NUM_OUTPUTS
-	};
-	enum LightIds {
-		ENUMS(PHASE_LIGHT, 3),
-		ENUMS(RECORD_MODE_LIGHT, 3),
-		NUM_LIGHTS
-	};
+  enum ParamIds {
+    LAYER_PARAM,
+    MODE_SWITCH_PARAM,
+    SELECT_PARAM,
+    SCENE_PARAM,
+    LOOP_PARAM,
+    SCENE_OR_TIME_SWITCH_PARAM,
+    ADD_OR_REPLACE_SWITCH_PARAM,
+    DELTA_PARAM,
+    NUM_PARAMS
+  };
+  enum InputIds { SCENE_INPUT, DELTA_INPUT, CLK_INPUT, NUM_INPUTS };
+  enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
+  enum LightIds {
+    ENUMS(LAYER_LIGHT, 3),
+    ENUMS(DELTA_MODE_LIGHT, 3),
+    ENUMS(PHASE_LIGHT, 3),
+    ENUMS(RECORD_MODE_LIGHT, 3),
+    NUM_LIGHTS
+  };
 
   SignalExpanderMessage *_toSignal = nullptr;
   SignalExpanderMessage *_fromSignal = nullptr;

@@ -3,12 +3,12 @@
 Frame::Frame() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(LAYER_PARAM, 0.f, 1.f, 0.f, "Layer");
-  configParam(MODE_SWITCH_PARAM, 0.f, 1.f, 0.f, "Mode Switch");
   configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "Select");
   configParam(SCENE_PARAM, 0.f, 1.f, 0.f, "Scene");
+  configParam(MODE_SWITCH_PARAM, 0.f, 1.f, 0.f, "Mode");
   configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
-  configParam(SCENE_OR_TIME_SWITCH_PARAM, 0.f, 1.f, 0.f, "Record to Scene or Time Switch");
-  configParam(ADD_OR_REPLACE_SWITCH_PARAM, 0.f, 1.f, 0.f, "Add or Replace Switch");
+  configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
+  configParam(RECORD_CONTEXT_PARAM, 0.f, 1.f, 0.f, "Record Context");
   configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "Delta");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
@@ -55,7 +55,7 @@ void Frame::modulateChannel(int channel_index) {
 
   // taking to the power of 3 gives a more intuitive curve
   e->_delta.attenuation = rack::clamp(pow(widget_delta, 3), 0.0f, 1.0f);
- e->_delta.recording = _recordThreshold < widget_delta ? true : false;
+  e->_delta.recording = _recordThreshold < widget_delta ? true : false;
 
   // TODO FIXME
   // delta.mode = RecordMode::CREATE;
@@ -164,41 +164,42 @@ struct FrameWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
+
 		addParam(createParam<Rogan1PGray>(mm2px(Vec(7.631, 18.94)), module, Frame::LAYER_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(17.878, 25.239)), module, Frame::SELECT_PARAM));
 		addParam(createParam<Rogan1HPSWhite>(mm2px(Vec(5.333, 35.894)), module, Frame::SCENE_PARAM));
-
-		addParam(createParam<TL1105>(mm2px(Vec(18.254, 24.044)), module, Frame::SELECT_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(18.206, 48.57)), module, Frame::MODE_SWITCH_PARAM));
-
-		addParam(createParam<TL1105>(mm2px(Vec(9.371, 62.144)), module, Frame::LOOP_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(2.172, 76.603)), module, Frame::ADD_OR_REPLACE_SWITCH_PARAM));
-		addParam(createParam<TL1105>(mm2px(Vec(17.954, 76.602)), module, Frame::SCENE_OR_TIME_SWITCH_PARAM));
-
-
-		addParam(createParam<Rogan3PBlue>(mm2px(Vec(5.333, 81.402)), module, Frame::DELTA_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(17.878, 48.367)), module, Frame::MODE_SWITCH_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(9.715, 62.232)), module, Frame::LOOP_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(16.926, 76.376)), module, Frame::RECORD_CONTEXT_PARAM));
+		addParam(createParam<ToggleLEDButton>(mm2px(Vec(2.596, 76.389)), module, Frame::RECORD_MODE_PARAM));
+		addParam(createParam<Rogan3PBlue>(mm2px(Vec(5.333, 82.157)), module, Frame::DELTA_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 51.114)), module, Frame::SCENE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 96.926)), module, Frame::DELTA_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(2.172, 109.491)), module, Frame::CLK_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 97.419)), module, Frame::DELTA_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 109.491)), module, Frame::CLK_INPUT));
 
-		addOutput(createOutput<PJ301MPort>(mm2px(Vec(14.873, 109.491)), module, Frame::PHASE_OUTPUT));
+		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 109.491)), module, Frame::PHASE_OUTPUT));
 
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.435, 14.547)), module, Frame::LAYER_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 75.118)), module, Frame::DELTA_MODE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 112.291)), module, Frame::PHASE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.309, 26.67)), module, Frame::SELECT_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.308, 49.797)), module, Frame::MODE_SWITCH_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.16, 63.676)), module, Frame::LOOP_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 72.898)), module, Frame::STRUCTURE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(18.357, 77.807)), module, Frame::RECORD_CONTEXT_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.027, 77.82)), module, Frame::RECORD_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.046, 111.955)), module, Frame::PHASE_LIGHT));
 
 		// mm2px(Vec(10.219, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(7.591, 14.293))));
-		// // mm2px(Vec(10.029, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(7.685, 31.288))));
-		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 61.613))));
-		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 61.767))));
-		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 66.084))));
-		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 66.238))));
+		addChild(createWidget<Widget>(mm2px(Vec(7.591, 14.293))));
+		// mm2px(Vec(10.029, 3.514))
+		addChild(createWidget<Widget>(mm2px(Vec(7.645, 31.288))));
+		// mm2px(Vec(5.195, 3.514))
+		addChild(createWidget<Widget>(mm2px(Vec(2.599, 61.438))));
+		// mm2px(Vec(5.195, 3.514))
+		addChild(createWidget<Widget>(mm2px(Vec(17.838, 61.592))));
+		// mm2px(Vec(5.195, 3.514))
+		addChild(createWidget<Widget>(mm2px(Vec(2.599, 65.909))));
+		// mm2px(Vec(5.195, 3.514))
+		addChild(createWidget<Widget>(mm2px(Vec(17.838, 66.063))));
   }
 };
 

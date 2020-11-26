@@ -10,9 +10,10 @@
 
 #include "util/assert.hpp"
 #include "module.hpp"
-#include "widgets.hpp"
 
 using namespace rack;
 using namespace myrisa;
 
 extern Plugin *pluginInstance;
+
+#include "widgets.hpp"

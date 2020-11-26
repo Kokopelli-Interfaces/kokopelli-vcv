@@ -1,7 +1,6 @@
 #pragma once
 
 #include "rack.hpp"
-#include "myrisa.hpp"
 
 struct Rogan1HPSWhite : Rogan {
   Rogan1HPSWhite() {
@@ -77,10 +76,11 @@ struct TextBox : TransparentWidget {
   NVGcolor defaultTextColor;
   NVGcolor textColor; // This can be used to temporarily override text color
   NVGcolor backgroundColor;
+  int textAlign;
 
   TextBox() {
-    font = APP->window->loadFont(asset::plugin(
-        pluginInstance, "res/fonts/RobotoMono-Bold.ttf")); // TODO: fix paths...
+    // FIXME
+    // font = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/RobotoMono-Bold.ttf")); // TODO: fix paths...
     defaultTextColor = nvgRGB(0x23, 0x23, 0x23);
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0xc8, 0xc8, 0xc8);
@@ -90,9 +90,31 @@ struct TextBox : TransparentWidget {
     font_size = 20;
     letter_spacing = 0.f;
     textOffset = Vec(box.size.x * 0.5f, 0.f);
+    textAlign = NVG_ALIGN_CENTER | NVG_ALIGN_TOP;
   }
 
   virtual void setText(std::string s) { text = s; }
 
-  virtual void draw(const DrawArgs &args) override;
+  virtual void draw(const DrawArgs &args) override {
+    // based on LedDisplayChoice::draw() in Rack/src/app/LedDisplay.cpp
+    const auto vg = args.vg;
+    nvgScissor(vg, 0, 0, box.size.x, box.size.y);
+    nvgBeginPath(vg);
+    nvgRoundedRect(vg, 0, 0, box.size.x, box.size.y, 3.0);
+    nvgFillColor(vg, backgroundColor);
+    nvgFill(vg);
+
+    if (font->handle >= 0) {
+
+      nvgFillColor(vg, textColor);
+      nvgFontFaceId(vg, font->handle);
+
+      nvgFontSize(vg, font_size);
+      nvgTextLetterSpacing(vg, letter_spacing);
+      nvgTextAlign(vg, textAlign);
+      nvgText(vg, textOffset.x, textOffset.y, text.c_str(), NULL);
+    }
+
+    nvgResetScissor(vg);
+  };
 };

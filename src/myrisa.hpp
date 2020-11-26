@@ -8,12 +8,11 @@
 
 #include "rack.hpp"
 
-#include "util/assert.hpp"
 #include "module.hpp"
+#include "util/assert.hpp"
+#include "widgets.hpp"
 
 using namespace rack;
 using namespace myrisa;
 
 extern Plugin *pluginInstance;
-
-#include "widgets.hpp"

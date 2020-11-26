@@ -2,6 +2,8 @@
 
 #include "Frame_shared.hpp"
 #include "dsp/Frame/Engine.hpp"
+#include "widgets.hpp"
+#include "util/gui.hpp"
 #include <math.h>
 
 namespace myrisa {

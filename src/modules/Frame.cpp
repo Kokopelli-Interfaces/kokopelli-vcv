@@ -151,8 +151,61 @@ void Frame::removeChannel(int channel_index) {
   _engines[channel_index] = nullptr;
 }
 
+
+struct FrameValueDisplay : TextBox {
+	Frame *_module;
+	int _previous_displayed_value = 0;
+	float _value_display_time = 2.f;
+	GUITimer _value_display_timer;
+
+	FrameValueDisplay(Frame *m) : TextBox() {
+      _module = m;
+      // font = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/nunito/Nunito-Bold.ttf"));
+    // font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Overpass-Regular.ttf"));
+    font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Overpass-Bold.ttf"));
+    font_size = 10;
+    letter_spacing = 0;
+    // backgroundColor = nvgRGB(0xee, 0xe8, 0xd5); // solarized base2
+    // backgroundColor = nvgRGB(0x93, 0xa1, 0xa1); // solarized base1
+    // backgroundColor = nvgRGB(0x78, 0x78, 0x78); // blendish default
+    // backgroundColor = nvgRGB(0xd7, 0xda, 0xec); // blend
+    backgroundColor = nvgRGB(0xff, 0xff, 0xff); // custom
+    box.size = mm2px(Vec(6.902, 3.283));
+    textOffset = Vec(box.size.x * 0.5f, 0.f);
+  }
+
+	void updateDisplayValue(int v) {
+		std::string s;
+		if(v != _previous_displayed_value) {
+			_previous_displayed_value = v;
+      s = string::f("%d", v);
+      setText(s);
+		}
+	}
+
+	void triggerValueDisplay() {
+		_value_display_timer.trigger(_value_display_time);
+	}
+
+	void step() override {
+		TextBox::step();
+		if(_module) {
+      updateDisplayValue(327);
+		}
+	}
+
+};
+
 struct FrameWidget : ModuleWidget {
   const int hp = 4;
+  FrameValueDisplay *selected_layer;
+  FrameValueDisplay *total_layers;
+  FrameValueDisplay *selected_scene;
+  FrameValueDisplay *total_scenes;
+  FrameValueDisplay *current_section;
+  FrameValueDisplay *total_sections;
+  FrameValueDisplay *current_section_division;
+  FrameValueDisplay *total_section_divisions;
 
   FrameWidget(Frame *module) {
     setModule(module);
@@ -164,11 +217,10 @@ struct FrameWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-
 		addParam(createParam<Rogan1PGray>(mm2px(Vec(7.631, 18.94)), module, Frame::LAYER_PARAM));
-		addParam(createParam<LEDButton>(mm2px(Vec(17.878, 25.239)), module, Frame::SELECT_PARAM));
+		// addParam(createParam<LEDButton>(mm2px(Vec(17.878, 24.088)), module, Frame::SELECT_PARAM));
 		addParam(createParam<Rogan1HPSWhite>(mm2px(Vec(5.333, 35.894)), module, Frame::SCENE_PARAM));
-		addParam(createParam<LEDButton>(mm2px(Vec(17.878, 48.367)), module, Frame::MODE_SWITCH_PARAM));
+		// addParam(createParam<LEDButton>(mm2px(Vec(17.878, 48.367)), module, Frame::MODE_SWITCH_PARAM));
 		addParam(createParam<LEDButton>(mm2px(Vec(9.715, 62.232)), module, Frame::LOOP_PARAM));
 		addParam(createParam<LEDButton>(mm2px(Vec(16.926, 76.376)), module, Frame::RECORD_CONTEXT_PARAM));
 		addParam(createParam<ToggleLEDButton>(mm2px(Vec(2.596, 76.389)), module, Frame::RECORD_MODE_PARAM));
@@ -180,27 +232,46 @@ struct FrameWidget : ModuleWidget {
 
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 109.491)), module, Frame::PHASE_OUTPUT));
 
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.309, 26.67)), module, Frame::SELECT_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.308, 49.797)), module, Frame::MODE_SWITCH_LIGHT));
+		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.309, 25.518)), module, Frame::SELECT_LIGHT));
+		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.308, 49.797)), module, Frame::MODE_SWITCH_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.16, 63.676)), module, Frame::LOOP_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 72.898)), module, Frame::STRUCTURE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(18.357, 77.807)), module, Frame::RECORD_CONTEXT_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.027, 77.82)), module, Frame::RECORD_MODE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.046, 111.955)), module, Frame::PHASE_LIGHT));
 
-		// mm2px(Vec(10.219, 3.514))
-		addChild(createWidget<Widget>(mm2px(Vec(7.591, 14.293))));
-		// mm2px(Vec(10.029, 3.514))
-		addChild(createWidget<Widget>(mm2px(Vec(7.645, 31.288))));
-		// mm2px(Vec(5.195, 3.514))
-		addChild(createWidget<Widget>(mm2px(Vec(2.599, 61.438))));
-		// mm2px(Vec(5.195, 3.514))
-		addChild(createWidget<Widget>(mm2px(Vec(17.838, 61.592))));
-		// mm2px(Vec(5.195, 3.514))
-		addChild(createWidget<Widget>(mm2px(Vec(2.599, 65.909))));
-		// mm2px(Vec(5.195, 3.514))
-		addChild(createWidget<Widget>(mm2px(Vec(17.838, 66.063))));
-  }
+		selected_layer = new FrameValueDisplay(module);
+    selected_layer->box.pos = mm2px(Vec(5.28, 14.532));
+    addChild(selected_layer);
+
+    total_layers = new FrameValueDisplay(module);
+    total_layers->box.pos = mm2px(Vec(13.222, 14.532));
+    addChild(total_layers);
+
+    selected_scene = new FrameValueDisplay(module);
+    selected_scene->box.pos = mm2px(Vec(5.28, 31.494));
+    addChild(selected_scene);
+
+    total_scenes = new FrameValueDisplay(module);
+    total_scenes->box.pos = mm2px(Vec(13.222, 31.494));
+    addChild(total_scenes);
+
+    current_section = new FrameValueDisplay(module);
+    current_section->box.pos = mm2px(Vec(1.358, 61.5));
+    addChild(current_section);
+
+    total_sections = new FrameValueDisplay(module);
+    total_sections->box.pos = mm2px(Vec(17.203, 61.5));
+    addChild(total_sections);
+
+    current_section_division = new FrameValueDisplay(module);
+    current_section_division->box.pos = mm2px(Vec(1.41, 65.214));
+    addChild(current_section_division);
+
+    total_section_divisions = new FrameValueDisplay(module);
+    total_section_divisions->box.pos = mm2px(Vec(17.256, 65.214));
+    addChild(total_section_divisions);
+}
 };
 
 Model *modelFrame = rack::createModel<Frame, FrameWidget>("Myrisa-Frame");

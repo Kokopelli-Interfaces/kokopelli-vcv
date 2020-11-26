@@ -2,14 +2,14 @@
 
 Frame::Frame() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(LAYER_PARAM, 0.f, 1.f, 0.f, "");
-  configParam(MODE_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
-  configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "");
-  configParam(SCENE_PARAM, 0.f, 1.f, 0.f, "");
-  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "");
-  configParam(SCENE_OR_TIME_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
-  configParam(ADD_OR_REPLACE_SWITCH_PARAM, 0.f, 1.f, 0.f, "");
-  configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "");
+  configParam(LAYER_PARAM, 0.f, 1.f, 0.f, "Layer");
+  configParam(MODE_SWITCH_PARAM, 0.f, 1.f, 0.f, "Mode Switch");
+  configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "Select");
+  configParam(SCENE_PARAM, 0.f, 1.f, 0.f, "Scene");
+  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
+  configParam(SCENE_OR_TIME_SWITCH_PARAM, 0.f, 1.f, 0.f, "Record to Scene or Time Switch");
+  configParam(ADD_OR_REPLACE_SWITCH_PARAM, 0.f, 1.f, 0.f, "Add or Replace Switch");
+  configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "Delta");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   light_divider.setDivision(16);
@@ -179,36 +179,40 @@ struct FrameWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParam<RoundBlackKnob>(mm2px(Vec(7.631, 18.94)), module, Frame::LAYER_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(1.859, 24.043)), module, Frame::MODE_SWITCH_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(18.254, 24.044)), module, Frame::SELECT_PARAM));
 		addParam(createParam<RoundBlackKnob>(mm2px(Vec(5.333, 35.894)), module, Frame::SCENE_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(9.371, 62.829)), module, Frame::LOOP_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(17.954, 78.199)), module, Frame::SCENE_OR_TIME_SWITCH_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(2.172, 78.199)), module, Frame::ADD_OR_REPLACE_SWITCH_PARAM));
-		addParam(createParam<RoundBlackKnob>(mm2px(Vec(5.333, 82.998)), module, Frame::DELTA_PARAM));
+
+		addParam(createParam<TL1105>(mm2px(Vec(18.254, 24.044)), module, Frame::SELECT_PARAM));
+		addParam(createParam<TL1105>(mm2px(Vec(18.206, 48.57)), module, Frame::MODE_SWITCH_PARAM));
+
+		addParam(createParam<TL1105>(mm2px(Vec(9.371, 62.144)), module, Frame::LOOP_PARAM));
+		addParam(createParam<TL1105>(mm2px(Vec(2.172, 76.603)), module, Frame::ADD_OR_REPLACE_SWITCH_PARAM));
+		addParam(createParam<TL1105>(mm2px(Vec(17.954, 76.602)), module, Frame::SCENE_OR_TIME_SWITCH_PARAM));
+
+
+		addParam(createParam<Rogan3PBlue>(mm2px(Vec(5.333, 81.402)), module, Frame::DELTA_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 51.114)), module, Frame::SCENE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 98.703)), module, Frame::DELTA_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(2.172, 109.113)), module, Frame::CLK_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 96.926)), module, Frame::DELTA_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(2.172, 109.491)), module, Frame::CLK_INPUT));
 
-		addOutput(createOutput<PJ301MPort>(mm2px(Vec(14.873, 109.114)), module, Frame::PHASE_OUTPUT));
+		addOutput(createOutput<PJ301MPort>(mm2px(Vec(14.873, 109.491)), module, Frame::PHASE_OUTPUT));
 
-		addChild(createLight<MediumLight<RedLight>>(mm2px(Vec(-22.472, 14.547)), module, Frame::LAYER_LIGHT));
-		addChild(createLight<MediumLight<RedLight>>(mm2px(Vec(11.181, 76.714)), module, Frame::DELTA_MODE_LIGHT));
-		addChild(createLight<MediumLight<RedLight>>(mm2px(Vec(11.181, 111.913)), module, Frame::PHASE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.435, 14.547)), module, Frame::LAYER_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 75.118)), module, Frame::DELTA_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 112.291)), module, Frame::PHASE_LIGHT));
 
 		// mm2px(Vec(10.219, 3.514))
 		// addChild(createWidget<Widget>(mm2px(Vec(7.591, 14.293))));
 		// // mm2px(Vec(10.029, 3.514))
 		// addChild(createWidget<Widget>(mm2px(Vec(7.685, 31.288))));
 		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 62.299))));
+		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 61.613))));
 		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 62.453))));
+		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 61.767))));
 		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 66.77))));
+		// addChild(createWidget<Widget>(mm2px(Vec(2.599, 66.084))));
 		// // mm2px(Vec(5.195, 3.514))
-		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 66.924))));
+		// addChild(createWidget<Widget>(mm2px(Vec(17.838, 66.238))));
   }
 };
 

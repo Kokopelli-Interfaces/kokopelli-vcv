@@ -2,7 +2,7 @@
 
 enum RecordMode { READ, EXTEND, DUB, REPLACE };
 enum RecordContext { TIME, SCENE, LAYER };
-enum LoopMode { LOOP_TIME, LOOP_SECTION, LOOP_LAYER };
+enum TimeFrameMode { TIME_FRAME_TIME, TIME_FRAME_SECTION, TIME_FRAME_LAYER };
 
 /*
   At each step, what the FrameEngine does to it's collection of layers is a function of these parameters.

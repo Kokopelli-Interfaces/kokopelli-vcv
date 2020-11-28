@@ -2,22 +2,21 @@
 
 Frame::Frame() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(LAYER_PARAM, 0.f, 1.f, 0.f, "Layer");
   configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "Select");
-  configParam(SCENE_PARAM, 0.f, 1.f, 0.f, "Scene");
-  configParam(MODE_SWITCH_PARAM, 0.f, 1.f, 0.f, "Mode");
-  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop Section");
-  configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
-  configParam(RECORD_CONTEXT_PARAM, 0.f, 1.f, 0.f, "Record Context");
+  configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
+  configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
+  configParam(TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Time Frame");
+  configParam(DELTA_MODE_PARAM, 0.f, 1.f, 0.f, "Delta Mode");
+  configParam(DELTA_CONTEXT_PARAM, 0.f, 1.f, 0.f, "Delta Context");
   configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "Delta");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
 
-  _rec_mode_button.param = &params[RECORD_MODE_PARAM];
-  _rec_context_button.param = &params[RECORD_CONTEXT_PARAM];
-  _loop_button.param = &params[LOOP_PARAM];
+  _rec_mode_button.param = &params[DELTA_MODE_PARAM];
+  _rec_context_button.param = &params[DELTA_CONTEXT_PARAM];
+  _time_frame_button.param = &params[TIME_FRAME_PARAM];
 }
 
 void Frame::sampleRateChange() {
@@ -66,19 +65,19 @@ void Frame::processButtons() {
     break;
   }
 
-  switch (_loop_button.process(sampleTime)) {
+  switch (_time_frame_button.process(sampleTime)) {
   default:
   case LongPressButton::NO_PRESS:
     break;
   case LongPressButton::SHORT_PRESS:
-    if (_loop_mode == LoopMode::LOOP_SECTION) {
-      _loop_mode = LoopMode::LOOP_TIME;
+    if (_time_frame_mode == TimeFrameMode::TIME_FRAME_SECTION) {
+      _time_frame_mode = TimeFrameMode::TIME_FRAME_TIME;
     } else {
-      _loop_mode = LoopMode::LOOP_SECTION;
+      _time_frame_mode = TimeFrameMode::TIME_FRAME_SECTION;
     }
     break;
   case LongPressButton::LONG_PRESS:
-    _loop_mode = LoopMode::LOOP_LAYER;
+    _time_frame_mode = TimeFrameMode::TIME_FRAME_LAYER;
     break;
   }
 }
@@ -112,9 +111,9 @@ void Frame::modulateChannel(int channel_index) {
   e->_delta.rec_mode = _rec_mode;
   e->_delta.rec_context = _rec_context;
 
-  e->loop_mode = _loop_mode;
+  e->time_frame_mode = _time_frame_mode;
 
-  float scene_position = params[SCENE_PARAM].getValue() * (15);
+  float scene_position = params[SELECT_PARAM].getValue() * (15);
   if (inputs[SCENE_INPUT].isConnected()) {
     scene_position += rack::clamp(inputs[SCENE_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
@@ -152,7 +151,7 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   Delta delta = _engines[0]->_delta;
-  LoopMode loop_mode = _engines[0]->loop_mode;
+  TimeFrameMode time_frame_mode = _engines[0]->time_frame_mode;
   float phase = _engines[0]->_active_scene ? _engines[0]->_active_scene->_phase : 0.f;
   // display the engine with an active delta
 
@@ -185,48 +184,48 @@ void Frame::updateLights(const ProcessArgs &args) {
   switch (delta.rec_mode) {
   default:
   case RecordMode::EXTEND:
-    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
-    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
+    lights[DELTA_MODE_LIGHT + 0].value = 1.0;
+    lights[DELTA_MODE_LIGHT + 1].value = 0.0;
     break;
   case RecordMode::DUB:
-    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
-    lights[RECORD_MODE_LIGHT + 1].value = 1.0;
+    lights[DELTA_MODE_LIGHT + 0].value = 1.0;
+    lights[DELTA_MODE_LIGHT + 1].value = 1.0;
     break;
   case RecordMode::REPLACE:
-    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
-    lights[RECORD_MODE_LIGHT + 1].value = 1.0;
+    lights[DELTA_MODE_LIGHT + 0].value = 0.0;
+    lights[DELTA_MODE_LIGHT + 1].value = 1.0;
     break;
   }
 
   switch (delta.rec_context) {
   default:
   case RecordContext::TIME:
-    lights[RECORD_CONTEXT_LIGHT + 0].value = 1.0;
-    lights[RECORD_CONTEXT_LIGHT + 1].value = 0.0;
+    lights[DELTA_CONTEXT_LIGHT + 0].value = 1.0;
+    lights[DELTA_CONTEXT_LIGHT + 1].value = 0.0;
     break;
   case RecordContext::SCENE:
-    lights[RECORD_CONTEXT_LIGHT + 0].value = 1.0;
-    lights[RECORD_CONTEXT_LIGHT + 1].value = 1.0;
+    lights[DELTA_CONTEXT_LIGHT + 0].value = 1.0;
+    lights[DELTA_CONTEXT_LIGHT + 1].value = 1.0;
     break;
   case RecordContext::LAYER:
-    lights[RECORD_CONTEXT_LIGHT + 0].value = 0.0;
-    lights[RECORD_CONTEXT_LIGHT + 1].value = 1.0;
+    lights[DELTA_CONTEXT_LIGHT + 0].value = 0.0;
+    lights[DELTA_CONTEXT_LIGHT + 1].value = 1.0;
     break;
   }
 
-  switch (loop_mode) {
+  switch (time_frame_mode) {
   default:
-  case LoopMode::LOOP_TIME:
-    lights[LOOP_LIGHT + 0].value = 1.0;
-    lights[LOOP_LIGHT + 1].value = 0.0;
+  case TimeFrameMode::TIME_FRAME_TIME:
+    lights[TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
-  case LoopMode::LOOP_SECTION:
-    lights[LOOP_LIGHT + 0].value = 1.0;
-    lights[LOOP_LIGHT + 1].value = 1.0;
+  case TimeFrameMode::TIME_FRAME_SECTION:
+    lights[TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
-  case LoopMode::LOOP_LAYER:
-    lights[LOOP_LIGHT + 0].value = 0.0;
-    lights[LOOP_LIGHT + 1].value = 1.0;
+  case TimeFrameMode::TIME_FRAME_LAYER:
+    lights[TIME_FRAME_LIGHT + 0].value = 0.0;
+    lights[TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }
 }
@@ -257,13 +256,13 @@ struct FrameValueDisplay : TextBox {
       // font = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/nunito/Nunito-Bold.ttf"));
     // font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Overpass-Regular.ttf"));
     font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Overpass-Bold.ttf"));
-    font_size = 10;
-    letter_spacing = 0;
+    font_size = 12;
+    letter_spacing = 0.f;
     // backgroundColor = nvgRGB(0xee, 0xe8, 0xd5); // solarized base2
     // backgroundColor = nvgRGB(0x93, 0xa1, 0xa1); // solarized base1
     // backgroundColor = nvgRGB(0x78, 0x78, 0x78); // blendish default
-    // backgroundColor = nvgRGB(0xd7, 0xda, 0xec); // blend
-    backgroundColor = nvgRGB(0xff, 0xff, 0xff); // custom
+    backgroundColor = nvgRGB(0xd7, 0xda, 0xec); // blend
+    // backgroundColor = nvgRGB(0xff, 0xff, 0xff); // custom
     box.size = mm2px(Vec(6.902, 3.283));
     textOffset = Vec(box.size.x * 0.5f, 0.f);
   }
@@ -288,14 +287,13 @@ struct FrameValueDisplay : TextBox {
 
 struct FrameWidget : ModuleWidget {
   const int hp = 4;
-  FrameValueDisplay *selected_layer;
-  FrameValueDisplay *total_layers;
-  FrameValueDisplay *selected_scene;
-  FrameValueDisplay *total_scenes;
+  FrameValueDisplay *current_selection;
+  FrameValueDisplay *total_selections;
   FrameValueDisplay *current_section;
   FrameValueDisplay *total_sections;
   FrameValueDisplay *current_section_division;
   FrameValueDisplay *total_section_divisions;
+  FrameValueDisplay *time;
 
   FrameWidget(Frame *module) {
     setModule(module);
@@ -307,60 +305,68 @@ struct FrameWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<Rogan1PGray>(mm2px(Vec(7.631, 18.94)), module, Frame::LAYER_PARAM));
-		// addParam(createParam<LEDButton>(mm2px(Vec(17.878, 24.088)), module, Frame::SELECT_PARAM));
-		addParam(createParam<Rogan1HPSWhite>(mm2px(Vec(5.333, 35.894)), module, Frame::SCENE_PARAM));
-		// addParam(createParam<LEDButton>(mm2px(Vec(17.878, 48.367)), module, Frame::MODE_SWITCH_PARAM));
-		addParam(createParam<LEDButton>(mm2px(Vec(9.715, 62.232)), module, Frame::LOOP_PARAM));
-		addParam(createParam<LEDButton>(mm2px(Vec(16.926, 76.376)), module, Frame::RECORD_CONTEXT_PARAM));
-		addParam(createParam<LEDButton>(mm2px(Vec(2.596, 76.389)), module, Frame::RECORD_MODE_PARAM));
-		addParam(createParam<Rogan3PBlue>(mm2px(Vec(5.333, 82.157)), module, Frame::DELTA_PARAM));
+		addParam(createParam<Rogan1HPSWhite>(mm2px(Vec(5.333, 21.157)), module, Frame::SELECT_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Frame::SELECT_MODE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Frame::SELECT_FUNCTION_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 50.315)), module, Frame::TIME_FRAME_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 66.389)), module, Frame::DELTA_CONTEXT_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 66.412)), module, Frame::DELTA_MODE_PARAM));
+		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.21)), module, Frame::DELTA_PARAM));
 
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 51.114)), module, Frame::SCENE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 97.419)), module, Frame::DELTA_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 109.491)), module, Frame::PHASE_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 37.132)), module, Frame::SCENE_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.878)), module, Frame::DELTA_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 108.114)), module, Frame::PHASE_INPUT));
 
-		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 109.491)), module, Frame::PHASE_OUTPUT));
+		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Frame::PHASE_OUTPUT));
 
-		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.309, 25.518)), module, Frame::SELECT_LIGHT));
-		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.308, 49.797)), module, Frame::MODE_SWITCH_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.16, 63.676)), module, Frame::LOOP_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 72.898)), module, Frame::DELTA_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(18.357, 77.807)), module, Frame::RECORD_CONTEXT_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.027, 77.82)), module, Frame::RECORD_MODE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.046, 111.955)), module, Frame::PHASE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Frame::SELECT_FUNCTION_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.239, 34.928)), module, Frame::SELECT_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.099, 51.744)), module, Frame::TIME_FRAME_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 61.939)), module, Frame::DELTA_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 67.854)), module, Frame::DELTA_CONTEXT_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.911, 67.877)), module, Frame::DELTA_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Frame::PHASE_LIGHT));
 
-		selected_layer = new FrameValueDisplay(module);
-    selected_layer->box.pos = mm2px(Vec(5.28, 14.532));
-    addChild(selected_layer);
+    auto display_size = mm2px(Vec(9.096, 4.327));
 
-    total_layers = new FrameValueDisplay(module);
-    total_layers->box.pos = mm2px(Vec(13.222, 14.532));
-    addChild(total_layers);
+		current_selection = new FrameValueDisplay(module);
+    current_selection->box.pos = mm2px(Vec(2.921, 16.235));
+    current_selection->box.size = display_size;
+    addChild(current_selection);
 
-    selected_scene = new FrameValueDisplay(module);
-    selected_scene->box.pos = mm2px(Vec(5.28, 31.494));
-    addChild(selected_scene);
+    total_selections = new FrameValueDisplay(module);
+    total_selections->box.pos = mm2px(Vec(13.387, 16.236));
+    total_selections->box.size = display_size;
+    addChild(total_selections);
 
-    total_scenes = new FrameValueDisplay(module);
-    total_scenes->box.pos = mm2px(Vec(13.222, 31.494));
-    addChild(total_scenes);
+    display_size = mm2px(Vec(6.837, 4.327));
 
     current_section = new FrameValueDisplay(module);
-    current_section->box.pos = mm2px(Vec(1.358, 61.5));
+    current_section->box.pos = mm2px(Vec(1.071, 48.611));
+    current_section->box.size = display_size;
     addChild(current_section);
 
     total_sections = new FrameValueDisplay(module);
-    total_sections->box.pos = mm2px(Vec(17.203, 61.5));
+    total_sections->box.pos = mm2px(Vec(1.071, 53.716));
+    total_sections->box.size = display_size;
     addChild(total_sections);
 
     current_section_division = new FrameValueDisplay(module);
-    current_section_division->box.pos = mm2px(Vec(1.41, 65.214));
+    current_section_division->box.pos = mm2px(Vec(17.511, 48.611));
+    current_section_division->box.size = display_size;
     addChild(current_section_division);
 
     total_section_divisions = new FrameValueDisplay(module);
-    total_section_divisions->box.pos = mm2px(Vec(17.256, 65.214));
+    total_section_divisions->box.pos = mm2px(Vec(17.511, 53.751));
+    total_section_divisions->box.size = display_size;
     addChild(total_section_divisions);
+
+    display_size = mm2px(Vec(21.44, 4.327));
+
+    time = new FrameValueDisplay(module);
+    time->box.pos = mm2px(Vec(1.974, 99.568));
+    time->box.size = display_size;
+    addChild(time);
 }
 };
 

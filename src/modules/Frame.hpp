@@ -4,32 +4,30 @@
 #include "dsp/Frame/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
 #include "widgets.hpp"
-#include "util/gui.hpp"
 #include <math.h>
 
 namespace myrisa {
 
 struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   enum ParamIds {
-    LAYER_PARAM,
     SELECT_PARAM,
-    SCENE_PARAM,
-    MODE_SWITCH_PARAM,
-    LOOP_PARAM,
-    RECORD_MODE_PARAM,
-    RECORD_CONTEXT_PARAM,
+    SELECT_MODE_PARAM,
+    SELECT_FUNCTION_PARAM,
+    TIME_FRAME_PARAM,
+    DELTA_CONTEXT_PARAM,
+    DELTA_MODE_PARAM,
     DELTA_PARAM,
     NUM_PARAMS
   };
   enum InputIds { SCENE_INPUT, DELTA_INPUT, PHASE_INPUT, NUM_INPUTS };
   enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
   enum LightIds {
-    ENUMS(SELECT_LIGHT, 3),
-    ENUMS(MODE_SWITCH_LIGHT, 3),
-    ENUMS(LOOP_LIGHT, 3),
+    ENUMS(SELECT_FUNCTION_LIGHT, 3),
+    ENUMS(SELECT_MODE_LIGHT, 3),
+    ENUMS(TIME_FRAME_LIGHT, 3),
     ENUMS(DELTA_LIGHT, 3),
-    ENUMS(RECORD_MODE_LIGHT, 3),
-    ENUMS(RECORD_CONTEXT_LIGHT, 3),
+    ENUMS(DELTA_MODE_LIGHT, 3),
+    ENUMS(DELTA_CONTEXT_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
@@ -39,14 +37,14 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
   RecordMode _rec_mode = RecordMode::DUB;
   RecordContext _rec_context = RecordContext::SCENE;
-  LoopMode _loop_mode = LoopMode::LOOP_TIME;
+  TimeFrameMode _time_frame_mode = TimeFrameMode::TIME_FRAME_TIME;
 
   const float _recordThreshold = 0.05f;
   float _sampleTime = 1.0f;
 
   LongPressButton _rec_mode_button;
   LongPressButton _rec_context_button;
-  LongPressButton _loop_button;
+  LongPressButton _time_frame_button;
 
   std::array<myrisa::dsp::frame::Engine*, maxChannels> _engines;
   rack::dsp::ClockDivider _light_divider;

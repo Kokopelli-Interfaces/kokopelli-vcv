@@ -29,7 +29,7 @@ public:
   // another Frame to automate the rate of the external phase and section
   float _phase = 0.f;
 
-  LoopMode loop_mode;
+  TimeFrameMode time_frame_mode;
 
   Delta _delta = Delta();
 

@@ -51,6 +51,20 @@ struct RoganHalfPRed : Rogan {
   }
 };
 
+struct MediumLEDButton : rack::app::SvgSwitch {
+  MediumLEDButton() {
+		momentary = true;
+		addFrame(APP->window->loadSvg(asset::system("./plugins/Myrisa/res/components/MediumLEDButton.svg")));
+  }
+};
+
+struct Rogan3PDarkRed : Rogan {
+  Rogan3PDarkRed() {
+    setSvg(APP->window->loadSvg(
+        asset::system("./plugins/Myrisa/res/components/Rogan3PDarkRed.svg")));
+  }
+};
+
 // same as LittleUtils ToggleLEDButton in 'Widgets.hpp'
 struct ToggleLEDButton : SVGSwitch {
   BNDwidgetState state = BND_DEFAULT;
@@ -84,7 +98,6 @@ struct TextBox : TransparentWidget {
     defaultTextColor = nvgRGB(0x23, 0x23, 0x23);
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0xc8, 0xc8, 0xc8);
-    box.size = Vec(30, 18);
     // size 20 with spacing -2 will fit 3 characters on a 30px box with Roboto
     // mono
     font_size = 20;

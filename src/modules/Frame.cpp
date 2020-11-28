@@ -14,8 +14,8 @@ Frame::Frame() {
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
 
-  _rec_mode_button.param = &params[DELTA_MODE_PARAM];
-  _rec_context_button.param = &params[DELTA_CONTEXT_PARAM];
+  _delta_mode_button.param = &params[DELTA_MODE_PARAM];
+  _delta_context_button.param = &params[DELTA_CONTEXT_PARAM];
   _time_frame_button.param = &params[TIME_FRAME_PARAM];
 }
 
@@ -31,37 +31,37 @@ void Frame::sampleRateChange() {
 
 void Frame::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
-  switch (_rec_mode_button.process(sampleTime)) {
+  switch (_delta_mode_button.process(sampleTime)) {
   default:
   case LongPressButton::NO_PRESS:
     break;
   case LongPressButton::SHORT_PRESS:
-    printf("SHORT %d\n", _rec_mode);
-    if (_rec_mode == RecordMode::DUB) {
-      _rec_mode = RecordMode::EXTEND;
+    printf("SHORT %d\n", _delta_mode);
+    if (_delta_mode == Delta::Mode::DUB) {
+      _delta_mode = Delta::Mode::EXTEND;
     } else {
-      _rec_mode = RecordMode::DUB;
+      _delta_mode = Delta::Mode::DUB;
     }
-    printf("SHORT AFTER %d\n", _rec_mode);
+    printf("SHORT AFTER %d\n", _delta_mode);
     break;
   case LongPressButton::LONG_PRESS:
-    _rec_mode = RecordMode::REPLACE;
+    _delta_mode = Delta::Mode::REPLACE;
     break;
   }
 
-  switch (_rec_context_button.process(sampleTime)) {
+  switch (_delta_context_button.process(sampleTime)) {
   default:
   case LongPressButton::NO_PRESS:
     break;
   case LongPressButton::SHORT_PRESS:
-    if (_rec_context == RecordContext::SCENE) {
-      _rec_context = RecordContext::TIME;
+    if (_delta_context == Delta::Context::SCENE) {
+      _delta_context = Delta::Context::TIME;
     } else {
-      _rec_context = RecordContext::SCENE;
+      _delta_context = Delta::Context::SCENE;
     }
     break;
   case LongPressButton::LONG_PRESS:
-    _rec_context = RecordContext::LAYER;
+    _delta_context = Delta::Context::LAYER;
     break;
   }
 
@@ -70,14 +70,14 @@ void Frame::processButtons() {
   case LongPressButton::NO_PRESS:
     break;
   case LongPressButton::SHORT_PRESS:
-    if (_time_frame_mode == TimeFrameMode::TIME_FRAME_SECTION) {
-      _time_frame_mode = TimeFrameMode::TIME_FRAME_TIME;
+    if (_time_frame_mode == TimeFrame::SECTION) {
+      _time_frame_mode = TimeFrame::TIME;
     } else {
-      _time_frame_mode = TimeFrameMode::TIME_FRAME_SECTION;
+      _time_frame_mode = TimeFrame::SECTION;
     }
     break;
   case LongPressButton::LONG_PRESS:
-    _time_frame_mode = TimeFrameMode::TIME_FRAME_LAYER;
+    _time_frame_mode = TimeFrame::LAYER;
     break;
   }
 }
@@ -108,8 +108,8 @@ void Frame::modulateChannel(int channel_index) {
   // taking to the power of 3 gives a more intuitive curve
   e->_delta.attenuation = rack::clamp(pow(widget_delta, 3), 0.0f, 1.0f);
   e->_delta.active = _recordThreshold < widget_delta ? true : false;
-  e->_delta.rec_mode = _rec_mode;
-  e->_delta.rec_context = _rec_context;
+  e->_delta.mode = _delta_mode;
+  e->_delta.context = _delta_context;
 
   e->time_frame_mode = _time_frame_mode;
 
@@ -151,7 +151,7 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   Delta delta = _engines[0]->_delta;
-  TimeFrameMode time_frame_mode = _engines[0]->time_frame_mode;
+  TimeFrame time_frame_mode = _engines[0]->time_frame_mode;
   float phase = _engines[0]->_active_scene ? _engines[0]->_active_scene->_phase : 0.f;
   // display the engine with an active delta
 
@@ -181,33 +181,33 @@ void Frame::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  switch (delta.rec_mode) {
+  switch (delta.mode) {
   default:
-  case RecordMode::EXTEND:
+  case Delta::Mode::EXTEND:
     lights[DELTA_MODE_LIGHT + 0].value = 1.0;
     lights[DELTA_MODE_LIGHT + 1].value = 0.0;
     break;
-  case RecordMode::DUB:
+  case Delta::Mode::DUB:
     lights[DELTA_MODE_LIGHT + 0].value = 1.0;
     lights[DELTA_MODE_LIGHT + 1].value = 1.0;
     break;
-  case RecordMode::REPLACE:
+  case Delta::Mode::REPLACE:
     lights[DELTA_MODE_LIGHT + 0].value = 0.0;
     lights[DELTA_MODE_LIGHT + 1].value = 1.0;
     break;
   }
 
-  switch (delta.rec_context) {
+  switch (delta.context) {
   default:
-  case RecordContext::TIME:
+  case Delta::Context::TIME:
     lights[DELTA_CONTEXT_LIGHT + 0].value = 1.0;
     lights[DELTA_CONTEXT_LIGHT + 1].value = 0.0;
     break;
-  case RecordContext::SCENE:
+  case Delta::Context::SCENE:
     lights[DELTA_CONTEXT_LIGHT + 0].value = 1.0;
     lights[DELTA_CONTEXT_LIGHT + 1].value = 1.0;
     break;
-  case RecordContext::LAYER:
+  case Delta::Context::LAYER:
     lights[DELTA_CONTEXT_LIGHT + 0].value = 0.0;
     lights[DELTA_CONTEXT_LIGHT + 1].value = 1.0;
     break;
@@ -215,15 +215,15 @@ void Frame::updateLights(const ProcessArgs &args) {
 
   switch (time_frame_mode) {
   default:
-  case TimeFrameMode::TIME_FRAME_TIME:
+  case TimeFrame::TIME:
     lights[TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
-  case TimeFrameMode::TIME_FRAME_SECTION:
+  case TimeFrame::SECTION:
     lights[TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
-  case TimeFrameMode::TIME_FRAME_LAYER:
+  case TimeFrame::LAYER:
     lights[TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[TIME_FRAME_LIGHT + 1].value = 1.0;
     break;

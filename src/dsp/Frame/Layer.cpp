@@ -2,8 +2,8 @@
 
 using namespace myrisa::dsp::frame;
 
-Layer::Layer(RecordMode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division, bool phase_defined) {
-  ASSERT(record_mode, !=, RecordMode::READ);
+Layer::Layer(Delta::Mode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division, bool phase_defined) {
+  ASSERT(record_mode, !=, Delta::Mode::READ);
 
   buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
   send_attenuation = new PhaseBuffer(PhaseBuffer::Type::PARAM);
@@ -23,14 +23,14 @@ Layer::Layer(RecordMode record_mode, int division, vector<Layer*> selected_layer
       }
     }
 
-    if (_mode == RecordMode::DUB) {
+    if (_mode == Delta::Mode::DUB) {
       if (0 < selected_layers.size()) {
         auto most_recent_target_layer = selected_layers.back();
         n_divisions = most_recent_target_layer->n_divisions;
       } else {
         n_divisions = 1;
       }
-    } else if (_mode == RecordMode::EXTEND) {
+    } else if (_mode == Delta::Mode::EXTEND) {
       n_divisions = 0;
     }
   }
@@ -55,7 +55,7 @@ void Layer::write(int division, float phase, float sample, float attenuation) {
   } else {
     ASSERT(0, <, samples_per_division);
 
-    if (_mode == RecordMode::DUB) {
+    if (_mode == Delta::Mode::DUB) {
       ASSERT(n_divisions, !=, 0);
 
       if (buffer->size() == 0) {
@@ -67,7 +67,7 @@ void Layer::write(int division, float phase, float sample, float attenuation) {
       buffer->write(buffer_phase, sample);
       send_attenuation->write(buffer_phase, attenuation);
 
-    } else if (_mode == RecordMode::EXTEND) {
+    } else if (_mode == Delta::Mode::EXTEND) {
       while (start_division + n_divisions <= division) {
         buffer->resize(buffer->size() + samples_per_division);
         send_attenuation->resize(send_attenuation->size() + samples_per_division);
@@ -78,7 +78,7 @@ void Layer::write(int division, float phase, float sample, float attenuation) {
       buffer->write(buffer_phase, sample);
       send_attenuation->write(buffer_phase, attenuation);
 
-    } else if (_mode == RecordMode::READ) {
+    } else if (_mode == Delta::Mode::READ) {
       printf("Myrisa Frame: Write in read _mode?? Frame is broken.\n");
       return;
     }

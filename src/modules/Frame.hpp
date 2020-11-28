@@ -35,15 +35,15 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   SignalExpanderMessage *_to_signal = nullptr;
   SignalExpanderMessage *_from_signal = nullptr;
 
-  RecordMode _rec_mode = RecordMode::DUB;
-  RecordContext _rec_context = RecordContext::SCENE;
-  TimeFrameMode _time_frame_mode = TimeFrameMode::TIME_FRAME_TIME;
+  Delta::Mode _delta_mode = Delta::Mode::DUB;
+  Delta::Context _delta_context = Delta::Context::SCENE;
+  TimeFrame _time_frame_mode = TimeFrame::TIME;
 
   const float _recordThreshold = 0.05f;
   float _sampleTime = 1.0f;
 
-  LongPressButton _rec_mode_button;
-  LongPressButton _rec_context_button;
+  LongPressButton _delta_mode_button;
+  LongPressButton _delta_context_button;
   LongPressButton _time_frame_button;
 
   std::array<myrisa::dsp::frame::Engine*, maxChannels> _engines;

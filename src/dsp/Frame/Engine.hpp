@@ -22,14 +22,14 @@ public:
   float _sample_time = 1.0f;
   float _scene_position = 0.0f;
   float _attenuation = 0.0f;
-  RecordMode _mode = RecordMode::READ;
+  Delta::Mode _mode = Delta::Mode::READ;
   Scene *_active_scene = nullptr;
 
   // all scenes have the same phase. the way users can create new scenes of different bpm, is to use
   // another Frame to automate the rate of the external phase and section
   float _phase = 0.f;
 
-  TimeFrameMode time_frame_mode;
+  TimeFrame time_frame_mode;
 
   Delta _delta = Delta();
 
@@ -37,7 +37,7 @@ private:
   const int numScenes = 16;
   Scene *recording_dest_scene = nullptr;
   std::vector<Scene*> _scenes;
-  RecordMode _active_mode = RecordMode::READ;
+  Delta::Mode _active_mode = Delta::Mode::READ;
 
   PhaseAnalyzer _phase_analyzer;
 
@@ -51,7 +51,7 @@ public:
 private:
   void handleModeChange();
   void stepScene(Scene *scene);
-  bool addLayer(Scene *scene, RecordMode mode);
+  bool addLayer(Scene *scene, Delta::Mode mode);
 };
 
 } // namespace frame

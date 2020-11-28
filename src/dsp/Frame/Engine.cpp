@@ -19,7 +19,7 @@ void Engine::handleModeChange() {
     printf("MODE CHANGE:: %d -> %d\n", _active_mode, _mode);
 
     // FIXME BLOAT vv
-    if (_active_mode != RecordMode::READ && _mode == RecordMode::READ) {
+    if (_active_mode != Delta::Mode::READ && _mode == Delta::Mode::READ) {
       assert(_active_scene->_active_layer != nullptr);
 
       if (_active_scene->isEmpty() && !_active_scene->_internal_phase_defined) {
@@ -46,7 +46,7 @@ void Engine::handleModeChange() {
       _active_scene->_active_layer = nullptr;
     }
 
-    if (_active_mode == RecordMode::READ && _mode != RecordMode::READ) {
+    if (_active_mode == Delta::Mode::READ && _mode != Delta::Mode::READ) {
       if (addLayer(_active_scene, _mode)) {
         _active_mode = _mode;
       }
@@ -70,11 +70,10 @@ void Engine::updateScenePosition(float scene_position) {
 
 void Engine::step() {
   // FIXME hack to work with old method
-  _mode = _delta.rec_mode;
+  _mode = _delta.mode;
   if (!_delta.active) {
-    _mode = RecordMode::READ;
+    _mode = Delta::Mode::READ;
   }
-  _attenuation = _delta.attenuation;
 
   if (_active_mode != _mode) {
     handleModeChange();
@@ -95,9 +94,9 @@ float Engine::read() {
   float weight = _scene_position - floor(_scene_position);
 
   float out = 0.0f;
-  out += _scenes[scene_1]->read(_attenuation) * (1 - weight);
+  out += _scenes[scene_1]->read(_delta.attenuation) * (1 - weight);
   if (scene_1 != scene_2 && scene_2 < numScenes) {
-    out += _scenes[scene_2]->read(_attenuation) * weight;
+    out += _scenes[scene_2]->read(_delta.attenuation) * weight;
   }
 
   return out;
@@ -107,11 +106,11 @@ float Engine::read() {
 void Engine::stepScene(Scene* scene) {
   if (scene == _active_scene) {
     Layer* _active_layer = scene->_active_layer;
-    if (_active_mode != RecordMode::READ) {
+    if (_active_mode != Delta::Mode::READ) {
       assert(_active_layer != nullptr);
     }
 
-    if (_active_mode == RecordMode::DUB && (_active_layer->start_division + _active_layer->n_divisions == scene->_scene_division)) {
+    if (_active_mode == Delta::Mode::DUB && (_active_layer->start_division + _active_layer->n_divisions == scene->_scene_division)) {
       printf("END recording via overdub\n");
       printf("-- start div: %d, length: %d\n", _active_layer->start_division, _active_layer->n_divisions);
       scene->_layers.push_back(_active_layer);
@@ -121,8 +120,8 @@ void Engine::stepScene(Scene* scene) {
       addLayer(scene, _active_mode);
     }
 
-    if (_active_mode != RecordMode::READ) {
-      _active_layer->write(scene->_scene_division, scene->_phase, _in, _attenuation);
+    if (_active_mode != Delta::Mode::READ) {
+      _active_layer->write(scene->_scene_division, scene->_phase, _in, _delta.attenuation);
     }
   }
 
@@ -156,7 +155,7 @@ void Engine::stepScene(Scene* scene) {
   }
 }
 
-bool Engine::addLayer(Scene *scene, RecordMode layer_mode) {
+bool Engine::addLayer(Scene *scene, Delta::Mode layer_mode) {
   // TODO FIXME
   scene->_selected_layers = scene->_layers;
 
@@ -173,7 +172,7 @@ bool Engine::addLayer(Scene *scene, RecordMode layer_mode) {
 
   int samples_per_division = floor(phase_period / _sample_time);
 
-  printf("NEW LAYER: _scene_division: %d, phase period s %f sample time %f sapls per %d mode %d sel size %d\n", scene->_scene_division, phase_period, _sample_time, samples_per_division, layer_mode, scene->_selected_layers.size());
+  printf("NEW LAYER: _scene_division: %d, phase period s %f sample time %f sapls per %d mode %d sel size %ld\n", scene->_scene_division, phase_period, _sample_time, samples_per_division, layer_mode, scene->_selected_layers.size());
 
   bool phase_def = _use_ext_phase ? true : scene->_internal_phase_defined;
 

@@ -8,7 +8,7 @@ Frame::Frame() {
   configParam(TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Time Frame");
   configParam(DELTA_MODE_PARAM, 0.f, 1.f, 0.f, "Delta Mode");
   configParam(DELTA_CONTEXT_PARAM, 0.f, 1.f, 0.f, "Delta Context");
-  configParam(DELTA_PARAM, 0.f, 1.f, 0.f, "Delta");
+  configParam(DELTA_POWER_PARAM, 0.f, 1.f, 0.f, "Delta Power");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
@@ -21,64 +21,66 @@ Frame::Frame() {
 
 void Frame::sampleRateChange() {
   _sampleTime = APP->engine->getSampleTime();
-  // FIXME
-  // for (auto engine : _engines) {
-  //   if (engine) {
-  //     engine->_sample_time = _sampleTime;
-  //   }
-  // }
+  for (int c = 0; c < channels(); c++) {
+    _engines[c]->_sample_time = _sampleTime;
+  }
 }
 
 void Frame::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
-  switch (_delta_mode_button.process(sampleTime)) {
-  default:
-  case LongPressButton::NO_PRESS:
-    break;
-  case LongPressButton::SHORT_PRESS:
-    printf("SHORT %d\n", _delta_mode);
-    if (_delta_mode == Delta::Mode::DUB) {
-      _delta_mode = Delta::Mode::EXTEND;
-    } else {
-      _delta_mode = Delta::Mode::DUB;
+
+  myrisa::dsp::LongPressButton::Event _delta_mode_event = _delta_mode_button.process(sampleTime);
+  for (int c = 0; c < channels(); c++) {
+    switch (_delta_mode_event) {
+    case myrisa::dsp::LongPressButton::NO_PRESS:
+      break;
+    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+      if (_engines[c]->_delta.mode == Delta::Mode::DUB) {
+        _engines[c]->_delta.mode = Delta::Mode::EXTEND;
+      } else {
+        _engines[c]->_delta.mode = Delta::Mode::DUB;
+      }
+      break;
+    case myrisa::dsp::LongPressButton::LONG_PRESS:
+      _engines[c]->_delta.mode = Delta::Mode::REPLACE;
+      break;
     }
-    printf("SHORT AFTER %d\n", _delta_mode);
-    break;
-  case LongPressButton::LONG_PRESS:
-    _delta_mode = Delta::Mode::REPLACE;
-    break;
   }
 
-  switch (_delta_context_button.process(sampleTime)) {
-  default:
-  case LongPressButton::NO_PRESS:
-    break;
-  case LongPressButton::SHORT_PRESS:
-    if (_delta_context == Delta::Context::SCENE) {
-      _delta_context = Delta::Context::TIME;
-    } else {
-      _delta_context = Delta::Context::SCENE;
+  myrisa::dsp::LongPressButton::Event _delta_context_event = _delta_context_button.process(sampleTime);
+  for (int c = 0; c < channels(); c++) {
+    switch (_delta_context_event) {
+    case myrisa::dsp::LongPressButton::NO_PRESS:
+      break;
+    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+      if (_engines[c]->_delta.context == Delta::Context::SCENE) {
+        _engines[c]->_delta.context = Delta::Context::TIME;
+      } else {
+        _engines[c]->_delta.context = Delta::Context::SCENE;
+      }
+      break;
+    case myrisa::dsp::LongPressButton::LONG_PRESS:
+      _engines[c]->_delta.context = Delta::Context::LAYER;
+      break;
     }
-    break;
-  case LongPressButton::LONG_PRESS:
-    _delta_context = Delta::Context::LAYER;
-    break;
   }
 
-  switch (_time_frame_button.process(sampleTime)) {
-  default:
-  case LongPressButton::NO_PRESS:
-    break;
-  case LongPressButton::SHORT_PRESS:
-    if (_time_frame_mode == TimeFrame::SECTION) {
-      _time_frame_mode = TimeFrame::TIME;
-    } else {
-      _time_frame_mode = TimeFrame::SECTION;
+  myrisa::dsp::LongPressButton::Event _time_frame_event = _time_frame_button.process(sampleTime);
+  for (int c = 0; c < channels(); c++) {
+    switch (_time_frame_event) {
+    case myrisa::dsp::LongPressButton::NO_PRESS:
+      break;
+    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+      if (_engines[c]->_time_frame == TimeFrame::SECTION) {
+        _engines[c]->_time_frame = TimeFrame::TIME;
+      } else {
+        _engines[c]->_time_frame = TimeFrame::SECTION;
+      }
+      break;
+    case myrisa::dsp::LongPressButton::LONG_PRESS:
+      _engines[c]->_time_frame = TimeFrame::LAYER;
+      break;
     }
-    break;
-  case LongPressButton::LONG_PRESS:
-    _time_frame_mode = TimeFrame::LAYER;
-    break;
   }
 }
 
@@ -88,7 +90,6 @@ void Frame::processAlways(const ProcessArgs &args) {
     _to_signal = toBase();
   }
 
-  // Buttons
   if (_button_divider.process()) {
     processButtons();
   }
@@ -97,30 +98,26 @@ void Frame::processAlways(const ProcessArgs &args) {
 void Frame::modulateChannel(int channel_index) {
   myrisa::dsp::frame::Engine *e = _engines[channel_index];
 
-  e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
-
-  float widget_delta = params[DELTA_PARAM].getValue();
-  if (inputs[DELTA_INPUT].isConnected()) {
-    float delta_port = inputs[DELTA_INPUT].getPolyVoltage(channel_index) / 10;
-    widget_delta = rack::clamp(delta_port + widget_delta, 0.0f, 1.0f);
-  }
-
-  // taking to the power of 3 gives a more intuitive curve
-  e->_delta.attenuation = rack::clamp(pow(widget_delta, 3), 0.0f, 1.0f);
-  e->_delta.active = _recordThreshold < widget_delta ? true : false;
-  e->_delta.mode = _delta_mode;
-  e->_delta.context = _delta_context;
-
-  e->time_frame_mode = _time_frame_mode;
-
   float scene_position = params[SELECT_PARAM].getValue() * (15);
   if (inputs[SCENE_INPUT].isConnected()) {
     scene_position += rack::clamp(inputs[SCENE_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
   scene_position = rack::clamp(scene_position, 0.0f, 15.0f);
   e->updateScenePosition(scene_position);
+
+  float delta_power = params[DELTA_POWER_PARAM].getValue();
+  if (inputs[DELTA_POWER_INPUT].isConnected()) {
+    float delta_power_port = inputs[DELTA_POWER_INPUT].getPolyVoltage(channel_index) / 10;
+    delta_power = rack::clamp(delta_power_port + delta_power, 0.0f, 1.0f);
+  }
+  // taking to the power of 3 gives a more intuitive curve
+  delta_power = rack::clamp(pow(delta_power, 3), 0.0f, 1.0f);
+  e->updateDeltaPower(delta_power);
+
+  e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 }
 
+// TODO based off max
 int Frame::channels() {
   if (baseConnected()) {
     int input_channels = _from_signal->channels;
@@ -151,11 +148,11 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 
 void Frame::updateLights(const ProcessArgs &args) {
   Delta delta = _engines[0]->_delta;
-  TimeFrame time_frame_mode = _engines[0]->time_frame_mode;
+  TimeFrame time_frame = _engines[0]->_time_frame;
   float phase = _engines[0]->_active_scene ? _engines[0]->_active_scene->_phase : 0.f;
   // display the engine with an active delta
 
-  bool poly_delta = (inputs[DELTA_INPUT].isConnected() && 1 < inputs[DELTA_INPUT].getChannels());
+  bool poly_delta = (inputs[DELTA_POWER_INPUT].isConnected() && 1 < inputs[DELTA_POWER_INPUT].getChannels());
   bool poly_phase = (inputs[PHASE_INPUT].isConnected() && 1 < inputs[PHASE_INPUT].getChannels());
 
   lights[DELTA_LIGHT + 1].value = !delta.active;
@@ -163,11 +160,11 @@ void Frame::updateLights(const ProcessArgs &args) {
   if (poly_delta) {
     lights[DELTA_LIGHT + 0].value = 0.f;
     lights[DELTA_LIGHT + 2].setSmoothBrightness(
-        delta.active - delta.attenuation,
+        delta.active - delta.power,
         _sampleTime * _light_divider.getDivision());
   } else {
     lights[DELTA_LIGHT + 0].setSmoothBrightness(
-        delta.active - delta.attenuation,
+        delta.active - delta.power,
         _sampleTime * _light_divider.getDivision());
     lights[DELTA_LIGHT + 2].value = 0.f;
   }
@@ -182,7 +179,6 @@ void Frame::updateLights(const ProcessArgs &args) {
   }
 
   switch (delta.mode) {
-  default:
   case Delta::Mode::EXTEND:
     lights[DELTA_MODE_LIGHT + 0].value = 1.0;
     lights[DELTA_MODE_LIGHT + 1].value = 0.0;
@@ -198,7 +194,6 @@ void Frame::updateLights(const ProcessArgs &args) {
   }
 
   switch (delta.context) {
-  default:
   case Delta::Context::TIME:
     lights[DELTA_CONTEXT_LIGHT + 0].value = 1.0;
     lights[DELTA_CONTEXT_LIGHT + 1].value = 0.0;
@@ -213,8 +208,7 @@ void Frame::updateLights(const ProcessArgs &args) {
     break;
   }
 
-  switch (time_frame_mode) {
-  default:
+  switch (time_frame) {
   case TimeFrame::TIME:
     lights[TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[TIME_FRAME_LIGHT + 1].value = 0.0;
@@ -311,10 +305,10 @@ struct FrameWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 50.315)), module, Frame::TIME_FRAME_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 66.389)), module, Frame::DELTA_CONTEXT_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 66.412)), module, Frame::DELTA_MODE_PARAM));
-		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.21)), module, Frame::DELTA_PARAM));
+		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.21)), module, Frame::DELTA_POWER_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 37.132)), module, Frame::SCENE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.878)), module, Frame::DELTA_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.878)), module, Frame::DELTA_POWER_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 108.114)), module, Frame::PHASE_INPUT));
 
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Frame::PHASE_OUTPUT));

@@ -2,10 +2,10 @@
 
 #include <math.h>
 #include <vector>
+#include <assert.h>
 
 #include "Interpolation.hpp"
 #include "rack.hpp"
-#include "util/assert.hpp"
 #include "util/math.hpp"
 
 using namespace std;
@@ -58,10 +58,10 @@ public:
   }
 
   inline void write(float phase, float sample) {
-    ASSERT(0.0f, <=, phase);
-    ASSERT(phase, <=, 1.0f);
+    assert(0.0f <= phase);
+    assert(phase <= 1.0f);
     if (type == Type::PARAM) {
-      ASSERT(0.0f, <=, sample);
+      assert(0.0f <= sample);
     }
 
     if (divider.process()) {
@@ -115,8 +115,8 @@ public:
   }
 
   inline float read(float phase) {
-    ASSERT(0.0f, <=, phase);
-    ASSERT(phase, <=, 1.0f);
+    assert(0.0f <= phase);
+    assert(phase <= 1.0f);
 
     int size = buffer.size();
     if (size == 0) {

@@ -7,7 +7,7 @@ namespace myrisa {
 namespace dsp {
 
 /**
-   Tracks a phase signal, typically a saw wave in [0.0, 1.0]. Notifies when signal has flipped, and also estimates the period by sampling the signal and finding the slope, taking into consideration possible phase flips.
+   Tracks a phase signal, notifies when signal has flipped, and also estimates the period by sampling the signal and finding the slope, taking into consideration possible phase flips.
 */
 struct PhaseAnalyzer {
   float _last_phase = 0.0f;

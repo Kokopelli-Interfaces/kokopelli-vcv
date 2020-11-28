@@ -2666,6 +2666,74 @@
         </meshpatch>
       </meshrow>
     </meshgradient>
+    <meshgradient
+       inkscape:collect="always"
+       id="meshgradient2291"
+       gradientUnits="userSpaceOnUse"
+       x="14.867393"
+       y="80.413721">
+      <meshrow
+         id="meshrow2319">
+        <meshpatch
+           id="meshpatch2301">
+          <stop
+             path="l -4.33479,-1.90804e-08"
+             style="stop-color:#000000;stop-opacity:1"
+             id="stop2293" />
+          <stop
+             path="l 2.16739,-1.25135"
+             style="stop-color:#ffffff;stop-opacity:1"
+             id="stop2295" />
+          <stop
+             path="l 0,0"
+             style="stop-color:#000000;stop-opacity:1"
+             id="stop2297" />
+          <stop
+             path="l 2.16739,1.25135"
+             style="stop-color:#ffffff;stop-opacity:1"
+             id="stop2299" />
+        </meshpatch>
+        <meshpatch
+           id="meshpatch2309">
+          <stop
+             path="l 2.16739,-3.75404"
+             id="stop2303" />
+          <stop
+             path="l -1.10161e-08,2.50269"
+             style="stop-color:#000000;stop-opacity:1"
+             id="stop2305" />
+          <stop
+             path="l 0,0"
+             style="stop-color:#ffffff;stop-opacity:1"
+             id="stop2307" />
+        </meshpatch>
+        <meshpatch
+           id="meshpatch2317">
+          <stop
+             path="l 2.16739,3.75404"
+             id="stop2311" />
+          <stop
+             path="l -2.16739,-1.25135"
+             style="stop-color:#ffffff;stop-opacity:1"
+             id="stop2313" />
+          <stop
+             path="l 0,0"
+             style="stop-color:#000000;stop-opacity:1"
+             id="stop2315" />
+        </meshpatch>
+      </meshrow>
+    </meshgradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4288"
+       id="radialGradient2321"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,0.86602541,0,10.516268)"
+       cx="12.7"
+       cy="78.494494"
+       fx="12.7"
+       fy="78.494494"
+       r="2.3136138" />
   </defs>
   <sodipodi:namedview
      inkscape:snap-bbox="true"
@@ -2677,18 +2745,18 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.8181087"
-     inkscape:cx="-118.8611"
-     inkscape:cy="246.27529"
+     inkscape:cx="48.015381"
+     inkscape:cy="242.88818"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer6"
+     inkscape:current-layer="layer10"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:object-nodes="false"
-     inkscape:window-width="1920"
+     inkscape:window-width="960"
      inkscape:window-height="1080"
-     inkscape:window-x="0"
+     inkscape:window-x="960"
      inkscape:window-y="0"
-     inkscape:window-maximized="1"
+     inkscape:window-maximized="0"
      inkscape:snap-to-guides="true"
      inkscape:snap-object-midpoints="true"
      inkscape:snap-center="true"
@@ -3339,12 +3407,30 @@
          id="path27193"
          sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccsscccccsssccccccsssccccccsscccccccccsccccccssccccccccccccccccccccsccccccssccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccsccccccccssccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccsccccccssccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccsccsccssccccccccccccccccccsccsccccccsscccccccccsccccccsscccccccccsccccccsssccccccssccccccccccccccccccsccccccsssccccccsssccccccsscccccccccccccccscccccccccccsccccccsscccscccccsccccccsscccccccccccccccccsccccccsssccccccssscccccccccsscccccccccccccccccccccccccccsccccccssccccccscccccccccccccccccscccccccccscccccccccssccccccc" />
     </g>
+    <path
+       sodipodi:type="star"
+       style="display:inline;opacity:1;fill:url(#meshgradient2291);fill-opacity:1;fill-rule:evenodd;stroke:url(#radialGradient2321);stroke-width:0.168841;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:2.8;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
+       id="path2288"
+       sodipodi:sides="3"
+       sodipodi:cx="12.7"
+       sodipodi:cy="79.162376"
+       sodipodi:r1="2.5026901"
+       sodipodi:r2="1.2513452"
+       sodipodi:arg1="0.52359878"
+       sodipodi:arg2="1.5707963"
+       inkscape:flatsided="true"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 14.867393,80.413721 -4.334786,0 L 12.7,76.659686 Z"
+       inkscape:transform-center-y="-1.4443232"
+       transform="matrix(2.0803616,0,0,2.3083778,-13.733041,-118.93968)"
+       inkscape:label="DELTA" />
   </g>
   <g
      inkscape:label="Identifiers"
      inkscape:groupmode="layer"
      id="layer1"
-     style="display:inline;opacity:1">
+     style="display:none;opacity:1">
     <g
        transform="matrix(0.08958927,0,0,0.62210802,2.6931145,-216.24445)"
        id="g12031"
@@ -3739,7 +3825,7 @@
              id="rect2" />
           <polygon
              style="stroke-width:23.6128"
-             points="64,262.632 134.624,192 64,121.368 41.376,144 73.376,176 0,176 0,208 73.376,208 41.376,240 "
+             points="64,121.368 41.376,144 73.376,176 0,176 0,208 73.376,208 41.376,240 64,262.632 134.624,192 "
              id="polygon4" />
           <rect
              style="stroke-width:23.6128"
@@ -3791,7 +3877,7 @@
            id="g4675">
           <polygon
              style="stroke-width:23.6128"
-             points="64,262.632 134.624,192 64,121.368 41.376,144 73.376,176 0,176 0,208 73.376,208 41.376,240 "
+             points="64,121.368 41.376,144 73.376,176 0,176 0,208 73.376,208 41.376,240 64,262.632 134.624,192 "
              id="polygon4663"
              transform="translate(54.028854,-80.262388)" />
           <rect
@@ -3888,7 +3974,7 @@
              id="rect2051" />
           <polygon
              style="stroke-width:23.6128"
-             points="64,262.632 134.624,192 64,121.368 41.376,144 73.376,176 0,176 0,208 73.376,208 41.376,240 "
+             points="64,121.368 41.376,144 73.376,176 0,176 0,208 73.376,208 41.376,240 64,262.632 134.624,192 "
              id="polygon2053"
              transform="translate(-838.08126,416.12119)" />
         </g>
@@ -4061,7 +4147,7 @@
        id="path3302" />
     <path
        sodipodi:type="star"
-       style="display:inline;opacity:1;fill-opacity:1;stroke:url(#radialGradient4290);stroke-width:0.168841;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:2.8;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill;fill-rule:evenodd;fill:url(#meshgradient4650)"
+       style="display:inline;opacity:1;fill:url(#meshgradient4650);fill-opacity:1;fill-rule:evenodd;stroke:url(#radialGradient4290);stroke-width:0.168841;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:2.8;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:markers stroke fill"
        id="path2280"
        sodipodi:sides="3"
        sodipodi:cx="12.7"
@@ -4448,7 +4534,7 @@
        transform="matrix(0.33916948,0,0,0.33916948,-397.90031,-64.392003)"
        clip-path="url(#clip444-3)"
        id="g31387"
-       style="display:inline;opacity:1;clip-rule:nonzero;stroke-width:0.780092">
+       style="clip-rule:nonzero;display:inline;opacity:1;stroke-width:0.780092">
       <path
          style="fill:#2b2b2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.780092"
          d="m 1202.125,344.12109 c -1.6953,4.66797 0.7148,9.83594 5.3789,11.53516 4.6719,1.69531 9.8359,-0.71094 11.5352,-5.37891 1.6992,-4.67187 -0.7071,-9.83203 -5.3789,-11.53515 -4.668,-1.69532 -9.8282,0.70703 -11.5352,5.3789"
@@ -4459,7 +4545,7 @@
        transform="matrix(0.33916948,0,0,0.33916948,-406.09324,-48.29474)"
        clip-path="url(#clip444-3)"
        id="g2264"
-       style="display:inline;opacity:1;clip-rule:nonzero;stroke-width:0.780092">
+       style="clip-rule:nonzero;display:inline;opacity:1;stroke-width:0.780092">
       <path
          style="fill:#2b2b2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.780092"
          d="m 1202.125,344.12109 c -1.6953,4.66797 0.7148,9.83594 5.3789,11.53516 4.6719,1.69531 9.8359,-0.71094 11.5352,-5.37891 1.6992,-4.67187 -0.7071,-9.83203 -5.3789,-11.53515 -4.668,-1.69532 -9.8282,0.70703 -11.5352,5.3789"
@@ -4470,7 +4556,7 @@
        transform="matrix(0.33916948,0,0,0.33916948,-389.69101,-48.317436)"
        clip-path="url(#clip444-3)"
        id="g2268"
-       style="display:inline;opacity:1;clip-rule:nonzero;stroke-width:0.780092">
+       style="clip-rule:nonzero;display:inline;opacity:1;stroke-width:0.780092">
       <path
          style="fill:#2b2b2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.780092"
          d="m 1202.125,344.12109 c -1.6953,4.66797 0.7148,9.83594 5.3789,11.53516 4.6719,1.69531 9.8359,-0.71094 11.5352,-5.37891 1.6992,-4.67187 -0.7071,-9.83203 -5.3789,-11.53515 -4.668,-1.69532 -9.8282,0.70703 -11.5352,5.3789"
@@ -4481,7 +4567,7 @@
        transform="matrix(0.33916948,0,0,0.33916948,-389.76565,-81.24304)"
        clip-path="url(#clip444-3)"
        id="g2272"
-       style="display:inline;opacity:1;clip-rule:nonzero;stroke-width:0.780092">
+       style="clip-rule:nonzero;display:inline;opacity:1;stroke-width:0.780092">
       <path
          style="fill:#2b2b2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.780092"
          d="m 1202.125,344.12109 c -1.6953,4.66797 0.7148,9.83594 5.3789,11.53516 4.6719,1.69531 9.8359,-0.71094 11.5352,-5.37891 1.6992,-4.67187 -0.7071,-9.83203 -5.3789,-11.53515 -4.668,-1.69532 -9.8282,0.70703 -11.5352,5.3789"
@@ -4492,7 +4578,7 @@
        transform="matrix(0.33916948,0,0,0.33916948,-405.92192,-81.243331)"
        clip-path="url(#clip444-3)"
        id="g2276"
-       style="display:inline;opacity:1;clip-rule:nonzero;stroke-width:0.780092">
+       style="clip-rule:nonzero;display:inline;opacity:1;stroke-width:0.780092">
       <path
          style="fill:#2b2b2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.780092"
          d="m 1202.125,344.12109 c -1.6953,4.66797 0.7148,9.83594 5.3789,11.53516 4.6719,1.69531 9.8359,-0.71094 11.5352,-5.37891 1.6992,-4.67187 -0.7071,-9.83203 -5.3789,-11.53515 -4.668,-1.69532 -9.8282,0.70703 -11.5352,5.3789"

@@ -3,8 +3,6 @@
 using namespace myrisa::dsp::frame;
 
 Layer::Layer(Delta::Mode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division, bool phase_defined) {
-  ASSERT(record_mode, !=, Delta::Mode::READ);
-
   buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
   send_attenuation = new PhaseBuffer(PhaseBuffer::Type::PARAM);
   samples_per_division = layer_samples_per_division;
@@ -44,19 +42,19 @@ Layer::~Layer() {
 void Layer::write(int division, float phase, float sample, float attenuation) {
   // TODO have to consider case where we are recording with external phase
   // e.g. one could start recording forward and then go in reverse
-  ASSERT(0.0, <=, phase);
-  ASSERT(phase, <=, 1.0);
-  ASSERT(start_division, <=, division);
+  assert(0.0 <= phase);
+  assert(phase <= 1.0);
+  assert(start_division <= division);
 
   if (!_phase_defined) {
     buffer->pushBack(sample);
     send_attenuation->pushBack(sample);
     samples_per_division++;
   } else {
-    ASSERT(0, <, samples_per_division);
+    assert(0 < samples_per_division);
 
     if (_mode == Delta::Mode::DUB) {
-      ASSERT(n_divisions, !=, 0);
+      assert(n_divisions != 0);
 
       if (buffer->size() == 0) {
         buffer->resize(n_divisions * samples_per_division);
@@ -78,15 +76,12 @@ void Layer::write(int division, float phase, float sample, float attenuation) {
       buffer->write(buffer_phase, sample);
       send_attenuation->write(buffer_phase, attenuation);
 
-    } else if (_mode == Delta::Mode::READ) {
-      printf("Myrisa Frame: Write in read _mode?? Frame is broken.\n");
-      return;
     }
   }
 }
 
 float Layer::getBufferPhase(int division, float phase) {
-  ASSERT(0, <=, n_divisions);
+  assert(0 <= n_divisions);
   int layer_division = (division - start_division) % n_divisions;
   float buffer_phase = (layer_division + phase) / n_divisions;
   return buffer_phase;

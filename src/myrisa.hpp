@@ -9,7 +9,6 @@
 #include "rack.hpp"
 
 #include "module.hpp"
-#include "util/assert.hpp"
 #include "widgets.hpp"
 
 using namespace rack;

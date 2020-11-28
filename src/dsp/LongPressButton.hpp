@@ -1,5 +1,8 @@
 #include "rack.hpp"
 
+namespace myrisa {
+namespace dsp {
+
 // adapted from stoermelders vcvrack-packone
 // https://github.com/stoermelder/vcvrack-packone/blob/v1/src/components.hpp
 struct LongPressButton {
@@ -31,3 +34,6 @@ struct LongPressButton {
     return result;
   }
 };
+
+} // namespace dsp
+} // namespace myrisa

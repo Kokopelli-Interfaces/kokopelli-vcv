@@ -6,16 +6,16 @@ Frame::Frame() {
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
   configParam(TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Time Frame");
-  configParam(DELTA_MODE_PARAM, 0.f, 1.f, 0.f, "Delta Mode");
-  configParam(DELTA_CONTEXT_PARAM, 0.f, 1.f, 0.f, "Delta Context");
-  configParam(DELTA_POWER_PARAM, 0.f, 1.f, 0.f, "Delta Power");
+  configParam(MANIFEST_MODE_PARAM, 0.f, 1.f, 0.f, "Manifest Mode");
+  configParam(MANIFEST_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Manifest Time Frame");
+  configParam(MANIFEST_PARAM, 0.f, 1.f, 0.f, "Manifest Strength");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
 
-  _delta_mode_button.param = &params[DELTA_MODE_PARAM];
-  _delta_context_button.param = &params[DELTA_CONTEXT_PARAM];
+  _manifest_mode_button.param = &params[MANIFEST_MODE_PARAM];
+  _manifest_time_frame_button.param = &params[MANIFEST_TIME_FRAME_PARAM];
   _time_frame_button.param = &params[TIME_FRAME_PARAM];
 }
 
@@ -29,38 +29,38 @@ void Frame::sampleRateChange() {
 void Frame::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
-  myrisa::dsp::LongPressButton::Event _delta_mode_event = _delta_mode_button.process(sampleTime);
+  myrisa::dsp::LongPressButton::Event _manifest_mode_event = _manifest_mode_button.process(sampleTime);
   for (int c = 0; c < channels(); c++) {
-    switch (_delta_mode_event) {
+    switch (_manifest_mode_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_delta.mode == Delta::Mode::DUB) {
-        _engines[c]->_delta.mode = Delta::Mode::EXTEND;
+      if (_engines[c]->_manifest.mode == Manifest::Mode::DUB) {
+        _engines[c]->setManifestMode(Manifest::Mode::EXTEND);
       } else {
-        _engines[c]->_delta.mode = Delta::Mode::DUB;
+        _engines[c]->setManifestMode(ManifestParams::Mode::DUB);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      _engines[c]->_delta.mode = Delta::Mode::REPLACE;
+      _engines[c]->setManifestMode(ManifestParams::Mode::REPLACE);
       break;
     }
   }
 
-  myrisa::dsp::LongPressButton::Event _delta_context_event = _delta_context_button.process(sampleTime);
+  myrisa::dsp::LongPressButton::Event _manifest_time_frame_event = _manifest_time_frame_button.process(sampleTime);
   for (int c = 0; c < channels(); c++) {
-    switch (_delta_context_event) {
+    switch (_manifest_time_frame_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_delta.context == Delta::Context::SCENE) {
-        _engines[c]->_delta.context = Delta::Context::TIME;
+      if (_engines[c]->_manifest.time_frame == TimeFrame::SECTION) {
+        _engines[c]->setManifestTimeFrame(TimeFrame::TIME);
       } else {
-        _engines[c]->_delta.context = Delta::Context::SCENE;
+        _engines[c]->setManifestTimeFrame(TimeFrame::SECTION);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      _engines[c]->_delta.context = Delta::Context::LAYER;
+        _engines[c]->setManifestTimeFrame(TimeFrame::LAYER);
       break;
     }
   }
@@ -102,17 +102,17 @@ void Frame::modulateChannel(int channel_index) {
   if (inputs[SCENE_INPUT].isConnected()) {
     scene_position += rack::clamp(inputs[SCENE_INPUT].getPolyVoltage(channel_index), -5.0f, 5.0f);
   }
-  scene_position = rack::clamp(scene_position, 0.0f, 15.0f);
-  e->updateScenePosition(scene_position);
+  scene_position = rack::clamp(scene_position, 0.f, 15.0f);
+  e->setScenePosition(scene_position);
 
-  float delta_power = params[DELTA_POWER_PARAM].getValue();
-  if (inputs[DELTA_POWER_INPUT].isConnected()) {
-    float delta_power_port = inputs[DELTA_POWER_INPUT].getPolyVoltage(channel_index) / 10;
-    delta_power = rack::clamp(delta_power_port + delta_power, 0.0f, 1.0f);
+  float manifest_strength = params[MANIFEST_PARAM].getValue();
+  if (inputs[MANIFEST_INPUT].isConnected()) {
+    float manifest_strength_port = inputs[MANIFEST_INPUT].getPolyVoltage(channel_index) / 10;
+    manifest_strength = rack::clamp(manifest_strength_port + manifest_strength, 0.f, 1.0f);
   }
-  // taking to the power of 3 gives a more intuitive curve
-  delta_power = rack::clamp(pow(delta_power, 3), 0.0f, 1.0f);
-  e->updateDeltaPower(delta_power);
+  // taking to the strength of 3 gives a more intuitive curve
+  manifest_strength = rack::clamp(pow(manifest_strength, 3), 0.f, 1.0f);
+  e->setManifestStrength(manifest_strength);
 
   e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 }
@@ -136,79 +136,96 @@ void Frame::processChannel(const ProcessArgs& args, int channel_index) {
 
   myrisa::dsp::frame::Engine *e = _engines[channel_index];
 
-  if (e->_use_ext_phase) {
-    e->_ext_phase = rack::clamp(
-        inputs[PHASE_INPUT].getPolyVoltage(channel_index) / 10, 0.0f, 1.0f);
-  }
-
-  e->_in = _from_signal->signal[channel_index];
+  e->_ext_phase = rack::clamp(inputs[PHASE_INPUT].getPolyVoltage(channel_index) / 10, 0.f, 1.0f);
+  e->_manifest.in = _from_signal->signal[channel_index];
   e->step();
   _to_signal->signal[channel_index] = e->read();
 }
 
-void Frame::updateLights(const ProcessArgs &args) {
-  Delta delta = _engines[0]->_delta;
-  TimeFrame time_frame = _engines[0]->_time_frame;
-  float phase = _engines[0]->_active_scene ? _engines[0]->_active_scene->_phase : 0.f;
-  // display the engine with an active delta
+void Frame::setLights(const ProcessArgs &args) {
+  // LIGHT + 0 = RED
+  // LIGHT + 1 = GREEN
+  // LIGHT + 2 = BLUE
 
-  bool poly_delta = (inputs[DELTA_POWER_INPUT].isConnected() && 1 < inputs[DELTA_POWER_INPUT].getChannels());
-  bool poly_phase = (inputs[PHASE_INPUT].isConnected() && 1 < inputs[PHASE_INPUT].getChannels());
-
-  lights[DELTA_LIGHT + 1].value = !delta.active;
-
-  if (poly_delta) {
-    lights[DELTA_LIGHT + 0].value = 0.f;
-    lights[DELTA_LIGHT + 2].setSmoothBrightness(
-        delta.active - delta.power,
-        _sampleTime * _light_divider.getDivision());
-  } else {
-    lights[DELTA_LIGHT + 0].setSmoothBrightness(
-        delta.active - delta.power,
-        _sampleTime * _light_divider.getDivision());
-    lights[DELTA_LIGHT + 2].value = 0.f;
+  if (!baseConnected()) {
+    return;
   }
 
+  float signal_in_sum = 0.f;
+  float signal_out_sum = 0.f;
+
+  bool poly_manifest = (inputs[MANIFEST_INPUT].isConnected() && 1 < inputs[MANIFEST_INPUT].getChannels());
+
+  TimeFrame displayed_time_frame = _engines[0]->_time_frame;
+  ManifestParams displayed_manifest = _engines[0]->_manifest;
+  float displayed_phase = _engines[0]->_time.phase;
+
+  bool manifest_active = false;
+  for (int c = 0; c < channels(); c++) {
+    signal_in_sum += _from_signal->signal[c];
+    signal_out_sum += _to_signal->signal[c];
+    manifest_active = !manifest_active ? _engines[c]->_manifest.active : manifest_active;
+    if (manifest_active) {
+      displayed_time_frame = _engines[c]->_time_frame;
+      displayed_manifest = _engines[c]->_manifest;
+      displayed_phase = _engines[c]->_time.phase;
+    }
+  }
+
+  signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
+  signal_out_sum = rack::clamp(signal_out_sum, 0.f, 1.f);
+
+  // TODO make me show the layer output that is selected, not all
+  lights[MANIFEST_LIGHT + 1].setSmoothBrightness(signal_out_sum, _sampleTime * _light_divider.getDivision());
+
+  if (manifest_active) {
+    int light_colour = poly_manifest ? 2 : 0;
+    lights[MANIFEST_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
+  } else {
+    lights[MANIFEST_LIGHT + 0].value = 0.f;
+    lights[MANIFEST_LIGHT + 2].value = 0.f;
+  }
+
+  bool poly_phase = (inputs[PHASE_INPUT].isConnected() && 1 < inputs[PHASE_INPUT].getChannels());
   if (poly_phase) {
     lights[PHASE_LIGHT + 1].value = 0.f;
-    lights[PHASE_LIGHT + 2].setSmoothBrightness(phase, _sampleTime * _light_divider.getDivision());
+    lights[PHASE_LIGHT + 2].setSmoothBrightness(displayed_phase, _sampleTime * _light_divider.getDivision());
   } else {
-    lights[PHASE_LIGHT + 1].setSmoothBrightness(
-        phase, _sampleTime * _light_divider.getDivision());
+    lights[PHASE_LIGHT + 1].setSmoothBrightness(displayed_phase, _sampleTime * _light_divider.getDivision());
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  switch (delta.mode) {
-  case Delta::Mode::EXTEND:
-    lights[DELTA_MODE_LIGHT + 0].value = 1.0;
-    lights[DELTA_MODE_LIGHT + 1].value = 0.0;
+  switch (displayed_manifest.mode) {
+  case ManifestParams::Mode::EXTEND:
+    lights[MANIFEST_MODE_LIGHT + 0].value = 1.0;
+    lights[MANIFEST_MODE_LIGHT + 1].value = 0.0;
     break;
-  case Delta::Mode::DUB:
-    lights[DELTA_MODE_LIGHT + 0].value = 1.0;
-    lights[DELTA_MODE_LIGHT + 1].value = 1.0;
+  case ManifestParams::Mode::DUB:
+    lights[MANIFEST_MODE_LIGHT + 0].value = 1.0;
+    lights[MANIFEST_MODE_LIGHT + 1].value = 1.0;
     break;
-  case Delta::Mode::REPLACE:
-    lights[DELTA_MODE_LIGHT + 0].value = 0.0;
-    lights[DELTA_MODE_LIGHT + 1].value = 1.0;
-    break;
-  }
-
-  switch (delta.context) {
-  case Delta::Context::TIME:
-    lights[DELTA_CONTEXT_LIGHT + 0].value = 1.0;
-    lights[DELTA_CONTEXT_LIGHT + 1].value = 0.0;
-    break;
-  case Delta::Context::SCENE:
-    lights[DELTA_CONTEXT_LIGHT + 0].value = 1.0;
-    lights[DELTA_CONTEXT_LIGHT + 1].value = 1.0;
-    break;
-  case Delta::Context::LAYER:
-    lights[DELTA_CONTEXT_LIGHT + 0].value = 0.0;
-    lights[DELTA_CONTEXT_LIGHT + 1].value = 1.0;
+  case ManifestParams::Mode::REPLACE:
+    lights[MANIFEST_MODE_LIGHT + 0].value = 0.0;
+    lights[MANIFEST_MODE_LIGHT + 1].value = 1.0;
     break;
   }
 
-  switch (time_frame) {
+  switch (displayed_manifest.time_frame) {
+  case TimeFrame::TIME:
+    lights[MANIFEST_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[MANIFEST_TIME_FRAME_LIGHT + 1].value = 0.0;
+    break;
+  case TimeFrame::SECTION:
+    lights[MANIFEST_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[MANIFEST_TIME_FRAME_LIGHT + 1].value = 1.0;
+    break;
+  case TimeFrame::LAYER:
+    lights[MANIFEST_TIME_FRAME_LIGHT + 0].value = 0.0;
+    lights[MANIFEST_TIME_FRAME_LIGHT + 1].value = 1.0;
+    break;
+  }
+
+  switch (displayed_time_frame) {
   case TimeFrame::TIME:
     lights[TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[TIME_FRAME_LIGHT + 1].value = 0.0;
@@ -226,7 +243,7 @@ void Frame::updateLights(const ProcessArgs &args) {
 
 void Frame::postProcessAlways(const ProcessArgs &args) {
   if (_light_divider.process()) {
-    updateLights(args);
+    setLights(args);
   }
 }
 
@@ -261,7 +278,7 @@ struct FrameValueDisplay : TextBox {
     textOffset = Vec(box.size.x * 0.5f, 0.f);
   }
 
-	void updateDisplayValue(int v) {
+	void setDisplayValue(int v) {
 		std::string s;
 		if(v != _previous_displayed_value) {
 			_previous_displayed_value = v;
@@ -273,7 +290,7 @@ struct FrameValueDisplay : TextBox {
 	void step() override {
 		TextBox::step();
 		if(_module) {
-      updateDisplayValue(327);
+      setDisplayValue(327);
 		}
 	}
 
@@ -303,22 +320,22 @@ struct FrameWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Frame::SELECT_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Frame::SELECT_FUNCTION_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 50.315)), module, Frame::TIME_FRAME_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 66.389)), module, Frame::DELTA_CONTEXT_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 66.412)), module, Frame::DELTA_MODE_PARAM));
-		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.21)), module, Frame::DELTA_POWER_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Frame::MANIFEST_MODE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Frame::MANIFEST_TIME_FRAME_PARAM));
+		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Frame::MANIFEST_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 37.132)), module, Frame::SCENE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.878)), module, Frame::DELTA_POWER_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Frame::MANIFEST_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 108.114)), module, Frame::PHASE_INPUT));
 
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Frame::PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Frame::SELECT_FUNCTION_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.239, 34.928)), module, Frame::SELECT_MODE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.099, 51.744)), module, Frame::TIME_FRAME_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 61.939)), module, Frame::DELTA_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 67.854)), module, Frame::DELTA_CONTEXT_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.911, 67.877)), module, Frame::DELTA_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Frame::TIME_FRAME_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 62.77)), module, Frame::MANIFEST_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 66.901)), module, Frame::MANIFEST_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 66.901)), module, Frame::MANIFEST_TIME_FRAME_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Frame::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));
@@ -336,22 +353,22 @@ struct FrameWidget : ModuleWidget {
     display_size = mm2px(Vec(6.837, 4.327));
 
     current_section = new FrameValueDisplay(module);
-    current_section->box.pos = mm2px(Vec(1.071, 48.611));
+    current_section->box.pos = mm2px(Vec(1.071, 48.917));
     current_section->box.size = display_size;
     addChild(current_section);
 
-    total_sections = new FrameValueDisplay(module);
-    total_sections->box.pos = mm2px(Vec(1.071, 53.716));
-    total_sections->box.size = display_size;
-    addChild(total_sections);
-
     current_section_division = new FrameValueDisplay(module);
-    current_section_division->box.pos = mm2px(Vec(17.511, 48.611));
+    current_section_division->box.pos = mm2px(Vec(17.511, 48.917));
     current_section_division->box.size = display_size;
     addChild(current_section_division);
 
+    total_sections = new FrameValueDisplay(module);
+    total_sections->box.pos = mm2px(Vec(1.071, 54.022));
+    total_sections->box.size = display_size;
+    addChild(total_sections);
+
     total_section_divisions = new FrameValueDisplay(module);
-    total_section_divisions->box.pos = mm2px(Vec(17.511, 53.751));
+    total_section_divisions->box.pos = mm2px(Vec(17.511, 54.022));
     total_section_divisions->box.size = display_size;
     addChild(total_section_divisions);
 

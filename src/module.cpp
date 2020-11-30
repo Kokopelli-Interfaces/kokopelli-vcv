@@ -11,7 +11,7 @@ void MyrisaModule::onReset() {
 }
 
 void MyrisaModule::onSampleRateChange() {
-	_modulationSteps = APP->engine->getSampleRate() * (2.5f / 1000.0f); // modulate every ~2.5ms regardless of sample rate.
+	_modulationSteps = APP->engine->getSampleRate() * (2.5f / 1000.f); // modulate every ~2.5ms regardless of sample rate.
 	_steps = _modulationSteps;
 	sampleRateChange();
 }

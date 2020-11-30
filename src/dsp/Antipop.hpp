@@ -8,7 +8,7 @@ struct AntipopFilter {
     float filter_;
 
     inline void trigger() {
-        alpha_ = 0.0f;
+        alpha_ = 0.f;
     }
 
     inline float process(float in) {

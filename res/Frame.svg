@@ -2653,10 +2653,10 @@
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.8181079"
-     inkscape:cx="-61.594961"
-     inkscape:cy="267.51424"
+     inkscape:cx="22.838789"
+     inkscape:cy="264.76337"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer4"
+     inkscape:current-layer="layer3"
      inkscape:document-rotation="0"
      showgrid="false"
      inkscape:object-nodes="false"
@@ -4640,7 +4640,7 @@
        height="1.2887619"
        x="8.3839455"
        y="88.868591"
-       inkscape:label="DELTA" />
+       inkscape:label="MANIFEST" />
     <rect
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.82223px;line-height:1.25;font-family:Nunito;-inkscape-font-specification:'Nunito, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.0999999;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:0.200003, 0.200003;stroke-dashoffset:0.0199999"
        id="rect2034-0-0-8-6-0"
@@ -4675,7 +4675,7 @@
        style="display:inline;fill:#ff00ff;fill-opacity:1;stroke-width:0.1;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:0.2, 0.2;stroke-dashoffset:0.02"
        inkscape:transform-center-y="-1.4312661e-06" />
     <rect
-       inkscape:label="DELTA_CONTEXT"
+       inkscape:label="MANIFEST_TIME_FRAME"
        y="65.436287"
        x="17.849058"
        height="0.54302961"
@@ -4848,7 +4848,7 @@
        height="3.1759999"
        x="19.31345"
        y="66.90097"
-       inkscape:label="DELTA_CONTEXT"
+       inkscape:label="MANIFEST_TIME_FRAME"
        inkscape:transform-center-x="0.014693178"
        inkscape:transform-center-y="-4.4172305" />
     <rect
@@ -4908,7 +4908,7 @@
            dx="0 1.1599305 1.8400834 1.5268168"
            style="font-style:normal;font-variant:normal;font-weight:800;font-stretch:normal;font-family:Overpass;-inkscape-font-specification:'Overpass Ultra-Bold'">1470</tspan></tspan></text>
     <rect
-       inkscape:label="DELTA_MODE"
+       inkscape:label="MANIFEST_MODE"
        y="65.436569"
        x="1.4468126"
        height="0.54302961"
@@ -4924,11 +4924,11 @@
        height="3.1759999"
        x="2.9115877"
        y="66.901192"
-       inkscape:label="DELTA_MODE"
+       inkscape:label="MANIFEST_MODE"
        inkscape:transform-center-x="0.014692925"
        inkscape:transform-center-y="-4.4172326" />
     <rect
-       inkscape:label="DELTA"
+       inkscape:label="MANIFEST"
        y="73.118019"
        x="5.3336954"
        height="0.54302961"
@@ -4986,7 +4986,7 @@
        height="3.1759999"
        x="11.097026"
        y="62.770027"
-       inkscape:label="DELTA_CONTEXT"
+       inkscape:label="MANIFEST"
        inkscape:transform-center-x="0.014693178"
        inkscape:transform-center-y="-4.4172305" />
   </g>

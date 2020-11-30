@@ -2,16 +2,16 @@
 
 enum TimeFrame { TIME, SECTION, LAYER };
 
-/*
-  At each step, what the FrameEngine does to it's collection of layers is a function of these parameters.
- */
-struct Delta {
+/**
+  At each step, what the Engine does to it's Timeline is a function of these parameters.
+*/
+struct ManifestParams {
   enum Mode { EXTEND, DUB, REPLACE };
-  enum Context { TIME, SCENE, LAYER };
 
+  float in = 0.f;
   Mode mode = Mode::EXTEND;
-  Context context = Context::TIME;
-  float power = 0.f;
+  TimeFrame time_frame = TimeFrame::TIME;
+  float strength = 0.f;
   bool active = false;
 };
 

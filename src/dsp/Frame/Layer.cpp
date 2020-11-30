@@ -2,18 +2,15 @@
 
 using namespace myrisa::dsp::frame;
 
-Layer::Layer(Delta::Mode record_mode, int division, vector<Layer*> selected_layers, int layer_samples_per_division, bool phase_defined) {
+Layer::Layer() {
   buffer = new PhaseBuffer(PhaseBuffer::Type::AUDIO);
-  send_attenuation = new PhaseBuffer(PhaseBuffer::Type::PARAM);
-  samples_per_division = layer_samples_per_division;
+  manifestation_strength = new PhaseBuffer(PhaseBuffer::Type::PARAM);
 
-  start_division = division;
-  _mode = record_mode;
   // TODO remove me
   _phase_defined = phase_defined;
 
   if (!phase_defined) {
-    n_divisions = 1;
+    n_beats = 1;
   } else {
     for (auto selected_layer : selected_layers) {
       if (selected_layer && !selected_layer->fully_attenuated) {
@@ -21,92 +18,92 @@ Layer::Layer(Delta::Mode record_mode, int division, vector<Layer*> selected_laye
       }
     }
 
-    if (_mode == Delta::Mode::DUB) {
+    if (_mode == ManifestParams::Mode::DUB) {
       if (0 < selected_layers.size()) {
         auto most_recent_target_layer = selected_layers.back();
-        n_divisions = most_recent_target_layer->n_divisions;
+        n_beats = most_recent_target_layer->n_beats;
       } else {
-        n_divisions = 1;
+        n_beats = 1;
       }
-    } else if (_mode == Delta::Mode::EXTEND) {
-      n_divisions = 0;
+    } else if (_mode == ManifestParams::Mode::EXTEND) {
+      n_beats = 0;
     }
   }
 }
 
 Layer::~Layer() {
   delete buffer;
-  delete send_attenuation;
+  delete manifestation_strength;
 }
 
-void Layer::write(int division, float phase, float sample, float attenuation) {
+void Layer::write(int beat, float phase, float sample, float attenuation) {
   // TODO have to consider case where we are recording with external phase
   // e.g. one could start recording forward and then go in reverse
   assert(0.0 <= phase);
   assert(phase <= 1.0);
-  assert(start_division <= division);
+  assert(start_beat <= beat);
 
   if (!_phase_defined) {
     buffer->pushBack(sample);
-    send_attenuation->pushBack(sample);
-    samples_per_division++;
+    manifestation_strength->pushBack(sample);
+    samples_per_beat++;
   } else {
-    assert(0 < samples_per_division);
+    assert(0 < samples_per_beat);
 
-    if (_mode == Delta::Mode::DUB) {
-      assert(n_divisions != 0);
+    if (_mode == ManifestParams::Mode::DUB) {
+      assert(n_beats != 0);
 
       if (buffer->size() == 0) {
-        buffer->resize(n_divisions * samples_per_division);
-        send_attenuation->resize(n_divisions * samples_per_division);
+        buffer->resize(n_beats * samples_per_beat);
+        manifestation_strength->resize(n_beats * samples_per_beat);
       }
 
-      float buffer_phase = getBufferPhase(division, phase);
+      float buffer_phase = getBufferPhase(beat, phase);
       buffer->write(buffer_phase, sample);
-      send_attenuation->write(buffer_phase, attenuation);
+      manifestation_strength->write(buffer_phase, attenuation);
 
-    } else if (_mode == Delta::Mode::EXTEND) {
-      while (start_division + n_divisions <= division) {
-        buffer->resize(buffer->size() + samples_per_division);
-        send_attenuation->resize(send_attenuation->size() + samples_per_division);
-        n_divisions++;
+    } else if (_mode == ManifestParams::Mode::EXTEND) {
+      while (start_beat + n_beats <= beat) {
+        buffer->resize(buffer->size() + samples_per_beat);
+        manifestation_strength->resize(manifestation_strength->size() + samples_per_beat);
+        n_beats++;
       }
 
-      float buffer_phase = getBufferPhase(division, phase);
+      float buffer_phase = getBufferPhase(beat, phase);
       buffer->write(buffer_phase, sample);
-      send_attenuation->write(buffer_phase, attenuation);
+      manifestation_strength->write(buffer_phase, attenuation);
 
     }
   }
 }
 
-float Layer::getBufferPhase(int division, float phase) {
-  assert(0 <= n_divisions);
-  int layer_division = (division - start_division) % n_divisions;
-  float buffer_phase = (layer_division + phase) / n_divisions;
+float Layer::getBufferPhase(int beat, float phase) {
+  assert(0 <= n_beats);
+  int layer_beat = (beat - start_beat) % n_beats;
+  float buffer_phase = (layer_beat + phase) / n_beats;
   return buffer_phase;
 }
 
-float Layer::readSample(int division, float phase) {
-  if (division < start_division) {
-    return 0.0f;
+float Layer::readSample(int beat, float phase) {
+  if (beat < start_beat) {
+    return 0.f;
   }
 
-  return buffer->read(getBufferPhase(division, phase));
+  return buffer->read(getBufferPhase(beat, phase));
 }
 
-float Layer::readSampleWithAttenuation(int division, float phase,
+float Layer::readSampleWithAttenuation(int beat, float phase,
                                        float attenuation) {
-  float sample = readSample(division, phase);
-  if (sample == 0.0f) {
-    return 0.0f;
+  float sample = readSample(beat, phase);
+  if (sample == 0.f) {
+    return 0.f;
   }
   return buffer->getAttenuatedSample(sample, attenuation);
 }
 
-float Layer::readSendAttenuation(int division, float phase) {
-  if (division < start_division) {
-    return 0.0f;
+float Layer::readSendAttenuation(int beat, float phase) {
+  if (beat < start_beat) {
+    return 0.f;
   }
-  return send_attenuation->read(getBufferPhase(division, phase));
+  return manifestation_strength->read(getBufferPhase(beat, phase));
 }

@@ -13,7 +13,7 @@ using namespace myrisa::util;
 
 namespace myrisa {
 
-// a buffer that can be read and written to via a phase float in [0.0f, 1.0f]
+// a buffer that can be read and written to via a phase float in [0.f, 1.0f]
 // behaviour undefined if adding or replacing at multiple phase rates
 struct PhaseBuffer {
 private:
@@ -58,10 +58,10 @@ public:
   }
 
   inline void write(float phase, float sample) {
-    assert(0.0f <= phase);
+    assert(0.f <= phase);
     assert(phase <= 1.0f);
     if (type == Type::PARAM) {
-      assert(0.0f <= sample);
+      assert(0.f <= sample);
     }
 
     if (divider.process()) {
@@ -83,12 +83,12 @@ public:
   }
 
   inline float getAttenuatedSample(float buffer_sample, float attenuation) {
-    float clamped_attenuation = rack::clamp(attenuation, 0.0f, 1.0f);
+    float clamped_attenuation = rack::clamp(attenuation, 0.f, 1.0f);
 
     switch (type) {
     case Type::GATE:
       if (clamped_attenuation == 1.0f) {
-        return 0.0f;
+        return 0.f;
       } else {
         return buffer_sample;
       }
@@ -110,17 +110,17 @@ public:
       return sample;
     }
 
-    float fade_amount = rescale(phase, 0.0f, fade_length, 0.0f);
+    float fade_amount = rescale(phase, 0.f, fade_length, 0.f);
     return rack::crossfade(buffer[buffer.size()-1], sample, fade_amount);
   }
 
   inline float read(float phase) {
-    assert(0.0f <= phase);
+    assert(0.f <= phase);
     assert(phase <= 1.0f);
 
     int size = buffer.size();
     if (size == 0) {
-      return 0.0f;
+      return 0.f;
     }
 
     float buffer_position = size * phase;

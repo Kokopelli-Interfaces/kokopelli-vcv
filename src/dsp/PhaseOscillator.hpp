@@ -7,27 +7,34 @@ namespace myrisa {
 namespace dsp {
 
 struct PhaseOscillator {
-  float phase = 0.0f;
-  float freq = 1.0f;
+  float _phase = 0.f;
+  float _freq = 0.f;
+  bool _freq_set = false;
 
   PhaseOscillator() {}
 
-  inline void setPitch(float pitch) {
-    freq = pitch;
+  inline void setFrequency(float freq) {
+    _freq = freq;
+    _freq_set = true;
+  }
+
+  inline bool isSet() {
+    return _freq_set;
+  }
+
+  inline float getFrequency() {
+    return _freq;
   }
 
   inline void reset(float value) {
-    this->phase = std::fmod(value, 1.0f);
+    _phase = std::fmod(value, 1.0f);
   }
 
-  inline void step(float dt) {
-    float deltaPhase = freq * dt;
-    float sum = phase + deltaPhase;
-    this->phase = rack::math::eucMod(sum, 1.0f);
-  }
-
-  inline float getPhase() {
-    return this->phase;
+  inline float step(float dt) {
+    float d_phase = _freq * dt;
+    float sum = _phase + d_phase;
+    _phase = rack::math::eucMod(sum, 1.0f);
+    return _phase;
   }
 };
 

@@ -11,12 +11,12 @@ void Signal::modulateChannel(int c) {
   Engine &e = *_engines[c];
   e.mix = params[MIX_PARAM].getValue();
   if (inputs[MIX_INPUT].isConnected()) {
-    e.mix *= rack::clamp(inputs[MIX_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
+    e.mix *= rack::clamp(inputs[MIX_INPUT].getPolyVoltage(c) / 10.f, 0.f, 1.0f);
   }
 
   e.vca = params[VCA_PARAM].getValue();
   if (inputs[VCA_INPUT].isConnected()) {
-    e.vca *= rack::clamp(inputs[VCA_INPUT].getPolyVoltage(c) / 10.0f, 0.0f, 1.0f);
+    e.vca *= rack::clamp(inputs[VCA_INPUT].getPolyVoltage(c) / 10.f, 0.f, 1.0f);
   }
 }
 

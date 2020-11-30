@@ -14,20 +14,20 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
     TIME_FRAME_PARAM,
-    DELTA_CONTEXT_PARAM,
-    DELTA_MODE_PARAM,
-    DELTA_POWER_PARAM,
+    MANIFEST_TIME_FRAME_PARAM,
+    MANIFEST_MODE_PARAM,
+    MANIFEST_PARAM,
     NUM_PARAMS
   };
-  enum InputIds { SCENE_INPUT, DELTA_POWER_INPUT, PHASE_INPUT, NUM_INPUTS };
+  enum InputIds { SCENE_INPUT, MANIFEST_INPUT, PHASE_INPUT, NUM_INPUTS };
   enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
   enum LightIds {
     ENUMS(SELECT_FUNCTION_LIGHT, 3),
     ENUMS(SELECT_MODE_LIGHT, 3),
     ENUMS(TIME_FRAME_LIGHT, 3),
-    ENUMS(DELTA_LIGHT, 3),
-    ENUMS(DELTA_MODE_LIGHT, 3),
-    ENUMS(DELTA_CONTEXT_LIGHT, 3),
+    ENUMS(MANIFEST_LIGHT, 3),
+    ENUMS(MANIFEST_MODE_LIGHT, 3),
+    ENUMS(MANIFEST_TIME_FRAME_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
@@ -37,8 +37,8 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
   float _sampleTime = 1.0f;
 
-  myrisa::dsp::LongPressButton _delta_mode_button;
-  myrisa::dsp::LongPressButton _delta_context_button;
+  myrisa::dsp::LongPressButton _manifest_mode_button;
+  myrisa::dsp::LongPressButton _manifest_time_frame_button;
   myrisa::dsp::LongPressButton _time_frame_button;
 
   std::array<myrisa::dsp::frame::Engine*, maxChannels> _engines;
@@ -55,7 +55,7 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   void processAlways(const ProcessArgs &args) override;
   void processChannel(const ProcessArgs &args, int channel) override;
   void postProcessAlways(const ProcessArgs &args) override;
-  void updateLights(const ProcessArgs &args);
+  void setLights(const ProcessArgs &args);
 
 private:
   void processButtons();

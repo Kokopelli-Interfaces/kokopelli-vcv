@@ -2,19 +2,9 @@
 
 using namespace myrisa::dsp::frame;
 
-Scene::~Scene() {
-  for (auto layer : _layers) {
-    delete layer;
-  }
-
-  if (_active_layer) {
-    delete _active_layer;
-  }
-}
-
 // FIXME performance
 float Scene::getLayerAttenuation(int layer_i, float current_attenuation) {
-  float layer_attenuation = 0.0f;
+  float layer_attenuation = 0.f;
   if (_active_layer) {
     for (auto target_layer : _active_layer->target_layers) {
       if (target_layer == _layers[layer_i]) {
@@ -43,9 +33,9 @@ float Scene::getLayerAttenuation(int layer_i, float current_attenuation) {
 }
 
 float Scene::read(float current_attenuation) {
-  float out = 0.0f;
+  float out = 0.f;
   for (unsigned int i = 0; i < _layers.size(); i++) {
-    float layer_attenuation = getLayerAttenuation(i, current_attenuation);
+    // float layer_attenuation = getLayerAttenuation(i, current_attenuation);
     if (layer_attenuation < 1.0f) {
       float layer_out = _layers[i]->readSampleWithAttenuation(_scene_division, _phase, layer_attenuation);
       out += layer_out;
@@ -54,5 +44,3 @@ float Scene::read(float current_attenuation) {
 
   return out;
 }
-
-bool Scene::isEmpty() { return (_layers.size() == 0); }

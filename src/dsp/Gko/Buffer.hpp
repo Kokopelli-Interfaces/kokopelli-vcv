@@ -4,7 +4,7 @@
 #include <vector>
 #include <assert.h>
 
-#include "Interpolation.hpp"
+#include "dsp/Interpolation.hpp"
 #include "rack.hpp"
 #include "util/math.hpp"
 
@@ -12,59 +12,61 @@ using namespace std;
 using namespace myrisa::util;
 
 namespace myrisa {
+namespace dsp {
+namespace gko {
 
-// a buffer that can be read and written to via a phase float in [0.f, 1.0f]
-// behaviour undefined if adding or replacing at multiple phase rates
-struct PhaseBuffer {
+/**
+  A buffer that can be read and written with a Time.
+*/
+struct Buffer {
 private:
-  vector<float> buffer;
-  // TODO ???
-  rack::dsp::ClockDivider divider;
+  vector<PhaseBuffer> phase_buffers;
+  rack::dsp::ClockDivider write_divider;
 
 public:
   enum Type { AUDIO, PARAM, CV, GATE, VOCT, VEL };
   Type type;
 
-  PhaseBuffer(Type type) {
+  Buffer(Type type) {
     type = type;
     switch (type) {
     case Type::AUDIO: case Type::CV:
-      divider.setDivision(1);
+      write_divider.setDivision(1);
       break;
     case Type::GATE: case Type::VOCT: case Type::VEL:
-      divider.setDivision(100); // approx every ~.25ms
+      write_divider.setDivision(100); // approx every ~.25ms
       break;
     case Type::PARAM:
-      divider.setDivision(2000); // approx every ~5ms
+      write_divider.setDivision(2000); // approx every ~5ms
       break;
     }
   }
 
   inline void resize(int new_size) {
-    buffer.resize(new_size / divider.getDivision());
+    buffer.resize(new_size / write_divider.getDivision());
   }
 
   inline int size() {
-    return buffer.size() * divider.getDivision();
+    return buffer.size() * write_divider.getDivision();
   }
 
   inline void pushBack(float sample) {
     if (size() == 0) {
-      divider.reset();
+      write_divider.reset();
       buffer.push_back(sample);
-    } else if (divider.process()) {
+    } else if (write_divider.process()) {
       buffer.push_back(sample);
     }
   }
 
-  inline void write(float phase, float sample) {
+  inline void write(Time position, float sample) {
     assert(0.f <= phase);
     assert(phase <= 1.0f);
     if (type == Type::PARAM) {
       assert(0.f <= sample);
     }
 
-    if (divider.process()) {
+    if (write_divider.process()) {
       int length = buffer.size();
       float position = length * phase;
       int i = floor(position) == length ? length - 1 : floor(position);
@@ -143,4 +145,6 @@ public:
   }
 };
 
+} // namepsace frame
+} // namepsace dsp
 } // namepsace myrisa

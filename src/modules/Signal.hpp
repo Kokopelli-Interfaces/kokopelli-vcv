@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Frame_shared.hpp"
+#include "Gko_shared.hpp"
 
 namespace myrisa {
 
@@ -18,8 +18,8 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
 
   Engine *_engines[maxChannels] {};
 
-  SignalExpanderMessage *_toFrame = nullptr;
-  SignalExpanderMessage *_fromFrame = nullptr;
+  SignalExpanderMessage *_toGko = nullptr;
+  SignalExpanderMessage *_fromGko = nullptr;
 
   Signal() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -28,7 +28,7 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
 
     setExpanderModelPredicate([](Model *m) {
       // TODO chainable expanders
-      return m == modelFrame;
+      return m == modelGko;
     });
   }
 

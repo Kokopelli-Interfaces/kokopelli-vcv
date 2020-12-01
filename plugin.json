@@ -14,7 +14,7 @@
   "modules": [{
       "slug": "Myrisa-Signal",
       "name": "Signal",
-      "description": "Frame expander which adds one signal input and output.",
+      "description": "Gko expander which adds one signal input and output.",
       "tags": [
         "Expander"
       ]
@@ -22,7 +22,7 @@
     {
       "slug": "Myrisa-Signal4",
       "name": "Signal4",
-      "description": "Frame expander which adds four signal inputs and outputs.",
+      "description": "Gko expander which adds four signal inputs and outputs.",
       "tags": [
         "Expander"
       ]
@@ -30,7 +30,7 @@
     {
       "slug": "Myrisa-Play",
       "name": "Play",
-      "description": "Frame expander which adds midi recording inputs and outputs.",
+      "description": "Gko expander which adds midi recording inputs and outputs.",
       "tags": [
         "Expander"
       ]
@@ -44,16 +44,14 @@
       ]
     },
     {
-      "slug": "Myrisa-Frame",
-      "name": "Frame",
-      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more.",
+      "slug": "Myrisa-Gko",
+      "name": "Gko",
+      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more. Inspired by the advancer of existence, 'Gko'.",
       "tags": [
         "Poly",
         "Recording",
         "Sequencer",
-        "Sampler",
-        "Visual",
-        "Waveshaper"
+        "Sampler"
       ]
     }
   ]

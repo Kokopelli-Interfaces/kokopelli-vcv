@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Frame_shared.hpp"
-#include "dsp/Frame/Engine.hpp"
+#include "Gko_shared.hpp"
+#include "dsp/Gko/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
 #include "widgets.hpp"
 #include <math.h>
 
 namespace myrisa {
 
-struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
+struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   enum ParamIds {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
@@ -41,11 +41,11 @@ struct Frame : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   myrisa::dsp::LongPressButton _manifest_time_frame_button;
   myrisa::dsp::LongPressButton _time_frame_button;
 
-  std::array<myrisa::dsp::frame::Engine*, maxChannels> _engines;
+  std::array<myrisa::dsp::gko::Engine*, maxChannels> _engines;
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
 
-  Frame();
+  Gko();
 
   void sampleRateChange() override;
   int channels() override;

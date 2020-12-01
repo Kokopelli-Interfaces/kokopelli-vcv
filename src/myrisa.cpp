@@ -1,6 +1,6 @@
 #include "myrisa.hpp"
 
-#include "modules/Frame.hpp"
+#include "modules/Gko.hpp"
 #include "modules/Signal.hpp"
 #include "modules/Signal4.hpp"
 #include "modules/Play.hpp"
@@ -11,7 +11,7 @@ void init(rack::Plugin *p) {
 	pluginInstance = p;
 
   p->addModel(modelSignal);
-  p->addModel(modelFrame);
+  p->addModel(modelGko);
   p->addModel(modelSignal4);
   p->addModel(modelPlay);
 }

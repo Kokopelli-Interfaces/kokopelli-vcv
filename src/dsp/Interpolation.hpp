@@ -6,7 +6,7 @@
 
 namespace myrisa {
 
-enum Interpolations
+enum Interpolation
 {
     NONE,
     LINEAR,
@@ -52,7 +52,7 @@ inline float InterpolateHermite(float* data, float index) {
     return Hermite4pt3oX(data[x1 - 1], data[x1], data[x1 + 1], data[x1 + 2], t);
 }
 
-/* The array at `p` must be at least length `floor(x) + 3`. */
+/** The array at `p` must be at least length `floor(x) + 3`. */
 inline float interpolateBSpline(const float* data, float index) {
     int x1 = floor(index);
     float t = index - x1;
@@ -68,7 +68,7 @@ inline float interpolateLineard(float* data, float index, int dataLen) {
 }
 
 /** interpolates an array. Warps. */
-inline float InterpolateHermite(float* data, float index, int dataLen) {
+inline float interpolateHermite(float* data, float index, int dataLen) {
     int x1 = (int)floor(index);
     int x0 = (x1 < 1) ? dataLen - 1 : x1 - 1;
     int x2 = (x1 + 1) % dataLen;

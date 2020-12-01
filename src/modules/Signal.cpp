@@ -33,12 +33,12 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
 
   float out = in;
   if (expanderConnected()) {
-    auto toFrame = toExpander();
-    auto fromFrame = fromExpander();
+    auto toGko = toExpander();
+    auto fromGko = fromExpander();
 
-    toFrame->signal[c] = in;
-    toFrame->channels = _channels;
-    out += fromFrame->signal[c];
+    toGko->signal[c] = in;
+    toGko->channels = _channels;
+    out += fromGko->signal[c];
   }
 
   if (outputs[OUT_OUTPUT].isConnected()) {

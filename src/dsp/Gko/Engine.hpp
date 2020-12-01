@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Timeline.hpp"
+#include "utils.hpp"
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "dsp/PhaseOscillator.hpp"
@@ -13,53 +14,42 @@
 
 namespace myrisa {
 namespace dsp {
-namespace frame {
+namespace gko {
 
-class Engine {
-public:
+struct Engine {
   bool _use_ext_phase = false;
   float _ext_phase = 0.f;
-
   float _sample_time = 1.0f;
+  std::vector<int> _selected_layers;
 
   /* read only */
 
-  struct Time {
-    float phase = 0.f;
-    int beat = 0;
-  };
-  Time _time;
-
-  struct Manifestation {
-    Layer *content = nullptr;
-    std::vector<int> target_layers;
-    Time start;
-  };
-  Manifestation _active_manifestation;
+  Manifest _manifest;
+  Layer *_manifestation = nullptr;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
 
-  ManifestParams _manifest;
   TimeFrame _time_frame;
-  Timeline *_timeline;
 
-  // TODO
-  std::vector<int> _selected_layers;
+  Timeline _timeline;
+  float _time = 0.f;
 
-  // TODO make me infinite
   const float _manifestActiveThreshold = 0.0001f;
 
-public:
-  Engine();
-  ~Engine();
-  void setScenePosition(float scene_position);
   void step();
   float read();
 
-  void setManifestMode(ManifestParams::Mode mode);
-  void setManifestTimeFrame(TimeFrame mode);
+  void setManifestMode(Manifest::Mode mode);
+  void setManifestTimeFrame(TimeFrame time_frame);
   void setManifestStrength(float strength);
+
+private:
+  void manifest();
+  inline void beginManifestation();
+  inline void endManifestation();
+  inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
+  inline void handlePhaseFlip();
 };
 
 } // namespace frame

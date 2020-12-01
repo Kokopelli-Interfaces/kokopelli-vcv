@@ -4,7 +4,7 @@
 #include "myrisa.hpp"
 
 extern Model *modelSignal;
-extern Model *modelFrame;
+extern Model *modelGko;
 
 namespace myrisa {
 
@@ -14,7 +14,7 @@ struct SignalExpanderMessage : ExpanderMessage {
 };
 
 // TODO
-struct FrameExpanderMessage : ExpanderMessage {
+struct GkoExpanderMessage : ExpanderMessage {
   float rate[MyrisaModule::maxChannels]{};
   float pos[MyrisaModule::maxChannels]{};
 };

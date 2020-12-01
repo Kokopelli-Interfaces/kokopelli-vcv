@@ -12,15 +12,11 @@ namespace dsp {
 */
 struct PhaseAnalyzer {
   float _last_phase = 0.f;
-  bool _direction_forward = true;
 
-  float _last_d_phase = 0.f;
-
-  float _time_since_last_d_phase_zero_crossing = 0.f;
-  float _last_d_phase_zero_crossing_phase = 0.f;
-
-  float _period_phase_length = 0.f;
   float _period = 0.f;
+  float _period_start_phase = 0.f;
+  float _period_phase_length = 0.f;
+
   float _division_period = 0.f;
 
   enum PhaseFlip {
@@ -37,24 +33,29 @@ struct PhaseAnalyzer {
   inline PhaseFlip process(float phase, float sample_time) {
     float d_phase = phase - _last_phase;
     if (d_phase == 0) {
-      _time_since_last_d_phase_zero_crossing += sample_time;
+      _period += sample_time;
       return PhaseFlip::NONE;
     }
 
-    bool d_phase_zero_crossing = std::signbit(_last_d_phase) != std::signbit(d_phase);
-    if (d_phase_zero_crossing) {
-      _period = _time_since_last_d_phase_zero_crossing;
-      _period_phase_length = phase - _last_d_phase_zero_crossing_phase;
-      _division_period = _period_phase_length / _period;
+    bool period_end =
+      (_last_phase < _period_start_phase && _period_start_phase <= phase) ||
+      (phase <= _period_start_phase && _period_start_phase < _last_phase);
 
-      _time_since_last_d_phase_zero_crossing = 0.f;
-      _last_d_phase_zero_crossing_phase = phase;
+    if (period_end) {
+      _division_period = _period_phase_length / _period;
+      _period = 0.f;
+      _period_phase_length = 0.f;
+      _period_start_phase = phase;
+      printf("---- new period estimate: %fs\n", _division_period);
     } else {
-      _time_since_last_d_phase_zero_crossing += sample_time;
+      _period += sample_time;
+
+      if (0.f < d_phase) {
+        _period_phase_length += d_phase;
+      }
     }
 
     _last_phase = phase;
-    _last_d_phase = d_phase;
 
     if (d_phase < -0.95) {
       return PhaseFlip::FORWARD;

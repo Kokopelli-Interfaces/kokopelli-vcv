@@ -7,17 +7,15 @@ namespace myrisa {
 namespace dsp {
 
 /**
-   Analyzes a generic periodic signal in [0.0, 1.0].
-   Extracts phase flip information, num samples per division, and frequency.
+   Tracks a phase signal, typically a saw wave in [0.0, 1.0]. Notifies when signal has flipped, and also estimates the period by sampling the signal and finding the slope, taking into consideration possible phase flips. Works for slow phase signals where one can not wait to get period by waiting for a repetition.
 */
 struct PhaseAnalyzer {
-  float _last_phase = 0.f;
+  float _last_phase = 0.0f;
+  float _phase_period_estimate = 1.0f;
 
-  float _period = 0.f;
-  float _period_start_phase = 0.f;
-  float _period_phase_length = 0.f;
-
-  float _division_period = 0.f;
+  rack::dsp::ClockDivider _slope_estimator_divider;
+  float _offset_from_last_sample = 0.0f;
+  float _time_from_last_sample = 0.f;
 
   enum PhaseFlip {
     FORWARD,
@@ -25,45 +23,55 @@ struct PhaseAnalyzer {
     NONE,
   };
 
-  inline float getDivisionPeriod() {
-    return _division_period;
+  PhaseAnalyzer() {
+    _slope_estimator_divider.setDivision(2500); // ~1/16 second
   }
 
-  // TODO does not estimate slow signals fast enough
+  inline float getDivisionPeriod() {
+    return _phase_period_estimate;
+  }
+
   inline PhaseFlip process(float phase, float sample_time) {
-    float d_phase = phase - _last_phase;
-    if (d_phase == 0) {
-      _period += sample_time;
-      return PhaseFlip::NONE;
+    float phase_change = phase - _last_phase;
+    float phase_abs_change = fabs(phase_change);
+    bool phase_flip = (phase_abs_change > 0.95 && phase_abs_change <= 1.0);
+    PhaseFlip phase_flip_type;
+
+    // FIXME has a hard time with internal _section_division loops
+    if (phase_flip && 0 < phase_change) {
+      _offset_from_last_sample += phase_change - 1;
+      phase_flip_type = PhaseFlip::BACKWARD;
+    } else if (phase_flip && phase_change < 0) {
+      _offset_from_last_sample += phase_change + 1;
+      phase_flip_type = PhaseFlip::FORWARD;
+    } else {
+      phase_flip_type = PhaseFlip::NONE;
+      bool in_division_phase_flip =
+          (0 < _offset_from_last_sample &&
+           phase_change < 0) ||
+          (_offset_from_last_sample < 0 &&
+           0 < phase_change);
+      if (!in_division_phase_flip) {
+        _offset_from_last_sample += phase_change;
+      }
     }
 
-    bool period_end =
-      (_last_phase < _period_start_phase && _period_start_phase <= phase) ||
-      (phase <= _period_start_phase && _period_start_phase < _last_phase);
+    _time_from_last_sample += sample_time;
 
-    if (period_end) {
-      _division_period = _period_phase_length / _period;
-      _period = 0.f;
-      _period_phase_length = 0.f;
-      _period_start_phase = phase;
-      printf("---- new period estimate: %fs\n", _division_period);
-    } else {
-      _period += sample_time;
-
-      if (0.f < d_phase) {
-        _period_phase_length += d_phase;
+    if (_slope_estimator_divider.process()) {
+      float abs_change = fabs(_offset_from_last_sample);
+      if (abs_change != 0) {
+        _phase_period_estimate = _time_from_last_sample / abs_change;
+        // printf("phase period estimate: %fs\n", _phase_period_estimate);
       }
+
+      _offset_from_last_sample = 0;
+      _time_from_last_sample = 0;
     }
 
     _last_phase = phase;
 
-    if (d_phase < -0.95) {
-      return PhaseFlip::FORWARD;
-    } else if (.95 < d_phase) {
-      return PhaseFlip::BACKWARD;
-    } else {
-      return PhaseFlip::NONE;
-    }
+    return phase_flip_type;
   }
 };
 

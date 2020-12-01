@@ -2,23 +2,23 @@
 
 using namespace myrisa::dsp::gko;
 
-inline void initializePhaseOscillator(myrisa::dsp::PhaseOscillator oscillator, myrisa::dsp::PhaseAnalyzer analyzer, bool use_ext_phase, int last_recording_length) {
-  assert(!oscillator.isSet());
-  if (use_ext_phase && analyzer.getDivisionPeriod() != 0) {
-    oscillator.setFrequency(1 / analyzer.getDivisionPeriod());
-  } else {
-    oscillator.setFrequency(1 / last_recording_length);
-  }
-}
-
 inline void Engine::endManifestation() {
     assert(_manifestation != nullptr);
     assert(_manifestation->length != 0.f);
     assert(_manifestation->signal->size() != 0);
 
+    float recording_time = _manifestation->signal->size() * _sample_time;
+
+    printf("Manifest De-Activate\n");
+    printf("-- Manifestation start %f length %f size %d recording time %fs loop %d samples_per_beat %d\n", _manifestation->start, _manifestation->length, _manifestation->signal->size(), recording_time, _manifestation->loop, _manifestation->samples_per_beat);
+
     if (!_phase_oscillator.isSet()) {
-      int recording_length = _manifestation->signal->size() * _sample_time;
-      initializePhaseOscillator(_phase_oscillator, _phase_analyzer, _use_ext_phase, recording_length);
+      if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
+        _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
+      } else {
+        _phase_oscillator.setFrequency(1 / recording_time);
+      }
+      printf("-- phase oscillator set with frequency: %f\n", _phase_oscillator.getFrequency());
     }
 
     _timeline.layers.push_back(_manifestation);
@@ -30,16 +30,19 @@ void Engine::beginManifestation() {
   assert(_manifest.active);
   assert(_manifestation == nullptr);
 
-  float length = 0.f;
-  if (_manifest.mode == Manifest::Mode::DUB) {
-    if (0 < _manifest.selected_layers.size()) {
-      length = _timeline.getLengthOfLayers(_manifest.selected_layers);
-    } else {
-      length = 1.f;
-    }
+  float length = 1.f;
+  if (_manifest.mode == Manifest::Mode::DUB && 0 < _manifest.selected_layers.size()) {
+    length = _timeline.getLengthOfLayers(_manifest.selected_layers);
   }
 
-  _manifestation = new Layer(_time, length, _manifest.selected_layers);
+  float start_time;
+  if (_manifest.mode == Manifest::Mode::EXTEND) {
+    start_time = std::round(_time);
+  } else {
+    start_time = std::floor(_time);
+  }
+
+  _manifestation = new Layer(start_time, length, _manifest.selected_layers);
 
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   if (phase_defined) {
@@ -49,14 +52,15 @@ void Engine::beginManifestation() {
     } else if (_phase_oscillator.isSet()) {
       phase_period = 1 / _phase_oscillator.getFrequency();
     }
-    int samples_per_beat = floor(phase_period / _sample_time);
-    _manifestation->signal->resize(samples_per_beat * length);
-    _manifestation->manifestation_strength->resize(samples_per_beat * length);
+    _manifestation->samples_per_beat = floor(phase_period / _sample_time);
+    _manifestation->resizeToLength();
   }
 
   if (_manifest.time_frame != TimeFrame::TIMELINE) {
     _manifestation->loop = true;
   }
+
+  printf("-- Manifestation start %f initial length %f loop %d samples per beat %d\n", _manifestation->start, _manifestation->length, _manifestation->loop, _manifestation->samples_per_beat);
 }
 
 void Engine::setManifestStrength(float strength) {
@@ -71,7 +75,6 @@ void Engine::setManifestStrength(float strength) {
     _manifest.selected_layers = _selected_layers;
     beginManifestation();
   } else if (manifest_deactivate) {
-    printf("Manifest De-Activate\n");
     _manifest.active = false;
     endManifestation();
   }

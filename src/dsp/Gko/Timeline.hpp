@@ -40,7 +40,7 @@ struct Timeline {
     // return rendered_timeline->readSignal(time); // TODO
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
-      if (layers[i]->activeAtTime(time)) {
+      if (layers[i]->readableAtTime(time)) {
         float attenuation = getLayerAttenuation(time, i);
         signal_out += layers[i]->readSignal(time) * (1.f - attenuation);
       }

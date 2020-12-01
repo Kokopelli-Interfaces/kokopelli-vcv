@@ -3,12 +3,26 @@
 using namespace myrisa::dsp::gko;
 
 inline void Engine::handlePhaseFlip() {
-  if (_manifest.active && _manifest.mode == Manifest::Mode::DUB) {
+  bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
+  assert(phase_defined);
+
+
+  if (_manifest.active) {
+    assert(_manifestation != nullptr);
+    assert(_manifestation->samples_per_beat != 0);
+
     bool reached_manifestation_end = _manifestation->start + _manifestation->length <= _time;
     if (reached_manifestation_end) {
-      printf("END Manifest via DUB\n");
+      if (_manifest.mode == Manifest::Mode::DUB) {
+      // printf("END Manifest via DUB\n");
       // printf("-- Layer start: %f length %ld loop %b rec_size: %l\n", _manifestation->start, _manifestation->length, _manifestation->loop, _manifestation->signal->size());
-      _timeline.layers.push_back(_manifestation);
+        // endManifestation();
+        // beginManifestation();
+      } else if (_manifest.mode == Manifest::Mode::EXTEND) {
+        _manifestation->length = _manifestation->length + 1.f;
+        _manifestation->resizeToLength();
+        // TODO set start pos further back if reverse
+      }
     }
   }
 

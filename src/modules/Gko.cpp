@@ -96,23 +96,30 @@ void Gko::processAlways(const ProcessArgs &args) {
 }
 
 void Gko::modulateChannel(int channel_index) {
-  myrisa::dsp::gko::Engine *e = _engines[channel_index];
+  if (baseConnected()) {
+    myrisa::dsp::gko::Engine *e = _engines[channel_index];
+    float manifest_strength = params[MANIFEST_PARAM].getValue();
+    if (inputs[MANIFEST_INPUT].isConnected()) {
+      float manifest_strength_port = inputs[MANIFEST_INPUT].getPolyVoltage(channel_index) / 10;
+      manifest_strength = rack::clamp(manifest_strength_port + manifest_strength, 0.f, 1.0f);
+    }
+    // taking to the strength of 3 gives a more intuitive curve
+    manifest_strength = rack::clamp(pow(manifest_strength, 3), 0.f, 1.0f);
+    e->setManifestStrength(manifest_strength);
 
-  float manifest_strength = params[MANIFEST_PARAM].getValue();
-  if (inputs[MANIFEST_INPUT].isConnected()) {
-    float manifest_strength_port = inputs[MANIFEST_INPUT].getPolyVoltage(channel_index) / 10;
-    manifest_strength = rack::clamp(manifest_strength_port + manifest_strength, 0.f, 1.0f);
+    e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
+
+    // TODO have knob, now it just selects all layers
+    std::vector<int> selected_layers_idx;
+    selected_layers_idx.resize(e->_timeline.layers.size());
+    std::iota(std::begin(selected_layers_idx), std::end(selected_layers_idx), 0);
+    e->_manifest.selected_layers = selected_layers_idx;
   }
-  // taking to the strength of 3 gives a more intuitive curve
-  manifest_strength = rack::clamp(pow(manifest_strength, 3), 0.f, 1.0f);
-  e->setManifestStrength(manifest_strength);
-
-  e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 }
 
-// TODO based off max
+// TODO base off max of Gko & sig
 int Gko::channels() {
-  if (baseConnected()) {
+  if (baseConnected() && _from_signal) {
     int input_channels = _from_signal->channels;
     if (_channels < input_channels) {
       return input_channels;
@@ -129,13 +136,21 @@ void Gko::processChannel(const ProcessArgs& args, int channel_index) {
 
   myrisa::dsp::gko::Engine *e = _engines[channel_index];
 
-  e->_ext_phase = rack::clamp(inputs[PHASE_INPUT].getPolyVoltage(channel_index) / 10, 0.f, 1.0f);
+  if (inputs[PHASE_INPUT].isConnected()) {
+    e->_ext_phase = rack::clamp(inputs[PHASE_INPUT].getPolyVoltage(channel_index) / 10, 0.f, 1.0f);
+  }
+
+  if (outputs[PHASE_OUTPUT].isConnected()) {
+    float phase = myrisa::dsp::gko::splitBeatAndPhase(e->_time).second;
+    outputs[PHASE_OUTPUT].setVoltage(phase * 10, channel_index);
+  }
+
   e->_manifest.in = _from_signal->signal[channel_index];
   e->step();
   _to_signal->signal[channel_index] = e->read();
 }
 
-void Gko::setLights(const ProcessArgs &args) {
+void Gko::updateLights(const ProcessArgs &args) {
   // LIGHT + 0 = RED
   // LIGHT + 1 = GREEN
   // LIGHT + 2 = BLUE
@@ -151,7 +166,7 @@ void Gko::setLights(const ProcessArgs &args) {
 
   TimeFrame displayed_time_frame = _engines[0]->_time_frame;
   Manifest displayed_manifest = _engines[0]->_manifest;
-  float displayed_phase = _engines[0]->_time - (int)_engines[0]->_time;
+  float displayed_phase = myrisa::dsp::gko::splitBeatAndPhase(_engines[0]->_time).second;
 
   bool manifest_active = false;
   for (int c = 0; c < channels(); c++) {
@@ -236,7 +251,7 @@ void Gko::setLights(const ProcessArgs &args) {
 
 void Gko::postProcessAlways(const ProcessArgs &args) {
   if (_light_divider.process()) {
-    setLights(args);
+    updateLights(args);
   }
 }
 
@@ -312,7 +327,7 @@ struct GkoWidget : ModuleWidget {
 		addParam(createParam<Rogan1HPSWhite>(mm2px(Vec(5.333, 21.157)), module, Gko::SELECT_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Gko::SELECT_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Gko::SELECT_FUNCTION_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 50.315)), module, Gko::TIME_FRAME_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Gko::TIME_FRAME_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::MANIFEST_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::MANIFEST_TIME_FRAME_PARAM));
 		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Gko::MANIFEST_PARAM));

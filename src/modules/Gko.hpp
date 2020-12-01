@@ -55,7 +55,7 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   void processAlways(const ProcessArgs &args) override;
   void processChannel(const ProcessArgs &args, int channel) override;
   void postProcessAlways(const ProcessArgs &args) override;
-  void setLights(const ProcessArgs &args);
+  void updateLights(const ProcessArgs &args);
 
 private:
   void processButtons();

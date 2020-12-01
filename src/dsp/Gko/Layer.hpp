@@ -23,6 +23,8 @@ struct Layer {
   Recording *manifestation_strength;
   std::vector<int> target_layers_idx;
 
+  int samples_per_beat = 0;
+
   // TODO optinoal samples_per_beat?
   inline Layer(float start, float length, std::vector<int> target_layers_idx) {
     this->start = start;
@@ -43,20 +45,30 @@ struct Layer {
     manifestation_strength->pushBack(manifestation_strength_sample);
   }
 
-  inline bool activeAtTime(float time) {
+  inline void resizeToLength() {
+    int new_size = length * samples_per_beat;
+    signal->resize(new_size);
+    manifestation_strength->resize(new_size);
+  }
+
+  inline bool readableAtTime(float time) {
     return loop ?
       start <= time && time <= start + length :
       start <= time;
   }
 
+  inline bool writableAtTime(float time) {
+    return start <= time && time <= start + length;
+  }
+
   inline float timeToRecordingPhase(float time) {
-    assert(activeAtTime(time));
+    assert(readableAtTime(time));
     float time_in_recording = std::fmod(time - start, length);
     return time_in_recording / length;
   }
 
   inline float readSignal(float time) {
-    if (!activeAtTime(time)) {
+    if (!readableAtTime(time)) {
       return 0.f;
     }
 
@@ -65,7 +77,7 @@ struct Layer {
 
 
   inline float readManifestationStrength(float time) {
-    if (!activeAtTime(time)) {
+    if (!readableAtTime(time)) {
       return 0.f;
     }
 
@@ -73,7 +85,7 @@ struct Layer {
   }
 
   inline void write(float time, float signal_sample, float manifestation_strength_sample) {
-    assert(start <= time && time <= start + length);
+    assert(writableAtTime(time));
     assert(0 < signal->size());
     assert(0 < manifestation_strength->size());
 

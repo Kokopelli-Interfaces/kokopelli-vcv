@@ -46,13 +46,12 @@ void Engine::beginManifestation() {
 
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   if (phase_defined) {
-    float phase_period;
     if (_use_ext_phase) {
-      phase_period = _phase_analyzer.getDivisionPeriod();
+      _manifestation->samples_per_beat = _phase_analyzer.getSamplesPerDivision();
     } else if (_phase_oscillator.isSet()) {
-      phase_period = 1 / _phase_oscillator.getFrequency();
+      float beat_period = 1 / _phase_oscillator.getFrequency();
+      _manifestation->samples_per_beat = floor(beat_period / _sample_time);
     }
-    _manifestation->samples_per_beat = floor(phase_period / _sample_time);
     _manifestation->resizeToLength();
   }
 

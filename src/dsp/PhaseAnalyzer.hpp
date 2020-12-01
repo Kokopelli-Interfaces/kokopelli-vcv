@@ -16,6 +16,7 @@ struct PhaseAnalyzer {
   rack::dsp::ClockDivider _slope_estimator_divider;
   float _offset_from_last_sample = 0.0f;
   float _time_from_last_sample = 0.f;
+  int _samples_per_division = 1;
 
   enum PhaseFlip {
     FORWARD,
@@ -29,6 +30,10 @@ struct PhaseAnalyzer {
 
   inline float getDivisionPeriod() {
     return _phase_period_estimate;
+  }
+
+  inline float getSamplesPerDivision() {
+    return _samples_per_division;
   }
 
   inline PhaseFlip process(float phase, float sample_time) {
@@ -61,7 +66,8 @@ struct PhaseAnalyzer {
     if (_slope_estimator_divider.process()) {
       float abs_change = fabs(_offset_from_last_sample);
       if (abs_change != 0) {
-        _phase_period_estimate = _time_from_last_sample / abs_change;
+        float division_period_estimate = _time_from_last_sample / abs_change;
+        _samples_per_division = floor(division_period_estimate / sample_time);
         // printf("phase period estimate: %fs\n", _phase_period_estimate);
       }
 

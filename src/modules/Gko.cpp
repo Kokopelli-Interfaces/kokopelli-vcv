@@ -6,7 +6,7 @@ Gko::Gko() {
   configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "Select");
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
-  configParam(READ_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Time Frame");
+  configParam(READ_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Read Time Frame");
   configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
   configParam(RECORD_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Record Time Frame");
   configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");

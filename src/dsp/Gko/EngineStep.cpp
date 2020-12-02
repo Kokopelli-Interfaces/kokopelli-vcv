@@ -4,10 +4,6 @@ using namespace myrisa::dsp::gko;
 using namespace myrisa::dsp;
 
 inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
-  if (flip == PhaseAnalyzer::PhaseFlip::NONE) {
-    return;
-  }
-
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   assert(phase_defined);
 
@@ -32,11 +28,9 @@ inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
 }
 
 inline PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
-  float new_phase;
+  float new_phase = _phase_oscillator.step(_sample_time);
   if (_use_ext_phase) {
     new_phase = _ext_phase;
-  } else {
-    new_phase = _phase_oscillator.step(_sample_time);
   }
 
   float beat = _time - rack::math::eucMod(_time, 1.0f);
@@ -56,7 +50,11 @@ inline PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
 void Engine::step() {
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   if (phase_defined) {
-    handlePhaseFlip(advanceTimelinePosition());
+    PhaseAnalyzer::PhaseFlip phase_flip = advanceTimelinePosition();
+
+    if (phase_flip != PhaseAnalyzer::PhaseFlip::NONE) {
+      handlePhaseFlip(phase_flip);
+    }
   }
 
   if (_record.active) {

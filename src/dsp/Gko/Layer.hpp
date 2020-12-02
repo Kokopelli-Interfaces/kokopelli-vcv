@@ -63,8 +63,9 @@ struct Layer {
 
   inline float timeToRecordingPhase(float time) {
     assert(readableAtTime(time));
-    float time_in_recording = std::fmod(time - start, length);
-    return time_in_recording / length;
+    float phase = rack::math::eucMod(time, 1.0f);
+    float beat_in_recording = (int)(time - start) % (int)length;
+    return (beat_in_recording + phase) / length;
   }
 
   inline float readSignal(float time) {
@@ -74,7 +75,6 @@ struct Layer {
 
     return signal->read(timeToRecordingPhase(time));
   }
-
 
   inline float readRecordingStrength(float time) {
     if (!readableAtTime(time)) {

@@ -14,20 +14,20 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
     TIME_FRAME_PARAM,
-    MANIFEST_TIME_FRAME_PARAM,
-    MANIFEST_MODE_PARAM,
-    MANIFEST_PARAM,
+    RECORD_TIME_FRAME_PARAM,
+    RECORD_MODE_PARAM,
+    RECORD_PARAM,
     NUM_PARAMS
   };
-  enum InputIds { SCENE_INPUT, MANIFEST_INPUT, PHASE_INPUT, NUM_INPUTS };
+  enum InputIds { SCENE_INPUT, RECORD_INPUT, PHASE_INPUT, NUM_INPUTS };
   enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
   enum LightIds {
     ENUMS(SELECT_FUNCTION_LIGHT, 3),
     ENUMS(SELECT_MODE_LIGHT, 3),
     ENUMS(TIME_FRAME_LIGHT, 3),
-    ENUMS(MANIFEST_LIGHT, 3),
-    ENUMS(MANIFEST_MODE_LIGHT, 3),
-    ENUMS(MANIFEST_TIME_FRAME_LIGHT, 3),
+    ENUMS(RECORD_LIGHT, 3),
+    ENUMS(RECORD_MODE_LIGHT, 3),
+    ENUMS(RECORD_TIME_FRAME_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
@@ -37,8 +37,8 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
   float _sampleTime = 1.0f;
 
-  myrisa::dsp::LongPressButton _manifest_mode_button;
-  myrisa::dsp::LongPressButton _manifest_time_frame_button;
+  myrisa::dsp::LongPressButton _record_mode_button;
+  myrisa::dsp::LongPressButton _record_time_frame_button;
   myrisa::dsp::LongPressButton _time_frame_button;
 
   std::array<myrisa::dsp::gko::Engine*, maxChannels> _engines;

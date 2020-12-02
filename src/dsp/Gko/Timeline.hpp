@@ -22,11 +22,10 @@ struct Timeline {
     for (auto layer : layers) {
       for (auto target_layer_i : layer->target_layers_idx) {
         if (target_layer_i == layer_i) {
-          attenuation += layer->readManifestationStrength(time);
+          attenuation += layer->readRecordingStrength(time);
           break;
         }
       }
-
 
       if (1.f <= attenuation)  {
         return 1.f;
@@ -41,8 +40,9 @@ struct Timeline {
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
       if (layers[i]->readableAtTime(time)) {
-        float attenuation = getLayerAttenuation(time, i);
-        signal_out += layers[i]->readSignal(time) * (1.f - attenuation);
+        // float attenuation = getLayerAttenuation(time, i);
+        // signal_out += layers[i]->readSignal(time) * (1.f - attenuation);
+        signal_out += layers[i]->readSignal(time);
       }
     }
     return signal_out;

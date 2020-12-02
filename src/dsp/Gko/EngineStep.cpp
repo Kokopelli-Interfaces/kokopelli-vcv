@@ -7,29 +7,28 @@ inline void Engine::handlePhaseFlip() {
   assert(phase_defined);
 
 
-  if (_manifest.active) {
-    assert(_manifestation != nullptr);
-    assert(_manifestation->samples_per_beat != 0);
+  if (_record.active) {
+    assert(_recording != nullptr);
+    assert(_recording->samples_per_beat != 0);
 
-    bool reached_manifestation_end = _manifestation->start + _manifestation->length <= _time;
-    if (reached_manifestation_end) {
-      if (_manifest.mode == Manifest::Mode::DUB) {
-      // printf("END Manifest via DUB\n");
-      // printf("-- Layer start: %f length %ld loop %b rec_size: %l\n", _manifestation->start, _manifestation->length, _manifestation->loop, _manifestation->signal->size());
-        // endManifestation();
-        // beginManifestation();
-      } else if (_manifest.mode == Manifest::Mode::EXTEND) {
-        _manifestation->length = _manifestation->length + 1.f;
-        _manifestation->resizeToLength();
+    bool reached_recording_end = _recording->start + _recording->length <= _time;
+    if (reached_recording_end) {
+      if (_record.mode == RecordParams::Mode::DUB) {
+      printf("DUB END\n");
+        endRecording();
+        beginRecording();
+      } else if (_record.mode == RecordParams::Mode::EXTEND) {
+        _recording->length = _recording->length + 1.f;
+        _recording->resizeToLength();
         // TODO set start pos further back if reverse
       }
     }
   }
 
-    // } else if (_mode == Manifest::Mode::EXTEND) {
+    // } else if (_mode == RecordParams::Mode::EXTEND) {
       // while (start_beat + n_beats <= beat) {
       //   buffer->resize(buffer->size() + samples_per_beat);
-      //   manifestation_strength->resize(manifestation_strength->size() + samples_per_beat);
+      //   recording_strength->resize(recording_strength->size() + samples_per_beat);
       //   n_beats++;
       // }
   //}
@@ -67,7 +66,7 @@ void Engine::step() {
     }
   }
 
-  if (_manifest.active) {
-    manifest();
+  if (_record.active) {
+    record();
   }
 }

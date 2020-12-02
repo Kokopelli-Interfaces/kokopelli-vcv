@@ -20,7 +20,7 @@ struct Recording {
 
   /* read only */
 
-  enum Type { MANIFESTATION_STRENGTH, AUDIO, PARAM, CV, GATE, VOCT, VEL };
+  enum Type { RECORDING_STRENGTH, AUDIO, PARAM, CV, GATE, VOCT, VEL };
   Type type;
   std::vector<float> buffer;
   rack::dsp::ClockDivider write_divider;
@@ -34,7 +34,7 @@ struct Recording {
     case Type::GATE: case Type::VOCT: case Type::VEL:
       write_divider.setDivision(100); // approx every ~.25ms
       break;
-    case Type::PARAM: case Type::MANIFESTATION_STRENGTH:
+    case Type::PARAM: case Type::RECORDING_STRENGTH:
       write_divider.setDivision(2000); // approx every ~5ms
       break;
     }
@@ -123,6 +123,7 @@ struct Recording {
     }
 
     float buffer_position = size * phase;
+
     int min_samples_for_interpolation = 4;
     if (size < min_samples_for_interpolation) {
       return buffer[floor(buffer_position)];
@@ -130,8 +131,9 @@ struct Recording {
 
     if (type == Type::AUDIO) {
       // float interpolated_sample = InterpolateHermite(buffer.data(),
-      float interpolated_sample = interpolateBSpline(buffer.data(), buffer_position);
-      return crossfadeSample(interpolated_sample, phase);
+      return interpolateBSpline(buffer.data(), buffer_position);
+      // float interpolated_sample = interpolateBSpline(buffer.data(), buffer_position);
+      // return crossfadeSample(interpolated_sample, phase);
     } else if (type == Type::CV) {
       return interpolateLinearD(buffer.data(), buffer_position);
     } else if (type == Type::PARAM) {

@@ -24,8 +24,8 @@ struct Engine {
 
   /* read only */
 
-  Manifest _manifest;
-  Layer *_manifestation = nullptr;
+  RecordParams _record;
+  Layer *_recording = nullptr;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
@@ -35,19 +35,19 @@ struct Engine {
   Timeline _timeline;
   float _time = 0.f;
 
-  const float _manifestActiveThreshold = 0.0001f;
+  const float _recordActiveThreshold = 0.0001f;
 
   void step();
   float read();
 
-  void setManifestMode(Manifest::Mode mode);
-  void setManifestTimeFrame(TimeFrame time_frame);
-  void setManifestStrength(float strength);
+  void setRecordMode(RecordParams::Mode mode);
+  void setRecordTimeFrame(TimeFrame time_frame);
+  void setRecordStrength(float strength);
 
 private:
-  void manifest();
-  inline void beginManifestation();
-  inline void endManifestation();
+  void record();
+  void beginRecording();
+  void endRecording();
   inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
   inline void handlePhaseFlip();
 };

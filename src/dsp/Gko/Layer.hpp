@@ -20,7 +20,7 @@ struct Layer {
   // std::vector<Recording::Type> types;
 
   Recording *signal;
-  Recording *manifestation_strength;
+  Recording *recording_strength;
   std::vector<int> target_layers_idx;
 
   int samples_per_beat = 0;
@@ -32,23 +32,23 @@ struct Layer {
     this->target_layers_idx = target_layers_idx;
 
     signal = new Recording(Recording::Type::AUDIO);
-    manifestation_strength = new Recording(Recording::Type::PARAM);
+    recording_strength = new Recording(Recording::Type::PARAM);
   }
 
   inline ~Layer() {
     delete signal;
-    delete manifestation_strength;
+    delete recording_strength;
   }
 
-  inline void pushBack(float signal_sample, float manifestation_strength_sample) {
+  inline void pushBack(float signal_sample, float recording_strength_sample) {
     signal->pushBack(signal_sample);
-    manifestation_strength->pushBack(manifestation_strength_sample);
+    recording_strength->pushBack(recording_strength_sample);
   }
 
   inline void resizeToLength() {
     int new_size = length * samples_per_beat;
     signal->resize(new_size);
-    manifestation_strength->resize(new_size);
+    recording_strength->resize(new_size);
   }
 
   inline bool readableAtTime(float time) {
@@ -76,21 +76,21 @@ struct Layer {
   }
 
 
-  inline float readManifestationStrength(float time) {
+  inline float readRecordingStrength(float time) {
     if (!readableAtTime(time)) {
       return 0.f;
     }
 
-    return manifestation_strength->read(timeToRecordingPhase(time));
+    return recording_strength->read(timeToRecordingPhase(time));
   }
 
-  inline void write(float time, float signal_sample, float manifestation_strength_sample) {
+  inline void write(float time, float signal_sample, float recording_strength_sample) {
     assert(writableAtTime(time));
     assert(0 < signal->size());
-    assert(0 < manifestation_strength->size());
+    assert(0 < recording_strength->size());
 
     signal->write(timeToRecordingPhase(time), signal_sample);
-    manifestation_strength->write(timeToRecordingPhase(time), manifestation_strength_sample);
+    recording_strength->write(timeToRecordingPhase(time), recording_strength_sample);
   }
 };
 

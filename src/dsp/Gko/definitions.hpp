@@ -6,9 +6,9 @@ enum TimeFrame { TIMELINE, SELECTED_LAYERS, ACTIVE_LAYER };
 
 /**
   At each step, what the Engine does to it's Timeline is a function of these parameters.
-  See the description of Manifest in the README for behaviour.
+  See the description of Record in the README for behaviour.
 */
-struct Manifest {
+struct RecordParams {
   enum Mode {EXTEND, DUB, REPLACE};
 
   float in = 0.f;

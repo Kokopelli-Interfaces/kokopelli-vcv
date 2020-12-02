@@ -6,16 +6,16 @@ Gko::Gko() {
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
   configParam(TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Time Frame");
-  configParam(MANIFEST_MODE_PARAM, 0.f, 1.f, 0.f, "Manifest Mode");
-  configParam(MANIFEST_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Manifest Time Frame");
-  configParam(MANIFEST_PARAM, 0.f, 1.f, 0.f, "Manifest Strength");
+  configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
+  configParam(RECORD_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Record Time Frame");
+  configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
 
-  _manifest_mode_button.param = &params[MANIFEST_MODE_PARAM];
-  _manifest_time_frame_button.param = &params[MANIFEST_TIME_FRAME_PARAM];
+  _record_mode_button.param = &params[RECORD_MODE_PARAM];
+  _record_time_frame_button.param = &params[RECORD_TIME_FRAME_PARAM];
   _time_frame_button.param = &params[TIME_FRAME_PARAM];
 }
 
@@ -29,38 +29,38 @@ void Gko::sampleRateChange() {
 void Gko::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
-  myrisa::dsp::LongPressButton::Event _manifest_mode_event = _manifest_mode_button.process(sampleTime);
+  myrisa::dsp::LongPressButton::Event _record_mode_event = _record_mode_button.process(sampleTime);
   for (int c = 0; c < channels(); c++) {
-    switch (_manifest_mode_event) {
+    switch (_record_mode_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_manifest.mode == Manifest::Mode::DUB) {
-        _engines[c]->setManifestMode(Manifest::Mode::EXTEND);
+      if (_engines[c]->_record.mode == RecordParams::Mode::DUB) {
+        _engines[c]->setRecordMode(RecordParams::Mode::EXTEND);
       } else {
-        _engines[c]->setManifestMode(Manifest::Mode::DUB);
+        _engines[c]->setRecordMode(RecordParams::Mode::DUB);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      _engines[c]->setManifestMode(Manifest::Mode::REPLACE);
+      _engines[c]->setRecordMode(RecordParams::Mode::REPLACE);
       break;
     }
   }
 
-  myrisa::dsp::LongPressButton::Event _manifest_time_frame_event = _manifest_time_frame_button.process(sampleTime);
+  myrisa::dsp::LongPressButton::Event _record_time_frame_event = _record_time_frame_button.process(sampleTime);
   for (int c = 0; c < channels(); c++) {
-    switch (_manifest_time_frame_event) {
+    switch (_record_time_frame_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_manifest.time_frame == TimeFrame::SELECTED_LAYERS) {
-        _engines[c]->setManifestTimeFrame(TimeFrame::TIMELINE);
+      if (_engines[c]->_record.time_frame == TimeFrame::SELECTED_LAYERS) {
+        _engines[c]->setRecordTimeFrame(TimeFrame::TIMELINE);
       } else {
-        _engines[c]->setManifestTimeFrame(TimeFrame::SELECTED_LAYERS);
+        _engines[c]->setRecordTimeFrame(TimeFrame::SELECTED_LAYERS);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-        _engines[c]->setManifestTimeFrame(TimeFrame::ACTIVE_LAYER);
+        _engines[c]->setRecordTimeFrame(TimeFrame::ACTIVE_LAYER);
       break;
     }
   }
@@ -98,14 +98,14 @@ void Gko::processAlways(const ProcessArgs &args) {
 void Gko::modulateChannel(int channel_index) {
   if (baseConnected()) {
     myrisa::dsp::gko::Engine *e = _engines[channel_index];
-    float manifest_strength = params[MANIFEST_PARAM].getValue();
-    if (inputs[MANIFEST_INPUT].isConnected()) {
-      float manifest_strength_port = inputs[MANIFEST_INPUT].getPolyVoltage(channel_index) / 10;
-      manifest_strength = rack::clamp(manifest_strength_port + manifest_strength, 0.f, 1.0f);
+    float record_strength = params[RECORD_PARAM].getValue();
+    if (inputs[RECORD_INPUT].isConnected()) {
+      float record_strength_port = inputs[RECORD_INPUT].getPolyVoltage(channel_index) / 10;
+      record_strength = rack::clamp(record_strength_port + record_strength, 0.f, 1.0f);
     }
     // taking to the strength of 3 gives a more intuitive curve
-    manifest_strength = rack::clamp(pow(manifest_strength, 3), 0.f, 1.0f);
-    e->setManifestStrength(manifest_strength);
+    record_strength = rack::clamp(pow(record_strength, 3), 0.f, 1.0f);
+    e->setRecordStrength(record_strength);
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
@@ -113,7 +113,7 @@ void Gko::modulateChannel(int channel_index) {
     std::vector<int> selected_layers_idx;
     selected_layers_idx.resize(e->_timeline.layers.size());
     std::iota(std::begin(selected_layers_idx), std::end(selected_layers_idx), 0);
-    e->_manifest.selected_layers = selected_layers_idx;
+    e->_record.selected_layers = selected_layers_idx;
   }
 }
 
@@ -145,7 +145,7 @@ void Gko::processChannel(const ProcessArgs& args, int channel_index) {
     outputs[PHASE_OUTPUT].setVoltage(phase * 10, channel_index);
   }
 
-  e->_manifest.in = _from_signal->signal[channel_index];
+  e->_record.in = _from_signal->signal[channel_index];
   e->step();
   _to_signal->signal[channel_index] = e->read();
 }
@@ -162,20 +162,20 @@ void Gko::updateLights(const ProcessArgs &args) {
   float signal_in_sum = 0.f;
   float signal_out_sum = 0.f;
 
-  bool poly_manifest = (inputs[MANIFEST_INPUT].isConnected() && 1 < inputs[MANIFEST_INPUT].getChannels());
+  bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
   TimeFrame displayed_time_frame = _engines[0]->_time_frame;
-  Manifest displayed_manifest = _engines[0]->_manifest;
+  RecordParams displayed_record = _engines[0]->_record;
   float displayed_phase = myrisa::dsp::gko::splitBeatAndPhase(_engines[0]->_time).second;
 
-  bool manifest_active = false;
+  bool record_active = false;
   for (int c = 0; c < channels(); c++) {
     signal_in_sum += _from_signal->signal[c];
     signal_out_sum += _to_signal->signal[c];
-    manifest_active = !manifest_active ? _engines[c]->_manifest.active : manifest_active;
-    if (manifest_active) {
+    record_active = !record_active ? _engines[c]->_record.active : record_active;
+    if (record_active) {
       displayed_time_frame = _engines[c]->_time_frame;
-      displayed_manifest = _engines[c]->_manifest;
+      displayed_record = _engines[c]->_record;
       displayed_phase = myrisa::dsp::gko::splitBeatAndPhase(_engines[c]->_time).second;
     }
   }
@@ -184,14 +184,14 @@ void Gko::updateLights(const ProcessArgs &args) {
   signal_out_sum = rack::clamp(signal_out_sum, 0.f, 1.f);
 
   // TODO make me show the layer output that is selected, not all
-  lights[MANIFEST_LIGHT + 1].setSmoothBrightness(signal_out_sum, _sampleTime * _light_divider.getDivision());
+  lights[RECORD_LIGHT + 1].setSmoothBrightness(signal_out_sum, _sampleTime * _light_divider.getDivision());
 
-  if (manifest_active) {
-    int light_colour = poly_manifest ? 2 : 0;
-    lights[MANIFEST_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
+  if (record_active) {
+    int light_colour = poly_record ? 2 : 0;
+    lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
   } else {
-    lights[MANIFEST_LIGHT + 0].value = 0.f;
-    lights[MANIFEST_LIGHT + 2].value = 0.f;
+    lights[RECORD_LIGHT + 0].value = 0.f;
+    lights[RECORD_LIGHT + 2].value = 0.f;
   }
 
   bool poly_phase = (inputs[PHASE_INPUT].isConnected() && 1 < inputs[PHASE_INPUT].getChannels());
@@ -203,33 +203,33 @@ void Gko::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  switch (displayed_manifest.mode) {
-  case Manifest::Mode::EXTEND:
-    lights[MANIFEST_MODE_LIGHT + 0].value = 1.0;
-    lights[MANIFEST_MODE_LIGHT + 1].value = 0.0;
+  switch (displayed_record.mode) {
+  case RecordParams::Mode::EXTEND:
+    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     break;
-  case Manifest::Mode::DUB:
-    lights[MANIFEST_MODE_LIGHT + 0].value = 1.0;
-    lights[MANIFEST_MODE_LIGHT + 1].value = 1.0;
+  case RecordParams::Mode::DUB:
+    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     break;
-  case Manifest::Mode::REPLACE:
-    lights[MANIFEST_MODE_LIGHT + 0].value = 0.0;
-    lights[MANIFEST_MODE_LIGHT + 1].value = 1.0;
+  case RecordParams::Mode::REPLACE:
+    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
+    lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     break;
   }
 
-  switch (displayed_manifest.time_frame) {
+  switch (displayed_record.time_frame) {
   case TimeFrame::TIMELINE:
-    lights[MANIFEST_TIME_FRAME_LIGHT + 0].value = 1.0;
-    lights[MANIFEST_TIME_FRAME_LIGHT + 1].value = 0.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
   case TimeFrame::SELECTED_LAYERS:
-    lights[MANIFEST_TIME_FRAME_LIGHT + 0].value = 1.0;
-    lights[MANIFEST_TIME_FRAME_LIGHT + 1].value = 1.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   case TimeFrame::ACTIVE_LAYER:
-    lights[MANIFEST_TIME_FRAME_LIGHT + 0].value = 0.0;
-    lights[MANIFEST_TIME_FRAME_LIGHT + 1].value = 1.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }
 
@@ -328,12 +328,12 @@ struct GkoWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Gko::SELECT_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Gko::SELECT_FUNCTION_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Gko::TIME_FRAME_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::MANIFEST_MODE_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::MANIFEST_TIME_FRAME_PARAM));
-		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Gko::MANIFEST_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::RECORD_MODE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::RECORD_TIME_FRAME_PARAM));
+		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Gko::RECORD_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 37.132)), module, Gko::SCENE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Gko::MANIFEST_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Gko::RECORD_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 108.114)), module, Gko::PHASE_INPUT));
 
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Gko::PHASE_OUTPUT));
@@ -341,9 +341,9 @@ struct GkoWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Gko::SELECT_FUNCTION_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.239, 34.928)), module, Gko::SELECT_MODE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Gko::TIME_FRAME_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 62.77)), module, Gko::MANIFEST_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 66.901)), module, Gko::MANIFEST_MODE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 66.901)), module, Gko::MANIFEST_TIME_FRAME_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 62.77)), module, Gko::RECORD_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 66.901)), module, Gko::RECORD_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 66.901)), module, Gko::RECORD_TIME_FRAME_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Gko::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));

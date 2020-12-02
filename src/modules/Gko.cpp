@@ -142,9 +142,7 @@ void Gko::processChannel(const ProcessArgs& args, int channel_index) {
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    // TODO config option to output internal or actual
-    float internal_phase = e->_phase_oscillator._phase;
-    outputs[PHASE_OUTPUT].setVoltage(internal_phase * 10, channel_index);
+    outputs[PHASE_OUTPUT].setVoltage(e->_timeline_position.phase * 10, channel_index);
   }
 
   e->_record_params.in = _from_signal->signal[channel_index];

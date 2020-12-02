@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Timeline.hpp"
-#include "utils.hpp"
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "dsp/PhaseOscillator.hpp"
@@ -49,7 +48,7 @@ private:
   void beginRecording();
   void endRecording();
   inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
-  inline void handlePhaseFlip();
+  inline void handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip);
 };
 
 } // namespace frame

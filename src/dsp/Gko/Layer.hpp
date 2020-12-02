@@ -53,8 +53,8 @@ struct Layer {
 
   inline bool readableAtTime(float time) {
     return loop ?
-      start <= time && time <= start + length :
-      start <= time;
+      start <= time :
+      start <= time && time <= start + length;
   }
 
   inline bool writableAtTime(float time) {

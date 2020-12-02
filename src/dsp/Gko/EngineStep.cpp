@@ -1,11 +1,15 @@
 #include "Engine.hpp"
 
 using namespace myrisa::dsp::gko;
+using namespace myrisa::dsp;
 
-inline void Engine::handlePhaseFlip() {
+inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
+  if (flip == PhaseAnalyzer::PhaseFlip::NONE) {
+    return;
+  }
+
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   assert(phase_defined);
-
 
   if (_record.active) {
     assert(_recording != nullptr);
@@ -19,22 +23,15 @@ inline void Engine::handlePhaseFlip() {
         beginRecording();
       } else if (_record.mode == RecordParams::Mode::EXTEND) {
         _recording->length = _recording->length + 1.f;
+        printf("extend recording to: %f\n", _recording->length);
         _recording->resizeToLength();
         // TODO set start pos further back if reverse
       }
     }
   }
-
-    // } else if (_mode == RecordParams::Mode::EXTEND) {
-      // while (start_beat + n_beats <= beat) {
-      //   buffer->resize(buffer->size() + samples_per_beat);
-      //   recording_strength->resize(recording_strength->size() + samples_per_beat);
-      //   n_beats++;
-      // }
-  //}
 }
 
-inline myrisa::dsp::PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
+inline PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
   float new_phase;
   if (_use_ext_phase) {
     new_phase = _ext_phase;
@@ -42,15 +39,15 @@ inline myrisa::dsp::PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
     new_phase = _phase_oscillator.step(_sample_time);
   }
 
-  std::pair<int, float> time_beat_and_phase = splitBeatAndPhase(_time);
+  float beat = _time - rack::math::eucMod(_time, 1.0f);
 
   PhaseAnalyzer::PhaseFlip phase_flip = _phase_analyzer.process(new_phase, _sample_time);
-  if (phase_flip == PhaseAnalyzer::PhaseFlip::BACKWARD && 1 <= time_beat_and_phase.first) {
-    _time = time_beat_and_phase.first + new_phase - 1;
-  } else if (phase_flip == PhaseAnalyzer::FORWARD) {
-    _time = time_beat_and_phase.first + new_phase + 1;
+  if (phase_flip == PhaseAnalyzer::PhaseFlip::BACKWARD && 1 <= beat) {
+    _time = beat + new_phase - 1.f;
+  } else if (phase_flip == PhaseAnalyzer::PhaseFlip::FORWARD) {
+    _time = beat + new_phase + 1;
   } else {
-    _time = time_beat_and_phase.first + new_phase;
+    _time = beat + new_phase;
   }
 
   return phase_flip;
@@ -59,11 +56,7 @@ inline myrisa::dsp::PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
 void Engine::step() {
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   if (phase_defined) {
-    PhaseAnalyzer::PhaseFlip phase_flip = advanceTimelinePosition();
-
-    if (phase_flip != PhaseAnalyzer::PhaseFlip::NONE) {
-      handlePhaseFlip();
-    }
+    handlePhaseFlip(advanceTimelinePosition());
   }
 
   if (_record.active) {

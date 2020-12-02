@@ -12,5 +12,7 @@ void Engine::record() {
     _recording->samples_per_beat++;
   } else if (_recording->writableAtTime(_time)) {
     _recording->write(_time, _record.in, _record.strength);
+  } else {
+    printf("Not writable \n");
   }
 }

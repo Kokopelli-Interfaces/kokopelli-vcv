@@ -113,7 +113,7 @@ void Gko::modulateChannel(int channel_index) {
     std::vector<int> selected_layers_idx;
     selected_layers_idx.resize(e->_timeline.layers.size());
     std::iota(std::begin(selected_layers_idx), std::end(selected_layers_idx), 0);
-    e->_record.selected_layers = selected_layers_idx;
+    e->_selected_layers = selected_layers_idx;
   }
 }
 
@@ -141,7 +141,7 @@ void Gko::processChannel(const ProcessArgs& args, int channel_index) {
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    float phase = myrisa::dsp::gko::splitBeatAndPhase(e->_time).second;
+    float phase = rack::math::eucMod(e->_time, 1.0f);
     outputs[PHASE_OUTPUT].setVoltage(phase * 10, channel_index);
   }
 
@@ -166,7 +166,7 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   TimeFrame displayed_time_frame = _engines[0]->_time_frame;
   RecordParams displayed_record = _engines[0]->_record;
-  float displayed_phase = myrisa::dsp::gko::splitBeatAndPhase(_engines[0]->_time).second;
+  float displayed_phase = rack::math::eucMod(_engines[0]->_time, 1.0f);
 
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
@@ -176,7 +176,7 @@ void Gko::updateLights(const ProcessArgs &args) {
     if (record_active) {
       displayed_time_frame = _engines[c]->_time_frame;
       displayed_record = _engines[c]->_record;
-      displayed_phase = myrisa::dsp::gko::splitBeatAndPhase(_engines[c]->_time).second;
+      displayed_phase = rack::math::eucMod(_engines[c]->_time, 1.0f);
     }
   }
 

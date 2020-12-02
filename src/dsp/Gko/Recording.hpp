@@ -130,14 +130,12 @@ struct Recording {
     }
 
     if (type == Type::AUDIO) {
-      // float interpolated_sample = InterpolateHermite(buffer.data(),
-      return interpolateBSpline(buffer.data(), buffer_position);
-      // float interpolated_sample = interpolateBSpline(buffer.data(), buffer_position);
-      // return crossfadeSample(interpolated_sample, phase);
+      float interpolated_sample = interpolateHermite(buffer.data(), buffer_position, buffer.size());
+      return crossfadeSample(interpolated_sample, phase);
     } else if (type == Type::CV) {
-      return interpolateLinearD(buffer.data(), buffer_position);
+      return interpolateLineard(buffer.data(), buffer_position, buffer.size());
     } else if (type == Type::PARAM) {
-      return rack::clamp(interpolateBSpline(buffer.data(), buffer_position), 0.0, 1.0);
+      return rack::clamp(interpolateBSpline(buffer.data(), buffer_position, buffer.size()), 0.0, 1.0);
     } else {
       return buffer[floor(buffer_position)];
     }

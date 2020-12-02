@@ -10,7 +10,7 @@ void Engine::endRecording() {
     float recording_time = _recording->signal->size() * _sample_time;
 
     printf("Record De-Activate\n");
-    printf("-- Recording start %f length %f size %d recording time %fs loop %d samples_per_beat %d\n", _recording->start, _recording->length, _recording->signal->size(), recording_time, _recording->loop, _recording->samples_per_beat);
+    printf("-- start %f length %f size %d recording time %fs loop %d samples_per_beat %d\n", _recording->start, _recording->length, _recording->signal->size(), recording_time, _recording->loop, _recording->samples_per_beat);
 
     if (!_phase_oscillator.isSet()) {
       if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
@@ -59,7 +59,8 @@ void Engine::beginRecording() {
     _recording->loop = true;
   }
 
-  printf("-- Recording start %f initial length %f loop %d samples per beat %d\n", _recording->start, _recording->length, _recording->loop, _recording->samples_per_beat);
+  printf("Recording Active:\n");
+  printf("-- start %f initial length %f loop %d samples per beat %d\n", _recording->start, _recording->length, _recording->loop, _recording->samples_per_beat);
 }
 
 void Engine::setRecordStrength(float strength) {
@@ -69,7 +70,6 @@ void Engine::setRecordStrength(float strength) {
   bool record_deactivate = _record.active && strength < _recordActiveThreshold ;
 
   if (record_activate) {
-    printf("Record Activate\n");
     _record.active = true;
     _record.selected_layers = _selected_layers;
     beginRecording();
@@ -82,7 +82,6 @@ void Engine::setRecordStrength(float strength) {
 void Engine::setRecordTimeFrame(TimeFrame time_frame) {
   if (_record.active) {
     assert(_recording != nullptr);
-
     if (time_frame != TimeFrame::TIMELINE) {
       _recording->loop = true;
     }

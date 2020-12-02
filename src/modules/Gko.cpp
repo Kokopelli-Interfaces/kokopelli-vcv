@@ -36,7 +36,7 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_record.mode == RecordParams::Mode::DUB) {
+      if (_engines[c]->_record_params.mode == RecordParams::Mode::DUB) {
         _engines[c]->setRecordMode(RecordParams::Mode::EXTEND);
       } else {
         _engines[c]->setRecordMode(RecordParams::Mode::DUB);
@@ -54,7 +54,7 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_record.time_frame == TimeFrame::SELECTED_LAYERS) {
+      if (_engines[c]->_record_params.time_frame == TimeFrame::SELECTED_LAYERS) {
         _engines[c]->setRecordTimeFrame(TimeFrame::TIMELINE);
       } else {
         _engines[c]->setRecordTimeFrame(TimeFrame::SELECTED_LAYERS);
@@ -147,7 +147,7 @@ void Gko::processChannel(const ProcessArgs& args, int channel_index) {
     outputs[PHASE_OUTPUT].setVoltage(internal_phase * 10, channel_index);
   }
 
-  e->_record.in = _from_signal->signal[channel_index];
+  e->_record_params.in = _from_signal->signal[channel_index];
   e->step();
   _to_signal->signal[channel_index] = e->read();
 }
@@ -167,18 +167,18 @@ void Gko::updateLights(const ProcessArgs &args) {
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
   TimeFrame displayed_time_frame = _engines[0]->_time_frame;
-  RecordParams displayed_record = _engines[0]->_record;
-  float displayed_phase = rack::math::eucMod(_engines[0]->_time, 1.0f);
+  RecordParams displayed_record_params = _engines[0]->_record_params;
+  float displayed_phase = _engines[0]->_timeline_position.phase;
 
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
     signal_in_sum += _from_signal->signal[c];
     signal_out_sum += _to_signal->signal[c];
-    record_active = !record_active ? _engines[c]->_record.active : record_active;
+    record_active = !record_active ? _engines[c]->_record_params.active : record_active;
     if (record_active) {
       displayed_time_frame = _engines[c]->_time_frame;
-      displayed_record = _engines[c]->_record;
-      displayed_phase = rack::math::eucMod(_engines[c]->_time, 1.0f);
+      displayed_record_params = _engines[c]->_record_params;
+      displayed_phase = _engines[c]->_timeline_position.phase;
     }
   }
 
@@ -205,7 +205,7 @@ void Gko::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  switch (displayed_record.mode) {
+  switch (displayed_record_params.mode) {
   case RecordParams::Mode::EXTEND:
     lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
@@ -220,7 +220,7 @@ void Gko::updateLights(const ProcessArgs &args) {
     break;
   }
 
-  switch (displayed_record.time_frame) {
+  switch (displayed_record_params.time_frame) {
   case TimeFrame::TIMELINE:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;

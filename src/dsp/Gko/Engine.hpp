@@ -23,8 +23,8 @@ struct Engine {
 
   /* read only */
 
-  RecordParams _record;
   Layer *_recording = nullptr;
+  RecordParams _record_params;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
@@ -32,7 +32,7 @@ struct Engine {
   TimeFrame _time_frame;
 
   Timeline _timeline;
-  float _time = 0.f;
+  TimelinePosition _timeline_position;
 
   const float _recordActiveThreshold = 0.0001f;
 

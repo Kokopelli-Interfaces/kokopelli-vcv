@@ -57,7 +57,7 @@ struct Recording {
     }
   }
 
-  inline void write(float phase, float sample) {
+  inline void write(double phase, float sample) {
     assert(0.f <= phase);
     assert(phase <= 1.0f);
     if (type == Type::PARAM) {
@@ -98,7 +98,7 @@ struct Recording {
     }
   }
 
-  inline float crossfadeSample(float sample, float phase) {
+  inline float crossfadeSample(float sample, double phase) {
     const int num_audio_samples_to_fade = 50;
     float fade_length = (float)num_audio_samples_to_fade / (float)buffer.size();
     if (1.0f < fade_length) {
@@ -109,13 +109,13 @@ struct Recording {
       return sample;
     }
 
-    float fade_amount = rescale(phase, 0.f, fade_length, 0.f);
+    double fade_amount = rescale(phase, 0.0, fade_length, 0.0);
     return rack::crossfade(buffer[buffer.size()-1], sample, fade_amount);
   }
 
-  inline float read(float phase) {
+  inline float read(double phase) {
     assert(0.f <= phase);
-    assert(phase <= 1.0f);
+    assert(phase <= 1.0);
 
     int size = buffer.size();
     if (size == 0) {

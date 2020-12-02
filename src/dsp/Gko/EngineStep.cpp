@@ -7,19 +7,19 @@ inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   assert(phase_defined);
 
-  if (_record.active) {
+  if (_record_params.active) {
     assert(_recording != nullptr);
     assert(_recording->samples_per_beat != 0);
 
-    bool reached_recording_end = _recording->start + _recording->length <= _time;
+    bool reached_recording_end = _recording->start_beat + _recording->n_beats <= _timeline_position.beat;
     if (reached_recording_end) {
-      if (_record.mode == RecordParams::Mode::DUB) {
+      if (_record_params.mode == RecordParams::Mode::DUB) {
       printf("DUB END\n");
         endRecording();
         beginRecording();
-      } else if (_record.mode == RecordParams::Mode::EXTEND) {
-        _recording->length = _recording->length + 1.f;
-        printf("extend recording to: %f\n", _recording->length);
+      } else if (_record_params.mode == RecordParams::Mode::EXTEND) {
+        _recording->n_beats = _recording->n_beats + 1.f;
+        printf("extend recording to: %d\n", _recording->n_beats);
         _recording->resizeToLength();
         // TODO set start pos further back if reverse
       }
@@ -28,20 +28,14 @@ inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
 }
 
 inline PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
-  float new_phase = _phase_oscillator.step(_sample_time);
-  if (_use_ext_phase) {
-    new_phase = _ext_phase;
-  }
+  float internal_phase = _phase_oscillator.step(_sample_time);
+  _timeline_position.phase = _use_ext_phase ? _ext_phase : internal_phase;
 
-  float beat = _time - rack::math::eucMod(_time, 1.0f);
-
-  PhaseAnalyzer::PhaseFlip phase_flip = _phase_analyzer.process(new_phase, _sample_time);
-  if (phase_flip == PhaseAnalyzer::PhaseFlip::BACKWARD && 1 <= beat) {
-    _time = beat + new_phase - 1.f;
+  PhaseAnalyzer::PhaseFlip phase_flip = _phase_analyzer.process(_timeline_position.phase, _sample_time);
+  if (phase_flip == PhaseAnalyzer::PhaseFlip::BACKWARD && 1 <= _timeline_position.beat) {
+    _timeline_position.beat--;
   } else if (phase_flip == PhaseAnalyzer::PhaseFlip::FORWARD) {
-    _time = beat + new_phase + 1;
-  } else {
-    _time = beat + new_phase;
+    _timeline_position.beat++;
   }
 
   return phase_flip;
@@ -57,7 +51,7 @@ void Engine::step() {
     }
   }
 
-  if (_record.active) {
+  if (_record_params.active) {
     record();
   }
 }

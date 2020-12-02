@@ -17,12 +17,12 @@ struct Timeline {
 
   std::vector<Layer*> layers;
 
-  inline float getLayerAttenuation(float time, int layer_i) {
+  inline float getLayerAttenuation(TimelinePosition position, int layer_i) {
     float attenuation = 0.f;
     for (auto layer : layers) {
       for (auto target_layer_i : layer->target_layers_idx) {
         if (target_layer_i == layer_i) {
-          attenuation += layer->readRecordingStrength(time);
+          attenuation += layer->readRecordingStrength(position);
           break;
         }
       }
@@ -35,13 +35,13 @@ struct Timeline {
     return attenuation;
   }
 
-  inline float read(float time) {
+  inline float read(TimelinePosition position) {
     // return rendered_timeline->readSignal(time); // TODO
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
-      if (layers[i]->readableAtTime(time)) {
-        float attenuation = getLayerAttenuation(time, i);
-        signal_out += layers[i]->readSignal(time) * (1.f - attenuation);
+      if (layers[i]->readableAtPosition(position)) {
+        float attenuation = getLayerAttenuation(position, i);
+        signal_out += layers[i]->readSignal(position) * (1.f - attenuation);
       }
     }
     return signal_out;
@@ -55,20 +55,20 @@ struct Timeline {
     return selected_layers;
   }
 
-  inline float getLengthOfLayers(std::vector<int> layer_idx) {
+  inline float getNumberOfBeatsOfLayerSelection(std::vector<int> layer_idx) {
     assert(layers.size() != 0);
     assert(layer_idx.size() != 0);
     assert(layer_idx.size() <= layers.size());
 
-    float max_length = 0.f;
+    unsigned int max_n_beats = 0;
 
     for (auto layer : getLayersFromIdx(layer_idx)) {
-      if (max_length < layer->length) {
-        max_length = layer->length;
+      if (max_n_beats < layer->n_beats) {
+        max_n_beats = layer->n_beats;
       }
     }
 
-    return max_length;
+    return max_n_beats;
   }
 };
 

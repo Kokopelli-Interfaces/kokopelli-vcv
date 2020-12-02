@@ -11,8 +11,8 @@ namespace gko {
   A Layer is one row in the Posline.
 */
 struct Layer {
-  float start = 0;
-  float length = 0;
+  unsigned int start_beat = 0;
+  unsigned int n_beats = 0;
   bool loop = false;
 
   // TODO
@@ -26,9 +26,9 @@ struct Layer {
   int samples_per_beat = 0;
 
   // TODO optinoal samples_per_beat?
-  inline Layer(float start, float length, std::vector<int> target_layers_idx) {
-    this->start = start;
-    this->length = length;
+  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<int> target_layers_idx) {
+    this->start_beat = start_beat;
+    this->n_beats = n_beats;
     this->target_layers_idx = target_layers_idx;
 
     signal = new Recording(Recording::Type::AUDIO);
@@ -46,51 +46,53 @@ struct Layer {
   }
 
   inline void resizeToLength() {
-    int new_size = length * samples_per_beat;
+    int new_size = n_beats * samples_per_beat;
     signal->resize(new_size);
     recording_strength->resize(new_size);
   }
 
-  inline bool readableAtTime(float time) {
+  inline bool readableAtPosition(TimelinePosition position) {
     return loop ?
-      start <= time :
-      start <= time && time <= start + length;
+      start_beat <= position.beat :
+      start_beat <= position.beat && position.beat < start_beat + n_beats;
   }
 
-  inline bool writableAtTime(float time) {
-    return start <= time && time <= start + length;
+  inline bool writableAtPosition(TimelinePosition position) {
+    return start_beat <= position.beat && position.beat <= start_beat + n_beats;
   }
 
-  inline float timeToRecordingPhase(float time) {
-    assert(readableAtTime(time));
-    float phase = rack::math::eucMod(time, 1.0f);
-    float beat_in_recording = (int)(time - start) % (int)length;
-    return (beat_in_recording + phase) / length;
+  inline float positionToRecordingPhase(TimelinePosition position) {
+    assert(readableAtPosition(position));
+    assert(0 < n_beats);
+    double phase = position.phase;
+    unsigned int layer_beat = position.beat % n_beats;
+    phase += layer_beat;
+    return phase / n_beats;
   }
 
-  inline float readSignal(float time) {
-    if (!readableAtTime(time)) {
+  inline float readSignal(TimelinePosition position) {
+    if (!readableAtPosition(position)) {
       return 0.f;
     }
 
-    return signal->read(timeToRecordingPhase(time));
+    return signal->read(positionToRecordingPhase(position));
   }
 
-  inline float readRecordingStrength(float time) {
-    if (!readableAtTime(time)) {
+  inline float readRecordingStrength(TimelinePosition position) {
+    if (!readableAtPosition(position)) {
       return 0.f;
     }
 
-    return recording_strength->read(timeToRecordingPhase(time));
+    return recording_strength->read(positionToRecordingPhase(position));
   }
 
-  inline void write(float time, float signal_sample, float recording_strength_sample) {
-    assert(writableAtTime(time));
+  inline void write(TimelinePosition position, float signal_sample, float recording_strength_sample) {
+    assert(writableAtPosition(position));
     assert(0 < signal->size());
     assert(0 < recording_strength->size());
 
-    signal->write(timeToRecordingPhase(time), signal_sample);
-    recording_strength->write(timeToRecordingPhase(time), recording_strength_sample);
+    signal->write(positionToRecordingPhase(position), signal_sample);
+    recording_strength->write(positionToRecordingPhase(position), recording_strength_sample);
   }
 };
 

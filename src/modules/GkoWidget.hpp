@@ -41,7 +41,7 @@ struct BeatDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      int beat = _module->_engines[0]->_time - rack::math::eucMod(_module->_engines[0]->_time, 1.f);
+      int beat = _module->_engines[0]->_timeline_position.beat;
       GkoValueDisplay::setDisplayValue(beat);
 		}
 	}

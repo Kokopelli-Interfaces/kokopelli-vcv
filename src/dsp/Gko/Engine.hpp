@@ -19,36 +19,29 @@ struct Engine {
   bool _use_ext_phase = false;
   float _ext_phase = 0.f;
   float _sample_time = 1.0f;
-  std::vector<int> _selected_layers;
 
   /* read only */
 
   Layer *_recording = nullptr;
+  bool _recording_active = false;
   RecordParams _record_params;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
 
-  TimeFrame _time_frame;
-
   Timeline _timeline;
   TimelinePosition _timeline_position;
-
-  const float _recordActiveThreshold = 0.0001f;
+  TimeFrame _read_time_frame;
 
   void step();
   float read();
 
-  void setRecordMode(RecordParams::Mode mode);
-  void setRecordTimeFrame(TimeFrame time_frame);
-  void setRecordStrength(float strength);
-
 private:
-  void record();
-  void beginRecording();
-  void endRecording();
-  inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
+  inline void write();
+  inline void endRecording();
+  inline void beginRecording();
   inline void handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip);
+  inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
 };
 
 } // namespace frame

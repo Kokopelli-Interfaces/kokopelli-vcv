@@ -6,7 +6,7 @@ Gko::Gko() {
   configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "Select");
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
-  configParam(TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Time Frame");
+  configParam(READ_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Time Frame");
   configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
   configParam(RECORD_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Record Time Frame");
   configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");
@@ -17,7 +17,7 @@ Gko::Gko() {
 
   _record_mode_button.param = &params[RECORD_MODE_PARAM];
   _record_time_frame_button.param = &params[RECORD_TIME_FRAME_PARAM];
-  _time_frame_button.param = &params[TIME_FRAME_PARAM];
+  _read_time_frame_button.param = &params[READ_TIME_FRAME_PARAM];
 }
 
 void Gko::sampleRateChange() {
@@ -37,13 +37,13 @@ void Gko::processButtons() {
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
       if (_engines[c]->_record_params.mode == RecordParams::Mode::DUB) {
-        _engines[c]->setRecordMode(RecordParams::Mode::EXTEND);
+        _engines[c]->_record_params.mode = RecordParams::Mode::EXTEND;
       } else {
-        _engines[c]->setRecordMode(RecordParams::Mode::DUB);
+        _engines[c]->_record_params.mode = RecordParams::Mode::DUB;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      _engines[c]->setRecordMode(RecordParams::Mode::REPLACE);
+      _engines[c]->_record_params.mode = RecordParams::Mode::REPLACE;
       break;
     }
   }
@@ -55,31 +55,31 @@ void Gko::processButtons() {
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
       if (_engines[c]->_record_params.time_frame == TimeFrame::SELECTED_LAYERS) {
-        _engines[c]->setRecordTimeFrame(TimeFrame::TIMELINE);
+        _engines[c]->_record_params.time_frame = TimeFrame::TIMELINE;
       } else {
-        _engines[c]->setRecordTimeFrame(TimeFrame::SELECTED_LAYERS);
+        _engines[c]->_record_params.time_frame = TimeFrame::SELECTED_LAYERS;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-        _engines[c]->setRecordTimeFrame(TimeFrame::ACTIVE_LAYER);
+        _engines[c]->_record_params.time_frame = TimeFrame::ACTIVE_LAYER;
       break;
     }
   }
 
-  myrisa::dsp::LongPressButton::Event _time_frame_event = _time_frame_button.process(sampleTime);
+  myrisa::dsp::LongPressButton::Event _read_time_frame_event = _read_time_frame_button.process(sampleTime);
   for (int c = 0; c < channels(); c++) {
-    switch (_time_frame_event) {
+    switch (_read_time_frame_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_time_frame == TimeFrame::SELECTED_LAYERS) {
-        _engines[c]->_time_frame = TimeFrame::TIMELINE;
+      if (_engines[c]->_read_time_frame == TimeFrame::SELECTED_LAYERS) {
+        _engines[c]->_read_time_frame = TimeFrame::TIMELINE;
       } else {
-        _engines[c]->_time_frame = TimeFrame::SELECTED_LAYERS;
+        _engines[c]->_read_time_frame = TimeFrame::SELECTED_LAYERS;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      _engines[c]->_time_frame = TimeFrame::ACTIVE_LAYER;
+      _engines[c]->_read_time_frame = TimeFrame::ACTIVE_LAYER;
       break;
     }
   }
@@ -106,15 +106,15 @@ void Gko::modulateChannel(int channel_index) {
     }
     // taking to the strength of 3 gives a more intuitive curve
     record_strength = rack::clamp(pow(record_strength, 3), 0.f, 1.0f);
-    e->setRecordStrength(record_strength);
+    e->_record_params.strength = record_strength;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
     // TODO have knob, now it just selects all layers
-    std::vector<int> selected_layers_idx;
+    std::vector<unsigned int> selected_layers_idx;
     selected_layers_idx.resize(e->_timeline.layers.size());
     std::iota(std::begin(selected_layers_idx), std::end(selected_layers_idx), 0);
-    e->_selected_layers = selected_layers_idx;
+    e->_record_params.selected_layers = selected_layers_idx;
   }
 }
 
@@ -166,7 +166,7 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  TimeFrame displayed_time_frame = _engines[0]->_time_frame;
+  TimeFrame displayed_read_time_frame = _engines[0]->_read_time_frame;
   RecordParams displayed_record_params = _engines[0]->_record_params;
   float displayed_phase = _engines[0]->_timeline_position.phase;
 
@@ -174,9 +174,8 @@ void Gko::updateLights(const ProcessArgs &args) {
   for (int c = 0; c < channels(); c++) {
     signal_in_sum += _from_signal->signal[c];
     signal_out_sum += _to_signal->signal[c];
-    record_active = !record_active ? _engines[c]->_record_params.active : record_active;
     if (record_active) {
-      displayed_time_frame = _engines[c]->_time_frame;
+      displayed_read_time_frame = _engines[c]->_read_time_frame;
       displayed_record_params = _engines[c]->_record_params;
       displayed_phase = _engines[c]->_timeline_position.phase;
     }
@@ -188,7 +187,7 @@ void Gko::updateLights(const ProcessArgs &args) {
   // TODO make me show the layer output that is selected, not all
   lights[RECORD_LIGHT + 1].setSmoothBrightness(signal_out_sum, _sampleTime * _light_divider.getDivision());
 
-  if (record_active) {
+  if (displayed_record_params.active()) {
     int light_colour = poly_record ? 2 : 0;
     lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
   } else {
@@ -235,18 +234,18 @@ void Gko::updateLights(const ProcessArgs &args) {
     break;
   }
 
-  switch (displayed_time_frame) {
+  switch (displayed_read_time_frame) {
   case TimeFrame::TIMELINE:
-    lights[TIME_FRAME_LIGHT + 0].value = 1.0;
-    lights[TIME_FRAME_LIGHT + 1].value = 0.0;
+    lights[READ_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[READ_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
   case TimeFrame::SELECTED_LAYERS:
-    lights[TIME_FRAME_LIGHT + 0].value = 1.0;
-    lights[TIME_FRAME_LIGHT + 1].value = 1.0;
+    lights[READ_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   case TimeFrame::ACTIVE_LAYER:
-    lights[TIME_FRAME_LIGHT + 0].value = 0.0;
-    lights[TIME_FRAME_LIGHT + 1].value = 1.0;
+    lights[READ_TIME_FRAME_LIGHT + 0].value = 0.0;
+    lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }
 }

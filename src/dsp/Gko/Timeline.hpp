@@ -17,7 +17,7 @@ struct Timeline {
 
   std::vector<Layer*> layers;
 
-  inline float getLayerAttenuation(TimelinePosition position, int layer_i) {
+  inline float getLayerAttenuation(TimelinePosition position, unsigned int layer_i) {
     float attenuation = 0.f;
     for (auto layer : layers) {
       for (auto target_layer_i : layer->target_layers_idx) {
@@ -35,19 +35,32 @@ struct Timeline {
     return attenuation;
   }
 
-  inline float read(TimelinePosition position) {
+  inline float read(TimelinePosition position, Layer* recording, RecordParams record_params) {
     // return rendered_timeline->readSignal(time); // TODO
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
       if (layers[i]->readableAtPosition(position)) {
         float attenuation = getLayerAttenuation(position, i);
+
+        if (record_params.active()) {
+          for (unsigned int sel_i : recording->target_layers_idx) {
+            if (sel_i == i) {
+              attenuation += record_params.strength;
+              break;
+            }
+          }
+        }
+
+        attenuation = rack::clamp(attenuation, 0.f, 1.f);
+
         signal_out += layers[i]->readSignal(position) * (1.f - attenuation);
       }
     }
+
     return signal_out;
   }
 
-  inline std::vector<Layer*> getLayersFromIdx(std::vector<int> layer_idx) {
+  inline std::vector<Layer*> getLayersFromIdx(std::vector<unsigned int> layer_idx) {
     std::vector<Layer*> selected_layers;
     for (auto layer_id : layer_idx) {
       selected_layers.push_back(layers[layer_id]);
@@ -55,7 +68,7 @@ struct Timeline {
     return selected_layers;
   }
 
-  inline float getNumberOfBeatsOfLayerSelection(std::vector<int> layer_idx) {
+  inline float getNumberOfBeatsOfLayerSelection(std::vector<unsigned int> layer_idx) {
     assert(layers.size() != 0);
     assert(layer_idx.size() != 0);
     assert(layer_idx.size() <= layers.size());

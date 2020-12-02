@@ -21,12 +21,12 @@ struct Layer {
 
   Recording *signal;
   Recording *recording_strength;
-  std::vector<int> target_layers_idx;
+  std::vector<unsigned int> target_layers_idx;
 
   int samples_per_beat = 0;
 
   // TODO optinoal samples_per_beat?
-  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<int> target_layers_idx) {
+  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<unsigned int> target_layers_idx) {
     this->start_beat = start_beat;
     this->n_beats = n_beats;
     this->target_layers_idx = target_layers_idx;

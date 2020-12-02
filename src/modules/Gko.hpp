@@ -13,7 +13,7 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
-    TIME_FRAME_PARAM,
+    READ_TIME_FRAME_PARAM,
     RECORD_TIME_FRAME_PARAM,
     RECORD_MODE_PARAM,
     RECORD_PARAM,
@@ -24,7 +24,7 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   enum LightIds {
     ENUMS(SELECT_FUNCTION_LIGHT, 3),
     ENUMS(SELECT_MODE_LIGHT, 3),
-    ENUMS(TIME_FRAME_LIGHT, 3),
+    ENUMS(READ_TIME_FRAME_LIGHT, 3),
     ENUMS(RECORD_LIGHT, 3),
     ENUMS(RECORD_MODE_LIGHT, 3),
     ENUMS(RECORD_TIME_FRAME_LIGHT, 3),
@@ -39,7 +39,7 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
   myrisa::dsp::LongPressButton _record_mode_button;
   myrisa::dsp::LongPressButton _record_time_frame_button;
-  myrisa::dsp::LongPressButton _time_frame_button;
+  myrisa::dsp::LongPressButton _read_time_frame_button;
 
   std::array<myrisa::dsp::gko::Engine*, maxChannels> _engines;
   rack::dsp::ClockDivider _light_divider;

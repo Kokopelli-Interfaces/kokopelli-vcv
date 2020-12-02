@@ -18,11 +18,13 @@ struct RecordParams {
 
   float in = 0.f;
   TimeFrame time_frame = TimeFrame::TIMELINE;
-
-  /* read only */
-
-  std::vector<int> selected_layers;
+  std::vector<unsigned int> selected_layers;
   Mode mode = Mode::EXTEND;
   float strength = 0.f;
-  bool active = false;
+
+  float _recordActiveThreshold = 0.0001f;
+
+  inline bool active() {
+    return _recordActiveThreshold < strength;
+  }
 };

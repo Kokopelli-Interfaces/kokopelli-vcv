@@ -27,7 +27,7 @@ inline void Engine::endRecording() {
     float recording_time = _recording->signal->size() * _sample_time;
 
     printf("Recording De-Activate\n");
-    printf("-- start_beat %d length %d size %d recording time %fs loop %d samples_per_beat %d\n", _recording->start_beat, _recording->n_beats, _recording->signal->size(), recording_time, _recording->loop, _recording->samples_per_beat);
+    printf("-- start_beat %d n_beats %d size %d recording time %fs loop %d samples_per_beat %d\n", _recording->start_beat, _recording->n_beats, _recording->signal->size(), recording_time, _recording->loop, _recording->samples_per_beat);
 
     if (!_phase_oscillator.isSet()) {
       if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
@@ -78,7 +78,7 @@ inline void Engine::beginRecording() {
   _recording_active = true;
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d length %d loop %d samples per beat %d\n", _recording->start_beat, _recording->n_beats, _recording->loop, _recording->samples_per_beat);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d\n", _recording->start_beat, _recording->n_beats, _recording->loop, _recording->samples_per_beat);
 }
 
 inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {

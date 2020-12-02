@@ -41,7 +41,11 @@ struct Recording {
   }
 
   inline void resize(int new_size) {
-    buffer.resize(new_size / write_divider.getDivision());
+    int n_samples = new_size / write_divider.getDivision();
+    if (n_samples == 0) {
+      n_samples++;
+    }
+    buffer.resize(n_samples);
   }
 
   inline int size() {

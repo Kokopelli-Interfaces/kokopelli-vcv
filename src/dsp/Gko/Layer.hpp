@@ -47,6 +47,7 @@ struct Layer {
 
   inline void resizeToLength() {
     int new_size = n_beats * samples_per_beat;
+    printf("resizeto %d %d so %d\n", n_beats, samples_per_beat, new_size);
     signal->resize(new_size);
     recording_strength->resize(new_size);
   }
@@ -88,8 +89,8 @@ struct Layer {
 
   inline void write(TimelinePosition position, float signal_sample, float recording_strength_sample) {
     assert(writableAtPosition(position));
-    assert(0 < signal->size());
-    assert(0 < recording_strength->size());
+    assert(0 != signal->size());
+    assert(0 != recording_strength->size());
 
     signal->write(positionToRecordingPhase(position), signal_sample);
     recording_strength->write(positionToRecordingPhase(position), recording_strength_sample);

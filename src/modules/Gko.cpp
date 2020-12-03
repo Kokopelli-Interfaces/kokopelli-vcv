@@ -110,11 +110,13 @@ void Gko::modulateChannel(int channel_index) {
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
+    e->_active_layer_i = 0;
+
     // TODO have knob, now it just selects all layers
     std::vector<unsigned int> selected_layers_idx;
     selected_layers_idx.resize(e->_timeline.layers.size());
     std::iota(std::begin(selected_layers_idx), std::end(selected_layers_idx), 0);
-    e->_record_params.selected_layers = selected_layers_idx;
+    e->_selected_layers_idx = selected_layers_idx;
   }
 }
 

@@ -21,8 +21,8 @@ struct Engine {
   float _ext_phase = 0.f;
   float _sample_time = 1.0f;
 
-  std::vector<unsigned int> selected_layers;
-  unsigned int active_layer;
+  std::vector<unsigned int> _selected_layers_idx;
+  unsigned int _active_layer_i;
 
   /* read only */
 

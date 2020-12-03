@@ -49,8 +49,8 @@ inline void Engine::beginRecording() {
   assert(_recording_layer == nullptr);
 
   unsigned int n_beats = 1;
-  if (_record_params.mode == RecordParams::Mode::DUB && 0 < _record_params.selected_layers.size()) {
-    n_beats = _timeline.getNumberOfBeatsOfLayerSelection(_record_params.selected_layers);
+  if (_record_params.mode == RecordParams::Mode::DUB && 0 < _selected_layers_idx.size()) {
+    n_beats = _timeline.getNumberOfBeatsOfLayerSelection(_selected_layers_idx);
   }
 
   unsigned int start_beat = _timeline_position.beat;
@@ -58,7 +58,7 @@ inline void Engine::beginRecording() {
     start_beat = _timeline_position.beat + std::round(_timeline_position.phase);
   }
 
-  _recording_layer = new Layer(start_beat, n_beats, _record_params.selected_layers);
+  _recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx);
 
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   if (phase_defined) {

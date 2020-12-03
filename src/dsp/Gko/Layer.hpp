@@ -19,7 +19,7 @@ struct Layer {
   // std::vector<Recording*> recordings;
   // std::vector<Recording::Type> types;
 
-  Recording *signal;
+  Recording *in;
   Recording *recording_strength;
   std::vector<unsigned int> target_layers_idx;
 
@@ -31,24 +31,24 @@ struct Layer {
     this->n_beats = n_beats;
     this->target_layers_idx = target_layers_idx;
 
-    signal = new Recording(Recording::Type::AUDIO);
+    in = new Recording(Recording::Type::AUDIO);
     recording_strength = new Recording(Recording::Type::PARAM);
   }
 
   inline ~Layer() {
-    delete signal;
+    delete in;
     delete recording_strength;
   }
 
   inline void pushBack(float signal_sample, float recording_strength_sample) {
-    signal->pushBack(signal_sample);
+    in->pushBack(signal_sample);
     recording_strength->pushBack(recording_strength_sample);
   }
 
   inline void resizeToLength() {
     int new_size = n_beats * samples_per_beat;
     printf("resizeto %d %d so %d\n", n_beats, samples_per_beat, new_size);
-    signal->resize(new_size);
+    in->resize(new_size);
     recording_strength->resize(new_size);
   }
 
@@ -76,7 +76,7 @@ struct Layer {
       return 0.f;
     }
 
-    return signal->read(positionToRecordingPhase(position));
+    return in->read(positionToRecordingPhase(position));
   }
 
   inline float readRecordingStrength(TimelinePosition position) {
@@ -89,10 +89,10 @@ struct Layer {
 
   inline void write(TimelinePosition position, float signal_sample, float recording_strength_sample) {
     assert(writableAtPosition(position));
-    assert(0 != signal->size());
+    assert(0 != in->size());
     assert(0 != recording_strength->size());
 
-    signal->write(positionToRecordingPhase(position), signal_sample);
+    in->write(positionToRecordingPhase(position), signal_sample);
     recording_strength->write(positionToRecordingPhase(position), recording_strength_sample);
   }
 };

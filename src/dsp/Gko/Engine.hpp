@@ -44,6 +44,7 @@ struct Engine {
   float read();
 
 private:
+  inline bool phaseDefined();
   inline void write();
   inline void endRecording();
   inline void beginRecording();

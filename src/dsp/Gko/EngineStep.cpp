@@ -5,29 +5,29 @@ using namespace myrisa::dsp;
 
 inline void Engine::write() {
   assert(_record_params.active());
-  assert(_recording != nullptr);
+  assert(_recording_layer != nullptr);
 
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   if (!phase_defined) {
-    _recording->pushBack(_record_params.in, _record_params.strength);
-    _recording->samples_per_beat++;
-  } else if (_recording->writableAtPosition(_timeline_position)) {
-    _recording->write(_timeline_position, _record_params.in, _record_params.strength);
+    _recording_layer->pushBack(_record_params.in, _record_params.strength);
+    _recording_layer->samples_per_beat++;
+  } else if (_recording_layer->writableAtPosition(_timeline_position)) {
+    _recording_layer->write(_timeline_position, _record_params.in, _record_params.strength);
   } else {
     printf("Not writable \n");
   }
 }
 
 inline void Engine::endRecording() {
-    assert(_recording != nullptr);
-    assert(_recording->n_beats != 0.f);
-    assert(_recording->signal->size() != 0);
+    assert(_recording_layer != nullptr);
+    assert(_recording_layer->n_beats != 0.f);
+    assert(_recording_layer->signal->size() != 0);
     assert(_recording_active);
 
-    float recording_time = _recording->signal->size() * _sample_time;
+    float recording_time = _recording_layer->signal->size() * _sample_time;
 
     printf("Recording De-Activate\n");
-    printf("-- start_beat %d n_beats %d size %d recording time %fs loop %d samples_per_beat %d\n", _recording->start_beat, _recording->n_beats, _recording->signal->size(), recording_time, _recording->loop, _recording->samples_per_beat);
+    printf("-- start_beat %d n_beats %d size %d recording time %fs loop %d samples_per_beat %d\n", _recording_layer->start_beat, _recording_layer->n_beats, _recording_layer->signal->size(), recording_time, _recording_layer->loop, _recording_layer->samples_per_beat);
 
     if (!_phase_oscillator.isSet()) {
       if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
@@ -38,15 +38,15 @@ inline void Engine::endRecording() {
       printf("-- phase oscillator set with frequency: %f\n", _phase_oscillator.getFrequency());
     }
 
-    _timeline.layers.push_back(_recording);
+    _timeline.layers.push_back(_recording_layer);
 
     _recording_active = false;
-    _recording = nullptr;
+    _recording_layer = nullptr;
 }
 
 inline void Engine::beginRecording() {
   assert(_record_params.active());
-  assert(_recording == nullptr);
+  assert(_recording_layer == nullptr);
 
   unsigned int n_beats = 1;
   if (_record_params.mode == RecordParams::Mode::DUB && 0 < _record_params.selected_layers.size()) {
@@ -58,47 +58,47 @@ inline void Engine::beginRecording() {
     start_beat = _timeline_position.beat + std::round(_timeline_position.phase);
   }
 
-  _recording = new Layer(start_beat, n_beats, _record_params.selected_layers);
+  _recording_layer = new Layer(start_beat, n_beats, _record_params.selected_layers);
 
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   if (phase_defined) {
     if (_use_ext_phase) {
-      _recording->samples_per_beat = _phase_analyzer.getSamplesPerDivision();
+      _recording_layer->samples_per_beat = _phase_analyzer.getSamplesPerDivision();
     } else if (_phase_oscillator.isSet()) {
       float beat_period = 1 / _phase_oscillator.getFrequency();
-      _recording->samples_per_beat = floor(beat_period / _sample_time);
+      _recording_layer->samples_per_beat = floor(beat_period / _sample_time);
     }
-    _recording->resizeToLength();
+    _recording_layer->resizeToLength();
   }
 
   if (_record_params.time_frame != TimeFrame::TIMELINE) {
-    _recording->loop = true;
+    _recording_layer->loop = true;
   }
 
   _recording_active = true;
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d\n", _recording->start_beat, _recording->n_beats, _recording->loop, _recording->samples_per_beat);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d\n", _recording_layer->start_beat, _recording_layer->n_beats, _recording_layer->loop, _recording_layer->samples_per_beat);
 }
 
 inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
   bool phase_defined = (_use_ext_phase || _phase_oscillator.isSet());
   assert(phase_defined);
 
-  if (_recording) {
-    assert(_recording != nullptr);
-    assert(_recording->samples_per_beat != 0);
+  if (_recording_layer) {
+    assert(_recording_layer != nullptr);
+    assert(_recording_layer->samples_per_beat != 0);
 
-    bool reached_recording_end = _recording->start_beat + _recording->n_beats <= _timeline_position.beat;
+    bool reached_recording_end = _recording_layer->start_beat + _recording_layer->n_beats <= _timeline_position.beat;
     if (reached_recording_end) {
       if (_record_params.mode == RecordParams::Mode::DUB) {
       printf("DUB END\n");
         endRecording();
         beginRecording();
       } else if (_record_params.mode == RecordParams::Mode::EXTEND) {
-        _recording->n_beats = _recording->n_beats + 1.f;
-        printf("extend recording to: %d\n", _recording->n_beats);
-        _recording->resizeToLength();
+        _recording_layer->n_beats = _recording_layer->n_beats + 1.f;
+        printf("extend recording to: %d\n", _recording_layer->n_beats);
+        _recording_layer->resizeToLength();
       }
     }
   }

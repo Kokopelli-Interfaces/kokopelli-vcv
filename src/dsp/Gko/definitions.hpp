@@ -18,7 +18,6 @@ struct RecordParams {
 
   float in = 0.f;
   TimeFrame time_frame = TimeFrame::SELECTED_LAYERS;
-  std::vector<unsigned int> selected_layers;
   Mode mode = Mode::DUB;
   float strength = 0.f;
 

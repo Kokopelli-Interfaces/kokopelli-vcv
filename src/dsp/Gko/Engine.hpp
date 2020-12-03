@@ -21,9 +21,12 @@ struct Engine {
   float _ext_phase = 0.f;
   float _sample_time = 1.0f;
 
+  std::vector<unsigned int> selected_layers;
+  unsigned int active_layer;
+
   /* read only */
 
-  Layer *_recording = nullptr;
+  Layer *_recording_layer = nullptr;
   bool _recording_active = false;
   RecordParams _record_params;
 
@@ -35,6 +38,7 @@ struct Engine {
   TimeFrame _read_time_frame;
 
   AntipopReader _antipop_reader;
+
 
   void step();
   float read();

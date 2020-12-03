@@ -7,7 +7,7 @@
 namespace myrisa {
 namespace dsp {
 
-struct AntipopReader {
+struct AntipopFilter {
 
   const float click_threshold =  0.1f;
 
@@ -25,7 +25,7 @@ struct AntipopReader {
       sample_before_discontinuity = last_sample;
       float discontinuity_distance = std::fabs(sample - last_sample);
       num_samples_to_fade = (int) (discontinuity_distance * 100);
-      // printf("triggered! disc: %f, fade %d samples \n", discontinuity_distance, num_samples_to_fade);
+      printf("triggered! disc: %f, fade %d samples \n", discontinuity_distance, num_samples_to_fade);
     }
 
     last_sample = sample;
@@ -38,7 +38,7 @@ struct AntipopReader {
       if (num_samples_faded == num_samples_to_fade) {
         num_samples_faded = 0;
         num_samples_to_fade = 0;
-        // printf("anti pop recovered");
+        printf("anti pop recovered");
       }
     }
 

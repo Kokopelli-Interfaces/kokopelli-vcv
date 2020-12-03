@@ -54,9 +54,10 @@ inline void Engine::beginRecording() {
   }
 
   unsigned int start_beat = _timeline_position.beat;
-  if (_record_params.mode == RecordParams::Mode::EXTEND) {
-    start_beat = _timeline_position.beat + std::round(_timeline_position.phase);
-  }
+  // TODO
+  // if (_record_params.mode == RecordParams::Mode::EXTEND) {
+    // start_beat = _timeline_position.beat + std::round(_timeline_position.phase);
+  // }
 
   _recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx);
 

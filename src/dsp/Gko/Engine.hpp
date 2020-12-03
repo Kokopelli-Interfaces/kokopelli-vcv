@@ -4,7 +4,7 @@
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "dsp/PhaseOscillator.hpp"
-#include "dsp/AntipopReader.hpp"
+#include "dsp/AntipopFilter.hpp"
 #include "Layer.hpp"
 #include "rack.hpp"
 
@@ -37,7 +37,7 @@ struct Engine {
   TimelinePosition _timeline_position;
   TimeFrame _read_time_frame;
 
-  AntipopReader _antipop_reader;
+  AntipopFilter _antipop_filter;
 
 
   void step();

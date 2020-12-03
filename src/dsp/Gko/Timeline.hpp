@@ -19,10 +19,10 @@ struct Timeline {
 
   inline float getLayerAttenuation(TimelinePosition position, unsigned int layer_i) {
     float attenuation = 0.f;
-    for (auto layer : layers) {
-      for (auto target_layer_i : layer->target_layers_idx) {
+    for (int j = layer_i; j < layers.size(); j++) {
+      for (auto target_layer_i : layers[j]->target_layers_idx) {
         if (target_layer_i == layer_i) {
-          attenuation += layer->readRecordingStrength(position);
+          attenuation += layers[j]->readRecordingStrength(position);
           break;
         }
       }

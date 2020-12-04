@@ -66,7 +66,7 @@ struct Layer {
     assert(readableAtPosition(position));
     assert(0 < n_beats);
     double phase = position.phase;
-    unsigned int layer_beat = position.beat % n_beats;
+    unsigned int layer_beat = (position.beat - start_beat) % n_beats;
     phase += layer_beat;
     return phase / n_beats;
   }

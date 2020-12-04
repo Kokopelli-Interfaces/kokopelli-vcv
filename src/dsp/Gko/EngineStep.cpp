@@ -98,7 +98,7 @@ inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
         endRecording();
         beginRecording();
       } else if (_record_params.mode == RecordParams::Mode::EXTEND) {
-        _recording_layer->n_beats = _recording_layer->n_beats + 1.f;
+        _recording_layer->n_beats = _recording_layer->n_beats + 1;
         printf("extend recording to: %d\n", _recording_layer->n_beats);
         _recording_layer->resizeToLength();
       }

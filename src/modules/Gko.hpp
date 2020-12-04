@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Gko_shared.hpp"
+#include "menu.hpp"
 #include "dsp/Gko/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
 #include "widgets.hpp"
@@ -44,6 +45,8 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   std::array<myrisa::dsp::gko::Engine*, maxChannels> _engines;
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
+
+  Options _options;
 
   Gko();
 

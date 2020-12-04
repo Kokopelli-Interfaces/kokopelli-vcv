@@ -9,7 +9,8 @@ namespace dsp {
 
 struct AntipopFilter {
 
-  const float click_threshold =  0.1f;
+  const float click_threshold =  0.20f;
+  const int fade_length_multiplier = 30;
 
   // boost::circular_buffer<float> lookback(50);
 
@@ -24,7 +25,7 @@ struct AntipopFilter {
     if (num_samples_to_fade == 0 && click_threshold < std::fabs(sample - last_sample)) {
       sample_before_discontinuity = last_sample;
       float discontinuity_distance = std::fabs(sample - last_sample);
-      num_samples_to_fade = (int) (discontinuity_distance * 100);
+      num_samples_to_fade = (int) (discontinuity_distance * fade_length_multiplier);
       printf("triggered! disc: %f, fade %d samples \n", discontinuity_distance, num_samples_to_fade);
     }
 

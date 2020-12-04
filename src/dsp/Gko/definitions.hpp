@@ -27,3 +27,8 @@ struct RecordParams {
     return _recordActiveThreshold < strength;
   }
 };
+
+struct Options {
+  bool use_antipop = false;
+  float antipop_threshold = 0.5f;
+};

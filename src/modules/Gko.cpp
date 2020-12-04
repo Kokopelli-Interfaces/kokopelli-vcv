@@ -112,6 +112,8 @@ void Gko::modulateChannel(int channel_index) {
 
     e->_active_layer_i = 0;
 
+    e->_options = _options;
+
     // TODO have knob, now it just selects all layers
     std::vector<unsigned int> selected_layers_idx;
     selected_layers_idx.resize(e->_timeline.layers.size());

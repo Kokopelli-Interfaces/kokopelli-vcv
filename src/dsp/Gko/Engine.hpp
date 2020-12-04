@@ -39,6 +39,7 @@ struct Engine {
 
   AntipopFilter _antipop_filter;
 
+  Options _options;
 
   void step();
   float read();

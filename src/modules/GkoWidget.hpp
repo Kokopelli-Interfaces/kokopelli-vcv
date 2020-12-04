@@ -49,6 +49,9 @@ struct BeatDisplay : GkoValueDisplay {
 
 struct GkoWidget : ModuleWidget {
   const int hp = 4;
+
+  bool _use_antipop = false;
+
   GkoValueDisplay *current_selection;
   GkoValueDisplay *total_selections;
   GkoValueDisplay *current_section;
@@ -131,6 +134,21 @@ struct GkoWidget : ModuleWidget {
     time->textOffset = Vec(time->box.size.x * 0.5f, 0.f);
     addChild(time);
 }
+
+	void appendContextMenu(rack::Menu* menu) override {
+		auto m = dynamic_cast<Gko*>(module);
+		assert(m);
+
+    menu->addChild(new MenuLabel());
+
+    menu->addChild(new BoolOptionMenuItem("Antipop Filter", [m]() {
+      return &m->_options.use_antipop;
+    }));
+
+
+    // menu->addChild(new Slider());
+};
+
 };
 
 } // namespace myrisa

@@ -1,3 +1,5 @@
+NOTE:: README Outdated, 
+
 * Modules For Structure
 These modules, provide the ability to record, loop, edit, playback, and sequence
 signals. I designed the interface for fluidity and simple controls, making them
@@ -231,10 +233,9 @@ position of all ~FRAME~'s so to preserve deterministic playback.
 
 TODO
 
-* Modules for a Sound Interface
-These modules are for the [[https://github.com/gwatcha/sound-interface][sound interface]].
+* Modules for an OSC Interface
 
-** MACRO
+** [#B] MACRO
 Defines a macro. A macro consists of one or multiple ~M-PARAM~, and ~M-IN~ modules,
 a strip of modules that follow it, and one or multiple ~M-OUT~ modules after the
 strip, which touch the ~MACRO~ module.

@@ -9,38 +9,58 @@ namespace dsp {
 namespace gko {
 
 /**
-   A Timeline is the top level structure for content.
+   The Timeline is the top level structure for content.
 */
 struct Timeline {
-  // TODO
-  // Layer* rendered_timeline;
-
   std::vector<Layer*> layers;
 
-  inline float getLayerAttenuation(TimelinePosition position, unsigned int layer_i) {
-    float attenuation = 0.f;
-    for (unsigned int j = layer_i; j < layers.size(); j++) {
-      for (auto target_layer_i : layers[j]->target_layers_idx) {
-        if (target_layer_i == layer_i) {
-          attenuation += layers[j]->readRecordingStrength(position);
-          break;
-        }
-      }
+  std::vector<float> current_attenuation;
+  std::vector<float> last_calculated_attenuation;
+  rack::dsp::ClockDivider attenuation_calculator_divider;
 
-      if (1.f <= attenuation)  {
-        return 1.f;
+  Timeline() {
+    attenuation_calculator_divider.setDivision(2000);
+  }
+
+  static inline float smoothValue(float current, float old) {
+    const float lambda = 30.f / 44100;
+    return old + (current - old) * lambda;
+  }
+
+  inline void updateLayerAttenuations(TimelinePosition position) {
+    if (attenuation_calculator_divider.process()) {
+      for (unsigned int layer_i = 0; layer_i < layers.size(); layer_i++) {
+      float layer_i_attenuation = 0.f;
+        for (unsigned int j = layer_i; j < layers.size(); j++) {
+          for (auto target_layer_i : layers[j]->target_layers_idx) {
+            if (target_layer_i == layer_i) {
+              layer_i_attenuation += layers[j]->readRecordingStrength(position);
+              break;
+            }
+          }
+
+          if (1.f <= layer_i_attenuation)  {
+            layer_i_attenuation = 1.f;
+            break;
+          }
+        }
+
+        last_calculated_attenuation[layer_i] = layer_i_attenuation;
       }
     }
 
-    return attenuation;
+    for (unsigned int i = 0; i < layers.size(); i++) {
+      current_attenuation[i] = smoothValue(last_calculated_attenuation[i], current_attenuation[i]);
+    }
   }
 
   inline float read(TimelinePosition position, Layer* recording, RecordParams record_params) {
-    // return rendered_timeline->readSignal(time); // TODO
+    updateLayerAttenuations(position);
+
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
       if (layers[i]->readableAtPosition(position)) {
-        float attenuation = getLayerAttenuation(position, i);
+        float attenuation = current_attenuation[i];
 
         if (record_params.active()) {
           for (unsigned int sel_i : recording->target_layers_idx) {
@@ -52,7 +72,6 @@ struct Timeline {
         }
 
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
-
         signal_out += layers[i]->readSignal(position) * (1.f - attenuation);
       }
     }

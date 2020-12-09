@@ -42,6 +42,8 @@ inline void Engine::endRecording() {
     }
 
     _timeline.layers.push_back(_recording_layer);
+    _timeline.last_calculated_attenuation.resize(_timeline.layers.size());
+    _timeline.current_attenuation.resize(_timeline.layers.size());
 
     _recording_active = false;
     _recording_layer = nullptr;

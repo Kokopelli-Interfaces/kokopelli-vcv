@@ -42,7 +42,6 @@ struct PhaseAnalyzer {
     bool phase_flip = (phase_abs_change > 0.95 && phase_abs_change <= 1.0);
     PhaseFlip phase_flip_type;
 
-    // FIXME has a hard time with internal _section_division loops
     if (phase_flip && 0 < phase_change) {
       _offset_from_last_sample += phase_change - 1;
       phase_flip_type = PhaseFlip::BACKWARD;

@@ -1,9 +1,10 @@
 #include "Signal.hpp"
 
 int Signal::channels() {
-  // TODO define # channels based on FRAME out layers may be recorded with more
+  // TODO define # channels based on Gko layers, may be recorded with more
   // or less channels also, additional behaviours with mono or stereo
   // duplication via pos & rate will increase channels
+  // best to just send # of channels from Gko
   return inputs[IN_INPUT].getChannels();
 }
 

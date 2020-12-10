@@ -1,6 +1,7 @@
 #pragma once
 
 #include "expanders.hpp"
+#include "dsp/Signal.hpp"
 #include "myrisa.hpp"
 
 extern Model *modelSignal;
@@ -10,13 +11,8 @@ namespace myrisa {
 
 struct SignalExpanderMessage : ExpanderMessage {
   float signal[MyrisaModule::maxChannels]{};
+  myrisa::dsp::SignalType signal_type;
   int n_channels;
-};
-
-// TODO
-struct GkoExpanderMessage : ExpanderMessage {
-  float rate[MyrisaModule::maxChannels]{};
-  float pos[MyrisaModule::maxChannels]{};
 };
 
 } // namespace myrisa

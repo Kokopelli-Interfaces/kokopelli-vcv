@@ -2,6 +2,7 @@
 
 #include "definitions.hpp"
 #include "Recording.hpp"
+#include "dsp/Signal.hpp"
 
 namespace myrisa {
 namespace dsp {
@@ -17,7 +18,7 @@ struct Layer {
 
   // TODO
   // std::vector<Recording*> recordings;
-  // std::vector<Recording::Type> types;
+  // std::vector<myrisa::dsp::SignalType> types;
 
   Recording *in;
   Recording *recording_strength;
@@ -26,13 +27,13 @@ struct Layer {
   int samples_per_beat = 0;
 
   // TODO optinoal samples_per_beat?
-  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<unsigned int> target_layers_idx) {
+  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<unsigned int> target_layers_idx, myrisa::dsp::SignalType signal_type) {
     this->start_beat = start_beat;
     this->n_beats = n_beats;
     this->target_layers_idx = target_layers_idx;
 
-    in = new Recording(Recording::Type::AUDIO);
-    recording_strength = new Recording(Recording::Type::PARAM);
+    in = new Recording(signal_type);
+    recording_strength = new Recording(myrisa::dsp::SignalType::PARAM);
   }
 
   inline ~Layer() {
@@ -97,6 +98,6 @@ struct Layer {
   }
 };
 
-} // namespace frame
+} // namespace gko
 } // namespace dsp
 } // namespace myrisa

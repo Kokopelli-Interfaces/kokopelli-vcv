@@ -14,15 +14,15 @@ struct Signal4Widget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<RoganHalfPSRed>(mm2px(Vec(13.772, 71.584)), module, Signal4::VCA_PARAM));
-		addParam(createParam<RoganHalfPSLightPurple>(mm2px(Vec(1.499, 71.609)), module, Signal4::MIX_PARAM));
+		addParam(createParam<RoganHalfPSRed>(mm2px(Vec(13.772, 71.584)), module, Signal4::OUT_ATTENUATION_PARAM));
+		addParam(createParam<RoganHalfPSLightPurple>(mm2px(Vec(1.499, 71.609)), module, Signal4::IN_ATTENUATION_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(4.04, 18.394)), module, Signal4::IN_1_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(12.859, 18.394)), module, Signal4::IN_2_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(4.04, 27.468)), module, Signal4::IN_3_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(12.859, 27.468)), module, Signal4::IN_4_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(14.672, 82.768)), module, Signal4::VCA_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(2.398, 82.792)), module, Signal4::MIX_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(14.672, 82.768)), module, Signal4::OUT_ATTENUATION_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(2.398, 82.792)), module, Signal4::IN_ATTENUATION_INPUT));
 
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(4.04, 44.348)), module, Signal4::SEL_1_OUTPUT));
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(12.926, 44.348)), module, Signal4::SEL_2_OUTPUT));

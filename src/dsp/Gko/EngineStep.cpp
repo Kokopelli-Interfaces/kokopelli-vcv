@@ -64,7 +64,7 @@ inline void Engine::beginRecording() {
     // start_beat = _timeline_position.beat + std::round(_timeline_position.phase);
   // }
 
-  _recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx);
+  _recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type);
 
   if (phaseDefined()) {
     if (_use_ext_phase) {

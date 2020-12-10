@@ -57,6 +57,12 @@ struct Timeline {
   inline float read(TimelinePosition position, Layer* recording, RecordParams record_params) {
     updateLayerAttenuations(position);
 
+    // FIXME multiple recordings in layer, have loop and array of types
+    myrisa::dsp::SignalType signal_type;
+    if (0 < layers.size()) {
+      signal_type = layers[0]->in->_signal_type;
+    }
+
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
       if (layers[i]->readableAtPosition(position)) {
@@ -72,7 +78,9 @@ struct Timeline {
         }
 
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
-        signal_out += layers[i]->readSignal(position) * (1.f - attenuation);
+        float layer_out = layers[i]->readSignal(position);
+        layer_out = myrisa::dsp::attenuate(layer_out, attenuation, signal_type);
+        signal_out = myrisa::dsp::sum(signal_out, layer_out, signal_type);
       }
     }
 
@@ -104,6 +112,6 @@ struct Timeline {
   }
 };
 
-} // namespace frame
+} // namespace gko
 } // namespace dsp
 } // namespace myrisa

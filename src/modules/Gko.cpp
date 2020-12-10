@@ -119,6 +119,8 @@ void Gko::modulateChannel(int channel_index) {
     selected_layers_idx.resize(e->_timeline.layers.size());
     std::iota(std::begin(selected_layers_idx), std::end(selected_layers_idx), 0);
     e->_selected_layers_idx = selected_layers_idx;
+
+    e->_signal_type = _from_signal->signal_type;
   }
 }
 

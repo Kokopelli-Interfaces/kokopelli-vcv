@@ -7,7 +7,7 @@ namespace myrisa {
 struct Play : MyrisaModule {
 	enum ParamIds {
 		OUT_POWER_PARAM,
-		MIX_PARAM,
+		IN_ATTENUATION_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -15,7 +15,7 @@ struct Play : MyrisaModule {
 		GATE_INPUT,
 		VOCT_INPUT,
 		OUT_POWER_INPUT,
-		MIX_INPUT,
+		IN_ATTENUATION_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {
@@ -34,7 +34,7 @@ struct Play : MyrisaModule {
 	Play() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
 		configParam(OUT_POWER_PARAM, 0.f, 1.f, 0.f, "");
-		configParam(MIX_PARAM, 0.f, 1.f, 0.f, "");
+		configParam(IN_ATTENUATION_PARAM, 0.f, 1.f, 0.f, "");
 	}
 
 	void processAlways(const ProcessArgs& args) override;

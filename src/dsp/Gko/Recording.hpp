@@ -6,6 +6,7 @@
 
 #include "dsp/Interpolation.hpp"
 #include "definitions.hpp"
+#include "dsp/Signal.hpp"
 #include "rack.hpp"
 #include "util/math.hpp"
 
@@ -20,21 +21,23 @@ struct Recording {
 
   /* read only */
 
-  enum Type { ATTENUATION, AUDIO, PARAM, CV, GATE, VOCT, VEL };
-  Type type;
+  myrisa::dsp::SignalType _signal_type;
   std::vector<float> buffer;
   rack::dsp::ClockDivider write_divider;
 
-  Recording(Type type) {
-    type = type;
-    switch (type) {
-    case Type::AUDIO: case Type::CV:
+  Recording(myrisa::dsp::SignalType signal_type) {
+    _signal_type = signal_type;
+    switch (_signal_type) {
+    case myrisa::dsp::SignalType::AUDIO:
       write_divider.setDivision(1);
       break;
-    case Type::GATE: case Type::VOCT: case Type::VEL:
+    case myrisa::dsp::SignalType::CV:
+      write_divider.setDivision(10);
+      break;
+    case myrisa::dsp::SignalType::GATE: case myrisa::dsp::SignalType::VOCT: case myrisa::dsp::SignalType::VEL:
       write_divider.setDivision(100); // approx every ~.25ms
       break;
-    case Type::PARAM: case Type::ATTENUATION:
+    case myrisa::dsp::SignalType::PARAM:
       write_divider.setDivision(2000); // approx every ~5ms
       break;
     }
@@ -64,7 +67,7 @@ struct Recording {
   inline void write(double phase, float sample) {
     assert(0.f <= phase);
     assert(phase <= 1.0f);
-    if (type == Type::PARAM) {
+    if (_signal_type == myrisa::dsp::SignalType::PARAM) {
       assert(0.f <= sample);
     }
 
@@ -75,7 +78,7 @@ struct Recording {
 
       // TODO different more sophisticated ways to write?
       // FIXME explodes if in oscillator mode
-      if (type == Type::AUDIO)  {
+      if (_signal_type == myrisa::dsp::SignalType::AUDIO)  {
         int i2 = ceil(position) == length ? 0 : ceil(position);
         float w = position - i;
         buffer[i] += sample * (1 - w);
@@ -83,22 +86,6 @@ struct Recording {
       } else {
         buffer[i] = sample;
       }
-    }
-  }
-
-  inline float getAttenuatedSample(float buffer_sample, float attenuation) {
-    float clamped_attenuation = rack::clamp(attenuation, 0.f, 1.0f);
-    switch (type) {
-    case Type::GATE:
-      if (clamped_attenuation == 1.0f) {
-        return 0.f;
-      } else {
-        return buffer_sample;
-      }
-    case Type::VOCT:
-      return buffer_sample;
-    default:
-      return buffer_sample * (1.0f - clamped_attenuation);
     }
   }
 
@@ -133,12 +120,12 @@ struct Recording {
       return buffer[floor(buffer_position)];
     }
 
-    if (type == Type::AUDIO) {
+    if (_signal_type == myrisa::dsp::SignalType::AUDIO) {
       float interpolated_sample = interpolateHermite(buffer.data(), buffer_position, buffer.size());
       return crossfadeSample(interpolated_sample, phase);
-    } else if (type == Type::CV) {
+    } else if (_signal_type == myrisa::dsp::SignalType::CV) {
       return interpolateLineard(buffer.data(), buffer_position, buffer.size());
-    } else if (type == Type::PARAM) {
+    } else if (_signal_type == myrisa::dsp::SignalType::PARAM) {
       return rack::clamp(interpolateBSpline(buffer.data(), buffer_position, buffer.size()), 0.0, 1.0);
     } else {
       return buffer[floor(buffer_position)];
@@ -147,6 +134,6 @@ struct Recording {
 };
 
 
-} // namespace frame
+} // namespace gko
 } // namespace dsp
 } // namepsace myrisa

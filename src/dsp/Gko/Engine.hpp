@@ -5,6 +5,7 @@
 #include "dsp/PhaseAnalyzer.hpp"
 #include "dsp/PhaseOscillator.hpp"
 #include "dsp/AntipopFilter.hpp"
+#include "dsp/Signal.hpp"
 #include "Layer.hpp"
 #include "rack.hpp"
 
@@ -20,6 +21,9 @@ struct Engine {
   bool _use_ext_phase = false;
   float _ext_phase = 0.f;
   float _sample_time = 1.0f;
+
+  // TODO make me an array to support MIX4 & PLAY
+  myrisa::dsp::SignalType _signal_type;
 
   std::vector<unsigned int> _selected_layers_idx;
   unsigned int _active_layer_i;
@@ -53,6 +57,6 @@ private:
   inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
 };
 
-} // namespace frame
+} // namespace gko
 } // namespace dsp
 } // namespace myrisa

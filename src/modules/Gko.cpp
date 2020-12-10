@@ -96,12 +96,12 @@ void Gko::processAlways(const ProcessArgs &args) {
   }
 }
 
-void Gko::modulateChannel(int channel_index) {
+void Gko::modulateChannel(int channel_i) {
   if (baseConnected()) {
-    myrisa::dsp::gko::Engine *e = _engines[channel_index];
+    myrisa::dsp::gko::Engine *e = _engines[channel_i];
     float record_strength = params[RECORD_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
-      float record_strength_port = inputs[RECORD_INPUT].getPolyVoltage(channel_index) / 10;
+      float record_strength_port = inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10;
       record_strength = rack::clamp(record_strength_port + record_strength, 0.f, 1.0f);
     }
     // taking to the strength of 3 gives a more intuitive curve
@@ -136,24 +136,24 @@ int Gko::channels() {
   return _channels;
 }
 
-void Gko::processChannel(const ProcessArgs& args, int channel_index) {
+void Gko::processChannel(const ProcessArgs& args, int channel_i) {
   if (!baseConnected()) {
     return;
   }
 
-  myrisa::dsp::gko::Engine *e = _engines[channel_index];
+  myrisa::dsp::gko::Engine *e = _engines[channel_i];
 
   if (inputs[PHASE_INPUT].isConnected()) {
-    e->_ext_phase = rack::clamp(inputs[PHASE_INPUT].getPolyVoltage(channel_index) / 10, 0.f, 1.0f);
+    e->_ext_phase = rack::clamp(inputs[PHASE_INPUT].getPolyVoltage(channel_i) / 10, 0.f, 1.0f);
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    outputs[PHASE_OUTPUT].setVoltage(e->_timeline_position.phase * 10, channel_index);
+    outputs[PHASE_OUTPUT].setVoltage(e->_timeline_position.phase * 10, channel_i);
   }
 
-  e->_record_params.in = _from_signal->signal[channel_index];
+  e->_record_params.in = _from_signal->signal[channel_i];
   e->step();
-  _to_signal->signal[channel_index] = e->read();
+  _to_signal->signal[channel_i] = e->read();
 }
 
 void Gko::updateLights(const ProcessArgs &args) {
@@ -260,14 +260,14 @@ void Gko::postProcessAlways(const ProcessArgs &args) {
   }
 }
 
-void Gko::addChannel(int channel_index) {
-  _engines[channel_index] = new myrisa::dsp::gko::Engine();
-  _engines[channel_index]->_sample_time = _sampleTime;
+void Gko::addChannel(int channel_i) {
+  _engines[channel_i] = new myrisa::dsp::gko::Engine();
+  _engines[channel_i]->_sample_time = _sampleTime;
 }
 
-void Gko::removeChannel(int channel_index) {
-  delete _engines[channel_index];
-  _engines[channel_index] = nullptr;
+void Gko::removeChannel(int channel_i) {
+  delete _engines[channel_i];
+  _engines[channel_i] = nullptr;
 }
 
 Model *modelGko = rack::createModel<Gko, GkoWidget>("Myrisa-Gko");

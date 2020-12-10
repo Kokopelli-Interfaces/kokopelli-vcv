@@ -20,7 +20,7 @@ struct Recording {
 
   /* read only */
 
-  enum Type { RECORDING_STRENGTH, AUDIO, PARAM, CV, GATE, VOCT, VEL };
+  enum Type { ATTENUATION, AUDIO, PARAM, CV, GATE, VOCT, VEL };
   Type type;
   std::vector<float> buffer;
   rack::dsp::ClockDivider write_divider;
@@ -34,7 +34,7 @@ struct Recording {
     case Type::GATE: case Type::VOCT: case Type::VEL:
       write_divider.setDivision(100); // approx every ~.25ms
       break;
-    case Type::PARAM: case Type::RECORDING_STRENGTH:
+    case Type::PARAM: case Type::ATTENUATION:
       write_divider.setDivision(2000); // approx every ~5ms
       break;
     }

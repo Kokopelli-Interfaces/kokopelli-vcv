@@ -13,7 +13,6 @@ inline float saturation(float x) {
 	return saturation_limit * (offset + x1 - sqrtf(x1 * x1 - y1 * x) * (1.0f / y1));
 }
 
-
 inline float saturate(float sample) {
 	float x = sample * (1.0f / saturation_limit);
 	if (sample < 0.0f) {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Gko_shared.hpp"
+#include "menu.hpp"
 
 namespace myrisa {
 
@@ -17,7 +18,7 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
 
   Engine *_engines[maxChannels] {};
 
-  myrisa::dsp::SignalType _signal_type = myrisa::dsp::SignalType::GATE;
+  myrisa::dsp::SignalType _signal_type = myrisa::dsp::SignalType::AUDIO;
 
   SignalExpanderMessage *_toGko = nullptr;
   SignalExpanderMessage *_fromGko = nullptr;

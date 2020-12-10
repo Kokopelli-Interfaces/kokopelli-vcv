@@ -22,6 +22,8 @@ struct Layer {
 
   Recording *in;
   Recording *recording_strength;
+
+  // FIXME change me to be an array of bools for O(1) lookup
   std::vector<unsigned int> target_layers_idx;
 
   int samples_per_beat = 0;

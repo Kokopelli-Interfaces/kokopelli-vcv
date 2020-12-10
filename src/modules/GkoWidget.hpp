@@ -145,9 +145,8 @@ struct GkoWidget : ModuleWidget {
       return &m->_options.use_antipop;
     }));
 
-
     // menu->addChild(new Slider());
-};
+  }
 
 };
 

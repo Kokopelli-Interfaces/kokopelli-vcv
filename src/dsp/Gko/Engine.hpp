@@ -31,7 +31,6 @@ struct Engine {
   /* read only */
 
   Layer *_recording_layer = nullptr;
-  bool _recording_active = false;
   RecordParams _record_params;
 
   PhaseOscillator _phase_oscillator;
@@ -52,7 +51,7 @@ private:
   inline bool phaseDefined();
   inline void write();
   inline void endRecording();
-  inline void beginRecording();
+  inline Layer* newRecording();
   inline void handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip);
   inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
 };

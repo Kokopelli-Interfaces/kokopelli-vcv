@@ -25,7 +25,6 @@ inline void Engine::endRecording() {
     assert(_recording_layer != nullptr);
     assert(_recording_layer->n_beats != 0.f);
     assert(_recording_layer->in->size() != 0);
-    assert(_recording_active);
 
     float recording_time = _recording_layer->in->size() * _sample_time;
 
@@ -45,11 +44,10 @@ inline void Engine::endRecording() {
     _timeline.last_calculated_attenuation.resize(_timeline.layers.size());
     _timeline.current_attenuation.resize(_timeline.layers.size());
 
-    _recording_active = false;
     _recording_layer = nullptr;
 }
 
-inline void Engine::beginRecording() {
+inline Layer* Engine::newRecording() {
   assert(_record_params.active());
   assert(_recording_layer == nullptr);
 
@@ -64,26 +62,26 @@ inline void Engine::beginRecording() {
     // start_beat = _timeline_position.beat + std::round(_timeline_position.phase);
   // }
 
-  _recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type);
+  Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type);
 
   if (phaseDefined()) {
     if (_use_ext_phase) {
-      _recording_layer->samples_per_beat = _phase_analyzer.getSamplesPerDivision();
+      recording_layer->samples_per_beat = _phase_analyzer.getSamplesPerDivision();
     } else if (_phase_oscillator.isSet()) {
       float beat_period = 1 / _phase_oscillator.getFrequency();
-      _recording_layer->samples_per_beat = floor(beat_period / _sample_time);
+      recording_layer->samples_per_beat = floor(beat_period / _sample_time);
     }
-    _recording_layer->resizeToLength();
+    recording_layer->resizeToLength();
   }
 
   if (_record_params.time_frame != TimeFrame::TIMELINE) {
-    _recording_layer->loop = true;
+    recording_layer->loop = true;
   }
 
-  _recording_active = true;
-
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d\n", _recording_layer->start_beat, _recording_layer->n_beats, _recording_layer->loop, _recording_layer->samples_per_beat);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d\n", recording_layer->start_beat, recording_layer->n_beats, recording_layer->loop, recording_layer->samples_per_beat);
+
+  return recording_layer;
 }
 
 inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
@@ -98,7 +96,7 @@ inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
       if (_record_params.mode == RecordParams::Mode::DUB) {
       printf("DUB END\n");
         endRecording();
-        beginRecording();
+        _recording_layer = newRecording();
       } else if (_record_params.mode == RecordParams::Mode::EXTEND) {
         _recording_layer->n_beats = _recording_layer->n_beats + 1;
         printf("extend recording to: %d\n", _recording_layer->n_beats);
@@ -130,15 +128,13 @@ void Engine::step() {
     }
   }
 
-  if (_recording_active != _record_params.active()) {
-    if (!_recording_active) {
-      beginRecording();
-    } else {
-      endRecording();
-    }
+  if (!_recording_layer && _record_params.active()) {
+    _recording_layer = newRecording();
+  } else if (_recording_layer && !_record_params.active()) {
+    endRecording();
   }
 
-  if (_recording_active) {
+  if (_recording_layer) {
     write();
   }
 }

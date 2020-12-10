@@ -15,11 +15,13 @@ void Signal::modulateChannel(int c) {
   if (inputs[IN_ATTENUATION_INPUT].isConnected()) {
     e.in_attenuation *= rack::clamp(inputs[IN_ATTENUATION_INPUT].getPolyVoltage(c) / 10.f, 0.f, 1.0f);
   }
+  e.in_attenuation = 1.0f - e.in_attenuation;
 
   e.out_attenuation = params[OUT_ATTENUATION_PARAM].getValue();
   if (inputs[OUT_ATTENUATION_INPUT].isConnected()) {
     e.out_attenuation *= rack::clamp(inputs[OUT_ATTENUATION_INPUT].getPolyVoltage(c) / 10.f, 0.f, 1.0f);
   }
+  e.out_attenuation = 1.0f - e.out_attenuation;
 }
 
 void Signal::processAlways(const ProcessArgs &args) {
@@ -30,9 +32,8 @@ void Signal::processAlways(const ProcessArgs &args) {
 void Signal::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
 
-  // TODO in_attenuation knob with SEL
   float in = inputs[IN_INPUT].getPolyVoltage(c);
-  in = myrisa::dsp::attenuate(in, 1.0f - e.in_attenuation, _signal_type);
+  in = myrisa::dsp::attenuate(in, e.in_attenuation, _signal_type);
 
   float out = in;
   if (expanderConnected()) {
@@ -46,7 +47,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   }
 
   if (outputs[OUT_OUTPUT].isConnected()) {
-    out = myrisa::dsp::attenuate(out, 1.0f - e.out_attenuation, _signal_type);
+    out = myrisa::dsp::attenuate(out, e.out_attenuation, _signal_type);
     outputs[OUT_OUTPUT].setVoltage(out, c);
   }
 }

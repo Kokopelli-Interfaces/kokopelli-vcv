@@ -67,9 +67,6 @@ struct Recording {
   inline void write(double phase, float sample) {
     assert(0.f <= phase);
     assert(phase <= 1.0f);
-    if (_signal_type == myrisa::dsp::SignalType::PARAM) {
-      assert(0.f <= sample);
-    }
 
     if (write_divider.process()) {
       int length = buffer.size();

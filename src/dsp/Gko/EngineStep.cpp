@@ -54,7 +54,7 @@ inline Layer* Engine::newRecording() {
 
   if (phaseDefined()) {
     if (_use_ext_phase) {
-      recording_layer->samples_per_beat = _phase_analyzer.getSamplesPerDivision();
+      recording_layer->samples_per_beat = _phase_analyzer.getSamplesPerBeat(_sample_time);
     } else if (_phase_oscillator.isSet()) {
       float beat_period = 1 / _phase_oscillator.getFrequency();
       recording_layer->samples_per_beat = floor(beat_period / _sample_time);

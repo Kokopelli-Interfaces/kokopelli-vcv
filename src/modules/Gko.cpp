@@ -101,11 +101,10 @@ void Gko::modulateChannel(int channel_i) {
     myrisa::dsp::gko::Engine *e = _engines[channel_i];
     float record_strength = params[RECORD_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
-      float record_strength_port = inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10;
-      record_strength = rack::clamp(record_strength_port + record_strength, 0.f, 1.0f);
+      record_strength *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
     // taking to the strength of 3 gives a more intuitive curve
-    record_strength = rack::clamp(pow(record_strength, 3), 0.f, 1.0f);
+    record_strength = pow(record_strength, 3);
     e->_record_params.strength = record_strength;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();

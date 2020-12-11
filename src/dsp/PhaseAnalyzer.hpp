@@ -13,10 +13,10 @@ struct PhaseAnalyzer {
   float _last_phase = 0.0f;
   float _division_period_estimate = 1.0f;
 
-  rack::dsp::ClockDivider _slope_estimator_divider;
-  float _offset_from_last_sample = 0.0f;
-  float _time_from_last_sample = 0.f;
-  int _samples_per_division = 1;
+  rack::dsp::ClockDivider _phase_division_period_calculator_divider;
+  float _phase_offset_from_last_calculation = 0.0f;
+  float _time_since_last_calculation = 0.f;
+  bool _phase_reversed = false;
 
   enum PhaseFlip {
     FORWARD,
@@ -25,15 +25,15 @@ struct PhaseAnalyzer {
   };
 
   PhaseAnalyzer() {
-    _slope_estimator_divider.setDivision(2500); // ~1/16 second
+    _phase_division_period_calculator_divider.setDivision(2500); // ~1/16 second
   }
 
   inline float getDivisionPeriod() {
     return _division_period_estimate;
   }
 
-  inline float getSamplesPerDivision() {
-    return _samples_per_division;
+  inline float getSamplesPerBeat(float sample_time) {
+    return floor(_division_period_estimate / sample_time);
   }
 
   inline PhaseFlip process(float phase, float sample_time) {
@@ -43,35 +43,40 @@ struct PhaseAnalyzer {
     PhaseFlip phase_flip_type;
 
     if (phase_flip && 0 < phase_change) {
-      _offset_from_last_sample += phase_change - 1;
+      _phase_offset_from_last_calculation += phase_change - 1;
+      _time_since_last_calculation += sample_time;
       phase_flip_type = PhaseFlip::BACKWARD;
     } else if (phase_flip && phase_change < 0) {
-      _offset_from_last_sample += phase_change + 1;
+      _phase_offset_from_last_calculation += phase_change + 1;
+      _time_since_last_calculation += sample_time;
       phase_flip_type = PhaseFlip::FORWARD;
     } else {
-      phase_flip_type = PhaseFlip::NONE;
-      bool in_division_phase_flip =
-          (0 < _offset_from_last_sample &&
-           phase_change < 0) ||
-          (_offset_from_last_sample < 0 &&
-           0 < phase_change);
-      if (!in_division_phase_flip) {
-        _offset_from_last_sample += phase_change;
+      if (!_phase_reversed) {
+        _phase_reversed =
+          (0 < _phase_offset_from_last_calculation &&
+            phase_change < 0) ||
+          (_phase_offset_from_last_calculation < 0 &&
+            0 < phase_change);
       }
+
+      if (!_phase_reversed) {
+        _phase_offset_from_last_calculation += phase_change;
+        _time_since_last_calculation += sample_time;
+      }
+
+      phase_flip_type = PhaseFlip::NONE;
     }
 
-    _time_from_last_sample += sample_time;
-
-    if (_slope_estimator_divider.process()) {
-      float abs_change = fabs(_offset_from_last_sample);
+    if (_phase_division_period_calculator_divider.process()) {
+      float abs_change = fabs(_phase_offset_from_last_calculation);
       if (abs_change != 0) {
-        _division_period_estimate = _time_from_last_sample / abs_change;
-        _samples_per_division = floor(_division_period_estimate / sample_time);
+        _division_period_estimate = _time_since_last_calculation / abs_change;
         // printf("phase period estimate: %fs\n", _phase_period_estimate);
       }
 
-      _offset_from_last_sample = 0;
-      _time_from_last_sample = 0;
+      _phase_reversed = false;
+      _phase_offset_from_last_calculation = 0;
+      _time_since_last_calculation = 0;
     }
 
     _last_phase = phase;

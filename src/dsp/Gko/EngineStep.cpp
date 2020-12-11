@@ -7,20 +7,7 @@ inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();
 }
 
-inline void Engine::write() {
-  assert(_record_params.active());
-  assert(_recording_layer != nullptr);
-
-  if (!phaseDefined()) {
-    _recording_layer->pushBack(_record_params.in, _record_params.strength);
-    _recording_layer->samples_per_beat++;
-  } else if (_recording_layer->writableAtPosition(_timeline_position)) {
-    _recording_layer->write(_timeline_position, _record_params.in, _record_params.strength);
-  } else {
-    printf("Not writable \n");
-  }
-}
-
+// modifies engine
 inline void Engine::endRecording() {
     assert(_recording_layer != nullptr);
     assert(_recording_layer->n_beats != 0.f);
@@ -47,6 +34,7 @@ inline void Engine::endRecording() {
     _recording_layer = nullptr;
 }
 
+// does not modify engine
 inline Layer* Engine::newRecording() {
   assert(_record_params.active());
   assert(_recording_layer == nullptr);
@@ -84,6 +72,9 @@ inline Layer* Engine::newRecording() {
   return recording_layer;
 }
 
+/*
+ * Alters recording layer of engine.
+ */
 inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
   assert(phaseDefined());
 
@@ -121,20 +112,22 @@ inline PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
 }
 
 void Engine::step() {
-  if (phaseDefined()) {
-    PhaseAnalyzer::PhaseFlip phase_flip = advanceTimelinePosition();
+  bool phase_defined = this->phaseDefined();
+
+  if (phase_defined) {
+    PhaseAnalyzer::PhaseFlip phase_flip = this->advanceTimelinePosition();
     if (phase_flip != PhaseAnalyzer::PhaseFlip::NONE) {
-      handlePhaseFlip(phase_flip);
+      this->handlePhaseFlip(phase_flip);
     }
   }
 
   if (!_recording_layer && _record_params.active()) {
-    _recording_layer = newRecording();
+    _recording_layer = this->newRecording();
   } else if (_recording_layer && !_record_params.active()) {
-    endRecording();
+    this->endRecording();
   }
 
   if (_recording_layer) {
-    write();
+    _recording_layer->write(_timeline_position, _record_params, phase_defined);
   }
 }

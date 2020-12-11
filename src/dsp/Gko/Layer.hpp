@@ -43,11 +43,6 @@ struct Layer {
     delete recording_strength;
   }
 
-  inline void pushBack(float signal_sample, float recording_strength_sample) {
-    in->pushBack(signal_sample);
-    recording_strength->pushBack(recording_strength_sample);
-  }
-
   inline void resizeToLength() {
     int new_size = n_beats * samples_per_beat;
     printf("resizeto %d %d so %d\n", n_beats, samples_per_beat, new_size);
@@ -55,48 +50,53 @@ struct Layer {
     recording_strength->resize(new_size);
   }
 
-  inline bool readableAtPosition(TimelinePosition position) {
+  inline bool readableAtPosition(TimelinePosition timeline_position) {
     return loop ?
-      start_beat <= position.beat :
-      start_beat <= position.beat && position.beat < start_beat + n_beats;
+      start_beat <= timeline_position.beat :
+      start_beat <= timeline_position.beat && timeline_position.beat < start_beat + n_beats;
   }
 
-  inline bool writableAtPosition(TimelinePosition position) {
-    return start_beat <= position.beat && position.beat <= start_beat + n_beats;
+  inline bool writableAtPosition(TimelinePosition timeline_position) {
+    return start_beat <= timeline_position.beat && timeline_position.beat <= start_beat + n_beats;
   }
 
-  inline float positionToRecordingPhase(TimelinePosition position) {
-    assert(readableAtPosition(position));
+  inline float positionToRecordingPhase(TimelinePosition timeline_position) {
+    assert(readableAtPosition(timeline_position));
     assert(0 < n_beats);
-    double phase = position.phase;
-    unsigned int layer_beat = (position.beat - start_beat) % n_beats;
+    double phase = timeline_position.phase;
+    unsigned int layer_beat = (timeline_position.beat - start_beat) % n_beats;
     phase += layer_beat;
     return phase / n_beats;
   }
 
-  inline float readSignal(TimelinePosition position) {
-    if (!readableAtPosition(position)) {
+  inline float readSignal(TimelinePosition timeline_position) {
+    if (!readableAtPosition(timeline_position)) {
       return 0.f;
     }
 
-    return in->read(positionToRecordingPhase(position));
+    return in->read(positionToRecordingPhase(timeline_position));
   }
 
-  inline float readRecordingStrength(TimelinePosition position) {
-    if (!readableAtPosition(position)) {
+  inline float readRecordingStrength(TimelinePosition timeline_position) {
+    if (!readableAtPosition(timeline_position)) {
       return 0.f;
     }
 
-    return recording_strength->read(positionToRecordingPhase(position));
+    return recording_strength->read(positionToRecordingPhase(timeline_position));
   }
 
-  inline void write(TimelinePosition position, float signal_sample, float recording_strength_sample) {
-    assert(writableAtPosition(position));
-    assert(0 != in->size());
-    assert(0 != recording_strength->size());
+  inline void write(TimelinePosition timeline_position, RecordParams record_params, bool phase_defined) {
+    if (!phase_defined) {
+      in->pushBack(record_params.in);
+      recording_strength->pushBack(record_params.strength);
+      samples_per_beat++;
+    } else if (writableAtPosition(timeline_position)) {
+      assert(0 != in->size());
+      assert(0 != recording_strength->size());
 
-    in->write(positionToRecordingPhase(position), signal_sample);
-    recording_strength->write(positionToRecordingPhase(position), recording_strength_sample);
+      in->write(positionToRecordingPhase(timeline_position), record_params.in);
+   recording_strength->write(positionToRecordingPhase(timeline_position), record_params.strength);
+    }
   }
 };
 

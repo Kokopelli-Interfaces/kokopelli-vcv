@@ -103,8 +103,8 @@ void Gko::modulateChannel(int channel_i) {
     if (inputs[RECORD_INPUT].isConnected()) {
       record_strength *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
-    // taking to the strength of 3 gives a more intuitive curve
-    record_strength = pow(record_strength, 3);
+    // taking to the strength of 2 gives a more intuitive curve
+    record_strength = pow(record_strength, 2);
     e->_record_params.strength = record_strength;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
@@ -223,11 +223,11 @@ void Gko::updateLights(const ProcessArgs &args) {
   }
 
   switch (displayed_record_params.time_frame) {
-  case TimeFrame::TIMELINE:
+  case TimeFrame::SELECTED_LAYERS:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
-  case TimeFrame::SELECTED_LAYERS:
+  case TimeFrame::TIMELINE:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;

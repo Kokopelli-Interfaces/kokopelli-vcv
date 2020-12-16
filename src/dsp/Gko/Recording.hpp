@@ -139,15 +139,15 @@ struct Recording {
     // TODO different more sophisticated ways to write?
     if (_signal_type == myrisa::dsp::SignalType::AUDIO)  {
       float sample_phase = beat_position - x1;
-      _buffer[t.beat][x1] += sample * (1 - sample_phase);
+      _buffer[t.beat][x1] = _buffer[t.beat][x1] * sample_phase + sample * (1 - sample_phase);
 
       int x2 = ceil(beat_position);
       if (ceil(beat_position) == _samples_per_beat) {
         if (t.beat != _buffer.size() - 1) {
-          _buffer[t.beat + 1][0] += sample * sample_phase;
+          _buffer[t.beat + 1][0] = _buffer[t.beat + 1][0] * (1 - sample_phase) + sample * sample_phase;
         }
       } else {
-        _buffer[t.beat][x2] += sample * sample_phase;
+        _buffer[t.beat][x2] = _buffer[t.beat][x2] * (1 - sample_phase) + sample * sample_phase;
       }
     } else {
       _buffer[t.beat][x1] = sample;

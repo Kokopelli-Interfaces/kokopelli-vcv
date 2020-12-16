@@ -213,11 +213,11 @@ void Gko::updateLights(const ProcessArgs &args) {
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     break;
   case RecordParams::Mode::DUB:
-    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
+    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     break;
   case RecordParams::Mode::REPLACE:
-    lights[RECORD_MODE_LIGHT + 0].value = 0.0;
+    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     break;
   }
@@ -228,11 +228,11 @@ void Gko::updateLights(const ProcessArgs &args) {
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
   case TimeFrame::TIMELINE:
-    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   case TimeFrame::ACTIVE_LAYER:
-    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }
@@ -243,11 +243,11 @@ void Gko::updateLights(const ProcessArgs &args) {
     lights[READ_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
   case TimeFrame::SELECTED_LAYERS:
-    lights[READ_TIME_FRAME_LIGHT + 0].value = 1.0;
+    lights[READ_TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   case TimeFrame::ACTIVE_LAYER:
-    lights[READ_TIME_FRAME_LIGHT + 0].value = 0.0;
+    lights[READ_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }

@@ -36,6 +36,7 @@ struct SignalWidget : ModuleWidget {
     menu->addChild(new MenuLabel());
 
 		OptionsMenuItem* signal_type_menu = new OptionsMenuItem("Signal Type");
+
     signal_type_menu->addItem(OptionMenuItem("Audio", [m]() { return m->_signal_type == SignalType::AUDIO; }, [m]() { m->_signal_type = SignalType::AUDIO; }));
 		signal_type_menu->addItem(OptionMenuItem("Parameter", [m]() { return m->_signal_type == SignalType::PARAM; }, [m]() { m->_signal_type = SignalType::PARAM; }));
 		signal_type_menu->addItem(OptionMenuItem("Gate", [m]() { return m->_signal_type == SignalType::GATE; }, [m]() { m->_signal_type = SignalType::GATE; }));

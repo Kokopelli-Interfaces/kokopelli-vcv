@@ -50,8 +50,6 @@ struct BeatDisplay : GkoValueDisplay {
 struct GkoWidget : ModuleWidget {
   const int hp = 4;
 
-  bool _use_antipop = false;
-
   GkoValueDisplay *current_selection;
   GkoValueDisplay *total_selections;
   GkoValueDisplay *current_section;
@@ -140,11 +138,6 @@ struct GkoWidget : ModuleWidget {
 		assert(m);
 
     menu->addChild(new MenuLabel());
-
-    menu->addChild(new BoolOptionMenuItem("Antipop Filter", [m]() {
-      return &m->_options.use_antipop;
-    }));
-
     // menu->addChild(new Slider());
   }
 

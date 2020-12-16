@@ -22,11 +22,14 @@ struct Recording {
   /* read only */
 
   myrisa::dsp::SignalType _signal_type;
-  std::vector<float> buffer;
+  std::vector<std::vector<float>> _buffer;
+  int _samples_per_beat;
+
   rack::dsp::ClockDivider write_divider;
 
-  Recording(myrisa::dsp::SignalType signal_type) {
+  Recording(myrisa::dsp::SignalType signal_type, int samples_per_beat) {
     _signal_type = signal_type;
+    _samples_per_beat = samples_per_beat;
     switch (_signal_type) {
     case myrisa::dsp::SignalType::AUDIO:
       write_divider.setDivision(1);
@@ -43,90 +46,121 @@ struct Recording {
     }
   }
 
-  inline void resize(int new_size) {
-    int n_samples = new_size / write_divider.getDivision();
-    if (n_samples == 0) {
-      n_samples++;
-    }
-    buffer.resize(n_samples);
-  }
-
-  inline int size() {
-    return buffer.size() * write_divider.getDivision();
-  }
-
   inline void pushBack(float sample) {
-    if (size() == 0) {
+    if (_buffer.size() == 0) {
       write_divider.reset();
-      buffer.push_back(sample);
+      _buffer.push_back(std::vector<float>(0));
+      _buffer[0].push_back(sample);
     } else if (write_divider.process()) {
-      buffer.push_back(sample);
+      _buffer[0].push_back(sample);
     }
+    _samples_per_beat++;
   }
 
-  inline void write(double phase, float sample) {
-    assert(0.f <= phase);
-    assert(phase <= 1.0f);
+  inline float interpolateBuffer(TimePosition t) {
+    assert(t.beat < _buffer.size());
 
-    if (write_divider.process()) {
-      int length = buffer.size();
-      float position = length * phase;
-      int i = floor(position) == length ? length - 1 : floor(position);
+    std::vector<float> nearby;
+    double beat_position = _samples_per_beat * t.phase;
 
-      // TODO different more sophisticated ways to write?
-      // FIXME explodes if in oscillator mode
-      if (_signal_type == myrisa::dsp::SignalType::AUDIO)  {
-        int i2 = ceil(position) == length ? 0 : ceil(position);
-        float w = position - i;
-        buffer[i] += sample * (1 - w);
-        buffer[i2] += sample * (w);
+    int min_samples_for_interpolation = 4;
+    if (_samples_per_beat < min_samples_for_interpolation) {
+      return _buffer[t.beat][floor(beat_position)];
+    }
+
+    int x1 = (int)floor(beat_position);
+    if (x1 == _samples_per_beat) {
+      x1--;
+    }
+    float s1 = _buffer[t.beat][x1];
+
+    float s0;
+    if (x1 == 0) {
+      if (t.beat == 0) {
+        s0 = 0.f;
       } else {
-        buffer[i] = sample;
+        s0 = _buffer[t.beat - 1][_samples_per_beat - 1];
+      }
+    } else {
+      s0 = _buffer[t.beat][x1 - 1];
+    }
+
+    float s2;
+    float s3;
+    if (x1 == _samples_per_beat - 1) {
+      if (t.beat == _buffer.size() - 1) {
+        s2 = 0.f;
+        s3 = 0.f;
+      } else {
+        s2 = _buffer[t.beat + 1][0];
+        s3 = _buffer[t.beat + 1][1];
+      }
+    } else {
+      s2 = _buffer[t.beat][x1 + 1];
+      if (x1 + 1 == _samples_per_beat - 1) {
+        if (t.beat == _buffer.size() - 1) {
+          s3 = 0.f;
+        } else {
+          s3 = _buffer[t.beat + 1][0];
+        }
+      } else {
+        s3 = _buffer[t.beat][x1 + 2];
       }
     }
+
+    float sample_phase = rack::math::eucMod(beat_position, 1.0f);
+    if (_signal_type == myrisa::dsp::SignalType::AUDIO) {
+      return Hermite4pt3oX(s0, s1, s2, s3, sample_phase);
+    } else if (_signal_type == myrisa::dsp::SignalType::CV) {
+      return rack::crossfade(s1, s2, sample_phase);
+    } else if (_signal_type == myrisa::dsp::SignalType::PARAM) {
+      return rack::clamp(BSpline(s0, s1, s2, s3, sample_phase), 0.f, 10.f);
+    } else {
+      return s1;
+    }
   }
 
-  inline float crossfadeSample(float sample, double phase) {
-    const int num_audio_samples_to_fade = 50;
-    float fade_length = (float)num_audio_samples_to_fade / (float)buffer.size();
-    if (1.0f < fade_length) {
-      fade_length = 0.5f;
+  inline void write(TimePosition t, float sample) {
+    assert(0.f <= t.phase);
+    assert(t.phase <= 1.0f);
+
+    unsigned int n_beats = _buffer.size();
+    while (n_beats <= t.beat) {
+      _buffer.push_back(std::vector<float>(_samples_per_beat));
+      n_beats++;
     }
 
-    if (fade_length <= phase) {
-      return sample;
+    double beat_position = _samples_per_beat * t.phase;
+    int x1 = (int)floor(beat_position);
+    if (x1 == _samples_per_beat) {
+      x1--;
     }
 
-    double fade_amount = rescale(phase, 0.0, fade_length, 0.0);
-    return rack::crossfade(buffer[buffer.size()-1], sample, fade_amount);
+    // TODO different more sophisticated ways to write?
+    if (_signal_type == myrisa::dsp::SignalType::AUDIO)  {
+      float sample_phase = beat_position - x1;
+      _buffer[t.beat][x1] += sample * (1 - sample_phase);
+
+      int x2 = ceil(beat_position);
+      if (ceil(beat_position) == _samples_per_beat) {
+        if (t.beat != _buffer.size() - 1) {
+          _buffer[t.beat + 1][0] += sample * sample_phase;
+        }
+      } else {
+        _buffer[t.beat][x2] += sample * sample_phase;
+      }
+    } else {
+      _buffer[t.beat][x1] = sample;
+    }
   }
 
-  inline float read(double phase) {
-    assert(0.f <= phase);
-    assert(phase <= 1.0);
-
-    int size = buffer.size();
+  inline float read(TimePosition t) {
+    int size = _buffer.size();
     if (size == 0) {
       return 0.f;
     }
 
-    float buffer_position = size * phase;
-
-    int min_samples_for_interpolation = 4;
-    if (size < min_samples_for_interpolation) {
-      return buffer[floor(buffer_position)];
-    }
-
-    if (_signal_type == myrisa::dsp::SignalType::AUDIO) {
-      float interpolated_sample = interpolateHermite(buffer.data(), buffer_position, buffer.size());
-      return crossfadeSample(interpolated_sample, phase);
-    } else if (_signal_type == myrisa::dsp::SignalType::CV) {
-      return interpolateLineard(buffer.data(), buffer_position, buffer.size());
-    } else if (_signal_type == myrisa::dsp::SignalType::PARAM) {
-      return rack::clamp(interpolateBSpline(buffer.data(), buffer_position, buffer.size()), 0.0, 1.0);
-    } else {
-      return buffer[floor(buffer_position)];
-    }
+    return interpolateBuffer(t);
   }
 };
 

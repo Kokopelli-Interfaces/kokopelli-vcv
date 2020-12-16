@@ -27,7 +27,7 @@ struct Timeline {
     return old + (current - old) * lambda;
   }
 
-  inline void updateLayerAttenuations(TimelinePosition position) {
+  inline void updateLayerAttenuations(TimePosition position) {
     if (attenuation_calculator_divider.process()) {
       for (unsigned int layer_i = 0; layer_i < layers.size(); layer_i++) {
       float layer_i_attenuation = 0.f;
@@ -54,13 +54,13 @@ struct Timeline {
     }
   }
 
-  inline float read(TimelinePosition position, Layer* recording, RecordParams record_params) {
+  inline float read(TimePosition position, Layer* recording, RecordParams record_params) {
     updateLayerAttenuations(position);
 
     // FIXME multiple recordings in layer, have loop and array of types
     myrisa::dsp::SignalType signal_type;
     if (0 < layers.size()) {
-      signal_type = layers[0]->in->_signal_type;
+      signal_type = layers[0]->_in->_signal_type;
     }
 
     float signal_out = 0.f;
@@ -103,8 +103,8 @@ struct Timeline {
     unsigned int max_n_beats = 0;
 
     for (auto layer : getLayersFromIdx(layer_idx)) {
-      if (max_n_beats < layer->n_beats) {
-        max_n_beats = layer->n_beats;
+      if (max_n_beats < layer->_n_beats) {
+        max_n_beats = layer->_n_beats;
       }
     }
 

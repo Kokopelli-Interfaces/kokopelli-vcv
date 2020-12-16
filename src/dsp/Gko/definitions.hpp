@@ -4,7 +4,7 @@
 
 enum TimeFrame { TIMELINE, SELECTED_LAYERS, ACTIVE_LAYER };
 
-struct TimelinePosition {
+struct TimePosition {
   unsigned int beat = 0;
   double phase = 0.f;
 };
@@ -29,6 +29,4 @@ struct RecordParams {
 };
 
 struct Options {
-  bool use_antipop = false;
-  float antipop_threshold = 0.5f;
 };

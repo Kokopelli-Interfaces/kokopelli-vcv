@@ -4,7 +4,6 @@
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "dsp/PhaseOscillator.hpp"
-#include "dsp/AntipopFilter.hpp"
 #include "dsp/Signal.hpp"
 #include "Layer.hpp"
 #include "rack.hpp"
@@ -37,10 +36,8 @@ struct Engine {
   PhaseAnalyzer _phase_analyzer;
 
   Timeline _timeline;
-  TimelinePosition _timeline_position;
+  TimePosition _timeline_position;
   TimeFrame _read_time_frame;
-
-  AntipopFilter _antipop_filter;
 
   Options _options;
 

@@ -39,5 +39,16 @@ inline float sum(float sample_1, float sample_2, SignalType signal_type) {
   }
 }
 
+inline float crossfade(float sample_1, float sample_2, float fade, SignalType signal_type) {
+  switch (signal_type) {
+  case SignalType::VEL:
+  case SignalType::VOCT:
+  case SignalType::GATE:
+    return sample_1;
+  default:
+    return rack::crossfade(sample_1, sample_2, fade);
+  }
+}
+
 } // namespace dsp
 } // namespace myrisa

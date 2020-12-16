@@ -29,4 +29,5 @@ struct RecordParams {
 };
 
 struct Options {
+  bool use_antipop = false;
 };

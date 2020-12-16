@@ -1,95 +1,81 @@
-NOTE:: README Outdated, 
+* Gko Modules
+These modules provide an interface for adding to, editing, and playing back an arbitary collection
+of signals in time. The signals could be the audio output of some modules, it could be the output
+from your MIDI keyboard, parameter automation...
 
-* Modules For Structure
-These modules, provide the ability to record, loop, edit, playback, and sequence
-signals. I designed the interface for fluidity and simple controls, making them
-suitable for live recording where one can not pause to click and clack.
+The recording interface is the 'Gko' module. You can give it input/output ports by placing one or
+multiple ~SIG~, ~4SIG~, or ~PLAY~ modules next to it.
 
-The signal captured may be audio, in which case, these modules act as a loop
-recorder that can create multi-layered musical sections, and then sequence these
-sections. If capturing control voltage one could use these to record 
-and sequence parameter automation, or as a keyframer. 
+- an editable timeline that plays an arbitrary collection of recorded signals
+- compose by performing
 
-** FRAME
-The function of ~FRAME~ is to record and loop the input signals of the modules on
-it's left. These modules - ~PLAY~, ~SIGNAL~, and ~SIGNAL4~, - define the inputs and
-outputs of ~FRAME~. One can place multiple side by side to introduce more inputs
-and outputs.
+making them suitable for live recording where one can not pause to click and clack.
 
-Despite the simple interface, one can use ~FRAME~ as a multi-track looper, a
-sequencer for musical sections, a delay unit, a sample & hold unit, a sequencer,
-and more! 
-
-There is also a non input-output expander for ~FRAME~ called ~FRAME-X~. This module
-provides additional ~RATE~ and ~POS~ parameters, as well as additional control
-ports.  It enables more creative ways to use ~FRAME~.
-
-~FRAME~ supports [[https://vcvrack.com/manual/Polyphony][polyphonic]] input.
-
-*** Scene Selection
-A scene is simply a collection of looping buffers, or, in frame's terminology, a
+** Gko
+***  Selection
+A version is simply a collection of looping buffers, or, in gko's terminology, a
 collection of 'layers'.
 
-The ~SCENE~ parameter adjusts which scene ~FRAME~ records and reads from.
+The ~VERSION~ parameter adjusts which version ~GKO~ records and reads from.
 
-If ~SCENE~'s position is between two scenes, the behaviour will depend on the
-"scene transition" option. 
-- If set to  'smooth' it will output a weighted mix of both scenes, allowing for smooth crossfading between scenes. 
-- If set to 'discrete', the scene will snap to the nearest scene. 
-- If  set to 'sequence', the scene will snap to the nearest scene at the next
-  clk step, and will also reset the play position of the scene on transitioning. 
+If ~VERSION~'s position is between two versions, the behaviour will depend on the
+"version transition" option.
+- If set to  'smooth' it will output a weighted mix of both versions, allowing for smooth crossfading between versions.
+- If set to 'discrete', the version will snap to the nearest version.
+- If  set to 'sequence', the version will snap to the nearest version at the next
+  clk step, and will also reset the play position of the version on transitioning.
 
-The port directly under ~SCENE~ modulates the parameter, allowing for
-interesting crossfade patterns, or voltage controlled scene sequencing.
+The port directly under ~VERSION~ modulates the parameter, allowing for
+interesting crossfade patterns, or voltage controlled version sequencing.
 
-One may use multiple ~SCENEs~ to sequence musical sections or, in the case ~FRAME~
-is capturing control voltage, a keyframer for control voltage.
+One may use multiple ~VERSIONs~ to sequence musical sections or, in the case ~GKO~
+is capturing control voltage, a keygkor for control voltage.
 
-Scenes that have not recorded anything start with the layers of the scene
-before, so one may progress to the next scene to leave behind a 'checkpoint',
-that one may return to, or to just start developing a new scene by altering the
+Versions that have not recorded anything start with the layers of the version
+before, so one may progress to the next version to leave behind a 'checkpoint',
+that one may return to, or to just start developing a new version by altering the
 current one.
 
-*** Recording with FRAME 
-When ~DELTA~ has moved a small threshold away from 12 o'clock, ~FRAME~ will
-start recording. The scene that ~FRAME~ chooses for recording, is the scene that
-is closest to the sum of the ~SCENE~ parameter and ~SCENE~ port.
+*** Recording with GKO
+When ~DELTA~ has moved a small threshold away from 12 o'clock, ~GKO~ will
+start recording. The version that ~GKO~ chooses for recording, is the version that
+is closest to the sum of the ~VERSION~ parameter and ~VERSION~ port.
 
-If ~FRAME~ detects a clock signal on the ~CLK~ port, it will snap the  recording start
-and end points to mutiples of the clock period. 
+If ~GKO~ detects a clock signal on the ~PHASE~ port, it will snap the  recording start
+and end points to mutiples of the clock period.
 
-Recording behaviour depends on whether ~FRAME~ is in /global/ mode, or /layer/
+Recording behaviour depends on whether ~GKO~ is in /global/ mode, or /layer/
 mode. The ~DELTA_MODE~ button (up-right of ~DELTA~) toggles between these modes.
 The upper LED in the delta section indicates its state.
 
 Recording behaviour also depends on the direction of ~DELTA~'s rotation. If it
 moves clockwise, it activates the /extend/ record mode. If ~DELTA~ moves
 counter-clockwise, it activates /add/ mode. When ~DELTA~ returns to 12 o'clock,
-~FRAME~ finishes recording. The lower LED in the delta section indicates the
+~GKO~ finishes recording. The lower LED in the delta section indicates the
 current recording mode.
 
 The record and delta modes create four recording behaviours when combined.
 **** /global/ and /extend/ mode
-~FRAME~ records the input signal into a new layer, and loops the layer when
+~GKO~ records the input signal into a new layer, and loops the layer when
 ~DELTA~ returns to 12 o'clock.
 
 Used for dubbing a loop with elements that are longer than the current loop
 length - for example, adding a chord progression for a repeating phrase.
 **** /global/ and /add/ mode
-~FRAME~ records the input signal into a new layer with the same length as the
+~GKO~ records the input signal into a new layer with the same length as the
 active layer. On reaching the end, it repeats the process.
 
 Used for continuously recording multiple takes to audition and filter later
 on, or record new layers continuously.
-  
+
 **** /layer/ and /extend/ mode
-  ~FRAME~ records the input signal into the active layer, and upon reaching the
+  ~GKO~ records the input signal into the active layer, and upon reaching the
   end, will continue recording as well as extend the active layer by looping
   the old contents.
 
   Used for creating variation at the xth repetition of a layer.
 **** /layer/ and /add/ mode
-~FRAME~ records the input signal into the active layer and when it reaches the
+~GKO~ records the input signal into the active layer and when it reaches the
 loop end, it repeats the process.
 
 Used for continuously overdubbing a layer.
@@ -110,40 +96,78 @@ signal, it creates attenuation envelopes and when fully turned, erases parts of
 previous layers.
 
 *** Button Behaviour
-Excluding the ~DELTA_MODE~ button, there are four other buttons on ~FRAME~.
+Excluding the ~DELTA_MODE~ button, there are four other buttons on ~GKO~.
 
-The button to the upper left of ~DELTA~ is the ~UNDO~ button. ~FRAME~ keeps
+The button to the upper left of ~DELTA~ is the ~UNDO~ button. ~GKO~ keeps
 track of states before and after engaging record modes, and ~UNDO~ recalls the
-previous states. When one presses ~UNDO~ in a record mode, ~FRAME~ will discard
+previous states. When one presses ~UNDO~ in a record mode, ~GKO~ will discard
 any changes, and try again on the next loop start of the selected layer.
 
 The ~PREV~ and ~NEXT~ buttons change the active layer, and the ~PLAY~ button
 resets all layer positions to the beginning.
-*** FRAME Additional Uses Cases
+***
+
+*** GKO Additional Uses Cases
 **** Delay Unit
-~FRAME~ can function as a delay unit in the case /add/ mode is consistently on
+~GKO~ can function as a delay unit in the case /add/ mode is consistently on
 in /layer/ mode. ~DELTA~ would control the feedback in this case.
 
-One may use ~FRAME-X~ to change the rate and offset of the delays to produce
+One may use ~GKO-X~ to change the rate and offset of the delays to produce
 cool delay effects.
 
-** FRAME Expansion Modules
+**** Pitch Shifter
+When one sets up ~GKO~ as a delay unit with a small layer size and adjusts
+the ~RATE~ of ~GKO-X~, it will seem like the pitch of the sound is higher or
+lower.
+
+**** Advanced Sample & Hold / Sequencer
+When one sets ~RATE~ to 0, ~GKO~ does not progress at all but still may record
+and read signals. In this case, it acts as an advanced sample and hold module.
+Adjusting the ~VERSION~ knob smoothly transitions between samples.
+
+One may sequence samples in interesting ways using the ~VERSION~ modulation port.
+**** Advanced 'MIDI' Looper
+When ~GKO~ is expanding ~PLAY~, one may create interesting playback patterns
+by recording some GATE, VOCT, and VEL signals, and varying or modulating the
+~RATE~ and ~POS~ ports. One idea is to record a chord, and modulate ~RATE~ and
+~POS~ with low frequency noise sources with channel variation to create
+fluctuating, dreamy note sequences.
+**** An Instrument
+One may patch the ~RATE~ port with a VOCT signal, and the ~PLAY~ port with a
+GATE signal, patch the output VCA with a GATE controlled envelope, and play
+~GKO~ as if it were an instrument.
+
+This use case applies to all the additional use cases below.
+
+**** Wonky Audio Playback Unit
+One may patch the ~RATE~ port to modulate the speed of playback and recording,
+and one may patch the ~POS~ port to modulate the offset of ~GKO~ layers.
+Using these, one could get some cool sounds with ~GKO~ - especially if there
+is variation across channels. Have you ever wondered what playing back speech
+with a sin wave sounds like? I have.
+
+**** Wavetable Oscillator with Additive and Subtractive Synthesis Capabilities
+~GKO~ can be a wavetable oscillator if either the ~PHASE~ rate is high, 
+
+In this use case, the ~VERSION~ parameter morphs between recorded waves, and the
+~DELTA~ parameter would add or subract from a ~VERSIONs~ wave.
+** GKO Expansion Modules
 *** SIGNAL
 ~SIGNAL~ takes an arbitrary signal as input, sends it to
-~FRAME~, and outputs a mix of the input signal and output from ~FRAME~.
+~GKO~, and outputs a mix of the input signal and output from ~GKO~.
 
-It also outputs ~FRAME~'s selected layer(s). This is useful in the case of
+It also outputs ~GKO~'s selected layer(s). This is useful in the case of
 applying audio functions (or signal functions) to particular layers in
-~FRAME~. To do this, one would select a layer, route ~SEL~ into other VCV Rack
+~GKO~. To do this, one would select a layer, route ~SEL~ into other VCV Rack
 modules, route the output of those modules back into the input, and modify the
 layer by engaging recording in /layer/ mode.
 
 **** MIX
-- At 7 O'clock, ~SIG~ only outputs ~FRAME~ output, and the input signal is fully
-  attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when ~FRAME~ enters a record mode.
+- At 7 O'clock, ~SIG~ only outputs ~GKO~ output, and the input signal is fully
+  attenuated. This is useful to control the input power, but also in the case multiple expansion modules exist so to not record this input signal when ~GKO~ enters a record mode.
 - At 12 O'clock, the input signal is not attenuated.
 - At 5 O'clock, the input signal is still not attenuated, and ~SIG~ outputs 100% of
-  ~FRAME~'s /active layer/. Used for auditioning multiple takes that were loop
+  ~GKO~'s /active layer/. Used for auditioning multiple takes that were loop
   recorded, and for using /layer/ mode without sonic clutter from other layers.
 **** VCA
 A VCA for the output. Used for setting or modulating the output volume.
@@ -151,93 +175,45 @@ A VCA for the output. Used for setting or modulating the output volume.
 ~4IGNAL~ is ~SIGNAL~, just with 4 ports instead of 1. Its used for capturing
 multiple signals, as it saves space compared to 4 ~SIGNAL~ modules set side by
 side.
-*** PLAY
-~PLAY~ takes 3 polyphonic (or monophonic) signals associated with MIDI recording
-as input.
+*** PLAY~ 
+takes 3 signals associated with MIDI recording as input.
 
 ~PLAY~ functions just like ~SIG~, with a difference in how it attenuates signals.
 Attenuation only affects VEL (velocity) signals until max attenuation, where it
 also removes GATE signals and holds VOCT signals.
 
-*** FRAME-X
-This module is an expander for ~FRAME~. When placed on its right side, it gives
-it extra ~RATE~, and ~POS~ parameters, as well as ports for controlling ~PREV~,
-~NEXT~, and ~PLAY~.
-
-This module enables more ways to use ~FRAME~, checkout the footnotes section if interested.
-
-The ~POS~ parameter controls the start offset of the layers in the scene.
-
-The ~RATE~ parameter controls the speed at which ~FRAME~ plays back the layers
-in the scene.
-
-All the button ports react to rising edges. The ports underneath ~POS~ and
-~RATE~ modulate the parameters.
-**** FRAME-X Usage Ideas
-***** Pitch Shifter
-When one sets up ~FRAME~ as a delay unit with a small layer size and adjusts
-the ~RATE~ of ~FRAME-X~, it will seem like the pitch of the sound is higher or
-lower.
-
-***** Advanced Sample & Hold / Sequencer
-When one sets ~RATE~ to 0, ~FRAME~ does not progress at all but still may record
-and read signals. In this case, it acts as an advanced sample and hold module.
-Adjusting the ~SCENE~ knob smoothly transitions between samples.
-
-One may sequence samples in interesting ways using the ~SCENE~ modulation port.
-***** Advanced 'MIDI' Looper
-When ~FRAME~ is expanding ~PLAY~, one may create interesting playback patterns
-by recording some GATE, VOCT, and VEL signals, and varying or modulating the
-~RATE~ and ~POS~ ports. One idea is to record a chord, and modulate ~RATE~ and
-~POS~ with low frequency noise sources with channel variation to create
-fluctuating, dreamy note sequences.
-***** An Instrument
-One may patch the ~RATE~ port with a VOCT signal, and the ~PLAY~ port with a
-GATE signal, patch the output VCA with a GATE controlled envelope, and play
-~FRAME~ as if it were an instrument.
-
-This use case applies to all the additional use cases below.
-
-***** Wonky Audio Playback Unit 
-One may patch the ~RATE~ port to modulate the speed of playback and recording,
-and one may patch the ~POS~ port to modulate the offset of ~FRAME~ layers.
-Using these, one could get some cool sounds with ~FRAME~ - especially if there
-is variation across channels. Have you ever wondered what playing back speech
-with a sin wave sounds like? I have.
-
-***** Wavetable Oscillator with Additive and Subtractive Synthesis Capabilities
-~FRAME~ can be a wavetable oscillator if either the ~CLK~ rate is high, or a
-high frequency saw wave is input into ~POS~.
-
-In this use case, the ~SCENE~ parameter morphs between recorded waves, and the
-~DELTA~ parameter would add or subract from a ~SCENEs~ wave.
-***** Granular Synthesis Engine Component
-To use ~FRAME~ as a granulart synthesis engine component, one would record an
-audio signal, then patch a constant polyphonic signal with channel variation
-into ~POS~.
-
-To create the grains, one would patch the ~VCA~ in ~SIGNAL~ with short, repeating
-envelopes with phase variation across channels.
-
 ** TIMELINE
-Recall how ~FRAME~ keeps track of it's state before and after a recording starts.
-The ~TIMELINE~ module is essentially a sequencer for all ~FRAME~ module states. One
-could leave ~TIMELINE~ in record mode, record a live-looping performance with
-~FRAME~, rewind time via the ~TIMELINE~ module, and play back the performance.
-Rewinding / scrubbing time via the ~TIMELINE~ module will also scrub the playback
-position of all ~FRAME~'s so to preserve deterministic playback.
 
-TODO
+* Macro Modules 
+a macro is a strip of modules that have parameter values, inputs, and outputs. 
+The parameter values, and input and output ports are defined through the ~M-~ modules. 
+One is able to save/load macros.
+One is able to send macro outputs to macro inputs without using cables. This is so one may send
+between [-100%, 100%] of a signal to a port without involving large matrices, and also so that
+multiple macro out ports may be routed to the same in port with intuitive summing behaviour (e.g.
+don't sum pitch, keep gates at 0 or 10v, saturate audio, hard clip cv). having control over routing
+like this allows for routing to be recorded by ~GKO~.
 
-* Modules for an OSC Interface
+The ~M-~ modules stay when one loads a new macro so that one can swap out macros and preserve the
+connections on the input and output ports. 
+This allows one to create macros of a particular type (e.g. audio FX, modulation source, sound
+source, sound source player), and audition different ones quickly.
+
+~MACRO~ is also expandable by ~GKO~, in which case, ~GKO~ will record and playback the output of the Macro, the parameter
+values, parameter changes, the routing of the output, as well as which macro is loaded. 
+
+After this is done, one can record new layers, optionally changing the macro to something else. 
+Later on, one would be able to select the previously recorded layer through ~GKO~, and it will revert
+to the macro, parameter values, outputs, and parameter changes, at the time of recording.
+This allows one to adjust the aspects involved in the production of previously recorded layers.
 
 ** [#B] MACRO
 Defines a macro. A macro consists of one or multiple ~M-PARAM~, and ~M-IN~ modules,
 a strip of modules that follow it, and one or multiple ~M-OUT~ modules after the
-strip, which touch the ~MACRO~ module.
+strip, which end by touching the ~MACRO~ module.
 
 User can enter a name for the macro, and save to file similar
-to stoermelders ~STRIP~. The user can also use it to load macro files. 
+to stoermelders ~STRIP~. The user can also use it to load macro files.
 
 ** M-PARAM
 8 parameter mapping slots, with a place to enter an optional alias for the
@@ -251,29 +227,40 @@ Placed on the left side of a strip of modules.
 8 in ports, with place to enter names, as well as labels about type of signal
 - gates (blue), clks (purple), triggers (light blue), control (yellow), audio
   (red), voct (green)
-  
-These ports define the output of the macro. they can be routed via OSC to any
-~M-IN~ module, as well as recorded via a ~FRAME~ like interface.
+
+These ports define the output of the macro. they can be routed to any
+~M-IN~ module by selecting one or multiple ports, and twisting the knob of the ~M-IN~ port either 100%
+to the right (send 100% of the signal) or full left (send -100% of the signal). When a port is
+selected, each ~M-IN~ module knobs is updated to reflect that ports send to that port.
 
 Placed on the right side of a strip of modules.
 
 ** M-IN
 8 out ports, with place to enter names, as well as labels about type of signal.
-  
+
 These ports define the inputs for a macro. The signal on them can come from any ~M-OUT~ module.
 
 Placed on the left side of a strip of modules.
-
+* OSC Interface Modules
 ** INTERFACE
-This  module is the brains of the Sound Interface. The user inputs an address
-where it will listen for OSC messages from the controller. It will react to
-these messages and do multiple tasks, such  as 
-- control the routings between ~M-OUT~ and ~M-IN~ modules. (control macro routing)
-- control the values of ~M-PARAM~ modules. (control macro parameters)
-- record and loop ~M-OUT~ module outputs ('frame' macros)
-- intelligently disable modules that have a recording downstream of
-  the routing graph.
-- change active macros
-- control the timeline
+The user inputs an address where it will listen for OSC messages from the controller. 
 
-  
+It will be able to:
+- control the values of ~M-PARAM~ modules. (macro parameters)
+- control the routings between ~M-OUT~ and ~M-IN~ modules. (macro routing)
+- change macro of ~MACRO~ module (macro switching)
+- select which macros ~GKO~'s are active with ~GKO-MUX~ module. (arming recording for selected macros)
+- use ~GKO~ controls on ~GKO-MUX~ module (record (and other things) )
+- control ~TIME~ module
+
+It will receive data for display:
+- names of macro parameters
+- parameter values of macros
+- names of macros
+- routing between macros
+- timeline data
+- which macros are available to load
+- gko information
+
+TODO Should the messages follow a custom protocol that control Macro's, the Gko-Mux module, and the Time
+module? Or should it be generic signals and no 'under the hood' controls, just parameter mapping and cables?

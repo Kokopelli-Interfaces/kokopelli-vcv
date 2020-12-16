@@ -52,8 +52,8 @@ private:
   inline void write();
   inline void endRecording();
   inline Layer* newRecording();
-  inline void handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip);
-  inline PhaseAnalyzer::PhaseFlip advanceTimelinePosition();
+  inline void handlePhaseEvent(PhaseAnalyzer::PhaseEvent flip);
+  inline PhaseAnalyzer::PhaseEvent advanceTimelinePosition();
 };
 
 } // namespace gko

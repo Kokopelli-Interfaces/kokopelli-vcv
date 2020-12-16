@@ -20,7 +20,8 @@ A 'layer' will be a layer of the macro, includes
   In 'layer' mode, you can 
 
 * TODO Gko 
-** TODO [#B] make recordings an  array of phase bufferse, not one, to avoid downsampling
+** DONE [#B] make recordings an  array of phase bufferse, not one, to avoid downsampling
+CLOSED: [2020-12-16 Wed 13:26]
 ** TODO get displays working
 - show scene length and layer length
 ** TODO dub has length of last layer

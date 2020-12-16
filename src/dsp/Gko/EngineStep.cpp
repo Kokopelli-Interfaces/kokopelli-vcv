@@ -65,13 +65,11 @@ inline Layer* Engine::newRecording() {
   return recording_layer;
 }
 
-/*
- * Alters recording layer of engine.
- */
-inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
+inline void Engine::handlePhaseEvent(PhaseAnalyzer::PhaseEvent event) {
   assert(phaseDefined());
 
-  if (_recording_layer) {
+  bool phase_flip = (event == PhaseAnalyzer::PhaseEvent::FORWARD || event == PhaseAnalyzer::PhaseEvent::BACKWARD);
+  if (_recording_layer && phase_flip) {
     assert(_recording_layer != nullptr);
     assert(_recording_layer->_in->_samples_per_beat != 0);
 
@@ -87,29 +85,33 @@ inline void Engine::handlePhaseFlip(PhaseAnalyzer::PhaseFlip flip) {
       }
     }
   }
+
+  if (event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && _options.use_antipop) {
+    _antipop_filter.trigger();
+  }
 }
 
-inline PhaseAnalyzer::PhaseFlip Engine::advanceTimelinePosition() {
+inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
   float internal_phase = _phase_oscillator.step(_sample_time);
   _timeline_position.phase = _use_ext_phase ? _ext_phase : internal_phase;
 
-  PhaseAnalyzer::PhaseFlip phase_flip = _phase_analyzer.process(_timeline_position.phase, _sample_time);
-  if (phase_flip == PhaseAnalyzer::PhaseFlip::BACKWARD && 1 <= _timeline_position.beat) {
+  PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(_timeline_position.phase, _sample_time);
+  if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD && 1 <= _timeline_position.beat) {
     _timeline_position.beat--;
-  } else if (phase_flip == PhaseAnalyzer::PhaseFlip::FORWARD) {
+  } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
     _timeline_position.beat++;
   }
 
-  return phase_flip;
+  return phase_event;
 }
 
 void Engine::step() {
   bool phase_defined = this->phaseDefined();
 
   if (phase_defined) {
-    PhaseAnalyzer::PhaseFlip phase_flip = this->advanceTimelinePosition();
-    if (phase_flip != PhaseAnalyzer::PhaseFlip::NONE) {
-      this->handlePhaseFlip(phase_flip);
+    PhaseAnalyzer::PhaseEvent phase_event = this->advanceTimelinePosition();
+    if (phase_event != PhaseAnalyzer::PhaseEvent::NONE) {
+      this->handlePhaseEvent(phase_event);
     }
   }
 

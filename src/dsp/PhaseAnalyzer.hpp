@@ -10,6 +10,8 @@ namespace dsp {
    Tracks a phase signal, typically a saw wave in [0.0, 1.0]. Notifies when signal has flipped, and also estimates the period by sampling the signal and finding the slope, taking into consideration possible phase flips. Works for slow phase signals where one can not wait to get period by waiting for a repetition.
 */
 struct PhaseAnalyzer {
+  const float _discontinuity_change_threshold = 0.05f;
+
   float _last_phase = 0.0f;
   float _division_period_estimate = 1.0f;
 
@@ -18,9 +20,10 @@ struct PhaseAnalyzer {
   float _time_since_last_calculation = 0.f;
   bool _phase_reversed = false;
 
-  enum PhaseFlip {
+  enum PhaseEvent {
     FORWARD,
     BACKWARD,
+    DISCONTINUITY,
     NONE,
   };
 
@@ -36,20 +39,20 @@ struct PhaseAnalyzer {
     return floor(_division_period_estimate / sample_time);
   }
 
-  inline PhaseFlip process(float phase, float sample_time) {
+  inline PhaseEvent process(float phase, float sample_time) {
     float phase_change = phase - _last_phase;
     float phase_abs_change = fabs(phase_change);
     bool phase_flip = (phase_abs_change > 0.95 && phase_abs_change <= 1.0);
-    PhaseFlip phase_flip_type;
+    PhaseEvent phase_event;
 
     if (phase_flip && 0 < phase_change) {
       _phase_offset_from_last_calculation += phase_change - 1;
       _time_since_last_calculation += sample_time;
-      phase_flip_type = PhaseFlip::BACKWARD;
+      phase_event = PhaseEvent::BACKWARD;
     } else if (phase_flip && phase_change < 0) {
       _phase_offset_from_last_calculation += phase_change + 1;
       _time_since_last_calculation += sample_time;
-      phase_flip_type = PhaseFlip::FORWARD;
+      phase_event = PhaseEvent::FORWARD;
     } else {
       if (!_phase_reversed) {
         _phase_reversed =
@@ -64,7 +67,11 @@ struct PhaseAnalyzer {
         _time_since_last_calculation += sample_time;
       }
 
-      phase_flip_type = PhaseFlip::NONE;
+      if (_discontinuity_change_threshold < phase_abs_change) {
+        phase_event = PhaseEvent::DISCONTINUITY;
+      } else {
+        phase_event = PhaseEvent::NONE;
+      }
     }
 
     if (_phase_division_period_calculator_divider.process()) {
@@ -81,7 +88,7 @@ struct PhaseAnalyzer {
 
     _last_phase = phase;
 
-    return phase_flip_type;
+    return phase_event;
   }
 };
 

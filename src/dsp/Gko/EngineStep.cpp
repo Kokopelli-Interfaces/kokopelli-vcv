@@ -12,6 +12,7 @@ inline void Engine::endRecording() {
     assert(_recording_layer != nullptr);
     assert(_recording_layer->_n_beats != 0.f);
 
+    printf("- rec end\n");
     printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat);
 
     if (!_phase_oscillator.isSet()) {

@@ -6,7 +6,7 @@ namespace myrisa {
 
 struct GkoValueDisplay : TextBox {
 	Gko *_module;
-	int _previous_displayed_value = 0;
+	int _previous_displayed_value = -1;
 
 	GkoValueDisplay(Gko *m) : TextBox() {
     _module = m;
@@ -45,11 +45,17 @@ struct ActiveLayerDisplay : GkoValueDisplay {
       if (e == NULL) {
         return;
       }
-      int active_layer = e->_active_layer_i + 1;
-      if (e->_timeline.layers.size() == 0) {
-        active_layer = 0;
+
+      if (e->_recording_layer != nullptr) {
+        GkoValueDisplay::setText("N");
+      } else {
+        int active_layer_i = e->_active_layer_i + 1;
+        if (e->_timeline.layers.size() == 0) {
+          active_layer_i = 0;
+        }
+        std::string s = string::f("%d", active_layer_i);
+        GkoValueDisplay::setText(s);
       }
-      GkoValueDisplay::setDisplayValue(active_layer);
 		}
 	}
 };
@@ -60,12 +66,17 @@ struct LayerBeatDisplay : GkoValueDisplay {
 		GkoValueDisplay::step();
 		if(_module) {
       myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
 
       int layer_beat = 0;
       if (e->_recording_layer != nullptr) {
         layer_beat = e->_recording_layer->getLayerBeat(e->_timeline_position.beat);
       } else if (e->_timeline.layers.size() != 0) {
         layer_beat = e->_timeline.layers[e->_active_layer_i]->getLayerBeat(e->_timeline_position.beat);
+      } else {
+        layer_beat = -1;
       }
 
       GkoValueDisplay::setDisplayValue(layer_beat + 1);
@@ -79,6 +90,9 @@ struct TotalLayerBeatDisplay : GkoValueDisplay {
 		GkoValueDisplay::step();
 		if(_module) {
       myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
 
       int total_layer_beats = 0;
       if (e->_recording_layer != nullptr) {
@@ -91,7 +105,6 @@ struct TotalLayerBeatDisplay : GkoValueDisplay {
 		}
 	}
 };
-
 
 struct CircleBeatDisplay : GkoValueDisplay {
   using GkoValueDisplay::GkoValueDisplay;
@@ -107,6 +120,8 @@ struct CircleBeatDisplay : GkoValueDisplay {
       unsigned int circle_beat = 0;
       if (total_circle_beats != 0) {
         circle_beat = (e->_timeline_position.beat - e->_timeline.getCircleStartBeat(e->_timeline_position)) % total_circle_beats;
+      } else {
+        circle_beat = -1;
       }
 
       GkoValueDisplay::setDisplayValue(circle_beat + 1);
@@ -134,8 +149,12 @@ struct TotalLayersDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
+      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
       // TODO make me just the non attenuated layers
-      int total_layers = _module->_engines[0]->_timeline.layers.size();
+      int total_layers = e->_timeline.layers.size();
       GkoValueDisplay::setDisplayValue(total_layers);
 		}
 	}
@@ -146,7 +165,11 @@ struct BeatDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      int beat = _module->_engines[0]->_timeline_position.beat;
+      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
+      int beat = e->_timeline_position.beat;
       GkoValueDisplay::setDisplayValue(beat);
 		}
 	}
@@ -157,7 +180,7 @@ struct GkoWidget : ModuleWidget {
 
   bool _use_antipop = false;
 
-  ActiveLayerDisplay *active_layer;
+  ActiveLayerDisplay *active_layer_i;
   TotalLayersDisplay *total_layers;
 
   LayerBeatDisplay *layer_beat;
@@ -203,10 +226,10 @@ struct GkoWidget : ModuleWidget {
 
     auto display_size = mm2px(Vec(9.096, 4.327));
 
-		active_layer = new ActiveLayerDisplay(module);
-    active_layer->box.pos = mm2px(Vec(2.921, 16.235));
-    active_layer->box.size = display_size;
-    addChild(active_layer);
+		active_layer_i = new ActiveLayerDisplay(module);
+    active_layer_i->box.pos = mm2px(Vec(2.921, 16.235));
+    active_layer_i->box.size = display_size;
+    addChild(active_layer_i);
 
     total_layers = new TotalLayersDisplay(module);
     total_layers->box.pos = mm2px(Vec(13.387, 16.236));

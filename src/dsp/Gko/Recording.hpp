@@ -58,7 +58,9 @@ struct Recording {
   }
 
   inline float interpolateBuffer(TimePosition t) {
-    assert(t.beat < _buffer.size());
+    if (_buffer.size() <= t.beat) {
+      return 0.f;
+    }
 
     std::vector<float> nearby;
     double beat_position = _samples_per_beat * t.phase;

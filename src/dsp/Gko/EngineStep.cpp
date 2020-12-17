@@ -25,8 +25,8 @@ inline void Engine::endRecording() {
     }
 
     _timeline.layers.push_back(_recording_layer);
-    _timeline.last_calculated_attenuation.resize(_timeline.layers.size());
-    _timeline.current_attenuation.resize(_timeline.layers.size());
+        _timeline._last_calculated_attenuation.resize(_timeline.layers.size());
+    _timeline._current_attenuation.resize(_timeline.layers.size());
 
     _recording_layer = nullptr;
 }
@@ -37,7 +37,7 @@ inline Layer* Engine::newRecording() {
   assert(_recording_layer == nullptr);
 
   unsigned int n_beats = 1;
-  if (_record_params.mode == RecordParams::Mode::DUB && 0 < _selected_layers_idx.size()) {
+  if (_record_params.mode == RecordParams::Mode::DUB && 0 < _timeline.layers.size()) {
     n_beats = _timeline.layers[_active_layer_i]->_n_beats;
   }
 
@@ -60,7 +60,7 @@ inline Layer* Engine::newRecording() {
   }
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %ld\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
 
   return recording_layer;
 }

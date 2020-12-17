@@ -12,7 +12,7 @@ struct GkoValueDisplay : TextBox {
     _module = m;
       // font = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/nunito/Nunito-Bold.ttf"));
     // font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Overpass-Regular.ttf"));
-    font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Overpass-Bold.ttf"));
+    font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Nunito-Bold.ttf"));
     font_size = 12;
     letter_spacing = 0.f;
     // backgroundColor = nvgRGB(0xee, 0xe8, 0xd5); // solarized base2
@@ -47,6 +47,32 @@ struct BeatDisplay : GkoValueDisplay {
 	}
 };
 
+struct ActiveLayerDisplay : GkoValueDisplay {
+  using GkoValueDisplay::GkoValueDisplay;
+	void step() override {
+		GkoValueDisplay::step();
+		if(_module) {
+      int active_layer = _module->_engines[0]->_active_layer_i + 1;
+      if (_module->_engines[0]->_timeline.layers.size() == 0) {
+        active_layer = 0;
+      }
+      GkoValueDisplay::setDisplayValue(active_layer);
+		}
+	}
+};
+
+struct TotalLayersDisplay : GkoValueDisplay {
+  using GkoValueDisplay::GkoValueDisplay;
+	void step() override {
+		GkoValueDisplay::step();
+		if(_module) {
+      // TODO make me just the non attenuated layers
+      int total_layers = _module->_engines[0]->_timeline.layers.size();
+      GkoValueDisplay::setDisplayValue(total_layers);
+		}
+	}
+};
+
 struct GkoWidget : ModuleWidget {
   const int hp = 4;
 
@@ -58,6 +84,9 @@ struct GkoWidget : ModuleWidget {
   GkoValueDisplay *total_sections;
   GkoValueDisplay *current_section_division;
   GkoValueDisplay *total_section_divisions;
+
+  ActiveLayerDisplay *active_layer;
+  TotalLayersDisplay *total_layers;
   BeatDisplay *time;
 
   GkoWidget(Gko *module) {
@@ -94,15 +123,15 @@ struct GkoWidget : ModuleWidget {
 
     auto display_size = mm2px(Vec(9.096, 4.327));
 
-		current_selection = new GkoValueDisplay(module);
-    current_selection->box.pos = mm2px(Vec(2.921, 16.235));
-    current_selection->box.size = display_size;
-    addChild(current_selection);
+		active_layer = new ActiveLayerDisplay(module);
+    active_layer->box.pos = mm2px(Vec(2.921, 16.235));
+    active_layer->box.size = display_size;
+    addChild(active_layer);
 
-    total_selections = new GkoValueDisplay(module);
-    total_selections->box.pos = mm2px(Vec(13.387, 16.236));
-    total_selections->box.size = display_size;
-    addChild(total_selections);
+    total_layers = new TotalLayersDisplay(module);
+    total_layers->box.pos = mm2px(Vec(13.387, 16.236));
+    total_layers->box.size = display_size;
+    addChild(total_layers);
 
     display_size = mm2px(Vec(6.837, 4.327));
 
@@ -133,7 +162,7 @@ struct GkoWidget : ModuleWidget {
     time->box.size = display_size;
     time->textOffset = Vec(time->box.size.x * 0.5f, 0.f);
     addChild(time);
-}
+  }
 
 	void appendContextMenu(rack::Menu* menu) override {
 		auto m = dynamic_cast<Gko*>(module);

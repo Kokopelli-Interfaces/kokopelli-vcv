@@ -14,12 +14,14 @@ namespace gko {
 struct Timeline {
   std::vector<Layer*> layers;
 
-  std::vector<float> current_attenuation;
-  std::vector<float> last_calculated_attenuation;
-  rack::dsp::ClockDivider attenuation_calculator_divider;
+  /** read only */
+
+  std::vector<float> _current_attenuation;
+  std::vector<float> _last_calculated_attenuation;
+  rack::dsp::ClockDivider _attenuation_calculator_divider;
 
   Timeline() {
-    attenuation_calculator_divider.setDivision(2000);
+    _attenuation_calculator_divider.setDivision(2000);
   }
 
   static inline float smoothValue(float current, float old) {
@@ -28,10 +30,10 @@ struct Timeline {
   }
 
   inline void updateLayerAttenuations(TimePosition position) {
-    if (attenuation_calculator_divider.process()) {
+    if (_attenuation_calculator_divider.process()) {
       for (unsigned int layer_i = 0; layer_i < layers.size(); layer_i++) {
-      float layer_i_attenuation = 0.f;
-        for (unsigned int j = layer_i; j < layers.size(); j++) {
+        float layer_i_attenuation = 0.f;
+        for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
           for (auto target_layer_i : layers[j]->target_layers_idx) {
             if (target_layer_i == layer_i) {
               layer_i_attenuation += layers[j]->readRecordingStrength(position);
@@ -45,12 +47,12 @@ struct Timeline {
           }
         }
 
-        last_calculated_attenuation[layer_i] = layer_i_attenuation;
+        _last_calculated_attenuation[layer_i] = layer_i_attenuation;
       }
     }
 
     for (unsigned int i = 0; i < layers.size(); i++) {
-      current_attenuation[i] = smoothValue(last_calculated_attenuation[i], current_attenuation[i]);
+      _current_attenuation[i] = smoothValue(_last_calculated_attenuation[i], _current_attenuation[i]);
     }
   }
 
@@ -66,7 +68,7 @@ struct Timeline {
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
       if (layers[i]->readableAtPosition(position)) {
-        float attenuation = current_attenuation[i];
+        float attenuation = _current_attenuation[i];
 
         if (record_params.active()) {
           for (unsigned int sel_i : recording->target_layers_idx) {

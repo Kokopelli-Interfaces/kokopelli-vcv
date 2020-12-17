@@ -3,7 +3,7 @@
 
 Gko::Gko() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(SELECT_PARAM, 0.f, 1.f, 0.f, "Select");
+  configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
   configParam(READ_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Read Time Frame");
@@ -14,6 +14,9 @@ Gko::Gko() {
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
+
+  _select_function_button.param = &params[SELECT_FUNCTION_PARAM];
+  _select_mode_button.param = &params[SELECT_MODE_PARAM];
 
   _record_mode_button.param = &params[RECORD_MODE_PARAM];
   _record_time_frame_button.param = &params[RECORD_TIME_FRAME_PARAM];
@@ -29,6 +32,29 @@ void Gko::sampleRateChange() {
 
 void Gko::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
+
+  myrisa::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
+  bool select;
+  for (int c = 0; c < channels(); c++) {
+    select = true;
+    switch (_select_function_event) {
+    case myrisa::dsp::LongPressButton::NO_PRESS:
+      break;
+    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+      for (unsigned int layer_i_i = 0; layer_i_i < _engines[c]->_selected_layers_idx.size(); layer_i_i++) {
+        if (_engines[c]->_selected_layers_idx[layer_i_i] == _engines[c]->_active_layer_i) {
+          _engines[c]->_selected_layers_idx.erase(_engines[c]->_selected_layers_idx.begin() + layer_i_i);
+          select = false;
+        }
+      }
+      if (select && _engines[c]->_timeline.layers.size() != 0) {
+        _engines[c]->_selected_layers_idx.push_back(_engines[c]->_active_layer_i);
+      }
+      break;
+    case myrisa::dsp::LongPressButton::LONG_PRESS:
+      break;
+    }
+  }
 
   myrisa::dsp::LongPressButton::Event _record_mode_event = _record_mode_button.process(sampleTime);
   for (int c = 0; c < channels(); c++) {
@@ -85,6 +111,24 @@ void Gko::processButtons() {
   }
 }
 
+void Gko::processSelect() {
+  float select_value  = params[SELECT_PARAM].getValue();
+  float d_select = select_value - _last_select_value;
+  float value_per_rotation = 2.4f;
+  int n_increments_per_rotation = 16;
+  float select_change_threshold = value_per_rotation / n_increments_per_rotation;
+  if (select_change_threshold < fabs(d_select)) {
+    for (int c = 0; c < channels(); c++) {
+      if (0.f < d_select && _engines[c]->_active_layer_i < _engines[c]->_timeline.layers.size() - 1) {
+        _engines[c]->_active_layer_i++;
+      } else if (d_select < 0 && 0 < _engines[c]->_active_layer_i) {
+        _engines[c]->_active_layer_i--;
+      }
+    }
+    _last_select_value = select_value;
+  }
+}
+
 void Gko::processAlways(const ProcessArgs &args) {
   if (baseConnected()) {
     _from_signal = fromBase();
@@ -94,6 +138,10 @@ void Gko::processAlways(const ProcessArgs &args) {
   if (_button_divider.process()) {
     processButtons();
   }
+}
+
+void Gko::modulate() {
+  processSelect();
 }
 
 void Gko::modulateChannel(int channel_i) {
@@ -109,15 +157,7 @@ void Gko::modulateChannel(int channel_i) {
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
-    e->_active_layer_i = 0;
-
     e->_options = _options;
-
-    // TODO have knob, now it just selects all layers
-    std::vector<unsigned int> selected_layers_idx;
-    selected_layers_idx.resize(e->_timeline.layers.size());
-    std::iota(std::begin(selected_layers_idx), std::end(selected_layers_idx), 0);
-    e->_selected_layers_idx = selected_layers_idx;
 
     e->_signal_type = _from_signal->signal_type;
   }
@@ -166,6 +206,14 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   float signal_in_sum = 0.f;
   float signal_out_sum = 0.f;
+
+  lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
+  for (auto layer_i : _engines[0]->_selected_layers_idx) {
+    if(layer_i == _engines[0]->_active_layer_i) {
+      lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
+      break;
+    }
+  }
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 

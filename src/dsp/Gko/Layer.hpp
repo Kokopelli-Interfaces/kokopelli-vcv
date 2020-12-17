@@ -74,6 +74,9 @@ struct Layer {
   }
 
   inline void write(TimePosition timeline_position, RecordParams record_params, bool phase_defined) {
+    assert(_in->_buffer.size() <= _n_beats);
+    assert(_recording_strength->_buffer.size() <= _n_beats);
+
     if (!phase_defined) {
       _in->pushBack(record_params.in);
       _recording_strength->pushBack(record_params.strength);

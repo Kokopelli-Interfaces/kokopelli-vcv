@@ -38,11 +38,17 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
   float _sampleTime = 1.0f;
 
+  float _last_select_value = 0.f;
+
+  myrisa::dsp::LongPressButton _select_function_button;
+  myrisa::dsp::LongPressButton _select_mode_button;
+
   myrisa::dsp::LongPressButton _record_mode_button;
   myrisa::dsp::LongPressButton _record_time_frame_button;
   myrisa::dsp::LongPressButton _read_time_frame_button;
 
   std::array<myrisa::dsp::gko::Engine*, maxChannels> _engines;
+
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
 
@@ -52,6 +58,7 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
   void sampleRateChange() override;
   int channels() override;
+  void modulate() override;
   void modulateChannel(int c) override;
   void addChannel(int c) override;
   void removeChannel(int c) override;
@@ -62,6 +69,7 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
 private:
   void processButtons();
+  void processSelect();
 };
 
 } // namespace myrisa

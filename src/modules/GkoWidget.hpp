@@ -36,27 +36,95 @@ struct GkoValueDisplay : TextBox {
 	}
 };
 
-struct BeatDisplay : GkoValueDisplay {
-  using GkoValueDisplay::GkoValueDisplay;
-	void step() override {
-		GkoValueDisplay::step();
-		if(_module) {
-      int beat = _module->_engines[0]->_timeline_position.beat;
-      GkoValueDisplay::setDisplayValue(beat);
-		}
-	}
-};
-
 struct ActiveLayerDisplay : GkoValueDisplay {
   using GkoValueDisplay::GkoValueDisplay;
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      int active_layer = _module->_engines[0]->_active_layer_i + 1;
-      if (_module->_engines[0]->_timeline.layers.size() == 0) {
+      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
+      int active_layer = e->_active_layer_i + 1;
+      if (e->_timeline.layers.size() == 0) {
         active_layer = 0;
       }
       GkoValueDisplay::setDisplayValue(active_layer);
+		}
+	}
+};
+
+struct LayerBeatDisplay : GkoValueDisplay {
+  using GkoValueDisplay::GkoValueDisplay;
+	void step() override {
+		GkoValueDisplay::step();
+		if(_module) {
+      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+
+      int layer_beat = 0;
+      if (e->_recording_layer != nullptr) {
+        layer_beat = e->_recording_layer->getLayerBeat(e->_timeline_position.beat);
+      } else if (e->_timeline.layers.size() != 0) {
+        layer_beat = e->_timeline.layers[e->_active_layer_i]->getLayerBeat(e->_timeline_position.beat);
+      }
+
+      GkoValueDisplay::setDisplayValue(layer_beat + 1);
+		}
+	}
+};
+
+struct TotalLayerBeatDisplay : GkoValueDisplay {
+  using GkoValueDisplay::GkoValueDisplay;
+	void step() override {
+		GkoValueDisplay::step();
+		if(_module) {
+      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+
+      int total_layer_beats = 0;
+      if (e->_recording_layer != nullptr) {
+        total_layer_beats = e->_recording_layer->_n_beats;
+      } else if (e->_timeline.layers.size() != 0) {
+        total_layer_beats = e->_timeline.layers[e->_active_layer_i]->_n_beats;
+      }
+
+      GkoValueDisplay::setDisplayValue(total_layer_beats);
+		}
+	}
+};
+
+
+struct CircleBeatDisplay : GkoValueDisplay {
+  using GkoValueDisplay::GkoValueDisplay;
+	void step() override {
+		GkoValueDisplay::step();
+		if(_module) {
+      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
+
+      unsigned int total_circle_beats = e->_timeline.getNumberOfCircleBeats(e->_timeline_position);
+      unsigned int circle_beat = 0;
+      if (total_circle_beats != 0) {
+        circle_beat = (e->_timeline_position.beat - e->_timeline.getCircleStartBeat(e->_timeline_position)) % total_circle_beats;
+      }
+
+      GkoValueDisplay::setDisplayValue(circle_beat + 1);
+		}
+	}
+};
+
+struct TotalCircleBeatDisplay : GkoValueDisplay {
+  using GkoValueDisplay::GkoValueDisplay;
+	void step() override {
+		GkoValueDisplay::step();
+		if(_module) {
+      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
+      unsigned int total_circle_beats = e->_timeline.getNumberOfCircleBeats(e->_timeline_position);
+      GkoValueDisplay::setDisplayValue(total_circle_beats);
 		}
 	}
 };
@@ -73,20 +141,32 @@ struct TotalLayersDisplay : GkoValueDisplay {
 	}
 };
 
+struct BeatDisplay : GkoValueDisplay {
+  using GkoValueDisplay::GkoValueDisplay;
+	void step() override {
+		GkoValueDisplay::step();
+		if(_module) {
+      int beat = _module->_engines[0]->_timeline_position.beat;
+      GkoValueDisplay::setDisplayValue(beat);
+		}
+	}
+};
+
 struct GkoWidget : ModuleWidget {
   const int hp = 4;
 
   bool _use_antipop = false;
 
-  GkoValueDisplay *current_selection;
-  GkoValueDisplay *total_selections;
-  GkoValueDisplay *current_section;
-  GkoValueDisplay *total_sections;
-  GkoValueDisplay *current_section_division;
-  GkoValueDisplay *total_section_divisions;
-
   ActiveLayerDisplay *active_layer;
   TotalLayersDisplay *total_layers;
+
+  LayerBeatDisplay *layer_beat;
+  TotalLayerBeatDisplay *total_layer_beats;
+
+  CircleBeatDisplay *circle_beat;
+  TotalCircleBeatDisplay *total_circle_beats;
+
+
   BeatDisplay *time;
 
   GkoWidget(Gko *module) {
@@ -135,25 +215,25 @@ struct GkoWidget : ModuleWidget {
 
     display_size = mm2px(Vec(6.837, 4.327));
 
-    current_section = new GkoValueDisplay(module);
-    current_section->box.pos = mm2px(Vec(1.071, 48.917));
-    current_section->box.size = display_size;
-    addChild(current_section);
+    layer_beat = new LayerBeatDisplay(module);
+    layer_beat->box.pos = mm2px(Vec(1.071, 48.917));
+    layer_beat->box.size = display_size;
+    addChild(layer_beat);
 
-    current_section_division = new GkoValueDisplay(module);
-    current_section_division->box.pos = mm2px(Vec(17.511, 48.917));
-    current_section_division->box.size = display_size;
-    addChild(current_section_division);
+    total_layer_beats = new TotalLayerBeatDisplay(module);
+    total_layer_beats->box.pos = mm2px(Vec(1.071, 54.022));
+    total_layer_beats->box.size = display_size;
+    addChild(total_layer_beats);
 
-    total_sections = new GkoValueDisplay(module);
-    total_sections->box.pos = mm2px(Vec(1.071, 54.022));
-    total_sections->box.size = display_size;
-    addChild(total_sections);
+    circle_beat = new CircleBeatDisplay(module);
+    circle_beat->box.pos = mm2px(Vec(17.511, 48.917));
+    circle_beat->box.size = display_size;
+    addChild(circle_beat);
 
-    total_section_divisions = new GkoValueDisplay(module);
-    total_section_divisions->box.pos = mm2px(Vec(17.511, 54.022));
-    total_section_divisions->box.size = display_size;
-    addChild(total_section_divisions);
+    total_circle_beats = new TotalCircleBeatDisplay(module);
+    total_circle_beats->box.pos = mm2px(Vec(17.511, 54.022));
+    total_circle_beats->box.size = display_size;
+    addChild(total_circle_beats);
 
     display_size = mm2px(Vec(21.44, 4.327));
 

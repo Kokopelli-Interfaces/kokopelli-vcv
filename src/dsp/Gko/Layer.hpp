@@ -40,12 +40,16 @@ struct Layer {
     delete _recording_strength;
   }
 
-  inline bool readableAtPosition(TimePosition timeline_position) {
-    return _loop ?
-      _start_beat <= timeline_position.beat :
-      _start_beat <= timeline_position.beat && timeline_position.beat < _start_beat + _n_beats;
+  inline int getLayerBeat(unsigned int timeline_beat) {
+    return _loop ? (timeline_beat - _start_beat) % _n_beats : timeline_beat - _start_beat;
   }
 
+  inline bool readableAtPosition(TimePosition timeline_position) {
+    int layer_beat = getLayerBeat(timeline_position.beat);
+    return (0 <= layer_beat && layer_beat < _n_beats);
+  }
+
+  // TODO FIXME allow reverse recording
   inline bool writableAtPosition(TimePosition timeline_position) {
     return _start_beat <= timeline_position.beat && timeline_position.beat <= _start_beat + _n_beats;
   }

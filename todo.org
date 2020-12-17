@@ -24,6 +24,7 @@ A 'layer' will be a layer of the macro, includes
 CLOSED: [2020-12-16 Wed 13:26]
 ** TODO get displays working
 - show scene length and layer length
+** TODO fix reverse recording
 ** TODO dub has length of last layer
 ** TODO refine states
 - layer mode?

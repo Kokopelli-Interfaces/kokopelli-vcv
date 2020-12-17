@@ -2,6 +2,7 @@
 
 #include "Layer.hpp"
 #include "definitions.hpp"
+#include "util/math.hpp"
 #include <vector>
 
 namespace myrisa {
@@ -27,6 +28,27 @@ struct Timeline {
   static inline float smoothValue(float current, float old) {
     const float lambda = 30.f / 44100;
     return old + (current - old) * lambda;
+  }
+
+  inline unsigned int getNumberOfCircleBeats(TimePosition position) {
+    vector<unsigned int> layer_n_beats;
+    for (auto layer : layers) {
+      if (layer->readableAtPosition(position) && layer->_loop) {
+        layer_n_beats.push_back(layer->_n_beats);
+      }
+    }
+
+    return myrisa::util::lcm(layer_n_beats);
+  }
+
+  inline unsigned int getCircleStartBeat(TimePosition position) {
+    unsigned int start_beat = 0;
+    for (auto layer : layers) {
+      if (layer->readableAtPosition(position) && layer->_loop && start_beat < layer->_start_beat) {
+        start_beat = layer->_start_beat;
+      }
+    }
+    return start_beat;
   }
 
   inline void updateLayerAttenuations(TimePosition position) {

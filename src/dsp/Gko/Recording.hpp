@@ -62,7 +62,6 @@ struct Recording {
       return 0.f;
     }
 
-    std::vector<float> nearby;
     double beat_position = _samples_per_beat * t.phase;
 
     int min_samples_for_interpolation = 4;
@@ -139,8 +138,8 @@ struct Recording {
     }
 
     if (_signal_type == myrisa::dsp::SignalType::AUDIO)  {
-      float sample_phase = beat_position - x1;
-      _buffer[t.beat][x1] = rack::crossfade(_buffer[t.beat][x1], sample, sample_phase);
+      double sample_phase = beat_position - floor(beat_position);
+      _buffer[t.beat][x1] = rack::crossfade(sample, _buffer[t.beat][x1], sample_phase);
 
       int x2 = ceil(beat_position);
       if (ceil(beat_position) == _samples_per_beat) {
@@ -148,7 +147,7 @@ struct Recording {
           _buffer[t.beat + 1][0] = rack::crossfade(_buffer[t.beat + 1][0], sample, sample_phase);
         }
       } else {
-        _buffer[t.beat][x2] = rack::crossfade(sample, _buffer[t.beat][x2], sample_phase);
+        _buffer[t.beat][x2] = rack::crossfade(_buffer[t.beat][x2], sample, sample_phase);
       }
     } else {
       _buffer[t.beat][x1] = sample;

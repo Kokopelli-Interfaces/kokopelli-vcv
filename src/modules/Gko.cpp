@@ -33,79 +33,80 @@ void Gko::sampleRateChange() {
 void Gko::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
-  myrisa::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
-  bool select;
+    myrisa::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
+    myrisa::dsp::LongPressButton::Event _record_mode_event = _record_mode_button.process(sampleTime);
+    myrisa::dsp::LongPressButton::Event _record_time_frame_event = _record_time_frame_button.process(sampleTime);
+    myrisa::dsp::LongPressButton::Event _read_time_frame_event = _read_time_frame_button.process(sampleTime);
+
   for (int c = 0; c < channels(); c++) {
-    select = true;
+    myrisa::dsp::gko::Engine *e = _engines[c];
+
     switch (_select_function_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      for (unsigned int layer_i_i = 0; layer_i_i < _engines[c]->_selected_layers_idx.size(); layer_i_i++) {
-        if (_engines[c]->_selected_layers_idx[layer_i_i] == _engines[c]->_active_layer_i) {
-          _engines[c]->_selected_layers_idx.erase(_engines[c]->_selected_layers_idx.begin() + layer_i_i);
-          select = false;
-        }
-      }
-      if (select && _engines[c]->_timeline.layers.size() != 0) {
-        _engines[c]->_selected_layers_idx.push_back(_engines[c]->_active_layer_i);
-      }
+      e->toggleSelectLayer(e->_active_layer_i);
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
+      if (e->isSelected(e->_active_layer_i) ) {
+        if (e->_selected_layers_idx.size() == 1) {
+          e->_selected_layers_idx = e->_saved_selected_layers_idx;
+        } else {
+          e->_saved_selected_layers_idx = e->_selected_layers_idx;
+          e->soloSelectLayer(e->_active_layer_i);
+        }
+      } else {
+        if (e->_selected_layers_idx.size() == 1) {
+          e->selectRange(e->_selected_layers_idx[0], e->_active_layer_i);
+        } else {
+          e->selectRange(0, e->_active_layer_i);
+        }
+      }
       break;
     }
-  }
 
-  myrisa::dsp::LongPressButton::Event _record_mode_event = _record_mode_button.process(sampleTime);
-  for (int c = 0; c < channels(); c++) {
     switch (_record_mode_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_record_params.mode == RecordParams::Mode::DUB) {
-        _engines[c]->_record_params.mode = RecordParams::Mode::EXTEND;
+      if (e->_record_params.mode == RecordParams::Mode::DUB) {
+        e->_record_params.mode = RecordParams::Mode::EXTEND;
       } else {
-        _engines[c]->_record_params.mode = RecordParams::Mode::DUB;
+        e->_record_params.mode = RecordParams::Mode::DUB;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      _engines[c]->_record_params.mode = RecordParams::Mode::REPLACE;
+      e->_record_params.mode = RecordParams::Mode::REPLACE;
       break;
     }
-  }
 
-  myrisa::dsp::LongPressButton::Event _record_time_frame_event = _record_time_frame_button.process(sampleTime);
-  for (int c = 0; c < channels(); c++) {
     switch (_record_time_frame_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_record_params.time_frame == TimeFrame::SELECTED_LAYERS) {
-        _engines[c]->_record_params.time_frame = TimeFrame::TIMELINE;
+      if (e->_record_params.time_frame == TimeFrame::SELECTED_LAYERS) {
+        e->_record_params.time_frame = TimeFrame::TIMELINE;
       } else {
-        _engines[c]->_record_params.time_frame = TimeFrame::SELECTED_LAYERS;
+        e->_record_params.time_frame = TimeFrame::SELECTED_LAYERS;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-        _engines[c]->_record_params.time_frame = TimeFrame::ACTIVE_LAYER;
+        e->_record_params.time_frame = TimeFrame::ACTIVE_LAYER;
       break;
     }
-  }
 
-  myrisa::dsp::LongPressButton::Event _read_time_frame_event = _read_time_frame_button.process(sampleTime);
-  for (int c = 0; c < channels(); c++) {
     switch (_read_time_frame_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (_engines[c]->_read_time_frame == TimeFrame::SELECTED_LAYERS) {
-        _engines[c]->_read_time_frame = TimeFrame::TIMELINE;
+      if (e->_read_time_frame == TimeFrame::SELECTED_LAYERS) {
+        e->_read_time_frame = TimeFrame::TIMELINE;
       } else {
-        _engines[c]->_read_time_frame = TimeFrame::SELECTED_LAYERS;
+        e->_read_time_frame = TimeFrame::SELECTED_LAYERS;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      _engines[c]->_read_time_frame = TimeFrame::ACTIVE_LAYER;
+      e->_read_time_frame = TimeFrame::ACTIVE_LAYER;
       break;
     }
   }
@@ -207,19 +208,22 @@ void Gko::updateLights(const ProcessArgs &args) {
   float signal_in_sum = 0.f;
   float signal_out_sum = 0.f;
 
+  myrisa::dsp::gko::Engine *default_e = _engines[0];
+
+  lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
-  for (auto layer_i : _engines[0]->_selected_layers_idx) {
-    if(layer_i == _engines[0]->_active_layer_i) {
-      lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
-      break;
+  if (default_e->isSelected(default_e->_active_layer_i)) {
+    lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
+    if (default_e->_selected_layers_idx.size() == 1) {
+      lights[SELECT_FUNCTION_LIGHT + 0].value = 1.f;
     }
   }
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  TimeFrame displayed_read_time_frame = _engines[0]->_read_time_frame;
-  RecordParams displayed_record_params = _engines[0]->_record_params;
-  float displayed_phase = _engines[0]->_timeline_position.phase;
+  TimeFrame displayed_read_time_frame = default_e->_read_time_frame;
+  RecordParams displayed_record_params = default_e->_record_params;
+  float displayed_phase = default_e->_timeline_position.phase;
 
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {

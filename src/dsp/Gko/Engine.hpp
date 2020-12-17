@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <math.h>
 #include <vector>
+#include <numeric> // std::iota
 
 namespace myrisa {
 namespace dsp {
@@ -26,6 +27,8 @@ struct Engine {
   myrisa::dsp::SignalType _signal_type;
 
   std::vector<unsigned int> _selected_layers_idx;
+  std::vector<unsigned int> _saved_selected_layers_idx;
+
   unsigned int _active_layer_i;
 
   /* read only */
@@ -47,6 +50,11 @@ struct Engine {
 
   void step();
   float read();
+
+  void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
+  void soloSelectLayer(unsigned int layer_i);
+  bool isSelected(unsigned int layer_i);
+  void toggleSelectLayer(unsigned int layer_i);
 
 private:
   inline bool phaseDefined();

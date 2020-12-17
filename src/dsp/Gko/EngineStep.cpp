@@ -61,7 +61,7 @@ inline Layer* Engine::newRecording() {
   }
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %ld\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
 
   return recording_layer;
 }

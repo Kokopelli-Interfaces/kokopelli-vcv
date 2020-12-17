@@ -46,7 +46,7 @@ struct Layer {
 
   inline bool readableAtPosition(TimePosition timeline_position) {
     int layer_beat = getLayerBeat(timeline_position.beat);
-    return (0 <= layer_beat && layer_beat < _n_beats);
+    return (0 <= layer_beat && layer_beat < (int)_n_beats);
   }
 
   // TODO FIXME allow reverse recording
@@ -54,10 +54,9 @@ struct Layer {
     return _start_beat <= timeline_position.beat && timeline_position.beat <= _start_beat + _n_beats;
   }
 
-  inline TimePosition timelinePositionToRecordingPosition(TimePosition timeline_position) {
-    TimePosition recording_position;
-    recording_position.beat = (timeline_position.beat - _start_beat) % _n_beats;
-    recording_position.phase = timeline_position.phase;
+  inline TimePosition getRecordingPosition(TimePosition timeline_position) {
+    TimePosition recording_position = timeline_position;
+    recording_position.beat = getLayerBeat(timeline_position.beat);
     return recording_position;
   }
 
@@ -66,7 +65,7 @@ struct Layer {
       return 0.f;
     }
 
-    return _in->read(timelinePositionToRecordingPosition(timeline_position));
+    return _in->read(getRecordingPosition(timeline_position));
   }
 
   inline float readRecordingStrength(TimePosition timeline_position) {
@@ -74,7 +73,7 @@ struct Layer {
       return 0.f;
     }
 
-    return _recording_strength->read(timelinePositionToRecordingPosition(timeline_position));
+    return _recording_strength->read(getRecordingPosition(timeline_position));
   }
 
   inline void write(TimePosition timeline_position, float in, float strength, bool phase_defined) {
@@ -85,8 +84,8 @@ struct Layer {
       _in->pushBack(in);
       _recording_strength->pushBack(strength);
     } else if (writableAtPosition(timeline_position)) {
-      _in->write(timelinePositionToRecordingPosition(timeline_position), in);
-   _recording_strength->write(timelinePositionToRecordingPosition(timeline_position), strength);
+      _in->write(getRecordingPosition(timeline_position), in);
+   _recording_strength->write(getRecordingPosition(timeline_position), strength);
     }
   }
 };

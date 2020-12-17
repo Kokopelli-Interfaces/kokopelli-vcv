@@ -82,7 +82,7 @@ struct Timeline {
     updateLayerAttenuations(position);
 
     // FIXME multiple recordings in layer, have loop and array of types
-    myrisa::dsp::SignalType signal_type;
+  myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
     if (0 < layers.size()) {
       signal_type = layers[0]->_in->_signal_type;
     }

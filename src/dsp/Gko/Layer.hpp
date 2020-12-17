@@ -41,7 +41,12 @@ struct Layer {
   }
 
   inline int getLayerBeat(unsigned int timeline_beat) {
-    return _loop ? (timeline_beat - _start_beat) % _n_beats : timeline_beat - _start_beat;
+    int beat = timeline_beat - _start_beat;
+    if (_loop && 0 < beat) {
+      return beat % _n_beats;
+    }
+
+    return beat;
   }
 
   inline bool readableAtPosition(TimePosition timeline_position) {

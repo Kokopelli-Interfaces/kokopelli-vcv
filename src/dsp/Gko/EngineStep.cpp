@@ -88,7 +88,7 @@ inline void Engine::handlePhaseEvent(PhaseAnalyzer::PhaseEvent event) {
   }
 
   if (event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && _options.use_antipop) {
-    _antipop_filter.trigger();
+    _read_antipop_filter.trigger();
   }
 }
 
@@ -118,11 +118,13 @@ void Engine::step() {
 
   if (!_recording_layer && _record_params.active()) {
     _recording_layer = this->newRecording();
+    _write_antipop_filter.trigger();
   } else if (_recording_layer && !_record_params.active()) {
     this->endRecording();
   }
 
   if (_recording_layer) {
-    _recording_layer->write(_timeline_position, _record_params, phase_defined);
+    float in =  _write_antipop_filter.process(_record_params.in);
+    _recording_layer->write(_timeline_position, in, _record_params.strength, phase_defined);
   }
 }

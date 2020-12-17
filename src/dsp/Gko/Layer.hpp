@@ -77,16 +77,16 @@ struct Layer {
     return _recording_strength->read(timelinePositionToRecordingPosition(timeline_position));
   }
 
-  inline void write(TimePosition timeline_position, RecordParams record_params, bool phase_defined) {
+  inline void write(TimePosition timeline_position, float in, float strength, bool phase_defined) {
     assert(_in->_buffer.size() <= _n_beats);
     assert(_recording_strength->_buffer.size() <= _n_beats);
 
     if (!phase_defined) {
-      _in->pushBack(record_params.in);
-      _recording_strength->pushBack(record_params.strength);
+      _in->pushBack(in);
+      _recording_strength->pushBack(strength);
     } else if (writableAtPosition(timeline_position)) {
-      _in->write(timelinePositionToRecordingPosition(timeline_position), record_params.in);
-   _recording_strength->write(timelinePositionToRecordingPosition(timeline_position), record_params.strength);
+      _in->write(timelinePositionToRecordingPosition(timeline_position), in);
+   _recording_strength->write(timelinePositionToRecordingPosition(timeline_position), strength);
     }
   }
 };

@@ -40,7 +40,8 @@ struct Engine {
   TimePosition _timeline_position;
   TimeFrame _read_time_frame;
 
-  AntipopFilter _antipop_filter;
+  AntipopFilter _read_antipop_filter;
+  AntipopFilter _write_antipop_filter;
 
   Options _options;
 

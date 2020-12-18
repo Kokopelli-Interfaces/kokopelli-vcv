@@ -8,9 +8,6 @@ namespace myrisa {
 namespace dsp {
 namespace gko {
 
-/**
-  A Layer is one row _in the Posline.
-*/
 struct Layer {
   unsigned int _start_beat = 0;
   unsigned int _n_beats = 0;

@@ -45,10 +45,14 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      e->toggleSelectLayer(e->_active_layer_i);
+      if (e->_new_layer_active) {
+        e->_select_new_layers = !e->_select_new_layers;
+      } else {
+        e->toggleSelectLayer(e->_active_layer_i);
+      }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      if (e->isSelected(e->_active_layer_i) ) {
+      if (e->isSelected(e->_active_layer_i) && !e->_new_layer_active) {
         if (e->_selected_layers_idx.size() == 1) {
           e->_selected_layers_idx = e->_saved_selected_layers_idx;
         } else {
@@ -120,12 +124,25 @@ void Gko::processSelect() {
   float select_change_threshold = value_per_rotation / n_increments_per_rotation;
   if (select_change_threshold < fabs(d_select)) {
     for (int c = 0; c < channels(); c++) {
-      if (0.f < d_select && _engines[c]->_active_layer_i < _engines[c]->_timeline.layers.size() - 1) {
-        _engines[c]->_active_layer_i++;
-      } else if (d_select < 0 && 0 < _engines[c]->_active_layer_i) {
-        _engines[c]->_active_layer_i--;
+      myrisa::dsp::gko::Engine *e = _engines[c];
+
+      int new_active_layer_i = e->_active_layer_i;
+      if (0.f < d_select) {
+        if (e->_active_layer_i < e->_timeline.layers.size()) {
+          new_active_layer_i++;
+        }
+      } else if (0 < e->_active_layer_i) {
+        new_active_layer_i--;
+      }
+
+      if (new_active_layer_i == (int)e->_timeline.layers.size()) {
+        e->_new_layer_active = true;
+      } else {
+        e->_new_layer_active = false;
+        e->_active_layer_i = new_active_layer_i;
       }
     }
+
     _last_select_value = select_value;
   }
 }
@@ -152,6 +169,7 @@ void Gko::modulateChannel(int channel_i) {
     if (inputs[RECORD_INPUT].isConnected()) {
       record_strength *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
+
     // taking to the strength of 2 gives a more intuitive curve
     record_strength = pow(record_strength, 2);
     e->_record_params.strength = record_strength;
@@ -212,7 +230,13 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
-  if (default_e->isSelected(default_e->_active_layer_i)) {
+  if (default_e->_new_layer_active || default_e->_recording_layer != nullptr) {
+    if (default_e->_select_new_layers) {
+      lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
+    } else {
+      lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
+    }
+  } else if (default_e->isSelected(default_e->_active_layer_i)) {
     lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
     if (default_e->_selected_layers_idx.size() == 1) {
       lights[SELECT_FUNCTION_LIGHT + 0].value = 1.f;

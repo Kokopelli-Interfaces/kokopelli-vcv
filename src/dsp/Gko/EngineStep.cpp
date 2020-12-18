@@ -29,6 +29,16 @@ inline void Engine::endRecording() {
         _timeline._last_calculated_attenuation.resize(_timeline.layers.size());
     _timeline._current_attenuation.resize(_timeline.layers.size());
 
+    unsigned int layer_i = _timeline.layers.size() - 1;
+
+    if (_select_new_layers) {
+      _selected_layers_idx.push_back(layer_i);
+    }
+
+    if (_new_layer_active) {
+      _active_layer_i = layer_i;
+    }
+
     _recording_layer = nullptr;
 }
 

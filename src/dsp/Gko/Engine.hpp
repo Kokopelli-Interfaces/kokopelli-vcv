@@ -28,6 +28,8 @@ struct Engine {
 
   std::vector<unsigned int> _selected_layers_idx;
   std::vector<unsigned int> _saved_selected_layers_idx;
+  bool _new_layer_active = true;
+  bool _select_new_layers = true;
 
   unsigned int _active_layer_i;
 

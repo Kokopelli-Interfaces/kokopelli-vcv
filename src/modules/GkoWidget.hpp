@@ -46,7 +46,7 @@ struct ActiveLayerDisplay : GkoValueDisplay {
         return;
       }
 
-      if (e->_recording_layer != nullptr) {
+      if (e->_recording_layer != nullptr || e->_new_layer_active) {
         GkoValueDisplay::setText("N");
       } else {
         int active_layer_i = e->_active_layer_i + 1;

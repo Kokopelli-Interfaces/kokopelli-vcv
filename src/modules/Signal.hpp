@@ -1,11 +1,16 @@
 #pragma once
 
-#include "Gko_shared.hpp"
+#include <string>
+#include "GkoInterface.hpp"
+#include "module.hpp"
 #include "menu.hpp"
+#include "Gko.hpp"
+
+extern Model *modelSignal;
 
 namespace myrisa {
 
-struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
+struct Signal : MyrisaModule {
   enum ParamIds { IN_ATTENUATION_PARAM, OUT_ATTENUATION_PARAM, NUM_PARAMS };
   enum InputIds { IN_INPUT, IN_ATTENUATION_INPUT, OUT_ATTENUATION_INPUT, NUM_INPUTS };
   enum OutputIds { SEL_OUTPUT, OUT_OUTPUT, NUM_OUTPUTS };
@@ -18,20 +23,24 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
 
   Engine *_engines[maxChannels] {};
 
-  myrisa::dsp::SignalType _signal_type = myrisa::dsp::SignalType::AUDIO;
+  GkoChannel* _gko_channel;
 
-  SignalExpanderMessage *_toGko = nullptr;
-  SignalExpanderMessage *_fromGko = nullptr;
+  myrisa::dsp::SignalType _signal_type = myrisa::dsp::SignalType::AUDIO;
 
   Signal() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
     configParam(IN_ATTENUATION_PARAM, 0.f, 1.f, 0.f, "In Attenuation");
     configParam(OUT_ATTENUATION_PARAM, 0.f, 1.f, 0.f, "Out Attenuation");
 
-    setExpanderModelPredicate([](Model *m) {
-      // TODO chainable expanders
-      return m == modelGko;
-    });
+    _gko_channel = new GkoChannel();
+    _gko_channel->label = std::string("Sig%d", gko_channels.size()+1);
+    gko_channels.push_back(_gko_channel);
+
+    printf("add, gko ch's %ld\n", gko_channels.size());
+  }
+
+  ~Signal() {
+    _gko_channel->active = false;
   }
 
   void modulateChannel(int c) override;

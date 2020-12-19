@@ -279,7 +279,6 @@ struct GkoWidget : ModuleWidget {
 
     // menu->addChild(new Slider());
   }
-
 };
 
 } // namespace myrisa

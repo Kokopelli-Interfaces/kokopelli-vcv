@@ -1,15 +1,21 @@
 #pragma once
 
-#include "Gko_shared.hpp"
+#include "GkoInterface.hpp"
+#include "rack.hpp"
+#include "module.hpp"
+#include "myrisa.hpp"
 #include "menu.hpp"
 #include "dsp/Gko/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
 #include "widgets.hpp"
 #include <math.h>
+#include <map>
+
+extern Model *modelGko;
 
 namespace myrisa {
 
-struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
+struct Gko : MyrisaModule {
   enum ParamIds {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
@@ -32,9 +38,6 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
-
-  SignalExpanderMessage *_to_signal = nullptr;
-  SignalExpanderMessage *_from_signal = nullptr;
 
   float _sampleTime = 1.0f;
 
@@ -69,6 +72,7 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
 private:
   void processButtons();
+  bool hasGkoChannels();
   void processSelect();
 };
 

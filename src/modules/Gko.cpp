@@ -1,6 +1,8 @@
 #include "Gko.hpp"
 #include "GkoWidget.hpp"
 
+using namespace myrisa;
+
 Gko::Gko() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
@@ -11,7 +13,6 @@ Gko::Gko() {
   configParam(RECORD_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Record Time Frame");
   configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");
 
-  setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
 
@@ -21,6 +22,8 @@ Gko::Gko() {
   _record_mode_button.param = &params[RECORD_MODE_PARAM];
   _record_time_frame_button.param = &params[RECORD_TIME_FRAME_PARAM];
   _read_time_frame_button.param = &params[READ_TIME_FRAME_PARAM];
+
+  printf("gko channels GKO: %ld\n", gko_channels.size());
 }
 
 void Gko::sampleRateChange() {
@@ -148,11 +151,6 @@ void Gko::processSelect() {
 }
 
 void Gko::processAlways(const ProcessArgs &args) {
-  if (baseConnected()) {
-    _from_signal = fromBase();
-    _to_signal = toBase();
-  }
-
   if (_button_divider.process()) {
     processButtons();
   }
@@ -162,8 +160,12 @@ void Gko::modulate() {
   processSelect();
 }
 
+bool Gko::hasGkoChannels() {
+  return 0 < gko_channels.size();
+}
+
 void Gko::modulateChannel(int channel_i) {
-  if (baseConnected()) {
+  if (hasGkoChannels()) {
     myrisa::dsp::gko::Engine *e = _engines[channel_i];
     float record_strength = params[RECORD_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
@@ -178,14 +180,15 @@ void Gko::modulateChannel(int channel_i) {
 
     e->_options = _options;
 
-    e->_signal_type = _from_signal->signal_type;
+    // FIXME
+    e->_signal_type = gko_channels[0]->signal_type;
   }
 }
 
 // TODO base off max of Gko & sig
 int Gko::channels() {
-  if (baseConnected() && _from_signal) {
-    int input_channels = _from_signal->channels;
+  if (hasGkoChannels()) {
+    int input_channels = gko_channels[0]->send_channels;
     if (_channels < input_channels) {
       return input_channels;
     }
@@ -195,7 +198,7 @@ int Gko::channels() {
 }
 
 void Gko::processChannel(const ProcessArgs& args, int channel_i) {
-  if (!baseConnected()) {
+  if (!hasGkoChannels()) {
     return;
   }
 
@@ -209,9 +212,10 @@ void Gko::processChannel(const ProcessArgs& args, int channel_i) {
     outputs[PHASE_OUTPUT].setVoltage(e->_timeline_position.phase * 10, channel_i);
   }
 
-  e->_record_params.in = _from_signal->signal[channel_i];
+  // FIXME array
+  e->_record_params.in = gko_channels[0]->to[channel_i];
   e->step();
-  _to_signal->signal[channel_i] = e->read();
+  gko_channels[0]->from[channel_i] = e->read();
 }
 
 void Gko::updateLights(const ProcessArgs &args) {
@@ -219,12 +223,9 @@ void Gko::updateLights(const ProcessArgs &args) {
   // LIGHT + 1 = GREEN
   // LIGHT + 2 = BLUE
 
-  if (!baseConnected()) {
+  if (!hasGkoChannels()) {
     return;
   }
-
-  float signal_in_sum = 0.f;
-  float signal_out_sum = 0.f;
 
   myrisa::dsp::gko::Engine *default_e = _engines[0];
 
@@ -249,10 +250,13 @@ void Gko::updateLights(const ProcessArgs &args) {
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
+  float in_sum = 0.f;
+  float out_sum = 0.f;
+
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
-    signal_in_sum += _from_signal->signal[c];
-    signal_out_sum += _to_signal->signal[c];
+    in_sum += gko_channels[0]->to[c];
+    out_sum += gko_channels[0]->from[c];
     if (record_active) {
       displayed_read_time_frame = _engines[c]->_read_time_frame;
       displayed_record_params = _engines[c]->_record_params;
@@ -260,15 +264,15 @@ void Gko::updateLights(const ProcessArgs &args) {
     }
   }
 
-  signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
-  signal_out_sum = rack::clamp(signal_out_sum, 0.f, 1.f);
+  in_sum = rack::clamp(in_sum, 0.f, 1.f);
+  out_sum = rack::clamp(out_sum, 0.f, 1.f);
 
   // TODO make me show the layer output that is selected, not all
-  lights[RECORD_LIGHT + 1].setSmoothBrightness(signal_out_sum, _sampleTime * _light_divider.getDivision());
+  lights[RECORD_LIGHT + 1].setSmoothBrightness(out_sum, _sampleTime * _light_divider.getDivision());
 
   if (displayed_record_params.active()) {
     int light_colour = poly_record ? 2 : 0;
-    lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
+    lights[RECORD_LIGHT + light_colour].setSmoothBrightness(in_sum, _sampleTime * _light_divider.getDivision());
   } else {
     lights[RECORD_LIGHT + 0].value = 0.f;
     lights[RECORD_LIGHT + 2].value = 0.f;

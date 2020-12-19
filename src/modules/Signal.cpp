@@ -9,6 +9,7 @@ int Signal::channels() {
   return inputs[IN_INPUT].getChannels();
 }
 
+
 void Signal::modulateChannel(int c) {
   Engine &e = *_engines[c];
   e.in_attenuation = params[IN_ATTENUATION_PARAM].getValue();
@@ -33,32 +34,26 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
 
   float in = inputs[IN_INPUT].getPolyVoltage(c);
-  in = myrisa::dsp::attenuate(in, e.in_attenuation, _signal_type);
+  in = myrisa::dsp::attenuate(in, e.in_attenuation, _gko_channel->signal_type);
 
-  float out = in;
-  if (expanderConnected()) {
-    auto toGko = toExpander();
-    auto fromGko = fromExpander();
-
-    toGko->signal[c] = in;
-    toGko->signal_type = _signal_type;
-    toGko->channels = _channels;
-    out = myrisa::dsp::sum(fromGko->signal[c], in, _signal_type);
-  }
+  _gko_channel->to[c] = in;
 
   if (outputs[OUT_OUTPUT].isConnected()) {
-    out = myrisa::dsp::attenuate(out, e.out_attenuation, _signal_type);
+    float out = myrisa::dsp::sum(_gko_channel->from[c], in, _gko_channel->signal_type);
+    out = myrisa::dsp::attenuate(out, e.out_attenuation, _gko_channel->signal_type);
     outputs[OUT_OUTPUT].setVoltage(out, c);
   }
 }
 
 void Signal::addChannel(int c) {
   _engines[c] = new Engine();
+  _gko_channel->send_channels++;
 }
 
 void Signal::removeChannel(int c) {
   delete _engines[c];
   _engines[c] = nullptr;
+  _gko_channel->send_channels--;
 }
 
 Model* modelSignal = rack::createModel<Signal, SignalWidget>("Myrisa-Signal");

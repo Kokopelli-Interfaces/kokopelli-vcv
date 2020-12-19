@@ -13,12 +13,7 @@ struct Layer {
   unsigned int _n_beats = 0;
   bool _loop = false;
 
-  // TODO
-  // std::vector<Recording*> recordings;
-  // std::vector<myrisa::dsp::SignalType> types;
-
   Recording *_in;
-  Recording *_recording_strength;
 
   // FIXME change me to be an array of bools for O(1) lookup
   std::vector<unsigned int> target_layers_idx;

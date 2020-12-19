@@ -6,15 +6,6 @@
 
 namespace myrisa {
 
-struct GkoChannel {
-  float to[MyrisaModule::maxChannels]{};
-  float from[MyrisaModule::maxChannels]{};
-  myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
-  int send_channels = 1;
-  std::string label = "";
-  bool active = true;
-};
-
-extern std::vector<GkoChannel*> gko_channels;
+extern std::vector<myrisa::dsp::gko::Connection*> connections;
 
 } // namespace myrisa

@@ -36,12 +36,12 @@ struct SignalWidget : ModuleWidget {
     menu->addChild(new MenuLabel());
 
 		OptionsMenuItem* signal_type_menu = new OptionsMenuItem("Signal Type");
-    signal_type_menu->addItem(OptionMenuItem("Audio", [m]() { return m->_gko_channel->signal_type == SignalType::AUDIO; }, [m]() { m->_gko_channel->signal_type = SignalType::AUDIO; }));
-		signal_type_menu->addItem(OptionMenuItem("Parameter", [m]() { return m->_gko_channel->signal_type == SignalType::PARAM; }, [m]() { m->_gko_channel->signal_type = SignalType::PARAM; }));
-		signal_type_menu->addItem(OptionMenuItem("Gate", [m]() { return m->_gko_channel->signal_type == SignalType::GATE; }, [m]() { m->_gko_channel->signal_type = SignalType::GATE; }));
-		signal_type_menu->addItem(OptionMenuItem("Control Voltage", [m]() { return m->_gko_channel->signal_type == SignalType::CV; }, [m]() { m->_gko_channel->signal_type = SignalType::CV; }));
-		signal_type_menu->addItem(OptionMenuItem("Pitch", [m]() { return m->_gko_channel->signal_type == SignalType::VOCT; }, [m]() { m->_gko_channel->signal_type = SignalType::VOCT; }));
-		signal_type_menu->addItem(OptionMenuItem("Velocity", [m]() { return m->_gko_channel->signal_type == SignalType::VEL; }, [m]() { m->_gko_channel->signal_type = SignalType::VEL; }));
+    signal_type_menu->addItem(OptionMenuItem("Audio", [m]() { return m->_gko_connection->signal_type == SignalType::AUDIO; }, [m]() { m->_gko_connection->signal_type = SignalType::AUDIO; }));
+		signal_type_menu->addItem(OptionMenuItem("Parameter", [m]() { return m->_gko_connection->signal_type == SignalType::PARAM; }, [m]() { m->_gko_connection->signal_type = SignalType::PARAM; }));
+		signal_type_menu->addItem(OptionMenuItem("Gate", [m]() { return m->_gko_connection->signal_type == SignalType::GATE; }, [m]() { m->_gko_connection->signal_type = SignalType::GATE; }));
+		signal_type_menu->addItem(OptionMenuItem("Control Voltage", [m]() { return m->_gko_connection->signal_type == SignalType::CV; }, [m]() { m->_gko_connection->signal_type = SignalType::CV; }));
+		signal_type_menu->addItem(OptionMenuItem("Pitch", [m]() { return m->_gko_connection->signal_type == SignalType::VOCT; }, [m]() { m->_gko_connection->signal_type = SignalType::VOCT; }));
+		signal_type_menu->addItem(OptionMenuItem("Velocity", [m]() { return m->_gko_connection->signal_type == SignalType::VEL; }, [m]() { m->_gko_connection->signal_type = SignalType::VEL; }));
 
 		OptionsMenuItem::addToMenu(signal_type_menu, menu);
   }

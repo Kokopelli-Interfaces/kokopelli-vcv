@@ -1,27 +1,28 @@
 #pragma once
 
-#include "Layer.hpp"
 #include "definitions.hpp"
 #include "util/math.hpp"
-#include <vector>
+#include "Layer.hpp"
+#include "Channel.hpp"
+#include <string>
 
 namespace myrisa {
 namespace dsp {
 namespace gko {
 
-/**
-   The Timeline is the top level structure for content.
-*/
-struct Timeline {
+class LayerManager {
   std::vector<Layer*> layers;
 
   /** read only */
 
-  std::vector<float> _current_attenuation;
-  std::vector<float> _last_calculated_attenuation;
+  // seperate attenuation calculation for each channel?
+  // I suppose. some attenuations only target some channels
+  // and more can be added.
+  std::vector<float> _current_layer_attenuations;
+  std::vector<float> _last_calculated_layer_attenuations;
   rack::dsp::ClockDivider _attenuation_calculator_divider;
 
-  Timeline() {
+  LayerManager() {
     _attenuation_calculator_divider.setDivision(2000);
   }
 
@@ -69,16 +70,16 @@ struct Timeline {
           }
         }
 
-        _last_calculated_attenuation[layer_i] = layer_i_attenuation;
+        _last_calculated_layer_attenuations[layer_i] = layer_i_attenuation;
       }
     }
 
     for (unsigned int i = 0; i < layers.size(); i++) {
-      _current_attenuation[i] = smoothValue(_last_calculated_attenuation[i], _current_attenuation[i]);
+      _current_layer_attenuations[i] = smoothValue(_last_calculated_layer_attenuations[i], _current_layer_attenuations[i]);
     }
   }
 
-  inline float read(TimePosition position, Layer* recording, RecordParams record_params) {
+  inline float read(TimePosition position, Layer* recording, RecordInterface record_interface) {
     updateLayerAttenuations(position);
 
     // FIXME multiple recordings in layer, have loop and array of types
@@ -90,12 +91,12 @@ struct Timeline {
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
       if (layers[i]->readableAtPosition(position)) {
-        float attenuation = _current_attenuation[i];
+        float attenuation = _current_layer_attenuations[i];
 
-        if (record_params.active()) {
+        if (record_interface.active()) {
           for (unsigned int sel_i : recording->target_layers_idx) {
             if (sel_i == i) {
-              attenuation += record_params.strength;
+              attenuation += record_interface.strength;
               break;
             }
           }
@@ -134,8 +135,7 @@ struct Timeline {
 
     return max_n_beats;
   }
-};
 
 } // namespace gko
 } // namespace dsp
-} // namespace myrisa
+} // namepsace myrisa

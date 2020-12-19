@@ -43,6 +43,8 @@ struct Gko : MyrisaModule {
 
   float _last_select_value = 0.f;
 
+  std::vector<unsigned int> _saved_selected_layers_idx;
+
   myrisa::dsp::LongPressButton _select_function_button;
   myrisa::dsp::LongPressButton _select_mode_button;
 
@@ -72,7 +74,7 @@ struct Gko : MyrisaModule {
 
 private:
   void processButtons();
-  bool hasGkoChannels();
+  bool hasConnections();
   void processSelect();
 };
 

@@ -1,54 +1,43 @@
 #pragma once
 
 #include "Timeline.hpp"
+#include "modules/GkoInterface.hpp"
 #include "definitions.hpp"
-#include "dsp/PhaseAnalyzer.hpp"
-#include "dsp/PhaseOscillator.hpp"
 #include "dsp/AntipopFilter.hpp"
 #include "dsp/Signal.hpp"
 #include "Layer.hpp"
 #include "rack.hpp"
+#include "Channel.hpp"
 
 #include <assert.h>
 #include <math.h>
 #include <vector>
+#include <string>
 #include <numeric> // std::iota
+#include <boost/unordered_map.hpp>
 
 namespace myrisa {
 namespace dsp {
 namespace gko {
 
 struct Engine {
-  bool _use_ext_phase = false;
-  float _ext_phase = 0.f;
-  float _sample_time = 1.0f;
+
+
 
   // TODO make me an array to support MIX4 & PLAY
-  myrisa::dsp::SignalType _signal_type;
-
-  std::vector<unsigned int> _selected_layers_idx;
-  std::vector<unsigned int> _saved_selected_layers_idx;
-  bool _new_layer_active = true;
-  bool _select_new_layers = true;
-
-  unsigned int _active_layer_i;
+  // myrisa::dsp::SignalType _signal_type;
 
   /* read only */
 
-  Layer *_recording_layer = nullptr;
-  RecordParams _record_params;
 
-  PhaseOscillator _phase_oscillator;
-  PhaseAnalyzer _phase_analyzer;
-
-  Timeline _timeline;
   TimePosition _timeline_position;
-  TimeFrame _read_time_frame;
 
-  AntipopFilter _read_antipop_filter;
-  AntipopFilter _write_antipop_filter;
-
-  Options _options;
+  /** IOC components */
+  Interface _interface;
+  Stepper _stepper;
+  Recorder _recorder;
+  StateController _state_controller;
+  ChannelManager _channel_manager;
 
   void step();
   float read();

@@ -23,7 +23,7 @@ Gko::Gko() {
   _record_time_frame_button.param = &params[RECORD_TIME_FRAME_PARAM];
   _read_time_frame_button.param = &params[READ_TIME_FRAME_PARAM];
 
-  printf("gko channels GKO: %ld\n", gko_channels.size());
+  printf("gko channels GKO: %ld\n", gko_connections.size());
 }
 
 void Gko::sampleRateChange() {
@@ -76,14 +76,14 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.mode == RecordParams::Mode::DUB) {
-        e->_record_params.mode = RecordParams::Mode::EXTEND;
+      if (e->_record_interface.mode == RecordInterface::Mode::DUB) {
+        e->_record_interface.mode = RecordInterface::Mode::EXTEND;
       } else {
-        e->_record_params.mode = RecordParams::Mode::DUB;
+        e->_record_interface.mode = RecordInterface::Mode::DUB;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->_record_params.mode = RecordParams::Mode::REPLACE;
+      e->_record_interface.mode = RecordInterface::Mode::REPLACE;
       break;
     }
 
@@ -91,14 +91,14 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.time_frame == TimeFrame::SELECTED_LAYERS) {
-        e->_record_params.time_frame = TimeFrame::TIMELINE;
+      if (e->_record_interface.time_frame == TimeFrame::SELECTED_LAYERS) {
+        e->_record_interface.time_frame = TimeFrame::TIMELINE;
       } else {
-        e->_record_params.time_frame = TimeFrame::SELECTED_LAYERS;
+        e->_record_interface.time_frame = TimeFrame::SELECTED_LAYERS;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-        e->_record_params.time_frame = TimeFrame::ACTIVE_LAYER;
+        e->_record_interface.time_frame = TimeFrame::ACTIVE_LAYER;
       break;
     }
 
@@ -160,12 +160,12 @@ void Gko::modulate() {
   processSelect();
 }
 
-bool Gko::hasGkoChannels() {
-  return 0 < gko_channels.size();
+bool Gko::hasConnections() {
+  return 0 < gko_connections.size();
 }
 
 void Gko::modulateChannel(int channel_i) {
-  if (hasGkoChannels()) {
+  if (hasConnections()) {
     myrisa::dsp::gko::Engine *e = _engines[channel_i];
     float record_strength = params[RECORD_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
@@ -174,21 +174,21 @@ void Gko::modulateChannel(int channel_i) {
 
     // taking to the strength of 2 gives a more intuitive curve
     record_strength = pow(record_strength, 2);
-    e->_record_params.strength = record_strength;
+    e->_record_interface.strength = record_strength;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
     e->_options = _options;
 
     // FIXME
-    e->_signal_type = gko_channels[0]->signal_type;
+    e->_signal_type = gko_connections[0]->signal_type;
   }
 }
 
 // TODO base off max of Gko & sig
 int Gko::channels() {
-  if (hasGkoChannels()) {
-    int input_channels = gko_channels[0]->send_channels;
+  if (hasConnections()) {
+    int input_channels = gko_connections[0]->send_channels;
     if (_channels < input_channels) {
       return input_channels;
     }
@@ -198,7 +198,7 @@ int Gko::channels() {
 }
 
 void Gko::processChannel(const ProcessArgs& args, int channel_i) {
-  if (!hasGkoChannels()) {
+  if (!hasConnections()) {
     return;
   }
 
@@ -213,9 +213,9 @@ void Gko::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   // FIXME array
-  e->_record_params.in = gko_channels[0]->to[channel_i];
+  e->_record_interface.in = gko_connections[0]->to[channel_i];
   e->step();
-  gko_channels[0]->from[channel_i] = e->read();
+  gko_connections[0]->from[channel_i] = e->read();
 }
 
 void Gko::updateLights(const ProcessArgs &args) {
@@ -223,7 +223,7 @@ void Gko::updateLights(const ProcessArgs &args) {
   // LIGHT + 1 = GREEN
   // LIGHT + 2 = BLUE
 
-  if (!hasGkoChannels()) {
+  if (!hasConnections()) {
     return;
   }
 
@@ -247,7 +247,7 @@ void Gko::updateLights(const ProcessArgs &args) {
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
   TimeFrame displayed_read_time_frame = default_e->_read_time_frame;
-  RecordParams displayed_record_params = default_e->_record_params;
+  RecordInterface displayed_record_interface = default_e->_record_interface;
   float displayed_phase = default_e->_timeline_position.phase;
 
   float in_sum = 0.f;
@@ -255,11 +255,11 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
-    in_sum += gko_channels[0]->to[c];
-    out_sum += gko_channels[0]->from[c];
+    in_sum += gko_connections[0]->to[c];
+    out_sum += gko_connections[0]->from[c];
     if (record_active) {
       displayed_read_time_frame = _engines[c]->_read_time_frame;
-      displayed_record_params = _engines[c]->_record_params;
+      displayed_record_interface = _engines[c]->_record_interface;
       displayed_phase = _engines[c]->_timeline_position.phase;
     }
   }
@@ -270,7 +270,7 @@ void Gko::updateLights(const ProcessArgs &args) {
   // TODO make me show the layer output that is selected, not all
   lights[RECORD_LIGHT + 1].setSmoothBrightness(out_sum, _sampleTime * _light_divider.getDivision());
 
-  if (displayed_record_params.active()) {
+  if (displayed_record_interface.active()) {
     int light_colour = poly_record ? 2 : 0;
     lights[RECORD_LIGHT + light_colour].setSmoothBrightness(in_sum, _sampleTime * _light_divider.getDivision());
   } else {
@@ -287,22 +287,22 @@ void Gko::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  switch (displayed_record_params.mode) {
-  case RecordParams::Mode::EXTEND:
+  switch (displayed_record_interface.mode) {
+  case RecordInterface::Mode::EXTEND:
     lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 1].value = 0.0;
     break;
-  case RecordParams::Mode::DUB:
+  case RecordInterface::Mode::DUB:
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     break;
-  case RecordParams::Mode::REPLACE:
+  case RecordInterface::Mode::REPLACE:
     lights[RECORD_MODE_LIGHT + 0].value = 1.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     break;
   }
 
-  switch (displayed_record_params.time_frame) {
+  switch (displayed_record_interface.time_frame) {
   case TimeFrame::SELECTED_LAYERS:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;

@@ -2,66 +2,59 @@
 
 #include "rack.hpp"
 
+extern Plugin *pluginInstance;
+
 struct Rogan1HPSWhite : Rogan {
   Rogan1HPSWhite() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/Rogan1HPSWhite.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan1HPSWhite.svg")));
   }
 };
 
 struct Rogan1PGray : Rogan {
   Rogan1PGray() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/Rogan1PGray.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan1PGray.svg")));
   }
 };
 
 struct Rogan4PSGray : Rogan {
   Rogan4PSGray() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/Rogan4PSGray.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan4PSGray.svg")));
   }
 };
 
 struct RoganHalfPSRed : Rogan {
   RoganHalfPSRed() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/RoganHalfPSRed.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPSRed.svg")));
   }
 };
 
 struct RoganHalfPSLightPurple : Rogan {
   RoganHalfPSLightPurple() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/RoganHalfPSLightPurple.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPSLightPurple.svg")));
   }
 };
 
 struct RoganHalfPGray : Rogan {
   RoganHalfPGray() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/RoganHalfPGray.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPGray.svg")));
   }
 };
 
 struct RoganHalfPRed : Rogan {
   RoganHalfPRed() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/RoganHalfPRed.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPRed.svg")));
   }
 };
 
 struct MediumLEDButton : rack::app::SvgSwitch {
   MediumLEDButton() {
-		momentary = true;
-		addFrame(APP->window->loadSvg(asset::system("./plugins/Myrisa/res/components/MediumLEDButton.svg")));
+		momentary = true; addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/MediumLEDButton.svg")));
   }
 };
 
 struct Rogan3PDarkRed : Rogan {
   Rogan3PDarkRed() {
-    setSvg(APP->window->loadSvg(
-        asset::system("./plugins/Myrisa/res/components/Rogan3PDarkRed.svg")));
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan3PDarkRed.svg")));
   }
 };
 
@@ -72,8 +65,7 @@ struct ToggleLEDButton : SVGSwitch {
   NVGcolor hoverColor;
 
   ToggleLEDButton() {
-    addFrame(APP->window->loadSvg(
-        asset::system("res/ComponentLibrary/LEDButton.svg")));
+    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "/LEDButton.svg")));
   }
 };
 

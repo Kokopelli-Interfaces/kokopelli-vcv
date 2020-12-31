@@ -13,6 +13,8 @@ struct Layer {
   unsigned int _n_beats = 0;
   bool _loop = false;
 
+  float time_length;
+
   Recording *_in;
 
   // FIXME change me to be an array of bools for O(1) lookup

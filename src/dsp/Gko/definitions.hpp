@@ -13,6 +13,20 @@ struct TimePosition {
   double phase = 0.f;
 };
 
+struct Connection {
+  float to[MyrisaModule::maxChannels]{};
+  float from[MyrisaModule::maxChannels]{};
+
+  myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
+  int send_channels = 1;
+  std::string label = "";
+  bool active = true;
+};
+
+struct Options {
+  bool use_antipop = false;
+};
+
 /**
   At each step, what the Engine does to it's Timeline is a function of these parameters.
   See the description of Record in the README for behaviour.
@@ -24,26 +38,30 @@ struct RecordInterface {
   Mode mode = Mode::DUB;
   float strength = 0.f;
 
-  float _recordActiveThreshold = 0.0001f;
+  float _recordActiveThreshold = 0.0005f;
 
   inline bool active() {
     return _recordActiveThreshold < strength;
   }
 };
 
-struct Connection {
-  float to[MyrisaModule::maxChannels]{};
-  float from[MyrisaModule::maxChannels]{};
+struct Interface {
+  std::vector<myrisa::dsp::gko::Connection*> connections;
 
-  myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
-  int send_channels = 1;
-  std::string label = "";
-  bool active = true;
-};
+  float sample_time = 1.0f;
 
+  bool use_ext_phase = false;
+  float ext_phase = 0.f;
 
-struct Options {
-  bool use_antipop = false;
+  unsigned int active_layer_i;
+  std::vector<unsigned int> selected_layers_idx;
+  bool select_new_layers = true;
+  bool new_layer_active = true;
+
+  RecordInterface record_interface;
+  TimeFrame read_time_frame;
+
+  Options options;
 };
 
 } // namespace gko

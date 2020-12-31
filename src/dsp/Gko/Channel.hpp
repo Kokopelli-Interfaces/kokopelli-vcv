@@ -19,8 +19,8 @@ struct Channel {
       printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat);
 
       if (!_phase_oscillator.isSet()) {
-        if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
-          _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
+        if (_use_ext_phase && _phase_analyzer.getBeatPeriod() != 0) {
+          _phase_oscillator.setFrequency(1 / _phase_analyzer.getBeatPeriod());
         } else {
           float recording_time = _recording_layer->_in->_samples_per_beat * _sample_time;
           _phase_oscillator.setFrequency(1 / recording_time);
@@ -59,7 +59,7 @@ struct Channel {
     int samples_per_beat = 0;
     if (phaseDefined()) {
       if (_use_ext_phase) {
-        samples_per_beat = _phase_analyzer.getSamplesPerBeat(_sample_time);
+        samples_per_beat = _phase_analyzer.getSamplesPerBeat();
       } else if (_phase_oscillator.isSet()) {
         float beat_period = 1 / _phase_oscillator.getFrequency();
         samples_per_beat = floor(beat_period / _sample_time);

@@ -13,11 +13,14 @@ struct PhaseAnalyzer {
   const float _discontinuity_change_threshold = 0.05f;
 
   float _last_phase = 0.0f;
-  float _division_period_estimate = 1.0f;
+  float _beat_period_estimate = 1.0f;
+  int _beat_n_samples_estimate = 0;
 
-  rack::dsp::ClockDivider _phase_division_period_calculator_divider;
+  rack::dsp::ClockDivider _phase_beat_period_calculator_divider;
+
   float _phase_offset_from_last_calculation = 0.0f;
   float _time_since_last_calculation = 0.f;
+
   bool _phase_reversed = false;
 
   enum PhaseEvent {
@@ -28,15 +31,15 @@ struct PhaseAnalyzer {
   };
 
   PhaseAnalyzer() {
-    _phase_division_period_calculator_divider.setDivision(2500); // ~1/16 second
+    _phase_beat_period_calculator_divider.setDivision(2500); // ~1/16 second
   }
 
-  inline float getDivisionPeriod() {
-    return _division_period_estimate;
+  inline float getBeatPeriod() {
+    return _beat_period_estimate;
   }
 
-  inline float getSamplesPerBeat(float sample_time) {
-    return floor(_division_period_estimate / sample_time);
+  inline float getSamplesPerBeat() {
+    return _beat_n_samples_estimate;
   }
 
   inline PhaseEvent process(float phase, float sample_time) {
@@ -74,11 +77,11 @@ struct PhaseAnalyzer {
       }
     }
 
-    if (_phase_division_period_calculator_divider.process()) {
+    if (_phase_beat_period_calculator_divider.process()) {
       float abs_change = fabs(_phase_offset_from_last_calculation);
       if (abs_change != 0) {
-        _division_period_estimate = _time_since_last_calculation / abs_change;
-        // printf("phase period estimate: %fs\n", _phase_period_estimate);
+        _beat_period_estimate = _time_since_last_calculation / abs_change;
+        _beat_n_samples_estimate = floor(_beat_period_estimate / sample_time);
       }
 
       _phase_reversed = false;

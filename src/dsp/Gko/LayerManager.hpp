@@ -11,10 +11,10 @@ namespace dsp {
 namespace gko {
 
 class LayerManager {
-  std::vector<Layer*> layers;
 
   /** read only */
 
+  std::vector<Layer*> _layers;
   // seperate attenuation calculation for each channel?
   // I suppose. some attenuations only target some channels
   // and more can be added.
@@ -33,7 +33,7 @@ class LayerManager {
 
   inline unsigned int getNumberOfCircleBeats(TimePosition position) {
     vector<unsigned int> layer_n_beats;
-    for (auto layer : layers) {
+    for (auto layer : _layers) {
       if (layer->readableAtPosition(position) && layer->_loop) {
         layer_n_beats.push_back(layer->_n_beats);
       }
@@ -44,7 +44,7 @@ class LayerManager {
 
   inline unsigned int getCircleStartBeat(TimePosition position) {
     unsigned int start_beat = 0;
-    for (auto layer : layers) {
+    for (auto layer : _layers) {
       if (layer->readableAtPosition(position) && layer->_loop && start_beat < layer->_start_beat) {
         start_beat = layer->_start_beat;
       }
@@ -54,12 +54,12 @@ class LayerManager {
 
   inline void updateLayerAttenuations(TimePosition position) {
     if (_attenuation_calculator_divider.process()) {
-      for (unsigned int layer_i = 0; layer_i < layers.size(); layer_i++) {
+      for (unsigned int layer_i = 0; layer_i < _layers.size(); layer_i++) {
         float layer_i_attenuation = 0.f;
-        for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
-          for (auto target_layer_i : layers[j]->target_layers_idx) {
+        for (unsigned int j = layer_i + 1; j < _layers.size(); j++) {
+          for (auto target_layer_i : _layers[j]->target_layers_idx) {
             if (target_layer_i == layer_i) {
-              layer_i_attenuation += layers[j]->readRecordingStrength(position);
+              layer_i_attenuation += _layers[j]->readRecordingStrength(position);
               break;
             }
           }
@@ -74,7 +74,7 @@ class LayerManager {
       }
     }
 
-    for (unsigned int i = 0; i < layers.size(); i++) {
+    for (unsigned int i = 0; i < _layers.size(); i++) {
       _current_layer_attenuations[i] = smoothValue(_last_calculated_layer_attenuations[i], _current_layer_attenuations[i]);
     }
   }
@@ -84,13 +84,13 @@ class LayerManager {
 
     // FIXME multiple recordings in layer, have loop and array of types
   myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
-    if (0 < layers.size()) {
-      signal_type = layers[0]->_in->_signal_type;
+    if (0 < _layers.size()) {
+      signal_type = _layers[0]->_in->_signal_type;
     }
 
     float signal_out = 0.f;
-    for (unsigned int i = 0; i < layers.size(); i++) {
-      if (layers[i]->readableAtPosition(position)) {
+    for (unsigned int i = 0; i < _layers.size(); i++) {
+      if (_layers[i]->readableAtPosition(position)) {
         float attenuation = _current_layer_attenuations[i];
 
         if (record_interface.active()) {
@@ -103,7 +103,7 @@ class LayerManager {
         }
 
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
-        float layer_out = layers[i]->readSignal(position);
+        float layer_out = _layers[i]->readSignal(position);
         layer_out = myrisa::dsp::attenuate(layer_out, attenuation, signal_type);
         signal_out = myrisa::dsp::sum(signal_out, layer_out, signal_type);
       }
@@ -115,15 +115,15 @@ class LayerManager {
   inline std::vector<Layer*> getLayersFromIdx(std::vector<unsigned int> layer_idx) {
     std::vector<Layer*> selected_layers;
     for (auto layer_id : layer_idx) {
-      selected_layers.push_back(layers[layer_id]);
+      selected_layers.push_back(_layers[layer_id]);
     }
     return selected_layers;
   }
 
   inline float getNumberOfBeatsOfLayerSelection(std::vector<unsigned int> layer_idx) {
-    assert(layers.size() != 0);
+    assert(_layers.size() != 0);
     assert(layer_idx.size() != 0);
-    assert(layer_idx.size() <= layers.size());
+    assert(layer_idx.size() <= _layers.size());
 
     unsigned int max_n_beats = 0;
 
@@ -134,6 +134,12 @@ class LayerManager {
     }
 
     return max_n_beats;
+  }
+
+  inline void addLayer(Layer* new_layer) {
+    _layers.push_back(new_layer);
+    _last_calculated_layer_attenuations.resize(_layers.size());
+    _current_layer_attenuations.resize(_layers.size());
   }
 
 } // namespace gko

@@ -2,6 +2,7 @@
 
 #include "dsp/AntipopFilter.hpp"
 #include "definitions.hpp"
+#include "dsp/PhaseAnalyzer.hpp"
 #include "Layer.hpp"
 #include "Channel.hpp"
 
@@ -9,13 +10,10 @@ namespace myrisa {
 namespace dsp {
 namespace gko {
 
-/**
-   Records a connection into a Layer.
-  */
 class Recorder {
 public:
+  /** read only */
   Layer *_recording_layer = nullptr;
-  RecordInterface record_interface;
   AntipopFilter _write_antipop_filter;
 
 public:
@@ -23,29 +21,27 @@ public:
     return _recording_layer != nullptr;
   }
 
-  inline Layer* endRecording() {
+  inline Layer* endRecording(const TimePositionAdvancer &time_position_advancer, const LayerManager &layer_manager) {
     assert(isRecording());
-    assert(_recording_layer->_n_beats != 0.f);
+    assert(_recording_layer->_n_beats != 0);
 
     printf("- rec end\n");
     printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat);
 
-    if (!_phase_oscillator.isSet()) {
-      if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
-        _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
-      } else {
-        float recording_time = _recording_layer->_in->_samples_per_beat * _sample_time;
-        _phase_oscillator.setFrequency(1 / recording_time);
+
+    if (!time_position_advancer.isPhaseOscillatorSet())) {
+      float period = time_position_advancer.getBeatPeriod();
+      if (period == 0.f) {
+        period = _recording_layer->time_length;
       }
-      printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
+
+      time_position_advancer.setPhaseOscillatorFrequency(1 / period);
+      printf("-- phase oscillator set with period: %f\n", period);
     }
 
-    _timeline.layers.push_back(_recording_layer);
-        _timeline._last_calculated_attenuation.resize(_timeline.layers.size());
-    _timeline._current_attenuation.resize(_timeline.layers.size());
+    layer_manager.add_layer(_recording_layer);
 
     unsigned int layer_i = _timeline.layers.size() - 1;
-
     if (_select_new_layers) {
       _selected_layers_idx.push_back(layer_i);
     }
@@ -57,42 +53,66 @@ public:
     _recording_layer = nullptr;
   }
 
-  inline newRecording(TimePosition timeline_position, RecordInterface record_interface, int samples_per_beat) {
+  inline void newRecording(const TimePosition &timeline_position, const Interface &interface, int samples_per_beat) {
     assert(record_interface.active());
     assert(_recording_layer == nullptr);
 
     _write_antipop_filter.trigger();
 
     unsigned int n_beats = 1;
-    if (record_interface.mode == RecordInterface::Mode::DUB && 0 < _timeline.layers.size()) {
+    if (interface.record_interface.mode == RecordInterface::Mode::DUB && 0 < _timeline.layers.size()) {
       n_beats = _timeline.layers[_active_layer_i]->_n_beats;
     }
 
     unsigned int start_beat = _timeline_position.beat;
 
-    int samples_per_beat = 0;
-    if (phaseDefined()) {
-      if (_use_ext_phase) {
-        samples_per_beat = _phase_analyzer.getSamplesPerBeat(_sample_time);
-      } else if (_phase_oscillator.isSet()) {
-        float beat_period = 1 / _phase_oscillator.getFrequency();
-        samples_per_beat = floor(beat_period / _sample_time);
-      }
-    }
+    // TODO
+    _recording_layer = new Layer(start_beat, n_beats, interface.selected_layers_idx, _signal_type, samples_per_beat);
 
-    _recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
-
-    if (record_interface.time_frame != TimeFrame::TIMELINE) {
+    if (interface.record_interface.time_frame != TimeFrame::TIMELINE) {
       _recording_layer->_loop = true;
     }
 
     printf("Recording Activate:\n");
     printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats, _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, _active_layer_i);
+  }
 
-    _recording_layer;
+  inline void step(const TimePosition timeline_position, const RecordInterface &record_interface) {
+    if (_recording_layer) {
+      float in =  _write_antipop_filter.process(record_interface.in);
+      _recording_layer->write(timeline_position, in, record_interface.strength, phase_defined);
+    }
+  }
+
+  inline void growRecording(int n_beats) {
+    _recording_layer->_n_beats++;
+  }
+
+  inline bool pastRecordingEnd(TimePosition timeline_position) {
+    return _recording_layer->_start_beat + _recording_layer->_n_beats <= timeline_position.beat;
+  }
+
+  inline void handlePhaseEvent(PhaseAnalyzer::PhaseEvent event, const RecordInterface &record_interface) {
+    bool phase_flip = (event == PhaseAnalyzer::PhaseEvent::FORWARD || event == PhaseAnalyzer::PhaseEvent::BACKWARD);
+    if (_recording_layer && phase_flip) {
+      assert(_recording_layer != nullptr);
+      assert(_recording_layer->_in->_samples_per_beat != 0);
+
+      bool reached_recording_end = _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
+      if (reached_recording_end) {
+        if (record_interface.mode == RecordInterface::Mode::DUB) {
+          printf("DUB END\n");
+          this->endRecording();
+          this->newRecording();
+        } else if (record_interface.mode == RecordInterface::Mode::EXTEND) {
+          _recording_layer->_n_beats++;
+          printf("extend recording to: %d\n", _recording_layer->_n_beats);
+        }
+      }
+      // TODO more modes
+    }
   }
 };
-
 
 } // namespace gko
 } // namespace dsp

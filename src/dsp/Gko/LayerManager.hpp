@@ -3,7 +3,6 @@
 #include "definitions.hpp"
 #include "util/math.hpp"
 #include "Layer.hpp"
-#include "Channel.hpp"
 #include <string>
 
 namespace myrisa {

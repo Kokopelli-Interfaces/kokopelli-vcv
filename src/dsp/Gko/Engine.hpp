@@ -5,11 +5,12 @@
 #include "definitions.hpp"
 #include "dsp/AntipopFilter.hpp"
 #include "dsp/Signal.hpp"
+#include "dsp/PhaseAnalyzer.hpp"
 #include "rack.hpp"
 
 #include "Layer.hpp"
-#include "Channel.hpp"
 #include "TimePositionAdvancer.hpp"
+#include "ConnectionManager.hpp"
 #include  "Interface.hpp"
 #include "Recorder.hpp"
 #include "Reader.hpp"
@@ -39,7 +40,7 @@ struct Engine {
   Recorder _recorder;
   Reader _reader;
   StateController _state_controller;
-  ChannelManager _channel_manager;
+  ConnectionManager _connection_manager;
 
   void step();
   float read();

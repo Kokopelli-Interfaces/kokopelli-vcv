@@ -4,7 +4,6 @@
 #include "dsp/AntipopFilter.hpp"
 #include "definitions.hpp"
 #include "Layer.hpp"
-#include "Channel.hpp"
 
 namespace myrisa {
 namespace dsp {

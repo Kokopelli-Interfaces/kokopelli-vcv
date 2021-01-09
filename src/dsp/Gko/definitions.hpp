@@ -14,6 +14,12 @@ struct TimePosition {
 };
 
 struct Connection {
+  std::vector<ConnectionChannel*> channels;
+
+  std::string label = "";
+};
+
+struct ConnectionChannel {
   float to[MyrisaModule::maxChannels]{};
   float from[MyrisaModule::maxChannels]{};
 

@@ -1,13 +1,11 @@
 #include "Engine.hpp"
-#include "dsp/PhaseAnalyzer.hpp"
 
-using namespace myrisa::dsp::gko;
+// using namespace myrisa::dsp::gko;
 using namespace myrisa::dsp;
 
 inline void Engine::handlePhaseEvent(PhaseAnalyzer::PhaseEvent phase_event) {
   bool phase_flip = (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD || phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD);
 
-  // _recorder
   if (phase_flip && _recorder->isRecording() && _recorder->pastRecordingEnd()) {
     if (_interface.record_interface.mode == RecordInterface::Mode::DUB) {
       printf("DUB END\n");
@@ -19,7 +17,6 @@ inline void Engine::handlePhaseEvent(PhaseAnalyzer::PhaseEvent phase_event) {
     }
   }
 
-  // _reader
   if (_interface.options.use_antipop && phase_event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY) {
     _reader->triggerAntipop();
   }
@@ -33,7 +30,7 @@ void Engine::step() {
 
   if (!_recorder->isRecording() && _interface.record_interface.active()) {
     _recorder->newRecording();
-  } else if (recorder->isRecording() && !_interface.record_interface.active()) {
-    _recorder->endRecording();
+  } else if (_recorder->isRecording() && !_interface.record_interface.active()) {
+    _recorder->endRecording(_time_position_advancer, _layer_manager);
   }
 }

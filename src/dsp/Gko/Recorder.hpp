@@ -4,7 +4,6 @@
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "Layer.hpp"
-#include "Channel.hpp"
 
 namespace myrisa {
 namespace dsp {
@@ -41,21 +40,26 @@ public:
 
     layer_manager.add_layer(_recording_layer);
 
-    unsigned int layer_i = _timeline.layers.size() - 1;
-    if (_select_new_layers) {
-      _selected_layers_idx.push_back(layer_i);
-    }
+    // FIXME
+    // unsigned int layer_i = _timeline.layers.size() - 1;
+    // if (_select_new_layers) {
+    //   _selected_layers_idx.push_back(layer_i);
+    // }
 
-    if (_new_layer_active) {
-      _active_layer_i = layer_i;
-    }
+    // if (_new_layer_active) {
+    //   _active_layer_i = layer_i;
+    // }
 
+    Layer* recorded_layer = _recording_layer;
     _recording_layer = nullptr;
+    return recorded_layer
   }
 
-  inline void newRecording(const TimePosition &timeline_position, const Interface &interface, int samples_per_beat) {
+  inline void newRecording(const TimePosition &timeline_position, const Interface &interface, int samples_per_beat, const ConnectionManager &connection_manager) {
     assert(record_interface.active());
     assert(_recording_layer == nullptr);
+
+    connection_manager.refreshActiveConnections();
 
     _write_antipop_filter.trigger();
 
@@ -77,7 +81,7 @@ public:
     printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats, _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, _active_layer_i);
   }
 
-  inline void step(const TimePosition timeline_position, const RecordInterface &record_interface) {
+  inline void step(const TimePosition timeline_position, const RecordInterface &record_interface, const *ConnectionManager) {
     if (_recording_layer) {
       float in =  _write_antipop_filter.process(record_interface.in);
       _recording_layer->write(timeline_position, in, record_interface.strength, phase_defined);
@@ -90,27 +94,6 @@ public:
 
   inline bool pastRecordingEnd(TimePosition timeline_position) {
     return _recording_layer->_start_beat + _recording_layer->_n_beats <= timeline_position.beat;
-  }
-
-  inline void handlePhaseEvent(PhaseAnalyzer::PhaseEvent event, const RecordInterface &record_interface) {
-    bool phase_flip = (event == PhaseAnalyzer::PhaseEvent::FORWARD || event == PhaseAnalyzer::PhaseEvent::BACKWARD);
-    if (_recording_layer && phase_flip) {
-      assert(_recording_layer != nullptr);
-      assert(_recording_layer->_in->_samples_per_beat != 0);
-
-      bool reached_recording_end = _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
-      if (reached_recording_end) {
-        if (record_interface.mode == RecordInterface::Mode::DUB) {
-          printf("DUB END\n");
-          this->endRecording();
-          this->newRecording();
-        } else if (record_interface.mode == RecordInterface::Mode::EXTEND) {
-          _recording_layer->_n_beats++;
-          printf("extend recording to: %d\n", _recording_layer->_n_beats);
-        }
-      }
-      // TODO more modes
-    }
   }
 };
 

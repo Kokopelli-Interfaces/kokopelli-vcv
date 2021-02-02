@@ -124,10 +124,8 @@ inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
     new_beat = _timeline_position.beat + 1;
     if (_read_time_frame == TimeFrame::SELECTED_LAYERS) {
       unsigned int circle_end_beat = _timeline.getCircleStartBeat(_timeline_position) + _timeline.getNumberOfCircleBeats(_timeline_position);
-      printf("beat is %d, end beat is %d\n", _timeline_position.beat, circle_end_beat);
       if (circle_end_beat <= _timeline_position.beat + 1) {
         if (!(_record_params.mode == RecordParams::Mode::EXTEND && _recording_layer != nullptr)) {
-          printf("new beat is %d\n", _timeline.getCircleStartBeat(_timeline_position));
           new_beat = _timeline.getCircleStartBeat(_timeline_position);
         }
       }

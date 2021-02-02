@@ -53,7 +53,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      if (e->isSelected(e->_active_layer_i) && !e->_new_layer_active) {
+      if (e->isSelected(e->_active_layer_i)) {
         if (e->_selected_layers_idx.size() == 1) {
           e->_selected_layers_idx = e->_saved_selected_layers_idx;
         } else {

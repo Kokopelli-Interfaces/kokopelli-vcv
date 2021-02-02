@@ -30,6 +30,10 @@ struct Timeline {
     return old + (current - old) * lambda;
   }
 
+  inline unsigned int getCircleBeat(TimePosition position) {
+    return position.beat - getCircleStartBeat(position);
+  }
+
   inline unsigned int getNumberOfCircleBeats(TimePosition position) {
     unsigned int max_n_beats = 0;
     for (auto layer : layers) {
@@ -42,15 +46,16 @@ struct Timeline {
   }
 
   inline unsigned int getCircleStartBeat(TimePosition position) {
-    unsigned int start_beat = position.beat;
+    unsigned int start_beat = 0;
+    unsigned int max_layer_start_beat = 0;
+    unsigned int circle_beats = getNumberOfCircleBeats(position);
+
     for (auto layer : layers) {
-      if (layer->readableAtPosition(position) && layer->_loop) {
-        unsigned int layer_beat = layer->getLayerBeat(position.beat);
-        if (position.beat - layer_beat < start_beat) {
-          start_beat = position.beat - layer_beat;
-        }
+      if (layer->_loop && layer->_n_beats == circle_beats && max_layer_start_beat < layer->_start_beat) {
+        start_beat = position.beat - layer->getLayerBeat(position.beat);
       }
     }
+
     return start_beat;
   }
 

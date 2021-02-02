@@ -116,15 +116,14 @@ struct CircleBeatDisplay : GkoValueDisplay {
         return;
       }
 
-      unsigned int total_circle_beats = e->_timeline.getNumberOfCircleBeats(e->_timeline_position);
-      unsigned int circle_beat = 0;
-      if (total_circle_beats != 0) {
-        circle_beat = (e->_timeline_position.beat - e->_timeline.getCircleStartBeat(e->_timeline_position)) % total_circle_beats;
-      } else {
-        circle_beat = -1;
+      unsigned int circle_beat = e->_timeline.getCircleBeat(e->_timeline_position) + 1;
+
+      unsigned int n_circle_beats = e->_timeline.getNumberOfCircleBeats(e->_timeline_position);
+      if (n_circle_beats == 0) {
+        circle_beat = 0;
       }
 
-      GkoValueDisplay::setDisplayValue(circle_beat + 1);
+      GkoValueDisplay::setDisplayValue(circle_beat);
 		}
 	}
 };

@@ -2,7 +2,9 @@
 
 #include <vector>
 
-enum TimeFrame { TIMELINE, SELECTED_LAYERS, ACTIVE_LAYER };
+enum TimeFrame { SELECTED_LAYERS, TIMELINE, ACTIVE_LAYER };
+
+enum RecordFrame { CIRCLE, TIME, ALT };
 
 struct TimePosition {
   unsigned int beat = 0;
@@ -14,10 +16,10 @@ struct TimePosition {
   See the description of Record in the README for behaviour.
 */
 struct RecordParams {
-  enum Mode {EXTEND, DUB, REPLACE};
+  enum Mode {DUB, EXTEND, REPLACE};
 
   float in = 0.f;
-  TimeFrame time_frame = TimeFrame::SELECTED_LAYERS;
+  RecordFrame record_frame = RecordFrame::TIME;
   Mode mode = Mode::DUB;
   float strength = 0.f;
 

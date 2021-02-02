@@ -99,14 +99,14 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.time_frame == TimeFrame::SELECTED_LAYERS) {
-        e->_record_params.time_frame = TimeFrame::TIMELINE;
+      if (e->_record_params.record_frame == RecordFrame::CIRCLE) {
+        e->_record_params.record_frame = RecordFrame::TIME;
       } else {
-        e->_record_params.time_frame = TimeFrame::SELECTED_LAYERS;
+        e->_record_params.record_frame = RecordFrame::CIRCLE;
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-        e->_record_params.time_frame = TimeFrame::ACTIVE_LAYER;
+        e->_record_params.record_frame = RecordFrame::ALT;
       break;
     }
 
@@ -309,7 +309,7 @@ void Gko::updateLights(const ProcessArgs &args) {
     break;
   }
 
-  switch (displayed_record_params.time_frame) {
+  switch (displayed_record_params.record_frame) {
   case TimeFrame::SELECTED_LAYERS:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;

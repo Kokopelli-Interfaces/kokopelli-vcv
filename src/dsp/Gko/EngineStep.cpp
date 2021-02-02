@@ -55,8 +55,13 @@ inline Layer* Engine::newRecording() {
   unsigned int start_beat = _timeline_position.beat;
   if (_read_time_frame == TimeFrame::SELECTED_LAYERS) {
     if (_record_params.mode == RecordParams::Mode::DUB) {
-      start_beat = _timeline.getCircleStartBeat(_timeline_position);
-      n_beats = _timeline.getNumberOfCircleBeats(_timeline_position);
+      unsigned int circle_start_beat = _timeline.getCircleStartBeat(_timeline_position);
+      unsigned int circle_n_beats = _timeline.getNumberOfCircleBeats(_timeline_position);
+      if (circle_start_beat + circle_n_beats < start_beat + n_beats) {
+        start_beat = circle_start_beat;
+        n_beats = circle_n_beats;
+      }
+
       if (n_beats == 0) {
         n_beats = 1;
       }

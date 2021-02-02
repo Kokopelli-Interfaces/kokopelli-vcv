@@ -51,7 +51,7 @@ struct Timeline {
     unsigned int circle_beats = getNumberOfCircleBeats(position);
 
     for (auto layer : layers) {
-      if (layer->_loop && layer->_n_beats == circle_beats && max_layer_start_beat < layer->_start_beat) {
+      if (layer->_loop && layer->_n_beats == circle_beats && max_layer_start_beat <= layer->_start_beat) {
         start_beat = position.beat - layer->getLayerBeat(position.beat);
       }
     }

@@ -53,7 +53,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      if (e->isSelected(e->_active_layer_i)) {
+      if (e->isSelected(e->_active_layer_i) && !e->_new_layer_active) {
         if (e->_selected_layers_idx.size() == 1) {
           e->_selected_layers_idx = e->_saved_selected_layers_idx;
         } else {
@@ -137,20 +137,27 @@ void Gko::processSelect() {
     for (int c = 0; c < channels(); c++) {
       myrisa::dsp::gko::Engine *e = _engines[c];
 
-      int new_active_layer_i = e->_active_layer_i;
+      bool increment = true;
       if (0.f < d_select) {
         if (e->_active_layer_i < e->_timeline.layers.size()) {
-          new_active_layer_i++;
+          increment = true;
         }
       } else if (0 < e->_active_layer_i) {
-        new_active_layer_i--;
+        increment = false;
       }
 
-      if (new_active_layer_i == (int)e->_timeline.layers.size()) {
-        e->_new_layer_active = true;
+      if (increment) {
+        if (e->_active_layer_i == e->_timeline.layers.size()-1) {
+          e->_new_layer_active = true;
+        } else {
+          e->_active_layer_i++;
+        }
       } else {
-        e->_new_layer_active = false;
-        e->_active_layer_i = new_active_layer_i;
+        if (e->_new_layer_active) {
+          e->_new_layer_active = false;
+        } else {
+          e->_active_layer_i--;
+        }
       }
     }
 

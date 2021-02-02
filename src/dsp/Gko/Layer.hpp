@@ -38,7 +38,7 @@ struct Layer {
   }
 
   inline unsigned int getLayerBeat(unsigned int timeline_beat) {
-    unsigned int beat = timeline_beat - _start_beat;
+    int beat = timeline_beat - _start_beat;
     if (_loop && 0 < beat) {
       return beat % _n_beats;
     }

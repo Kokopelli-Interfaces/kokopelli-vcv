@@ -34,6 +34,7 @@ void Gko::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
     myrisa::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
+    myrisa::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
     myrisa::dsp::LongPressButton::Event _record_mode_event = _record_mode_button.process(sampleTime);
     myrisa::dsp::LongPressButton::Event _record_time_frame_event = _record_time_frame_button.process(sampleTime);
     myrisa::dsp::LongPressButton::Event _read_time_frame_event = _read_time_frame_button.process(sampleTime);
@@ -66,6 +67,16 @@ void Gko::processButtons() {
           e->selectRange(0, e->_active_layer_i);
         }
       }
+      break;
+    }
+
+    switch (_select_mode_event) {
+    case myrisa::dsp::LongPressButton::NO_PRESS:
+      break;
+    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+      break;
+    case myrisa::dsp::LongPressButton::LONG_PRESS:
+      e->deleteSelection();
       break;
     }
 

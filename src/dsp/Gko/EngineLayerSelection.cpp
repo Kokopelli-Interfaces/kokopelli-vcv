@@ -26,8 +26,8 @@ void Engine::soloSelectLayer(unsigned int layer_i) {
 }
 
 bool Engine::isSelected(unsigned int layer_i) {
-  for (auto layer_i : _selected_layers_idx) {
-    if (layer_i == _active_layer_i) {
+  for (auto sel_layer_i : _selected_layers_idx) {
+    if (sel_layer_i == layer_i) {
       return true;
     }
   }
@@ -45,4 +45,13 @@ void Engine::toggleSelectLayer(unsigned int layer_i) {
     if (select && _timeline.layers.size() != 0) {
       _selected_layers_idx.push_back(_active_layer_i);
     }
+}
+
+void Engine::deleteSelection() {
+  for (int layer_i = _timeline.layers.size()-1; layer_i >= 0; layer_i--) {
+    if (isSelected(layer_i)) {
+      printf("YES %d\n", layer_i);
+      _timeline.layers.erase(_timeline.layers.begin()+layer_i);
+    }
+  }
 }

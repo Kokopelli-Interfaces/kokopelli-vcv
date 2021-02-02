@@ -31,14 +31,14 @@ struct Timeline {
   }
 
   inline unsigned int getNumberOfCircleBeats(TimePosition position) {
-    vector<unsigned int> layer_n_beats;
+    unsigned int max_n_beats = 0;
     for (auto layer : layers) {
-      if (layer->readableAtPosition(position) && layer->_loop) {
-        layer_n_beats.push_back(layer->_n_beats);
+      if (layer->readableAtPosition(position) && layer->_loop && max_n_beats < layer->_n_beats) {
+        max_n_beats = layer->_n_beats;
       }
     }
 
-    return myrisa::util::lcm(layer_n_beats);
+    return max_n_beats;
   }
 
   inline unsigned int getCircleStartBeat(TimePosition position) {

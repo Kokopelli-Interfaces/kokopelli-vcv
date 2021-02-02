@@ -56,6 +56,7 @@ struct Engine {
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);
   bool isSelected(unsigned int layer_i);
+  bool isSolo(unsigned int layer_i);
   void toggleSelectLayer(unsigned int layer_i);
   void deleteSelection();
 

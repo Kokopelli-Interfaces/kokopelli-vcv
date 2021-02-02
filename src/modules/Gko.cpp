@@ -53,7 +53,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      if (e->isSelected(e->_active_layer_i) && !e->_new_layer_active) {
+      if (e->isSelected(e->_active_layer_i)) {
         if (e->_selected_layers_idx.size() == 1) {
           e->_selected_layers_idx = e->_saved_selected_layers_idx;
         } else {
@@ -147,7 +147,7 @@ void Gko::processSelect() {
       }
 
       if (increment) {
-        if (e->_active_layer_i == e->_timeline.layers.size()-1) {
+        if ((int) e->_timeline.layers.size()-1 <= (int)e->_active_layer_i) {
           e->_new_layer_active = true;
         } else {
           e->_active_layer_i++;
@@ -251,8 +251,9 @@ void Gko::updateLights(const ProcessArgs &args) {
   if (default_e->_new_layer_active || default_e->_recording_layer != nullptr) {
     if (default_e->_select_new_layers) {
       lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
-    } else {
-      lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
+      if (default_e->isSolo(default_e->_timeline.layers.size()-1)) {
+        lights[SELECT_FUNCTION_LIGHT + 0].value = 1.f;
+      }
     }
   } else if (default_e->isSelected(default_e->_active_layer_i)) {
     lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;

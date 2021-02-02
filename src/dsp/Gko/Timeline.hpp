@@ -42,10 +42,13 @@ struct Timeline {
   }
 
   inline unsigned int getCircleStartBeat(TimePosition position) {
-    unsigned int start_beat = 0;
+    unsigned int start_beat = position.beat;
     for (auto layer : layers) {
-      if (layer->readableAtPosition(position) && layer->_loop && start_beat < layer->_start_beat) {
-        start_beat = layer->_start_beat;
+      if (layer->readableAtPosition(position) && layer->_loop) {
+        unsigned int layer_beat = layer->getLayerBeat(position.beat);
+        if (position.beat - layer_beat < start_beat) {
+          start_beat = position.beat - layer_beat;
+        }
       }
     }
     return start_beat;

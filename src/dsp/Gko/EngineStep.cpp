@@ -107,11 +107,24 @@ inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
   _timeline_position.phase = _use_ext_phase ? _ext_phase : internal_phase;
 
   PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(_timeline_position.phase, _sample_time);
+
+  unsigned int new_beat = _timeline_position.beat;
   if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD && 1 <= _timeline_position.beat) {
-    _timeline_position.beat--;
+    new_beat = _timeline_position.beat - 1;
   } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
-    _timeline_position.beat++;
+    new_beat = _timeline_position.beat + 1;
+    if (_read_time_frame == TimeFrame::SELECTED_LAYERS) {
+      unsigned int circle_end_beat = _timeline.getCircleStartBeat(_timeline_position) + _timeline.getNumberOfCircleBeats(_timeline_position);
+      printf("beat is %d, end beat is %d\n", _timeline_position.beat, circle_end_beat);
+      if (_timeline_position.beat + 1 == circle_end_beat) {
+        if (!(_record_params.mode == RecordParams::Mode::EXTEND && _recording_layer != nullptr)) {
+          printf("new beat is %d\n", _timeline.getCircleStartBeat(_timeline_position));
+          new_beat = _timeline.getCircleStartBeat(_timeline_position);
+        }
+      }
+    }
   }
+  _timeline_position.beat = new_beat;
 
   return phase_event;
 }

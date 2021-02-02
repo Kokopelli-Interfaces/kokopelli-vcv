@@ -37,8 +37,8 @@ struct Layer {
     delete _recording_strength;
   }
 
-  inline int getLayerBeat(unsigned int timeline_beat) {
-    int beat = timeline_beat - _start_beat;
+  inline unsigned int getLayerBeat(unsigned int timeline_beat) {
+    unsigned int beat = timeline_beat - _start_beat;
     if (_loop && 0 < beat) {
       return beat % _n_beats;
     }

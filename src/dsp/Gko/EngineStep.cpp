@@ -55,8 +55,8 @@ inline Layer* Engine::newRecording() {
   unsigned int start_beat = _timeline_position.beat;
   if (_read_time_frame == TimeFrame::SELECTED_LAYERS) {
     if (_record_params.mode == RecordParams::Mode::DUB) {
-      unsigned int circle_start_beat = _timeline.getCircleStartBeat(_timeline_position);
-      unsigned int circle_n_beats = _timeline.getNumberOfCircleBeats(_timeline_position);
+      unsigned int circle_start_beat = _timeline.getCircleStartBeat(_selected_layers_idx, _timeline_position);
+      unsigned int circle_n_beats = _timeline.getNumberOfCircleBeats(_selected_layers_idx, _timeline_position);
       if (circle_start_beat + circle_n_beats < start_beat + n_beats) {
         start_beat = circle_start_beat;
         n_beats = circle_n_beats;
@@ -128,10 +128,10 @@ inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
   } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
     new_beat = _timeline_position.beat + 1;
     if (_read_time_frame == TimeFrame::SELECTED_LAYERS) {
-      unsigned int circle_end_beat = _timeline.getCircleStartBeat(_timeline_position) + _timeline.getNumberOfCircleBeats(_timeline_position);
+      unsigned int circle_end_beat = _timeline.getCircleStartBeat(_selected_layers_idx, _timeline_position) + _timeline.getNumberOfCircleBeats(_selected_layers_idx, _timeline_position);
       if (circle_end_beat <= _timeline_position.beat + 1) {
         if (!(_record_params.mode == RecordParams::Mode::EXTEND && _recording_layer != nullptr)) {
-          new_beat = _timeline.getCircleStartBeat(_timeline_position);
+          new_beat = _timeline.getCircleStartBeat(_selected_layers_idx, _timeline_position);
         }
       }
     }

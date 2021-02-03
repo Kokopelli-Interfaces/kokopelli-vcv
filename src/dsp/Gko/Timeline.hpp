@@ -30,13 +30,10 @@ struct Timeline {
     return old + (current - old) * lambda;
   }
 
-  inline unsigned int getCircleBeat(TimePosition position) {
-    return position.beat - getCircleStartBeat(position);
-  }
-
-  inline unsigned int getNumberOfCircleBeats(TimePosition position) {
+  inline unsigned int getNumberOfCircleBeats(std::vector<unsigned int> circle_layers_idx, TimePosition position) {
     unsigned int max_n_beats = 0;
-    for (auto layer : layers) {
+    for (auto layer_i : circle_layers_idx) {
+      Layer* layer = layers[layer_i];
       if (layer->readableAtPosition(position) && layer->_loop && max_n_beats < layer->_n_beats) {
         max_n_beats = layer->_n_beats;
       }
@@ -45,10 +42,14 @@ struct Timeline {
     return max_n_beats;
   }
 
-  inline unsigned int getCircleStartBeat(TimePosition position) {
+  inline unsigned int getCircleBeat(std::vector<unsigned int> circle_layers_idx, TimePosition position) {
+    return position.beat - getCircleStartBeat(circle_layers_idx, position);
+  }
+
+  inline unsigned int getCircleStartBeat(std::vector<unsigned int> circle_layers_idx, TimePosition position) {
     unsigned int start_beat = 0;
     unsigned int max_layer_start_beat = 0;
-    unsigned int circle_beats = getNumberOfCircleBeats(position);
+    unsigned int circle_beats = getNumberOfCircleBeats(circle_layers_idx, position);
 
     for (auto layer : layers) {
       if (layer->_loop && layer->_n_beats == circle_beats && max_layer_start_beat <= layer->_start_beat) {

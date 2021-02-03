@@ -106,7 +106,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-        e->_record_params.record_frame = RecordFrame::ALT;
+      e->_record_params.record_frame = RecordFrame::ALT;
       break;
     }
 
@@ -121,8 +121,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->_read_time_frame = TimeFrame::ACTIVE_LAYER;
-      break;
+      e->deleteLayer(e->_timeline.layers.size()-1);
     }
   }
 }
@@ -318,15 +317,15 @@ void Gko::updateLights(const ProcessArgs &args) {
   }
 
   switch (displayed_record_params.record_frame) {
-  case TimeFrame::SELECTED_LAYERS:
+  case RecordFrame::CIRCLE:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
-  case TimeFrame::TIMELINE:
+  case RecordFrame::TIME:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
-  case TimeFrame::ACTIVE_LAYER:
+  case RecordFrame::ALT:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
@@ -339,10 +338,6 @@ void Gko::updateLights(const ProcessArgs &args) {
     break;
   case TimeFrame::SELECTED_LAYERS:
     lights[READ_TIME_FRAME_LIGHT + 0].value = 0.0;
-    lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
-    break;
-  case TimeFrame::ACTIVE_LAYER:
-    lights[READ_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }

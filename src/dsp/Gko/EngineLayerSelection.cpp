@@ -51,6 +51,12 @@ void Engine::toggleSelectLayer(unsigned int layer_i) {
     }
 }
 
+void Engine::deleteLayer(unsigned int layer_i) {
+  if (layer_i < _timeline.layers.size()) {
+    _timeline.layers.erase(_timeline.layers.begin()+layer_i);
+  }
+}
+
 void Engine::deleteSelection() {
   for (int layer_i = _timeline.layers.size()-1; layer_i >= 0; layer_i--) {
     if (isSelected(layer_i)) {

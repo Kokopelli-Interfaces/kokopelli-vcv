@@ -46,7 +46,7 @@ struct ActiveLayerDisplay : GkoValueDisplay {
         return;
       }
 
-      if (e->_recording_layer != nullptr || e->_new_layer_active) {
+      if (e->isRecording() || e->_new_layer_active) {
         GkoValueDisplay::setText("N");
       } else {
         int active_layer_i = e->_active_layer_i + 1;
@@ -71,7 +71,7 @@ struct LayerBeatDisplay : GkoValueDisplay {
       }
 
       int layer_beat = 0;
-      if (e->_recording_layer != nullptr) {
+      if (e->isRecording()) {
         layer_beat = e->_recording_layer->getLayerBeat(e->_timeline_position.beat);
       } else if (e->_timeline.layers.size() != 0) {
         layer_beat = e->_timeline.layers[e->_active_layer_i]->getLayerBeat(e->_timeline_position.beat);
@@ -95,7 +95,7 @@ struct TotalLayerBeatDisplay : GkoValueDisplay {
       }
 
       int total_layer_beats = 0;
-      if (e->_recording_layer != nullptr) {
+      if (e->isRecording()) {
         total_layer_beats = e->_recording_layer->_n_beats;
       } else if (e->_timeline.layers.size() != 0) {
         total_layer_beats = e->_timeline.layers[e->_active_layer_i]->_n_beats;

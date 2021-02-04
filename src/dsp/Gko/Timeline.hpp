@@ -47,7 +47,7 @@ struct Timeline {
   }
 
   inline unsigned int getCircleStartBeat(std::vector<unsigned int> circle_layers_idx, TimePosition position) {
-    unsigned int start_beat = 0;
+    unsigned int start_beat = position.beat;
     unsigned int max_layer_start_beat = 0;
     unsigned int circle_beats = getNumberOfCircleBeats(circle_layers_idx, position);
 

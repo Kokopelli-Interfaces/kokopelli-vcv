@@ -85,13 +85,13 @@ void Gko::processButtons() {
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
       if (e->_record_params.mode == RecordParams::Mode::DUB) {
-        e->_record_params.mode = RecordParams::Mode::EXTEND;
+        e->setRecordMode(RecordParams::Mode::EXTEND);
       } else {
-        e->_record_params.mode = RecordParams::Mode::DUB;
+        e->setRecordMode(RecordParams::Mode::DUB);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->_record_params.mode = RecordParams::Mode::REPLACE;
+      e->setRecordMode(RecordParams::Mode::REPLACE);
       break;
     }
 
@@ -99,14 +99,14 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.record_frame == RecordFrame::CIRCLE) {
-        e->_record_params.record_frame = RecordFrame::TIME;
+      if (e->_record_params.time_frame == RecordTimeFrame::CIRCLE) {
+        e->setRecordTimeFrame(RecordTimeFrame::TIME);
       } else {
-        e->_record_params.record_frame = RecordFrame::CIRCLE;
+        e->setRecordTimeFrame(RecordTimeFrame::CIRCLE);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->_record_params.record_frame = RecordFrame::ALT;
+      e->setRecordTimeFrame(RecordTimeFrame::ALT);
       break;
     }
 
@@ -114,10 +114,10 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_read_time_frame == TimeFrame::SELECTED_LAYERS) {
-        e->_read_time_frame = TimeFrame::TIMELINE;
+      if (e->_read_time_frame == ReadTimeFrame::SELECTED_LAYERS) {
+        e->setReadTimeFrame(ReadTimeFrame::TIMELINE);
       } else {
-        e->_read_time_frame = TimeFrame::SELECTED_LAYERS;
+        e->setReadTimeFrame(ReadTimeFrame::SELECTED_LAYERS);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
@@ -247,7 +247,7 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
-  if (default_e->_new_layer_active || default_e->_recording_layer != nullptr) {
+  if (default_e->_new_layer_active || default_e->isRecording()) {
     if (default_e->_select_new_layers) {
       lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
       if (default_e->isSolo(default_e->_timeline.layers.size()-1)) {
@@ -263,7 +263,7 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  TimeFrame displayed_read_time_frame = default_e->_read_time_frame;
+  ReadTimeFrame displayed_read_time_frame = default_e->_read_time_frame;
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
@@ -316,29 +316,31 @@ void Gko::updateLights(const ProcessArgs &args) {
     break;
   }
 
-  switch (displayed_record_params.record_frame) {
-  case RecordFrame::CIRCLE:
+  switch (displayed_record_params.time_frame) {
+  case RecordTimeFrame::CIRCLE:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
-  case RecordFrame::TIME:
+  case RecordTimeFrame::TIME:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
-  case RecordFrame::ALT:
+  case RecordTimeFrame::ALT:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }
 
   switch (displayed_read_time_frame) {
-  case TimeFrame::TIMELINE:
+  case ReadTimeFrame::TIMELINE:
     lights[READ_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[READ_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
-  case TimeFrame::SELECTED_LAYERS:
+  case ReadTimeFrame::SELECTED_LAYERS:
     lights[READ_TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
+    break;
+  default:
     break;
   }
 }

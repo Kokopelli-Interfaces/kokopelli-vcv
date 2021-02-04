@@ -43,7 +43,7 @@ struct Engine {
 
   Timeline _timeline;
   TimePosition _timeline_position;
-  TimeFrame _read_time_frame;
+  ReadTimeFrame _read_time_frame;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -52,6 +52,11 @@ struct Engine {
 
   void step();
   float read();
+
+  bool isRecording();
+  void setRecordMode(RecordParams::Mode mode);
+  void setRecordTimeFrame(RecordTimeFrame frame);
+  void setReadTimeFrame(ReadTimeFrame frame);
 
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);
@@ -62,10 +67,10 @@ struct Engine {
   void deleteSelection();
 
 private:
+  void endRecording();
+  Layer* newRecording();
   inline bool phaseDefined();
   inline void write();
-  inline void endRecording();
-  inline Layer* newRecording();
   inline void handlePhaseEvent(PhaseAnalyzer::PhaseEvent flip);
   inline PhaseAnalyzer::PhaseEvent advanceTimelinePosition();
 };

@@ -8,59 +8,15 @@ same as gko, but has additional ~GKO~ parameter to select active gko
 * TODO [#C] Timeline-VIS
 timeline visualizer for timelin
 can also use to click and drag events to different division points
-* [#C] Macros
-** Macro recording
-Gko can expand the macro module
-A 'layer' will be a layer of the macro, includes
-- parameter values
-- parameter changes
-- outputs
-- which macro it even is
-
-  In 'layer' mode, you can 
-
 * TODO Gko 
-** DONE [#B] make recordings an  array of phase bufferse, not one, to avoid downsampling
-CLOSED: [2020-12-16 Wed 13:26]
-** TODO get displays working
-- show scene length and layer length
-** TODO fix reverse recording
-** TODO dub has length of last layer
-** TODO refine states
-- layer mode?
-handle 
 
-scope,mode,circle
-- *SDT*: scene dub time.
-  'safe/practice' mode.  at layer end, discard and create new.
-  ->SDC write to circle at layer end. 
-  ->SET write to time at layer end if disengaged, else, extend.
-- *SDC*: scene dub circle.
-  'dub mode'. layer length preset to active layer length (or last?). at end, new dub layer.
-  ->SDT cancel write.
-  ->SEC extend at end.
-- *SET*: scene extend time.
-    'time write' mode. record at time position. non looping.
-    ->SEC end layer and create new loop layer
-    ->SDT discard and create new dub time layer of same length.
-- *SEC*: scene extend circle.
-   new looping layer with new length
-   ->SDC end layer and create new loop layer with preset length.
-
-??? 
-
-  'layer' mode changes to alternate layer-scope behaviour.
-  used for editting active layer.  
-  changes target layer to only be active layer (and merged layers).
-  'merges' new layers under this layer number.
-  SEL becomes this layers target layers.
-   
-- *LDT*: layer dub time.
-  same as CDT but only layer is target.
-- *LDC*: layer dub circle.
-- *LET*: layer extend time.
-- *LEC*: layer e
+* TODO cpu optim Gko
+volume calculation
+- dont use layer if not started yet
 
 
-** TODO IOC?
-
+deselect and gray out layers that are fully attenuated
+* DONE top button deletes most recent layer
+CLOSED: [2021-02-03 Wed 11:05]
+* TODO round recording lengths
+* 

@@ -2,9 +2,9 @@
 
 #include <vector>
 
-enum TimeFrame { SELECTED_LAYERS, TIMELINE, ACTIVE_LAYER };
+enum ReadTimeFrame { SELECTED_LAYERS, TIMELINE, ACTIVE_LAYER };
 
-enum RecordFrame { CIRCLE, TIME, ALT };
+enum RecordTimeFrame { CIRCLE, TIME, ALT };
 
 struct TimePosition {
   unsigned int beat = 0;
@@ -19,7 +19,7 @@ struct RecordParams {
   enum Mode {DUB, EXTEND, REPLACE};
 
   float in = 0.f;
-  RecordFrame record_frame = RecordFrame::TIME;
+  RecordTimeFrame time_frame = RecordTimeFrame::TIME;
   Mode mode = Mode::DUB;
   float strength = 0.f;
 

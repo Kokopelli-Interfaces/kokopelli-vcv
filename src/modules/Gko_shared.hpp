@@ -11,6 +11,7 @@ namespace myrisa {
 
 struct SignalExpanderMessage : ExpanderMessage {
   float signal[MyrisaModule::maxChannels]{};
+  float sel_signal[MyrisaModule::maxChannels]{};
   myrisa::dsp::SignalType signal_type;
   int n_channels;
 };

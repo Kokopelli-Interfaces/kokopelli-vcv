@@ -91,7 +91,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->deleteLayer(e->_timeline.layers.size()-1);
+      e->undo();
       break;
     }
 
@@ -223,6 +223,7 @@ void Gko::processChannel(const ProcessArgs& args, int channel_i) {
   e->_record_params.in = _from_signal->signal[channel_i];
   e->step();
   _to_signal->signal[channel_i] = e->read();
+  _to_signal->sel_signal[channel_i] = e->readSelection();
 }
 
 void Gko::updateLights(const ProcessArgs &args) {

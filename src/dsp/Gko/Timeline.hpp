@@ -30,6 +30,31 @@ struct Timeline {
     return old + (current - old) * lambda;
   }
 
+  inline bool atEnd(TimePosition position) {
+    if (layers.size() == 0) {
+      return true;
+    }
+
+    return getLayerIndexForPosition(position) == layers.size()-1;
+  }
+
+  inline unsigned int getLayerIndexForPosition(TimePosition position) {
+    if (layers.size() == 0) {
+      return 0;
+    }
+
+    unsigned int layer_i = layers.size()-1;
+    for (int i = layers.size()-1; 0 <= i; i--) {
+      if (layers[i]->_start_beat <= position.beat) {
+        break;
+      }
+
+      layer_i = i;
+    }
+
+    return layer_i;
+  }
+
   inline void updateLayerAttenuations(TimePosition position) {
     if (_attenuation_calculator_divider.process()) {
       for (unsigned int layer_i = 0; layer_i < layers.size(); layer_i++) {
@@ -57,11 +82,28 @@ struct Timeline {
     }
   }
 
+  inline float readRawLayers(TimePosition position, std::vector<unsigned int> layers_idx) {
+    float signal_out = 0.f;
+
+    // FIXME multiple recordings in layer, have loop and array of types
+    myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
+    if (0 < layers.size()) {
+      signal_type = layers[0]->_in->_signal_type;
+    }
+
+    for (auto layer_i : layers_idx) {
+      float layer_out = layers[layer_i]->readSignal(position);
+      signal_out = myrisa::dsp::sum(signal_out, layer_out, signal_type);
+    }
+
+    return signal_out;
+  }
+
   inline float read(TimePosition position, Layer* recording, RecordParams record_params) {
     updateLayerAttenuations(position);
 
     // FIXME multiple recordings in layer, have loop and array of types
-  myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
+    myrisa::dsp::SignalType signal_type = myrisa::dsp::SignalType::AUDIO;
     if (0 < layers.size()) {
       signal_type = layers[0]->_in->_signal_type;
     }

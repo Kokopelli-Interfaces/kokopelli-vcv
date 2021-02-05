@@ -54,9 +54,11 @@ struct Engine {
 
   void step();
   float read();
+  float readSelection();
 
   void setCircleToActiveLayer();
 
+  void undo();
   bool isRecording();
   void setRecordMode(RecordParams::Mode mode);
   void setRecordTimeFrame(RecordTimeFrame frame);

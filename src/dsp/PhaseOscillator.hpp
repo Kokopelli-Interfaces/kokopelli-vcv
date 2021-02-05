@@ -28,6 +28,7 @@ struct PhaseOscillator {
 
   inline void reset(float value) {
     _phase = std::fmod(value, 1.0f);
+    _freq_set = false;
   }
 
   inline float step(float dt) {

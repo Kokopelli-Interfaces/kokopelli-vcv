@@ -74,6 +74,7 @@ struct LayerBeatDisplay : GkoValueDisplay {
       if (e->isRecording()) {
         layer_beat = e->_recording_layer->getLayerBeat(e->_timeline_position.beat);
       } else if (e->_timeline.layers.size() != 0) {
+        // TODO how to show start position of loops?
         layer_beat = e->_timeline.layers[e->_active_layer_i]->getLayerBeat(e->_timeline_position.beat);
       } else {
         layer_beat = -1;

@@ -51,12 +51,27 @@ void Engine::toggleSelectLayer(unsigned int layer_i) {
     }
 }
 
+void Engine::undo() {
+  if (isRecording()) {
+    endRecording();
+  }
+
+  this->deleteLayer(_timeline.layers.size()-1);
+  _active_layer_i = _timeline.layers.size()-1;
+  setCircleToActiveLayer();
+}
+
+
 void Engine::deleteLayer(unsigned int layer_i) {
   if (layer_i < _timeline.layers.size()) {
     _timeline.layers.erase(_timeline.layers.begin()+layer_i);
-    if (_active_layer_i == layer_i && layer_i != 0) {
+    if (_active_layer_i == layer_i && _active_layer_i != 0) {
       _active_layer_i--;
     }
+  }
+
+  if (_timeline.layers.size() == 0) {
+    _phase_oscillator.reset(0.f);
   }
 }
 
@@ -68,5 +83,9 @@ void Engine::deleteSelection() {
       }
       _timeline.layers.erase(_timeline.layers.begin()+layer_i);
     }
+  }
+
+  if (_timeline.layers.size() == 0) {
+    _phase_oscillator.reset(0.f);
   }
 }

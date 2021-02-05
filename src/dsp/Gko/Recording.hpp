@@ -126,6 +126,11 @@ struct Recording {
     assert(t.phase <= 1.0f);
 
     unsigned int n_beats = _buffer.size();
+    if (n_beats == 0) {
+      _buffer.push_back(std::vector<float>(_samples_per_beat));
+      n_beats++;;
+    }
+
     while (n_beats <= t.beat) {
       _buffer.push_back(std::vector<float>(_samples_per_beat));
       n_beats++;

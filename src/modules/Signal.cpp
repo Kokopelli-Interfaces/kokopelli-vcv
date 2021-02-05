@@ -43,6 +43,11 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
     toGko->signal[c] = in;
     toGko->signal_type = _signal_type;
     toGko->channels = _channels;
+
+    if (outputs[SEL_OUTPUT].isConnected()) {
+      outputs[SEL_OUTPUT].setVoltage(fromGko->sel_signal[c], c);
+    }
+
     out = myrisa::dsp::sum(fromGko->signal[c], in, _signal_type);
   }
 

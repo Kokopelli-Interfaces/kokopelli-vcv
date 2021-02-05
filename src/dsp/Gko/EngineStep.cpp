@@ -9,7 +9,7 @@ inline bool Engine::phaseDefined() {
 
 void Engine::endRecording() {
     assert(isRecording());
-    assert(_recording_layer->_n_beats != 0.f);
+    assert(_recording_layer->_n_beats != 0);
 
     printf("- rec end\n");
     printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat);

@@ -36,6 +36,7 @@ struct Engine {
   /* read only */
 
   std::pair<unsigned int, unsigned int> _circle = std::make_pair(0, 1);
+  unsigned int _circle_saved_len = 0;
 
   Layer *_recording_layer = nullptr;
   RecordParams _record_params;

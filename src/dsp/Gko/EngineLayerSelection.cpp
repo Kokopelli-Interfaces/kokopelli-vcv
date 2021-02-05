@@ -57,8 +57,6 @@ void Engine::undo() {
   }
 
   this->deleteLayer(_timeline.layers.size()-1);
-  _active_layer_i = _timeline.layers.size()-1;
-  setCircleToActiveLayer();
 }
 
 

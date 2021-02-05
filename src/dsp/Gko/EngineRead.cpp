@@ -14,5 +14,6 @@ float Engine::read() {
 
 float Engine::readSelection() {
   float timeline_out = _timeline.readRawLayers(_timeline_position, _selected_layers_idx);
-  return _read_antipop_filter.process(timeline_out);
+  // return _read_antipop_filter.process(timeline_out);
+  return timeline_out;
 }

@@ -47,23 +47,15 @@ Layer* Engine::newRecording() {
   assert(_recording_layer == nullptr);
 
   unsigned int n_beats = 1;
-  if (_record_params.mode == RecordParams::Mode::DUB && 0 < _timeline.layers.size()) {
+  if (_record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == RecordTimeFrame::CIRCLE && 0 < _timeline.layers.size()) {
     n_beats = _timeline.layers[_active_layer_i]->_n_beats;
   }
 
   unsigned int start_beat = _timeline_position.beat;
   if (_read_time_frame == ReadTimeFrame::SELECTED_LAYERS) {
-    if (_record_params.mode == RecordParams::Mode::DUB) {
-      unsigned int circle_start_beat = _timeline.getCircleStartBeat(_selected_layers_idx, _timeline_position);
-      unsigned int circle_n_beats = _timeline.getNumberOfCircleBeats(_selected_layers_idx, _timeline_position);
-      if (circle_start_beat + circle_n_beats < start_beat + n_beats) {
-        start_beat = circle_start_beat;
-        n_beats = circle_n_beats;
-      }
-
-      if (n_beats == 0) {
-        n_beats = 1;
-      }
+    if (_record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == RecordTimeFrame::CIRCLE) {
+      start_beat = _circle.first;
+      n_beats = _circle.second - _circle.first;
     }
   }
 
@@ -126,15 +118,18 @@ inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
     new_beat = _timeline_position.beat - 1;
   } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
     new_beat = _timeline_position.beat + 1;
-    if (_read_time_frame == ReadTimeFrame::SELECTED_LAYERS) {
-      unsigned int circle_end_beat = _timeline.getCircleStartBeat(_selected_layers_idx, _timeline_position) + _timeline.getNumberOfCircleBeats(_selected_layers_idx, _timeline_position);
-      if (circle_end_beat <= _timeline_position.beat + 1) {
-        if (!(_record_params.mode == RecordParams::Mode::EXTEND && isRecording())) {
-          new_beat = _timeline.getCircleStartBeat(_selected_layers_idx, _timeline_position);
-        }
-      }
+  }
+
+  if (new_beat == _circle.second) {
+    if (_read_time_frame == ReadTimeFrame::TIMELINE || (isRecording() && _record_params.mode == RecordParams::Mode::EXTEND)) {
+      _circle.second++;
+    } else {
+      new_beat = _circle.first;
+      _read_antipop_filter.trigger();
+      _write_antipop_filter.trigger();
     }
   }
+
   _timeline_position.beat = new_beat;
 
   return phase_event;

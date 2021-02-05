@@ -116,12 +116,7 @@ struct CircleBeatDisplay : GkoValueDisplay {
         return;
       }
 
-      unsigned int circle_beat = e->_timeline.getCircleBeat(e->_selected_layers_idx, e->_timeline_position) + 1;
-
-      unsigned int n_circle_beats = e->_timeline.getNumberOfCircleBeats(e->_selected_layers_idx, e->_timeline_position);
-      if (n_circle_beats == 0) {
-        circle_beat = 0;
-      }
+      int circle_beat = e->_timeline_position.beat - e->_circle.first + 1;
 
       GkoValueDisplay::setDisplayValue(circle_beat);
 		}
@@ -137,8 +132,8 @@ struct TotalCircleBeatDisplay : GkoValueDisplay {
       if (e == NULL) {
         return;
       }
-      unsigned int total_circle_beats = e->_timeline.getNumberOfCircleBeats(e->_selected_layers_idx, e->_timeline_position);
-      GkoValueDisplay::setDisplayValue(total_circle_beats);
+      unsigned int n_circle_beats = e->_circle.second - e->_circle.first;
+      GkoValueDisplay::setDisplayValue(n_circle_beats);
 		}
 	}
 };
@@ -155,6 +150,7 @@ struct TotalLayersDisplay : GkoValueDisplay {
       // TODO make me just the non attenuated layers
       int total_layers = e->_timeline.layers.size();
       GkoValueDisplay::setDisplayValue(total_layers);
+
 		}
 	}
 };
@@ -169,7 +165,7 @@ struct BeatDisplay : GkoValueDisplay {
         return;
       }
       int beat = e->_timeline_position.beat;
-      GkoValueDisplay::setDisplayValue(beat);
+      GkoValueDisplay::setDisplayValue(beat+1);
 		}
 	}
 };

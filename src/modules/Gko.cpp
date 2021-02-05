@@ -91,7 +91,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->setRecordMode(RecordParams::Mode::REPLACE);
+      e->deleteLayer(e->_timeline.layers.size()-1);
       break;
     }
 
@@ -106,7 +106,9 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->setRecordTimeFrame(RecordTimeFrame::ALT);
+      if (0 < e->_timeline.layers.size()) {
+        e->_timeline.layers[e->_active_layer_i]->_loop = !e->_timeline.layers[e->_active_layer_i]->_loop;
+      }
       break;
     }
 
@@ -121,7 +123,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
-      e->deleteLayer(e->_timeline.layers.size()-1);
+      e->setCircleToActiveLayer();
     }
   }
 }
@@ -136,15 +138,7 @@ void Gko::processSelect() {
     for (int c = 0; c < channels(); c++) {
       myrisa::dsp::gko::Engine *e = _engines[c];
 
-      bool increment = true;
-      if (0.f < d_select) {
-        if (e->_active_layer_i < e->_timeline.layers.size()) {
-          increment = true;
-        }
-      } else if (0 < e->_active_layer_i) {
-        increment = false;
-      }
-
+      bool increment = 0.f < d_select;
       if (increment) {
         if ((int) e->_timeline.layers.size()-1 <= (int)e->_active_layer_i) {
           e->_new_layer_active = true;
@@ -154,7 +148,7 @@ void Gko::processSelect() {
       } else {
         if (e->_new_layer_active) {
           e->_new_layer_active = false;
-        } else {
+        } else if (0 < e->_active_layer_i) {
           e->_active_layer_i--;
         }
       }

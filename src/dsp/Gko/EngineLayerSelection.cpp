@@ -54,6 +54,9 @@ void Engine::toggleSelectLayer(unsigned int layer_i) {
 void Engine::deleteLayer(unsigned int layer_i) {
   if (layer_i < _timeline.layers.size()) {
     _timeline.layers.erase(_timeline.layers.begin()+layer_i);
+    if (_active_layer_i == layer_i && layer_i != 0) {
+      _active_layer_i--;
+    }
   }
 }
 

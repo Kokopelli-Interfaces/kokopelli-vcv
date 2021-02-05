@@ -35,6 +35,8 @@ struct Engine {
 
   /* read only */
 
+  std::pair<unsigned int, unsigned int> _circle = std::make_pair(0, 1);
+
   Layer *_recording_layer = nullptr;
   RecordParams _record_params;
 
@@ -52,6 +54,8 @@ struct Engine {
 
   void step();
   float read();
+
+  void setCircleToActiveLayer();
 
   bool isRecording();
   void setRecordMode(RecordParams::Mode mode);

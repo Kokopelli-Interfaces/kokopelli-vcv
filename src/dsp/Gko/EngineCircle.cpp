@@ -14,6 +14,8 @@ void Engine::setCircleToActiveLayer() {
     _timeline_position.beat = 0;
   }
 
+  _loop_length = _circle.second - _circle.first;
+
   _read_antipop_filter.trigger();
   _write_antipop_filter.trigger();
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rack.hpp"
+
 #include <vector>
 
 enum ReadTimeFrame { SELECTED_LAYERS, TIMELINE, ACTIVE_LAYER };
@@ -28,8 +30,16 @@ struct RecordParams {
   inline bool active() {
     return _recordActiveThreshold < strength;
   }
+
+  inline float readIn() {
+    // avoids pops when engaging / disengaging strength parameter
+    float engage_attenuation = -1.f * pow((10.f * strength - _recordActiveThreshold), 3) + 1.f;
+    engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
+    return in * (1.f - engage_attenuation);
+  }
 };
 
 struct Options {
   bool use_antipop = false;
+  bool strict_recording_lengths = true;
 };

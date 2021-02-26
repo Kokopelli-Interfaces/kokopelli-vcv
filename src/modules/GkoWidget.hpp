@@ -273,6 +273,10 @@ struct GkoWidget : ModuleWidget {
       return &m->_options.use_antipop;
     }));
 
+    menu->addChild(new BoolOptionMenuItem("Snap to Divisible Recording Lengths", [m]() {
+      return &m->_options.strict_recording_lengths;
+    }));
+
     // menu->addChild(new Slider());
   }
 

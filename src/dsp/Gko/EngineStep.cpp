@@ -53,7 +53,7 @@ Layer* Engine::newRecording() {
   unsigned int n_beats = 1;
   unsigned int start_beat = _timeline_position.beat;
   if (_record_params.time_frame == RecordTimeFrame::CIRCLE && _record_params.mode == RecordParams::Mode::DUB) {
-    if (_timeline.layers[_active_layer_i]) {
+    if (_read_time_frame == ReadTimeFrame::TIMELINE && _timeline.layers[_active_layer_i]) {
       n_beats = _timeline.layers[_active_layer_i]->_n_beats;
     } else {
       n_beats = _circle.second - _circle.first;

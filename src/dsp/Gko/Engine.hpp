@@ -56,6 +56,7 @@ struct Engine {
   void step();
   float read();
   float readSelection();
+  float readActiveLayer();
 
   void setCircleToActiveLayer();
 

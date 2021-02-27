@@ -15,6 +15,8 @@ namespace gko {
 struct Timeline {
   std::vector<Layer*> layers;
 
+  float active_layer_out;
+
   /** read only */
 
   std::vector<float> _current_attenuation;
@@ -100,7 +102,7 @@ struct Timeline {
     return signal_out;
   }
 
-  inline float read(TimePosition position, Layer* recording, RecordParams record_params) {
+  inline float read(TimePosition position, Layer* recording, RecordParams record_params, unsigned int active_layer_i) {
     updateLayerAttenuations(position);
 
     // FIXME multiple recordings in layer, have loop and array of types
@@ -126,6 +128,10 @@ struct Timeline {
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
         float layer_out = layers[i]->readSignal(position);
         layer_out = myrisa::dsp::attenuate(layer_out, attenuation, signal_type);
+        if (i == active_layer_i) {
+          active_layer_out = layer_out;
+        }
+
         signal_out = myrisa::dsp::sum(signal_out, layer_out, signal_type);
       }
     }

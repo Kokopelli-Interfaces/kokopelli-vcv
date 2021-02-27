@@ -127,7 +127,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
-    bool create_new_dub = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _record_params.time_frame == TimeFrame::TIME;
+    bool create_new_dub = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::TIME;
     bool overwrite = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _record_params.time_frame == TimeFrame::CIRCLE;
     if (create_new_dub) {
       this->endRecording();

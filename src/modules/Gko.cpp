@@ -236,7 +236,6 @@ void Gko::updateLights(const ProcessArgs &args) {
   }
 
   float signal_in_sum = 0.f;
-  float sel_signal_out_sum = 0.f;
 
   myrisa::dsp::gko::Engine *default_e = _engines[0];
 
@@ -262,10 +261,12 @@ void Gko::updateLights(const ProcessArgs &args) {
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
+  float active_layer_signal_out_sum = 0.f;
+
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
     signal_in_sum += _from_signal->signal[c];
-    sel_signal_out_sum += _to_signal->sel_signal[c];
+    active_layer_signal_out_sum += _engines[c]->readActiveLayer();
     if (record_active) {
       displayed_read_time_frame = _engines[c]->_read_time_frame;
       displayed_record_params = _engines[c]->_record_params;
@@ -274,10 +275,9 @@ void Gko::updateLights(const ProcessArgs &args) {
   }
 
   signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
-  sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
+  active_layer_signal_out_sum = rack::clamp(active_layer_signal_out_sum, 0.f, 1.f);
 
-  // TODO make me show the layer output that is selected, not all
-  lights[RECORD_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
+  lights[RECORD_LIGHT + 1].setSmoothBrightness(active_layer_signal_out_sum, _sampleTime * _light_divider.getDivision());
 
   if (displayed_record_params.active()) {
     int light_colour = poly_record ? 2 : 0;

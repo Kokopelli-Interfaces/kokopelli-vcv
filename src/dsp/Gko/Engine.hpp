@@ -46,7 +46,7 @@ struct Engine {
 
   Timeline _timeline;
   TimePosition _timeline_position;
-  ReadTimeFrame _read_time_frame;
+  TimeFrame _read_time_frame;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -62,8 +62,8 @@ struct Engine {
   void undo();
   bool isRecording();
   void setRecordMode(RecordParams::Mode mode);
-  void setRecordTimeFrame(RecordTimeFrame frame);
-  void setReadTimeFrame(ReadTimeFrame frame);
+  void setRecordTimeFrame(TimeFrame frame);
+  void setReadTimeFrame(TimeFrame frame);
 
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);

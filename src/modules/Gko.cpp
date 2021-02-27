@@ -99,10 +99,10 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.time_frame == RecordTimeFrame::CIRCLE) {
-        e->setRecordTimeFrame(RecordTimeFrame::TIME);
+      if (e->_record_params.time_frame == TimeFrame::CIRCLE) {
+        e->setRecordTimeFrame(TimeFrame::TIME);
       } else {
-        e->setRecordTimeFrame(RecordTimeFrame::CIRCLE);
+        e->setRecordTimeFrame(TimeFrame::CIRCLE);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
@@ -116,10 +116,10 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_read_time_frame == ReadTimeFrame::SELECTED_LAYERS) {
-        e->setReadTimeFrame(ReadTimeFrame::TIMELINE);
+      if (e->_read_time_frame == TimeFrame::CIRCLE) {
+        e->setReadTimeFrame(TimeFrame::TIME);
       } else {
-        e->setReadTimeFrame(ReadTimeFrame::SELECTED_LAYERS);
+        e->setReadTimeFrame(TimeFrame::CIRCLE);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
@@ -258,7 +258,7 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  ReadTimeFrame displayed_read_time_frame = default_e->_read_time_frame;
+  TimeFrame displayed_read_time_frame = default_e->_read_time_frame;
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
@@ -305,37 +305,27 @@ void Gko::updateLights(const ProcessArgs &args) {
     lights[RECORD_MODE_LIGHT + 0].value = 0.0;
     lights[RECORD_MODE_LIGHT + 1].value = 1.0;
     break;
-  case RecordParams::Mode::REPLACE:
-    lights[RECORD_MODE_LIGHT + 0].value = 1.0;
-    lights[RECORD_MODE_LIGHT + 1].value = 1.0;
-    break;
   }
 
   switch (displayed_record_params.time_frame) {
-  case RecordTimeFrame::CIRCLE:
-    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
-    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
-    break;
-  case RecordTimeFrame::TIME:
+  case TimeFrame::TIME:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
-  case RecordTimeFrame::ALT:
+  case TimeFrame::CIRCLE:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
-    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
   }
 
   switch (displayed_read_time_frame) {
-  case ReadTimeFrame::TIMELINE:
+  case TimeFrame::TIME:
     lights[READ_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[READ_TIME_FRAME_LIGHT + 1].value = 0.0;
     break;
-  case ReadTimeFrame::SELECTED_LAYERS:
+  case TimeFrame::CIRCLE:
     lights[READ_TIME_FRAME_LIGHT + 0].value = 0.0;
     lights[READ_TIME_FRAME_LIGHT + 1].value = 1.0;
-    break;
-  default:
     break;
   }
 }

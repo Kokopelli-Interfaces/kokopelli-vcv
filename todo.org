@@ -18,5 +18,6 @@ volume calculation
 deselect and gray out layers that are fully attenuated
 * DONE top button deletes most recent layer
 CLOSED: [2021-02-03 Wed 11:05]
-* TODO round recording lengths
-* 
+* DONE round recording lengths
+CLOSED: [2021-02-26 Fri 19:57]
+* TODO same enum for timeframes

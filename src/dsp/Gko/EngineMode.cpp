@@ -11,9 +11,9 @@ void Engine::setRecordMode(RecordParams::Mode mode) {
   _record_params.mode = mode;
 }
 
-void Engine::setRecordTimeFrame(RecordTimeFrame frame) {
+void Engine::setRecordTimeFrame(TimeFrame frame) {
   if (this->isRecording()) {
-    if (!(_record_params.mode == RecordParams::Mode::DUB && frame == RecordTimeFrame::TIME)) {
+    if (!(_record_params.mode == RecordParams::Mode::DUB && frame == TimeFrame::TIME)) {
       this->endRecording();
       _record_params.time_frame = frame;
       _recording_layer = this->newRecording();
@@ -24,6 +24,6 @@ void Engine::setRecordTimeFrame(RecordTimeFrame frame) {
   _record_params.time_frame = frame;
 }
 
-void Engine::setReadTimeFrame(ReadTimeFrame frame) {
+void Engine::setReadTimeFrame(TimeFrame frame) {
   _read_time_frame = frame;
 }

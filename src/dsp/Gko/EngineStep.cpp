@@ -56,10 +56,8 @@ Layer* Engine::newRecording() {
     start_beat = _circle.first;
 
     if (_record_params.mode == RecordParams::Mode::DUB) {
-      if (_read_time_frame == TimeFrame::TIME && _timeline.layers[_active_layer_i]) {
+      if (_timeline.layers[_active_layer_i]) {
         n_beats = _timeline.layers[_active_layer_i]->_n_beats;
-      } else {
-        n_beats = _circle.second - _circle.first;
       }
     } else {
       n_beats = _timeline_position.beat - _circle.first + 1;
@@ -129,11 +127,12 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
-    bool create_new_dub = this->isRecording() && _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE;
+    bool create_new_dub = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _record_params.time_frame == TimeFrame::TIME;
+    bool overwrite = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _record_params.time_frame == TimeFrame::CIRCLE;
     if (create_new_dub) {
       this->endRecording();
       _recording_layer = this->newRecording();
-    } else {
+    } else if (!overwrite) {
       _recording_layer->_n_beats++;
     }
   }

@@ -46,4 +46,5 @@ struct RecordParams {
 struct Options {
   bool use_antipop = false;
   bool strict_recording_lengths = true;
+  bool create_new_layer_on_skip_back = false;
 };

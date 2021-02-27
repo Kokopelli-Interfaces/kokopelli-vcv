@@ -269,12 +269,16 @@ struct GkoWidget : ModuleWidget {
 
     menu->addChild(new MenuLabel());
 
-    menu->addChild(new BoolOptionMenuItem("Antipop Filter", [m]() {
+    menu->addChild(new BoolOptionMenuItem("Trigger antipop at phase discontuinity", [m]() {
       return &m->_options.use_antipop;
     }));
 
-    menu->addChild(new BoolOptionMenuItem("Snap to Divisible Recording Lengths", [m]() {
+    menu->addChild(new BoolOptionMenuItem("Snap to divisible recording lengths", [m]() {
       return &m->_options.strict_recording_lengths;
+    }));
+
+    menu->addChild(new BoolOptionMenuItem("Create new layer on skip back", [m]() {
+      return &m->_options.create_new_layer_on_skip_back;
     }));
 
     // menu->addChild(new Slider());

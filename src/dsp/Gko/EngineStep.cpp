@@ -106,6 +106,10 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();
         _timeline_position.beat = _circle.first;
+        if (_options.create_new_layer_on_skip_back && this->isRecording()) {
+          this->endRecording();
+          _recording_layer = this->newRecording();
+        }
       } else {
         unsigned int circle_shift = _circle.second - _circle.first;
         _circle.first = _circle.second;

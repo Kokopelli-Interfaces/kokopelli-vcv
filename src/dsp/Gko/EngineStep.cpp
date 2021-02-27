@@ -52,13 +52,18 @@ Layer* Engine::newRecording() {
 
   unsigned int n_beats = 1;
   unsigned int start_beat = _timeline_position.beat;
-  if (_record_params.time_frame == RecordTimeFrame::CIRCLE && _record_params.mode == RecordParams::Mode::DUB) {
-    if (_read_time_frame == ReadTimeFrame::TIMELINE && _timeline.layers[_active_layer_i]) {
-      n_beats = _timeline.layers[_active_layer_i]->_n_beats;
-    } else {
-      n_beats = _circle.second - _circle.first;
-    }
+  if (_record_params.time_frame == RecordTimeFrame::CIRCLE) {
     start_beat = _circle.first;
+
+    if (_record_params.mode == RecordParams::Mode::DUB) {
+      if (_read_time_frame == ReadTimeFrame::TIMELINE && _timeline.layers[_active_layer_i]) {
+        n_beats = _timeline.layers[_active_layer_i]->_n_beats;
+      } else {
+        n_beats = _circle.second - _circle.first;
+      }
+    } else {
+      n_beats = _timeline_position.beat - _circle.first + 1;
+    }
   }
 
   bool shift_circle_start = _record_params.time_frame == RecordTimeFrame::CIRCLE && _record_params.mode == RecordParams::Mode::EXTEND && _read_time_frame == ReadTimeFrame::TIMELINE;
@@ -67,7 +72,6 @@ Layer* Engine::newRecording() {
     _circle.first += shift;
     _circle.second = _circle.first + _loop_length;
   }
-
 
   int samples_per_beat = 0;
   if (phaseDefined()) {
@@ -119,18 +123,19 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         _circle.first = _circle.second;
         _circle.second += circle_shift;
 
-        bool create_new_dub = this->isRecording() && _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == RecordTimeFrame::CIRCLE;
-        if (create_new_dub) {
-          this->endRecording();
-          _recording_layer = this->newRecording();
-        }
       }
     }
   }
 
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
-  if (reached_recording_end && !reached_circle_end) {
-    _recording_layer->_n_beats++;
+  if (reached_recording_end) {
+    bool create_new_dub = this->isRecording() && _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == RecordTimeFrame::CIRCLE;
+    if (create_new_dub) {
+      this->endRecording();
+      _recording_layer = this->newRecording();
+    } else {
+      _recording_layer->_n_beats++;
+    }
   }
 }
 

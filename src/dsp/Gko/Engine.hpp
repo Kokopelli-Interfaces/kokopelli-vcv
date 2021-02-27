@@ -78,7 +78,7 @@ private:
   Layer* newRecording();
   inline bool phaseDefined();
   inline void write();
-  inline void handlePhaseEvent(PhaseAnalyzer::PhaseEvent flip);
+  inline void handleBeatChange(PhaseAnalyzer::PhaseEvent flip);
   inline PhaseAnalyzer::PhaseEvent advanceTimelinePosition();
 };
 

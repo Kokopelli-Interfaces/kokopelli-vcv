@@ -8,39 +8,39 @@ inline bool Engine::phaseDefined() {
 }
 
 void Engine::endRecording() {
-    assert(isRecording());
-    assert(_recording_layer->_n_beats != 0);
+  assert(isRecording());
+  assert(_recording_layer->_n_beats != 0);
 
-    if (!_phase_oscillator.isSet()) {
-      if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
-        _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
-      } else {
-        float recording_time = _recording_layer->_in->_samples_per_beat * _sample_time;
-        _phase_oscillator.setFrequency(1 / recording_time);
-      }
-      printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
+  if (!_phase_oscillator.isSet()) {
+    if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
+      _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
+    } else {
+      float recording_time = _recording_layer->_in->_samples_per_beat * _sample_time;
+      _phase_oscillator.setFrequency(1 / recording_time);
     }
+    printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
+  }
 
-    _timeline.layers.push_back(_recording_layer);
-    _timeline._last_calculated_attenuation.resize(_timeline.layers.size());
-    _timeline._current_attenuation.resize(_timeline.layers.size());
+  _timeline.layers.push_back(_recording_layer);
+  _timeline._last_calculated_attenuation.resize(_timeline.layers.size());
+  _timeline._current_attenuation.resize(_timeline.layers.size());
 
-    unsigned int layer_i = _timeline.layers.size() - 1;
+  unsigned int layer_i = _timeline.layers.size() - 1;
 
-    if (_select_new_layers) {
-      _selected_layers_idx.push_back(layer_i);
-    }
+  if (_select_new_layers) {
+    _selected_layers_idx.push_back(layer_i);
+  }
 
-    if (_new_layer_active) {
-      _active_layer_i = layer_i;
-    }
+  if (_new_layer_active) {
+    _active_layer_i = layer_i;
+  }
 
-    if (_recording_layer->_loop && _loop_length < _recording_layer->_n_beats) {
-      _loop_length = _recording_layer->_n_beats;
-    }
+  if (_recording_layer->_loop && _loop_length < _recording_layer->_n_beats) {
+    _loop_length = _recording_layer->_n_beats;
+  }
 
-    printf("- rec end\n");
-    printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
+  printf("- rec end\n");
+  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
 
   _recording_layer = nullptr;
 }
@@ -68,10 +68,6 @@ Layer* Engine::newRecording() {
     _circle.second = _circle.first + _loop_length;
   }
 
-  bool grow_circle = _circle.second < start_beat + n_beats;
-  if (grow_circle) {
-    _circle.second += _loop_length;
-  }
 
   int samples_per_beat = 0;
   if (phaseDefined()) {
@@ -95,34 +91,41 @@ Layer* Engine::newRecording() {
   return recording_layer;
 }
 
-inline void Engine::handlePhaseEvent(PhaseAnalyzer::PhaseEvent event) {
+inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   assert(phaseDefined());
 
-  bool phase_flip = (event == PhaseAnalyzer::PhaseEvent::FORWARD || event == PhaseAnalyzer::PhaseEvent::BACKWARD);
-  if (_recording_layer && phase_flip) {
-    assert(isRecording());
-    assert(_recording_layer->_in->_samples_per_beat != 0);
-
-    bool reached_recording_end = _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
-    if (reached_recording_end) {
-      if (_record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == RecordTimeFrame::CIRCLE) {
-        printf("DUB END\n");
-        this->endRecording();
-        _recording_layer = this->newRecording();
-      } else if (_recording_layer->_n_beats % _loop_length == 0 && _options.strict_recording_lengths && _record_params.time_frame == RecordTimeFrame::CIRCLE) {
-        _recording_layer->_n_beats += _loop_length;
+  bool reached_circle_end = _timeline_position.beat == _circle.second;
+  if (reached_circle_end) {
+    bool grow_circle = this->isRecording() && _record_params.mode == RecordParams::Mode::EXTEND;
+    if (grow_circle) {
+      _recording_layer->_n_beats += _loop_length;
+      _circle.second += _loop_length;
+    } else {
+      bool skip_back_to_circle_start = _read_time_frame == ReadTimeFrame::SELECTED_LAYERS;
+      if (skip_back_to_circle_start) {
+        _read_antipop_filter.trigger();
+        _write_antipop_filter.trigger();
+        _timeline_position.beat = _circle.first;
       } else {
-        _recording_layer->_n_beats++;
-      }
+        unsigned int circle_shift = _circle.second - _circle.first;
+        _circle.first = _circle.second;
+        _circle.second += circle_shift;
 
-      printf("extend recording to: %d\n", _recording_layer->_n_beats);
+        bool create_new_dub = this->isRecording() && _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == RecordTimeFrame::CIRCLE;
+        if (create_new_dub) {
+          this->endRecording();
+          _recording_layer = this->newRecording();
+        }
+      }
     }
   }
 
-  if (event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && _options.use_antipop) {
-    _read_antipop_filter.trigger();
+  bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
+  if (reached_recording_end && !reached_circle_end) {
+    _recording_layer->_n_beats++;
   }
 }
+
 
 inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
   float internal_phase = _phase_oscillator.step(_sample_time);
@@ -137,31 +140,8 @@ inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
     new_beat = _timeline_position.beat + 1;
   }
 
-  if (new_beat == _circle.second) {
-    bool extend_circle = _read_time_frame == ReadTimeFrame::TIMELINE;
-    if (extend_circle) {
-      bool extend_with_new_dub = this->isRecording() && _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == RecordTimeFrame::CIRCLE;
-      if (extend_with_new_dub) {
-        this->endRecording();
-        _recording_layer = this->newRecording();
-        _circle.second = _recording_layer->_n_beats + new_beat;
-        _circle.first = new_beat;
-      } else {
-        _circle.second += _loop_length;
-      }
-    } else {
-      new_beat = _circle.first;
-      _read_antipop_filter.trigger();
-
-      if (this->isRecording()) {
-        _write_antipop_filter.trigger();
-        _timeline_position.beat = new_beat;
-        if (_record_params.mode != RecordParams::Mode::DUB) {
-          this->endRecording();
-          _recording_layer = this->newRecording();
-        }
-      }
-    }
+  if (phase_event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && _options.use_antipop) {
+    _read_antipop_filter.trigger();
   }
 
   _timeline_position.beat = new_beat;
@@ -170,24 +150,22 @@ inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
 }
 
 void Engine::step() {
-  bool phase_defined = this->phaseDefined();
-
-  if (phase_defined) {
+  if (this->phaseDefined()) {
     PhaseAnalyzer::PhaseEvent phase_event = this->advanceTimelinePosition();
-    if (phase_event != PhaseAnalyzer::PhaseEvent::NONE) {
-      this->handlePhaseEvent(phase_event);
+    if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD || phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
+      this->handleBeatChange(phase_event);
     }
   }
 
-  if (!_recording_layer && _record_params.active()) {
+  if (!this->isRecording() && _record_params.active()) {
     _recording_layer = this->newRecording();
     _write_antipop_filter.trigger();
-  } else if (_recording_layer && !_record_params.active()) {
+  } else if (this->isRecording() && !_record_params.active()) {
     this->endRecording();
   }
 
-  if (_recording_layer) {
+  if (this->isRecording()) {
     float in = _write_antipop_filter.process(_record_params.readIn());
-    _recording_layer->write(_timeline_position, in, _record_params.strength, phase_defined);
+    _recording_layer->write(_timeline_position, in, _record_params.strength, this->phaseDefined());
   }
 }

@@ -98,8 +98,12 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   if (reached_circle_end) {
     bool grow_circle = this->isRecording() && _record_params.mode == RecordParams::Mode::EXTEND;
     if (grow_circle) {
-      _recording_layer->_n_beats += _loop_length;
       _circle.second += _loop_length;
+      if (_record_params.time_frame == RecordTimeFrame::CIRCLE) {
+        _recording_layer->_n_beats += _loop_length;
+      } else {
+        _recording_layer->_n_beats += 1;
+      }
     } else {
       bool skip_back_to_circle_start = _read_time_frame == ReadTimeFrame::SELECTED_LAYERS;
       if (skip_back_to_circle_start) {

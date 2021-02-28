@@ -1,6 +1,0 @@
-These modules provide an interface for adding to, editing, and playing back an arbitary capture
-of signals in time. The signals could be the audio output of some modules, it could be the output
-from your MIDI keyboard, parameter automation, really, anything.
-
-The recording interface is the 'Gko' module. You can give it input/output ports by placing either the 
-~SIG~, ~4SIG~, or ~PLAY~ module next to it.

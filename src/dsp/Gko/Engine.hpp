@@ -66,6 +66,8 @@ struct Engine {
   void setRecordTimeFrame(TimeFrame frame);
   void setReadTimeFrame(TimeFrame frame);
 
+  bool checkState(int read_time_frame, int extend, int write_time_frame);
+
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);
   bool isSelected(unsigned int layer_i);

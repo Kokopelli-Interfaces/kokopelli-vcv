@@ -7,6 +7,23 @@ inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();
 }
 
+// -1 is arbitrary card, 0 is green, 1 is red
+bool Engine::checkState(int read_time_frame, int extend, int write_time_frame) {
+  if ((read_time_frame == 1 && _read_time_frame != TimeFrame::TIME) || (read_time_frame == 0 && _read_time_frame != TimeFrame::CIRCLE)) {
+    return false;
+  }
+
+  if ((extend == 1 && _record_params.mode != RecordParams::Mode::EXTEND) || (extend == 0 && _record_params.mode != RecordParams::Mode::DUB)) {
+    return false;
+  }
+
+  if ((write_time_frame == 1 && _record_params.time_frame != TimeFrame::CIRCLE) || (write_time_frame == 0 && _record_params.time_frame != TimeFrame::TIME)) {
+    return false;
+  }
+
+  return true;
+}
+
 void Engine::endRecording() {
   assert(isRecording());
   assert(_recording_layer->_n_beats != 0);
@@ -52,17 +69,17 @@ Layer* Engine::newRecording() {
   unsigned int n_beats = 1;
   unsigned int start_beat = _timeline_position.beat;
 
-  bool new_circle = _record_params.time_frame == TimeFrame::CIRCLE && _record_params.mode == RecordParams::Mode::EXTEND && _read_time_frame == TimeFrame::TIME;
+  bool new_circle = this->checkState(1, 1, 1);
   if (new_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + 1;
     _loop_length = 1;
-  } else if (_record_params.time_frame == TimeFrame::CIRCLE) {
+  } else if (this->checkState(-1, -1, 1)) {
   // TODO
   // if (_record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::CIRCLE) {
     start_beat = _circle.first;
 
-    if (_record_params.mode == RecordParams::Mode::DUB) {
+    if (this->checkState(-1, 0, -1)) {
       if (0 < _timeline.layers.size() && _timeline.layers[_active_layer_i]->_loop) {
         n_beats = _timeline.layers[_active_layer_i]->_n_beats;
       }
@@ -83,7 +100,7 @@ Layer* Engine::newRecording() {
 
   Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
-  if (_record_params.time_frame == TimeFrame::CIRCLE) {
+  if (this->checkState(-1, -1, 1)) {
     recording_layer->_loop = true;
   }
 
@@ -98,16 +115,16 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_circle_end = _timeline_position.beat == _circle.second;
   if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && _record_params.mode == RecordParams::Mode::EXTEND && !(_record_params.time_frame == TimeFrame::TIME && _read_time_frame == TimeFrame::TIME);
+    bool grow_circle = this->isRecording() && this->checkState(-1, 1, -1) && !this->checkState(1, 1, 0);
     if (grow_circle) {
       _circle.second += _loop_length;
-      if (_record_params.time_frame == TimeFrame::CIRCLE) {
+      if (this->checkState(-1, -1, 1)) {
         _recording_layer->_n_beats += _loop_length;
       } else {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start = _read_time_frame == TimeFrame::CIRCLE;
+      bool skip_back_to_circle_start = this->checkState(0, -1, -1);
       if (skip_back_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();
@@ -127,8 +144,8 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
-    bool create_new_dub = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::TIME;
-    bool overwrite = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::CIRCLE;
+    bool create_new_dub = this->checkState(1, 0, 1);
+    bool overwrite = this->checkState(0, 0, 1);
     if (create_new_dub) {
       this->endRecording();
       _recording_layer = this->newRecording();
@@ -137,7 +154,6 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
     }
   }
 }
-
 
 inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
   float internal_phase = _phase_oscillator.step(_sample_time);

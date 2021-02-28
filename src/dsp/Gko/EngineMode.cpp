@@ -13,12 +13,10 @@ void Engine::setRecordMode(RecordParams::Mode mode) {
 
 void Engine::setRecordTimeFrame(TimeFrame frame) {
   if (this->isRecording()) {
-    if (!(_record_params.mode == RecordParams::Mode::DUB && frame == TimeFrame::TIME)) {
-      this->endRecording();
-      _record_params.time_frame = frame;
-      _recording_layer = this->newRecording();
-      // _write_antipop_filter.trigger();
-    }
+    this->endRecording();
+    _record_params.time_frame = frame;
+    _recording_layer = this->newRecording();
+    // _write_antipop_filter.trigger();
   }
 
   _record_params.time_frame = frame;

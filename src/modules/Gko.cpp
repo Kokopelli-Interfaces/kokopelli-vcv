@@ -106,6 +106,7 @@ void Gko::processButtons() {
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
+      // e->setCircleToActiveLayer();
       if (0 < e->_timeline.layers.size()) {
         e->_timeline.layers[e->_active_layer_i]->_loop = !e->_timeline.layers[e->_active_layer_i]->_loop;
       }
@@ -162,6 +163,8 @@ void Gko::processAlways(const ProcessArgs &args) {
   if (baseConnected()) {
     _from_signal = fromBase();
     _to_signal = toBase();
+
+    outputs[PHASE_OUTPUT].setChannels(this->channels());
   }
 
   if (_button_divider.process()) {

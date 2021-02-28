@@ -269,7 +269,7 @@ struct GkoWidget : ModuleWidget {
 
     menu->addChild(new MenuLabel());
 
-    menu->addChild(new BoolOptionMenuItem("Trigger antipop at phase discontuinity", [m]() {
+    menu->addChild(new BoolOptionMenuItem("Use read antipop at phase discontuinity", [m]() {
       return &m->_options.use_antipop;
     }));
 
@@ -279,6 +279,10 @@ struct GkoWidget : ModuleWidget {
 
     menu->addChild(new BoolOptionMenuItem("Create new layer on skip back", [m]() {
       return &m->_options.create_new_layer_on_skip_back;
+    }));
+
+    menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {
+      return &m->_options.bipolar_phase_input;
     }));
 
     // menu->addChild(new Slider());

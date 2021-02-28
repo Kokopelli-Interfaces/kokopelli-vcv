@@ -213,7 +213,12 @@ void Gko::processChannel(const ProcessArgs& args, int channel_i) {
   myrisa::dsp::gko::Engine *e = _engines[channel_i];
 
   if (inputs[PHASE_INPUT].isConnected()) {
-    e->_ext_phase = rack::clamp(inputs[PHASE_INPUT].getPolyVoltage(channel_i) / 10, 0.f, 1.0f);
+    float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
+    if (_options.bipolar_phase_input) {
+      phase_in += 5.0f;
+    }
+
+    e->_ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {

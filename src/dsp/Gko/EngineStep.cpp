@@ -45,30 +45,30 @@ void Engine::endRecording() {
   _recording_layer = nullptr;
 }
 
-// does not modify engine
 Layer* Engine::newRecording() {
   assert(_record_params.active());
   assert(_recording_layer == nullptr);
 
   unsigned int n_beats = 1;
   unsigned int start_beat = _timeline_position.beat;
-  if (_record_params.time_frame == TimeFrame::CIRCLE) {
+
+  bool new_circle = _record_params.time_frame == TimeFrame::CIRCLE && _record_params.mode == RecordParams::Mode::EXTEND && _read_time_frame == TimeFrame::TIME;
+  if (new_circle) {
+    _circle.first = start_beat;
+    _circle.second = start_beat + 1;
+    _loop_length = 1;
+  } else if (_record_params.time_frame == TimeFrame::CIRCLE) {
+  // TODO
+  // if (_record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::CIRCLE) {
     start_beat = _circle.first;
 
     if (_record_params.mode == RecordParams::Mode::DUB) {
-      if (_timeline.layers[_active_layer_i]) {
+      if (0 < _timeline.layers.size() && _timeline.layers[_active_layer_i]->_loop) {
         n_beats = _timeline.layers[_active_layer_i]->_n_beats;
       }
     } else {
       n_beats = _timeline_position.beat - _circle.first + 1;
     }
-  }
-
-  bool shift_circle_start = _record_params.time_frame == TimeFrame::CIRCLE && _record_params.mode == RecordParams::Mode::EXTEND && _read_time_frame == TimeFrame::TIME;
-  if (shift_circle_start) {
-    int shift = start_beat - _circle.first;
-    _circle.first += shift;
-    _circle.second = _circle.first + _loop_length;
   }
 
   int samples_per_beat = 0;
@@ -98,7 +98,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_circle_end = _timeline_position.beat == _circle.second;
   if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && _record_params.mode == RecordParams::Mode::EXTEND;
+    bool grow_circle = this->isRecording() && _record_params.mode == RecordParams::Mode::EXTEND && !(_record_params.time_frame == TimeFrame::TIME && _read_time_frame == TimeFrame::TIME);
     if (grow_circle) {
       _circle.second += _loop_length;
       if (_record_params.time_frame == TimeFrame::CIRCLE) {
@@ -128,7 +128,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
     bool create_new_dub = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::TIME;
-    bool overwrite = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _record_params.time_frame == TimeFrame::CIRCLE;
+    bool overwrite = _record_params.mode == RecordParams::Mode::DUB && _record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::CIRCLE;
     if (create_new_dub) {
       this->endRecording();
       _recording_layer = this->newRecording();

@@ -69,7 +69,14 @@ Layer* Engine::newRecording() {
   unsigned int n_beats = 1;
   unsigned int start_beat = _timeline_position.beat;
 
+  bool shift_circle = this->checkState(-1, 1, -1);
+  if (shift_circle) {
+    _circle.first = start_beat;
+    _circle.second = start_beat + _loop_length;
+  }
+
   bool new_circle = this->checkState(1, 1, 1);
+
   if (new_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + 1;
@@ -80,8 +87,12 @@ Layer* Engine::newRecording() {
     start_beat = _circle.first;
 
     if (this->checkState(-1, 0, -1)) {
-      if (0 < _timeline.layers.size() && _timeline.layers[_active_layer_i]->_loop) {
-        n_beats = _timeline.layers[_active_layer_i]->_n_beats;
+      if (0 < _timeline.layers.size()) {
+        if (_timeline.layers[_active_layer_i]->_loop) {
+          n_beats = _timeline.layers[_active_layer_i]->_n_beats;
+        } else {
+          n_beats = _loop_length;
+        }
       }
     } else {
       n_beats = _timeline_position.beat - _circle.first + 1;

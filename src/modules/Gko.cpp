@@ -270,11 +270,13 @@ void Gko::updateLights(const ProcessArgs &args) {
   float displayed_phase = default_e->_timeline_position.phase;
 
   float active_layer_signal_out_sum = 0.f;
+  float sel_signal_out_sum = 0.f;
 
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
     signal_in_sum += _from_signal->signal[c];
     active_layer_signal_out_sum += _engines[c]->readActiveLayer();
+    sel_signal_out_sum += _to_signal->sel_signal[c];
     if (record_active) {
       displayed_read_time_frame = _engines[c]->_read_time_frame;
       displayed_record_params = _engines[c]->_record_params;
@@ -284,14 +286,16 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
   active_layer_signal_out_sum = rack::clamp(active_layer_signal_out_sum, 0.f, 1.f);
-
-  lights[RECORD_LIGHT + 1].setSmoothBrightness(active_layer_signal_out_sum, _sampleTime * _light_divider.getDivision());
+  sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
 
   if (displayed_record_params.active()) {
+    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.strength);
+    lights[RECORD_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
     int light_colour = poly_record ? 2 : 0;
     lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
   } else {
     lights[RECORD_LIGHT + 0].value = 0.f;
+    lights[RECORD_LIGHT + 1].setSmoothBrightness(active_layer_signal_out_sum, _sampleTime * _light_divider.getDivision());
     lights[RECORD_LIGHT + 2].value = 0.f;
   }
 

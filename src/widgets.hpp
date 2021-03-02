@@ -10,6 +10,12 @@ struct Rogan1HPSWhite : Rogan {
   }
 };
 
+struct Rogan1HPSBrown : Rogan {
+  Rogan1HPSBrown() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan1HPSBrown.svg")));
+  }
+};
+
 struct Rogan1PGray : Rogan {
   Rogan1PGray() {
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan1PGray.svg")));

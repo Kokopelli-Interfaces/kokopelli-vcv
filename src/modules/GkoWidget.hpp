@@ -198,26 +198,33 @@ struct GkoWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<Rogan1HPSWhite>(mm2px(Vec(5.333, 21.157)), module, Gko::SELECT_PARAM));
+		addParam(createParam<Rogan1HPSBrown>(mm2px(Vec(5.333, 21.157)), module, Gko::SELECT_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Gko::SELECT_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Gko::SELECT_FUNCTION_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Gko::READ_TIME_FRAME_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::RECORD_MODE_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::RECORD_TIME_FRAME_PARAM));
-		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Gko::RECORD_PARAM));
 
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 37.132)), module, Gko::SCENE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Gko::RECORD_INPUT));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Gko::READ_TIME_FRAME_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::RECORD_MODE_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::RECORD_TIME_FRAME_PARAM));
+		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Gko::RECORD_PARAM));
+
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Gko::READ_TIME_FRAME_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Gko::RECORD_MODE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Gko::RECORD_TIME_FRAME_PARAM));
+		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Gko::RECORD_PARAM));
+
+		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Gko::RECORD_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 95.706)), module, Gko::RECORD_INPUT));
+
 		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 108.114)), module, Gko::PHASE_INPUT));
-
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Gko::PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Gko::SELECT_FUNCTION_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.239, 34.928)), module, Gko::SELECT_MODE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Gko::READ_TIME_FRAME_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 62.77)), module, Gko::RECORD_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 66.901)), module, Gko::RECORD_MODE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 66.901)), module, Gko::RECORD_TIME_FRAME_LIGHT));
+		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Gko::READ_TIME_FRAME_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Gko::READ_TIME_FRAME_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Gko::RECORD_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Gko::RECORD_MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Gko::RECORD_TIME_FRAME_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Gko::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));
@@ -232,35 +239,39 @@ struct GkoWidget : ModuleWidget {
     total_layers->box.size = display_size;
     addChild(total_layers);
 
+		// mm2px(Vec(7.391, 4.327))
+    // display_size = mm2px(Vec(7.391, 4.327));
+    // two displays TODO
+
+    display_size = mm2px(Vec(23.173, 4.327));
+
+    time = new BeatDisplay(module);
+    time->box.pos = mm2px(Vec(1.088, 47.476));
+    time->box.size = display_size;
+    time->textOffset = Vec(time->box.size.x * 0.5f, 0.f);
+    addChild(time);
+
     display_size = mm2px(Vec(6.837, 4.327));
 
     layer_beat = new LayerBeatDisplay(module);
-    layer_beat->box.pos = mm2px(Vec(1.071, 48.917));
+    layer_beat->box.pos = mm2px(Vec(1.05, 52.49));
     layer_beat->box.size = display_size;
     addChild(layer_beat);
 
     total_layer_beats = new TotalLayerBeatDisplay(module);
-    total_layer_beats->box.pos = mm2px(Vec(1.071, 54.022));
+    total_layer_beats->box.pos = mm2px(Vec(1.05, 57.592));
     total_layer_beats->box.size = display_size;
     addChild(total_layer_beats);
 
     circle_beat = new CircleBeatDisplay(module);
-    circle_beat->box.pos = mm2px(Vec(17.511, 48.917));
+    circle_beat->box.pos = mm2px(Vec(17.49, 52.49));
     circle_beat->box.size = display_size;
     addChild(circle_beat);
 
     total_circle_beats = new TotalCircleBeatDisplay(module);
-    total_circle_beats->box.pos = mm2px(Vec(17.511, 54.022));
+    total_circle_beats->box.pos = mm2px(Vec(17.49, 57.592));
     total_circle_beats->box.size = display_size;
     addChild(total_circle_beats);
-
-    display_size = mm2px(Vec(21.44, 4.327));
-
-    time = new BeatDisplay(module);
-    time->box.pos = mm2px(Vec(1.974, 99.568));
-    time->box.size = display_size;
-    time->textOffset = Vec(time->box.size.x * 0.5f, 0.f);
-    addChild(time);
   }
 
 	void appendContextMenu(rack::Menu* menu) override {

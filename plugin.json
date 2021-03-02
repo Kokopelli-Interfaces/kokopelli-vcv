@@ -11,7 +11,8 @@
   "manualUrl": "https://github.com/gwatcha/myrisa-modules/wiki",
   "sourceUrl": "https://github.com/gwatcha/myrisa-modules",
   "donateUrl": "https://ko-fi.com/michaelmuszynski",
-  "modules": [{
+  "modules": [
+    {
       "slug": "Myrisa-Signal",
       "name": "Signal",
       "description": "Gko expander which adds one signal input and output.",

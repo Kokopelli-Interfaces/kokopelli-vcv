@@ -34,9 +34,9 @@ struct RoganHalfPSRed : Rogan {
   }
 };
 
-struct RoganHalfPSLightPurple : Rogan {
-  RoganHalfPSLightPurple() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPSLightPurple.svg")));
+struct RoganHalfPSLightBrown : Rogan {
+  RoganHalfPSLightBrown() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPSLightBrown.svg")));
   }
 };
 

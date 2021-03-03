@@ -18,7 +18,7 @@ struct SignalWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<RoganHalfPSLightPurple>(mm2px(Vec(2.687, 50.584)), module, Signal::IN_ATTENUATION_PARAM));
+		addParam(createParam<RoganHalfPSLightBrown>(mm2px(Vec(2.687, 50.584)), module, Signal::IN_ATTENUATION_PARAM));
 		addParam(createParam<RoganHalfPSRed>(mm2px(Vec(2.687, 77.502)), module, Signal::OUT_ATTENUATION_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(3.69, 17.88)), module, Signal::IN_INPUT));

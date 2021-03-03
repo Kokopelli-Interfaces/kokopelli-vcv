@@ -13,7 +13,7 @@ struct PlayWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParam<RoganHalfPSRed>(mm2px(Vec(13.772, 71.608)), module, Play::OUT_POWER_PARAM));
-		addParam(createParam<RoganHalfPSLightPurple>(mm2px(Vec(1.499, 71.633)), module, Play::IN_ATTENUATION_PARAM));
+		addParam(createParam<RoganHalfPSLightBrown>(mm2px(Vec(1.499, 71.633)), module, Play::IN_ATTENUATION_PARAM));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.771, 17.295)), module, Play::VEL_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(3.788, 29.78)), module, Play::GATE_INPUT));

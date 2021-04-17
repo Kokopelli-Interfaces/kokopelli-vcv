@@ -201,6 +201,7 @@ void Engine::step() {
     _write_antipop_filter.trigger();
   } else if (this->isRecording() && !_record_params.active()) {
     this->endRecording();
+    this->resetEngineMode();
   }
 
   if (this->isRecording()) {

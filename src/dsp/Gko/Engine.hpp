@@ -62,6 +62,7 @@ struct Engine {
 
   void undo();
   bool isRecording();
+  void resetEngineMode();
   void setRecordMode(RecordParams::Mode mode);
   void setRecordTimeFrame(TimeFrame frame);
   void setReadTimeFrame(TimeFrame frame);

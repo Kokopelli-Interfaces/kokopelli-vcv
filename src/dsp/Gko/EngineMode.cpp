@@ -25,3 +25,9 @@ void Engine::setRecordTimeFrame(TimeFrame frame) {
 void Engine::setReadTimeFrame(TimeFrame frame) {
   _read_time_frame = frame;
 }
+
+void Engine::resetEngineMode() {
+  this->setReadTimeFrame(TimeFrame::CIRCLE);
+  this->setRecordTimeFrame(TimeFrame::CIRCLE);
+  this->setRecordMode(RecordParams::Mode::DUB);
+}

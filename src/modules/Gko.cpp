@@ -321,12 +321,12 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   switch (displayed_record_params.time_frame) {
   case TimeFrame::TIME:
-    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
-    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
-    break;
-  case TimeFrame::CIRCLE:
     lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
     lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
+    break;
+  case TimeFrame::CIRCLE:
+    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
+    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
     break;
   }
 

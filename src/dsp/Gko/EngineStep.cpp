@@ -57,7 +57,7 @@ void Engine::endRecording() {
   }
 
   printf("- rec end\n");
-  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
+  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start.beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
 
   _recording_layer = nullptr;
 }
@@ -109,14 +109,14 @@ Layer* Engine::newRecording() {
     }
   }
 
-  Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
+  Layer* recording_layer = new Layer(_timeline_position, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
   if (this->checkState(-1, -1, 1)) {
     recording_layer->_loop = true;
   }
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start.beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
 
   return recording_layer;
 }
@@ -153,7 +153,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
     }
   }
 
-  bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
+  bool reached_recording_end = this->isRecording() && _recording_layer->_start.beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
     bool create_new_dub = this->checkState(1, 0, 1);
     bool overwrite = this->checkState(0, 0, 1);

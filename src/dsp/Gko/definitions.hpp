@@ -19,7 +19,7 @@ struct RecordParams {
   enum Mode {DUB, EXTEND};
 
   float in = 0.f;
-  TimeFrame time_frame = TimeFrame::TIME;
+  TimeFrame time_frame = TimeFrame::CIRCLE;
   Mode mode = Mode::DUB;
   float strength = 0.f;
 

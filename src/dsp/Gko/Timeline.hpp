@@ -38,7 +38,7 @@ struct Timeline {
     }
 
     unsigned int last_layer_i = layers.size()-1;
-    return layers[last_layer_i]->_start.beat + layers[last_layer_i]->_n_beats <= position.beat + 1;
+    return layers[last_layer_i]->_start_beat + layers[last_layer_i]->_n_beats <= position.beat + 1;
   }
 
   inline unsigned int getLayerIndexForPosition(TimePosition position) {
@@ -48,7 +48,7 @@ struct Timeline {
 
     unsigned int layer_i = layers.size()-1;
     for (int i = layers.size()-1; 0 <= i; i--) {
-      if (layers[i]->_start.beat <= position.beat) {
+      if (layers[i]->_start_beat <= position.beat) {
         break;
       }
 
@@ -113,7 +113,7 @@ struct Timeline {
 
     float signal_out = 0.f;
     for (unsigned int i = 0; i < layers.size(); i++) {
-      if (layers[i]->definedAtPosition(position)) {
+      if (layers[i]->readableAtPosition(position)) {
         float attenuation = _current_attenuation[i];
 
         if (record_params.active()) {
@@ -166,7 +166,7 @@ struct Timeline {
   inline unsigned int getNumberOfCircleBeats(TimePosition position) {
     unsigned int max_n_beats = 0;
     for (auto layer: layers) {
-      if (layer->definedAtPosition(position) && layer->_loop && max_n_beats < layer->_n_beats) {
+      if (layer->readableAtPosition(position) && layer->_loop && max_n_beats < layer->_n_beats) {
         max_n_beats = layer->_n_beats;
       }
     }

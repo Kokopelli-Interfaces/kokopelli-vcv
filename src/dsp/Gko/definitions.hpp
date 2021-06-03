@@ -4,6 +4,8 @@
 
 #include <vector>
 
+enum State {ON, OFF, PLEX};
+
 enum TimeFrame { CIRCLE, TIME };
 
 struct TimePosition {

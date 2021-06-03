@@ -3,8 +3,6 @@
 using namespace myrisa::dsp::gko;
 using namespace myrisa::dsp;
 
-enum State {ON, OFF, PLEX};
-
 inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();
 }
@@ -134,7 +132,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start = this->checkState(State::OFF, State::PLEX, State::PLEX) && !_timeline.atEnd(_timeline_position);
+      bool skip_back_to_circle_start = this->checkState(State::OFF, State::PLEX, State::PLEX) || (_timeline.atEnd(_timeline_position) && !_record_params.active());
       if (skip_back_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();

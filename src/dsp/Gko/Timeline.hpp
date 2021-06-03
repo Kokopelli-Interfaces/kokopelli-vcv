@@ -37,8 +37,13 @@ struct Timeline {
       return true;
     }
 
-    unsigned int last_layer_i = layers.size()-1;
-    return layers[last_layer_i]->_start_beat + layers[last_layer_i]->_n_beats <= position.beat + 1;
+    for (int i = layers.size()-1; 0 <= i; i--) {
+      if (position.beat < layers[i]->_start_beat + layers[i]->_n_beats) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   inline unsigned int getLayerIndexForPosition(TimePosition position) {

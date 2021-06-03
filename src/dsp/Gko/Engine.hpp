@@ -23,6 +23,7 @@ struct Engine {
   float _ext_phase = 0.f;
   float _sample_time = 1.0f;
 
+  // TODO make me an array to support MIX4 & PLAY
   myrisa::dsp::SignalType _signal_type;
 
   std::vector<unsigned int> _selected_layers_idx;
@@ -66,7 +67,7 @@ struct Engine {
   void setRecordTimeFrame(TimeFrame frame);
   void setReadTimeFrame(TimeFrame frame);
 
-  bool checkState(State read_time_frame, State extend, State write_time_frame);
+  bool checkState(int read_time_frame, int extend, int write_time_frame);
 
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);

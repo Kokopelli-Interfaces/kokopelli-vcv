@@ -36,7 +36,7 @@ void Engine::endRecording() {
       float recording_time = _recording_layer->_in->_samples_per_beat * _sample_time;
       _phase_oscillator.setFrequency(1 / recording_time);
     }
-    printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
+    // printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
   }
 
   _timeline.layers.push_back(_recording_layer);
@@ -57,8 +57,8 @@ void Engine::endRecording() {
     _loop_length = _recording_layer->_n_beats;
   }
 
-  printf("- rec end\n");
-  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
+  // printf("- rec end\n");
+  // printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
 
   _recording_layer = nullptr;
 }
@@ -114,8 +114,8 @@ Layer* Engine::newRecording() {
     recording_layer->_loop = true;
   }
 
-  printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
+  // printf("Recording Activate:\n");
+  // printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
 
   return recording_layer;
 }
@@ -134,7 +134,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start = this->checkState(State::OFF, State::PLEX, State::PLEX);
+      bool skip_back_to_circle_start = this->checkState(State::OFF, State::PLEX, State::PLEX) && !_timeline.atEnd(_timeline_position);
       if (skip_back_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();

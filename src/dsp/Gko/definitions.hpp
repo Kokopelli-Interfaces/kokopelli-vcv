@@ -11,10 +11,6 @@ struct TimePosition {
   double phase = 0.f;
 };
 
-/**
-  At each step, what the Engine does to it's Timeline is a function of these parameters.
-  See the description of Record in the README for behaviour.
-*/
 struct RecordParams {
   enum Mode {DUB, EXTEND};
 

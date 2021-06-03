@@ -23,7 +23,6 @@ struct Engine {
   float _ext_phase = 0.f;
   float _sample_time = 1.0f;
 
-  // TODO make me an array to support MIX4 & PLAY
   myrisa::dsp::SignalType _signal_type;
 
   std::vector<unsigned int> _selected_layers_idx;

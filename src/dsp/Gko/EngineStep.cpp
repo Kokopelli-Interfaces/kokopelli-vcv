@@ -3,21 +3,22 @@
 using namespace myrisa::dsp::gko;
 using namespace myrisa::dsp;
 
+enum State {ON, OFF, PLEX};
+
 inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();
 }
 
-// -1 is arbitrary card, 0 is green, 1 is red
-bool Engine::checkState(int read_time_frame, int extend, int write_time_frame) {
-  if ((read_time_frame == 1 && _read_time_frame != TimeFrame::TIME) || (read_time_frame == 0 && _read_time_frame != TimeFrame::CIRCLE)) {
+bool Engine::checkState(State read_time_frame, State extend, State write_time_frame) {
+  if ((read_time_frame == State::ON && _read_time_frame != TimeFrame::TIME) || (read_time_frame == State::ON && _read_time_frame != TimeFrame::CIRCLE)) {
     return false;
   }
 
-  if ((extend == 1 && _record_params.mode != RecordParams::Mode::EXTEND) || (extend == 0 && _record_params.mode != RecordParams::Mode::DUB)) {
+  if ((extend == State::ON && _record_params.mode != RecordParams::Mode::EXTEND) || (extend == State::OFF && _record_params.mode != RecordParams::Mode::DUB)) {
     return false;
   }
 
-  if ((write_time_frame == 1 && _record_params.time_frame != TimeFrame::CIRCLE) || (write_time_frame == 0 && _record_params.time_frame != TimeFrame::TIME)) {
+  if ((write_time_frame == State::ON && _record_params.time_frame != TimeFrame::CIRCLE) || (write_time_frame == State::OFF && _record_params.time_frame != TimeFrame::TIME)) {
     return false;
   }
 
@@ -69,24 +70,22 @@ Layer* Engine::newRecording() {
   unsigned int n_beats = 1;
   unsigned int start_beat = _timeline_position.beat;
 
-  bool shift_circle = this->checkState(-1, 1, -1);
+  bool shift_circle = this->checkState(State::PLEX, State::ON, State::PLEX);
   if (shift_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + _loop_length;
   }
 
-  bool new_circle = this->checkState(1, 1, 1);
+  bool new_circle = this->checkState(State::ON, State::ON, State::ON);
 
   if (new_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + 1;
     _loop_length = 1;
-  } else if (this->checkState(-1, -1, 1)) {
-  // TODO
-  // if (_record_params.time_frame == TimeFrame::CIRCLE && _read_time_frame == TimeFrame::CIRCLE) {
+  } else if (this->checkState(State::PLEX, State::PLEX, State::ON)) {
     start_beat = _circle.first;
 
-    if (this->checkState(-1, 0, -1)) {
+    if (this->checkState(State::PLEX, State::OFF, State::PLEX)) {
       if (0 < _timeline.layers.size()) {
         if (_timeline.layers[_active_layer_i]->_loop) {
           n_beats = _timeline.layers[_active_layer_i]->_n_beats;
@@ -111,7 +110,7 @@ Layer* Engine::newRecording() {
 
   Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
-  if (this->checkState(-1, -1, 1)) {
+  if (this->checkState(State::PLEX, State::PLEX, State::ON)) {
     recording_layer->_loop = true;
   }
 
@@ -126,16 +125,16 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_circle_end = _timeline_position.beat == _circle.second;
   if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && this->checkState(-1, 1, -1) && !this->checkState(1, 1, 0);
+    bool grow_circle = this->isRecording() && this->checkState(State::PLEX, State::ON, State::PLEX) && !this->checkState(State::ON, State::ON, State::OFF);
     if (grow_circle) {
       _circle.second += _loop_length;
-      if (this->checkState(-1, -1, 1)) {
+      if (this->checkState(State::PLEX, State::PLEX, State::ON)) {
         _recording_layer->_n_beats += _loop_length;
       } else {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start = this->checkState(0, -1, -1);
+      bool skip_back_to_circle_start = this->checkState(State::OFF, State::PLEX, State::PLEX);
       if (skip_back_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();
@@ -148,15 +147,14 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         unsigned int circle_shift = _circle.second - _circle.first;
         _circle.first = _circle.second;
         _circle.second += circle_shift;
-
       }
     }
   }
 
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
-    bool create_new_dub = this->checkState(1, 0, 1);
-    bool overwrite = this->checkState(0, 0, 1);
+    bool create_new_dub = this->checkState(State::ON, State::OFF, State::ON);
+    bool overwrite = this->checkState(State::OFF, State::OFF, State::ON);
     if (create_new_dub) {
       this->endRecording();
       _recording_layer = this->newRecording();

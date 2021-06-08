@@ -203,13 +203,13 @@ struct GkoWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Gko::SELECT_FUNCTION_PARAM));
 
 		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Gko::SKIP_BACK_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::UNFIX_BOUNDS_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::RECORD_ON_OUTER_LOOP_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::FIX_BOUNDS_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::RECORD_ON_INNER_CIRCLE_PARAM));
 		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Gko::RECORD_PARAM));
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Gko::SKIP_BACK_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Gko::UNFIX_BOUNDS_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Gko::RECORD_ON_OUTER_LOOP_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Gko::FIX_BOUNDS_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Gko::RECORD_ON_INNER_CIRCLE_PARAM));
 		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Gko::RECORD_PARAM));
 
 		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Gko::RECORD_INPUT));
@@ -223,8 +223,8 @@ struct GkoWidget : ModuleWidget {
 		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Gko::SKIP_BACK_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Gko::SKIP_BACK_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Gko::RECORD_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Gko::UNFIX_BOUNDS_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Gko::RECORD_ON_OUTER_LOOP_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Gko::FIX_BOUNDS_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Gko::RECORD_ON_INNER_CIRCLE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Gko::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));

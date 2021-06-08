@@ -8,16 +8,16 @@ inline bool Engine::phaseDefined() {
 }
 
 // -1 is arbitrary card, 0 is green, 1 is red
-bool Engine::checkState(int skip_back, int extend, int record_on_outer_loop) {
+bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circle) {
   if ((skip_back == 1 && _skip_back != false) || (skip_back == 0 && _skip_back != true)) {
     return false;
   }
 
-  if ((extend == 1 && !_record_params.unfix_bounds) || (extend == 0 && _record_params.unfix_bounds)) {
+  if ((fix_bounds == 1 && _record_params.fix_bounds) || (fix_bounds == 0 && !_record_params.fix_bounds)) {
     return false;
   }
 
-  if ((record_on_outer_loop == 1 && _record_params.record_on_outer_loop != false) || (record_on_outer_loop == 0 && _record_params.record_on_outer_loop != true)) {
+  if ((record_on_inner_circle == 1 && _record_params.record_on_inner_circle) || (record_on_inner_circle == 0 && !_record_params.record_on_inner_circle)) {
     return false;
   }
 
@@ -83,7 +83,7 @@ Layer* Engine::newRecording() {
     _loop_length = 1;
   } else if (this->checkState(-1, -1, 1)) {
   // TODO
-  // if (_record_params.record_on_outer_loop == false && _skip_back == false) {
+  // if (_record_params.record_on_inner_circle == false && _skip_back == false) {
     start_beat = _circle.first;
 
     if (this->checkState(-1, 0, -1)) {

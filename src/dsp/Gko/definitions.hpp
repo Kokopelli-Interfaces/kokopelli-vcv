@@ -9,15 +9,12 @@ struct TimePosition {
   double phase = 0.f;
 };
 
-/**
-  At each step, what the Engine does to it's Timeline is a function of these parameters.
-  See the description of Record in the README for behaviour.
-*/
 struct RecordParams {
   float in = 0.f;
-  bool record_on_outer_loop = false;
-  bool unfix_bounds = false;
+
   float strength = 0.f;
+  bool record_on_inner_circle = true;
+  bool fix_bounds = true;
 
   float _recordActiveThreshold = 0.0001f;
 

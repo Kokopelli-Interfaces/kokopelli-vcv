@@ -15,8 +15,8 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
     SKIP_BACK_PARAM,
-    RECORD_ON_OUTER_LOOP_PARAM,
-    UNFIX_BOUNDS_PARAM,
+    RECORD_ON_INNER_CIRCLE_PARAM,
+    FIX_BOUNDS_PARAM,
     RECORD_PARAM,
     NUM_PARAMS
   };
@@ -27,8 +27,8 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
     ENUMS(SELECT_MODE_LIGHT, 3),
     ENUMS(SKIP_BACK_LIGHT, 3),
     ENUMS(RECORD_LIGHT, 3),
-    ENUMS(UNFIX_BOUNDS_LIGHT, 3),
-    ENUMS(RECORD_ON_OUTER_LOOP_LIGHT, 3),
+    ENUMS(FIX_BOUNDS_LIGHT, 3),
+    ENUMS(RECORD_ON_INNER_CIRCLE_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
@@ -43,8 +43,8 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
   myrisa::dsp::LongPressButton _select_function_button;
   myrisa::dsp::LongPressButton _select_mode_button;
 
-  myrisa::dsp::LongPressButton _unfix_bounds_button;
-  myrisa::dsp::LongPressButton _record_on_outer_loop_button;
+  myrisa::dsp::LongPressButton _fix_bounds_button;
+  myrisa::dsp::LongPressButton _record_on_inner_circle_button;
   myrisa::dsp::LongPressButton _skip_back_button;
 
   std::array<myrisa::dsp::gko::Engine*, maxChannels> _engines;

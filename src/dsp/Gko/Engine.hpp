@@ -46,7 +46,7 @@ struct Engine {
 
   Timeline _timeline;
   TimePosition _timeline_position;
-  TimeFrame _read_time_frame;
+  TimeFrame _skip_back;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -65,9 +65,9 @@ struct Engine {
   void resetEngineMode();
   void setRecordMode(RecordParams::Mode mode);
   void setRecordTimeFrame(TimeFrame frame);
-  void setReadTimeFrame(TimeFrame frame);
+  void setSkipBack(TimeFrame frame);
 
-  bool checkState(int read_time_frame, int extend, int write_time_frame);
+  bool checkState(int skip_back, int extend, int write_time_frame);
 
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);

@@ -202,12 +202,12 @@ struct GkoWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Gko::SELECT_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Gko::SELECT_FUNCTION_PARAM));
 
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Gko::READ_TIME_FRAME_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Gko::SKIP_BACK_PARAM));
 		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Gko::RECORD_MODE_PARAM));
 		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Gko::RECORD_TIME_FRAME_PARAM));
 		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Gko::RECORD_PARAM));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Gko::READ_TIME_FRAME_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Gko::SKIP_BACK_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Gko::RECORD_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Gko::RECORD_TIME_FRAME_PARAM));
 		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Gko::RECORD_PARAM));
@@ -220,8 +220,8 @@ struct GkoWidget : ModuleWidget {
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Gko::SELECT_FUNCTION_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.239, 34.928)), module, Gko::SELECT_MODE_LIGHT));
-		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Gko::READ_TIME_FRAME_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Gko::READ_TIME_FRAME_LIGHT));
+		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Gko::SKIP_BACK_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Gko::SKIP_BACK_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Gko::RECORD_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Gko::RECORD_MODE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Gko::RECORD_TIME_FRAME_LIGHT));

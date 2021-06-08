@@ -8,7 +8,7 @@ Gko::Gko() {
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
   configParam(SKIP_BACK_PARAM, 0.f, 1.f, 0.f, "Skip Back");
   configParam(RECORD_MODE_PARAM, 0.f, 1.f, 0.f, "Record Mode");
-  configParam(RECORD_TIME_FRAME_PARAM, 0.f, 1.f, 0.f, "Record Time Frame");
+  configParam(RECORD_ON_OUTER_LOOP_PARAM, 0.f, 1.f, 0.f, "Record on Outer Loop");
   configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
@@ -19,7 +19,7 @@ Gko::Gko() {
   _select_mode_button.param = &params[SELECT_MODE_PARAM];
 
   _record_mode_button.param = &params[RECORD_MODE_PARAM];
-  _record_time_frame_button.param = &params[RECORD_TIME_FRAME_PARAM];
+  _record_on_outer_loop_button.param = &params[RECORD_ON_OUTER_LOOP_PARAM];
   _skip_back_button.param = &params[SKIP_BACK_PARAM];
 }
 
@@ -36,7 +36,7 @@ void Gko::processButtons() {
     myrisa::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
     myrisa::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
     myrisa::dsp::LongPressButton::Event _record_mode_event = _record_mode_button.process(sampleTime);
-    myrisa::dsp::LongPressButton::Event _record_time_frame_event = _record_time_frame_button.process(sampleTime);
+    myrisa::dsp::LongPressButton::Event _record_on_outer_loop_event = _record_on_outer_loop_button.process(sampleTime);
     myrisa::dsp::LongPressButton::Event _skip_back_event = _skip_back_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
@@ -95,14 +95,14 @@ void Gko::processButtons() {
       break;
     }
 
-    switch (_record_time_frame_event) {
+    switch (_record_on_outer_loop_event) {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.time_frame == TimeFrame::CIRCLE) {
-        e->setRecordTimeFrame(TimeFrame::TIME);
+      if (e->_record_params.record_on_outer_loop == false) {
+        e->setRecordOnOuterLoop(true);
       } else {
-        e->setRecordTimeFrame(TimeFrame::CIRCLE);
+        e->setRecordOnOuterLoop(false);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
@@ -117,7 +117,7 @@ void Gko::processButtons() {
     case myrisa::dsp::LongPressButton::NO_PRESS:
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_skip_back == TimeFrame::CIRCLE) {
+      if (e->_skip_back == true) {
         e->setSkipBack(false);
       } else {
         e->setSkipBack(true);
@@ -319,15 +319,12 @@ void Gko::updateLights(const ProcessArgs &args) {
     break;
   }
 
-  switch (displayed_record_params.time_frame) {
-  case TimeFrame::TIME:
-    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 1.0;
-    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 0.0;
-    break;
-  case TimeFrame::CIRCLE:
-    lights[RECORD_TIME_FRAME_LIGHT + 0].value = 0.0;
-    lights[RECORD_TIME_FRAME_LIGHT + 1].value = 1.0;
-    break;
+  if (displayed_record_params.record_on_outer_loop == true) {
+    lights[RECORD_ON_OUTER_LOOP_LIGHT + 0].value = 1.0;
+    lights[RECORD_ON_OUTER_LOOP_LIGHT + 1].value = 0.0;
+  } else {
+    lights[RECORD_ON_OUTER_LOOP_LIGHT + 0].value = 0.0;
+    lights[RECORD_ON_OUTER_LOOP_LIGHT + 1].value = 1.0;
   }
 
   if (displayed_skip_back == true) {

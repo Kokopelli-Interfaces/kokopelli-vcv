@@ -64,10 +64,10 @@ struct Engine {
   bool isRecording();
   void resetEngineMode();
   void setRecordMode(RecordParams::Mode mode);
-  void setRecordTimeFrame(TimeFrame frame);
+  void setRecordOnOuterLoop(bool frame);
   void setSkipBack(bool);
 
-  bool checkState(int skip_back, int extend, int write_time_frame);
+  bool checkState(int skip_back, int extend, int record_on_outer_loop);
 
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);

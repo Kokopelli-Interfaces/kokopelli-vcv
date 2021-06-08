@@ -11,15 +11,15 @@ void Engine::setRecordMode(RecordParams::Mode mode) {
   _record_params.mode = mode;
 }
 
-void Engine::setRecordTimeFrame(TimeFrame frame) {
+void Engine::setRecordOnOuterLoop(bool record_on_outer_loop) {
   if (this->isRecording()) {
     this->endRecording();
-    _record_params.time_frame = frame;
+    _record_params.record_on_outer_loop = record_on_outer_loop;
     _recording_layer = this->newRecording();
     // _write_antipop_filter.trigger();
   }
 
-  _record_params.time_frame = frame;
+  _record_params.record_on_outer_loop = record_on_outer_loop;
 }
 
 void Engine::setSkipBack(bool skip_back) {
@@ -28,6 +28,6 @@ void Engine::setSkipBack(bool skip_back) {
 
 void Engine::resetEngineMode() {
   this->setSkipBack(true);
-  this->setRecordTimeFrame(TimeFrame::CIRCLE);
+  this->setRecordOnOuterLoop(false);
   this->setRecordMode(RecordParams::Mode::DUB);
 }

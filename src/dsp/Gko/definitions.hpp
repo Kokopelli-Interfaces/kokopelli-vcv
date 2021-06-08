@@ -4,8 +4,6 @@
 
 #include <vector>
 
-enum TimeFrame { CIRCLE, TIME };
-
 struct TimePosition {
   unsigned int beat = 0;
   double phase = 0.f;
@@ -19,7 +17,7 @@ struct RecordParams {
   enum Mode {DUB, EXTEND};
 
   float in = 0.f;
-  TimeFrame time_frame = TimeFrame::CIRCLE;
+  bool record_on_outer_loop = false;
   Mode mode = Mode::DUB;
   float strength = 0.f;
 

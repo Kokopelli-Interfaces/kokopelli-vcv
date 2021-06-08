@@ -9,11 +9,11 @@ inline bool Engine::phaseDefined() {
 
 // -1 is arbitrary card, 0 is green, 1 is red
 bool Engine::checkState(int skip_back, int extend, int record_on_outer_loop) {
-  if ((skip_back == 1 && _skip_back != TimeFrame::TIME) || (skip_back == 0 && _skip_back != TimeFrame::CIRCLE)) {
+  if ((skip_back == 1 && _skip_back != false) || (skip_back == 0 && _skip_back != true)) {
     return false;
   }
 
-  if ((extend == 1 && _record_params.mode != RecordParams::Mode::EXTEND) || (extend == 0 && _record_params.mode != RecordParams::Mode::DUB)) {
+  if ((extend == 1 && !_record_params.unfix_bounds) || (extend == 0 && _record_params.unfix_bounds)) {
     return false;
   }
 

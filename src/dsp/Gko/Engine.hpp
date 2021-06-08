@@ -63,9 +63,10 @@ struct Engine {
   void undo();
   bool isRecording();
   void resetEngineMode();
-  void setRecordMode(RecordParams::Mode mode);
-  void setRecordOnOuterLoop(bool frame);
-  void setSkipBack(bool);
+
+  void setUnfixBounds(bool unfix_bounds);
+  void setRecordOnOuterLoop(bool record_on_outer_loop);
+  void setSkipBack(bool skip_back);
 
   bool checkState(int skip_back, int extend, int record_on_outer_loop);
 

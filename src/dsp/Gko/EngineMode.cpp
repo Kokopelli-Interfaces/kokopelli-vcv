@@ -7,8 +7,8 @@ bool Engine::isRecording() {
   return _recording_layer != nullptr;
 }
 
-void Engine::setRecordMode(RecordParams::Mode mode) {
-  _record_params.mode = mode;
+void Engine::setUnfixBounds(bool unfix_bounds) {
+  _record_params.unfix_bounds = unfix_bounds;
 }
 
 void Engine::setRecordOnOuterLoop(bool record_on_outer_loop) {
@@ -29,5 +29,5 @@ void Engine::setSkipBack(bool skip_back) {
 void Engine::resetEngineMode() {
   this->setSkipBack(true);
   this->setRecordOnOuterLoop(false);
-  this->setRecordMode(RecordParams::Mode::DUB);
+  this->setUnfixBounds(false);
 }

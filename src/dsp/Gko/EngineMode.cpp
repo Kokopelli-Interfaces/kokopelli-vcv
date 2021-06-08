@@ -22,12 +22,12 @@ void Engine::setRecordTimeFrame(TimeFrame frame) {
   _record_params.time_frame = frame;
 }
 
-void Engine::setSkipBack(TimeFrame frame) {
-  _skip_back = frame;
+void Engine::setSkipBack(bool skip_back) {
+  _skip_back = skip_back;
 }
 
 void Engine::resetEngineMode() {
-  this->setSkipBack(TimeFrame::CIRCLE);
+  this->setSkipBack(true);
   this->setRecordTimeFrame(TimeFrame::CIRCLE);
   this->setRecordMode(RecordParams::Mode::DUB);
 }

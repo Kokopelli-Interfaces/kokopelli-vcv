@@ -118,9 +118,9 @@ void Gko::processButtons() {
       break;
     case myrisa::dsp::LongPressButton::SHORT_PRESS:
       if (e->_skip_back == TimeFrame::CIRCLE) {
-        e->setSkipBack(TimeFrame::TIME);
+        e->setSkipBack(false);
       } else {
-        e->setSkipBack(TimeFrame::CIRCLE);
+        e->setSkipBack(true);
       }
       break;
     case myrisa::dsp::LongPressButton::LONG_PRESS:
@@ -265,7 +265,7 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  TimeFrame displayed_skip_back = default_e->_skip_back;
+  bool displayed_skip_back = default_e->_skip_back;
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
@@ -330,15 +330,12 @@ void Gko::updateLights(const ProcessArgs &args) {
     break;
   }
 
-  switch (displayed_skip_back) {
-  case TimeFrame::TIME:
-    lights[SKIP_BACK_LIGHT + 0].value = 1.0;
-    lights[SKIP_BACK_LIGHT + 1].value = 0.0;
-    break;
-  case TimeFrame::CIRCLE:
+  if (displayed_skip_back == true) {
     lights[SKIP_BACK_LIGHT + 0].value = 0.0;
     lights[SKIP_BACK_LIGHT + 1].value = 1.0;
-    break;
+  } else {
+    lights[SKIP_BACK_LIGHT + 0].value = 1.0;
+    lights[SKIP_BACK_LIGHT + 1].value = 0.0;
   }
 }
 

@@ -135,7 +135,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start = this->checkState(0, -1, -1) || (_timeline.atEnd(_timeline_position) && !this->isRecording());
+      bool skip_back_to_circle_start = this->_skip_back || (_timeline.atEnd(_timeline_position) && !this->isRecording());
       if (skip_back_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();

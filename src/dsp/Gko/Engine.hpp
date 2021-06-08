@@ -46,7 +46,7 @@ struct Engine {
 
   Timeline _timeline;
   TimePosition _timeline_position;
-  TimeFrame _skip_back;
+  bool _skip_back = false;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -65,7 +65,7 @@ struct Engine {
   void resetEngineMode();
   void setRecordMode(RecordParams::Mode mode);
   void setRecordTimeFrame(TimeFrame frame);
-  void setSkipBack(TimeFrame frame);
+  void setSkipBack(bool);
 
   bool checkState(int skip_back, int extend, int write_time_frame);
 

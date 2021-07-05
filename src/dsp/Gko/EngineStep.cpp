@@ -69,24 +69,25 @@ Layer* Engine::newRecording() {
   unsigned int n_beats = 1;
   unsigned int start_beat = _timeline_position.beat;
 
-  bool shift_circle = this->checkState(-1, 1, -1);
+  bool shift_circle = !this->_record_params.fix_bounds;
   if (shift_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + _loop_length;
   }
 
-  bool new_circle = this->checkState(1, 1, 1);
+  // TODO create new_circle on transition
+  bool new_circle = !this->_skip_back && !this->_record_params.fix_bounds && !this->_record_params.record_on_inner_circle;
 
   if (new_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + 1;
     _loop_length = 1;
-  } else if (this->checkState(-1, -1, 1)) {
+  } else if (!this->_record_params.record_on_inner_circle) {
   // TODO
   // if (_record_params.record_on_inner_circle == false && _skip_back == false) {
     start_beat = _circle.first;
 
-    if (this->checkState(-1, 0, -1)) {
+    if (this->_record_params.fix_bounds) {
       if (0 < _timeline.layers.size()) {
         if (_timeline.layers[_active_layer_i]->_loop) {
           n_beats = _timeline.layers[_active_layer_i]->_n_beats;
@@ -111,12 +112,12 @@ Layer* Engine::newRecording() {
 
   Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
-  if (this->checkState(-1, -1, 1)) {
+  if (!this->_record_params.record_on_inner_circle) {
     recording_layer->_loop = true;
   }
 
-  printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
+  // printf("Recording Activate:\n");
+  // printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
 
   return recording_layer;
 }
@@ -126,10 +127,10 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_circle_end = _timeline_position.beat == _circle.second;
   if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && this->checkState(-1, 1, -1) && !this->checkState(1, 1, 0);
+    bool grow_circle = this->isRecording() && !this->_record_params.fix_bounds && !this->checkState(1, 1, 0);
     if (grow_circle) {
       _circle.second += _loop_length;
-      if (this->checkState(-1, -1, 1)) {
+      if (!this->_record_params.record_on_inner_circle) {
         _recording_layer->_n_beats += _loop_length;
       } else {
         _recording_layer->_n_beats += 1;

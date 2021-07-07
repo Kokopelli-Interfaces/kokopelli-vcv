@@ -15,7 +15,7 @@ namespace gko {
 struct Timeline {
   std::vector<Layer*> layers;
 
-  float active_layer_out;
+  float active_layer_out = 0.f;
 
   /** read only */
 

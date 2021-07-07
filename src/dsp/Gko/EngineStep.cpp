@@ -76,13 +76,13 @@ Layer* Engine::newRecording() {
   }
 
   // TODO create new_circle on transition
-  bool new_circle = !this->_skip_back && !this->_record_params.fix_bounds && !this->_record_params.record_on_inner_circle;
+  bool new_circle = !this->_skip_back && !this->_record_params.fix_bounds && this->_record_params.record_on_inner_circle;
 
   if (new_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + 1;
     _loop_length = 1;
-  } else if (!this->_record_params.record_on_inner_circle) {
+  } else if (this->_record_params.record_on_inner_circle) {
   // TODO
   // if (_record_params.record_on_inner_circle == false && _skip_back == false) {
     start_beat = _circle.first;
@@ -112,7 +112,7 @@ Layer* Engine::newRecording() {
 
   Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
-  if (!this->_record_params.record_on_inner_circle) {
+  if (this->_record_params.record_on_inner_circle) {
     recording_layer->_loop = true;
   }
 
@@ -130,7 +130,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
     bool grow_circle = this->isRecording() && !this->_record_params.fix_bounds && !this->checkState(1, 1, 0);
     if (grow_circle) {
       _circle.second += _loop_length;
-      if (!this->_record_params.record_on_inner_circle) {
+      if (this->_record_params.record_on_inner_circle) {
         _recording_layer->_n_beats += _loop_length;
       } else {
         _recording_layer->_n_beats += 1;

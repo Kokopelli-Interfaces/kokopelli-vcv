@@ -66,8 +66,8 @@ Layer* Engine::newRecording() {
   assert(_record_params.active());
   assert(_recording_layer == nullptr);
 
-  unsigned int n_beats = 1;
-  unsigned int start_beat = _timeline_position.beat;
+  unsigned int start_beat = _circle.first;
+  unsigned int n_beats = _loop_length;
 
   bool shift_circle = !this->_record_params.fix_bounds;
   if (shift_circle) {
@@ -83,10 +83,6 @@ Layer* Engine::newRecording() {
     _circle.second = start_beat + 1;
     _loop_length = 1;
   } else if (this->_record_params.record_on_inner_circle) {
-  // TODO
-  // if (_record_params.record_on_inner_circle == false && _skip_back == false) {
-    start_beat = _circle.first;
-
     if (this->_record_params.fix_bounds) {
       if (0 < _timeline.layers.size()) {
         if (_timeline.layers[_active_layer_i]->_loop) {

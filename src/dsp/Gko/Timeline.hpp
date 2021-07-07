@@ -95,6 +95,10 @@ struct Timeline {
     }
 
     for (auto layer_i : layers_idx) {
+      if (layers.size() < layer_i) {
+        continue;
+      }
+
       float layer_out = layers[layer_i]->readSignal(position);
       signal_out = myrisa::dsp::sum(signal_out, layer_out, signal_type);
     }

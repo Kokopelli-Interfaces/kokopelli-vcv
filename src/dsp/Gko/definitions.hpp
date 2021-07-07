@@ -16,10 +16,17 @@ struct RecordParams {
   bool record_on_inner_circle = true;
   bool fix_bounds = true;
 
+  bool _active = false;
   float _recordActiveThreshold = 0.0001f;
 
   inline bool active() {
-    return _recordActiveThreshold < strength;
+    if (_active && strength <= _recordActiveThreshold) {
+      _active = false;
+    } else if (!_active && _recordActiveThreshold < strength) {
+      _active = true;
+    }
+
+    return _active;
   }
 
   inline float readIn() {

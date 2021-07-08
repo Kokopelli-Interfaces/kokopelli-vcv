@@ -269,16 +269,12 @@ void Gko::updateLights(const ProcessArgs &args) {
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
-  float active_layer_signal_out_sum = 0.f;
+  float active_layer_signal_out_sum = default_e->readActiveLayer();
   float sel_signal_out_sum = 0.f;
 
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
-    if (_engines[c] == NULL) {
-      continue;
-    }
     signal_in_sum += _from_signal->signal[c];
-    active_layer_signal_out_sum += _engines[c]->readActiveLayer();
     sel_signal_out_sum += _to_signal->sel_signal[c];
     if (record_active) {
       displayed_skip_back = _engines[c]->_skip_back;

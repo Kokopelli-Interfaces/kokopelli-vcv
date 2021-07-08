@@ -74,6 +74,10 @@ void Engine::deleteLayer(unsigned int layer_i) {
 }
 
 void Engine::deleteSelection() {
+  if (isRecording()) {
+    return;
+  }
+
   for (int layer_i = _timeline.layers.size()-1; layer_i >= 0; layer_i--) {
     if (isSelected(layer_i)) {
       if (layer_i == (int)_active_layer_i) {

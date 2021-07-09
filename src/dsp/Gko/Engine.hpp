@@ -40,6 +40,7 @@ struct Engine {
 
   Layer *_recording_layer = nullptr;
   RecordParams _record_params;
+  bool _used_window_capture_button = false;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;

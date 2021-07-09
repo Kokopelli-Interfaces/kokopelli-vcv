@@ -194,7 +194,15 @@ void Engine::step() {
     _recording_layer = this->newRecording();
     _write_antipop_filter.trigger();
   } else if (this->isRecording() && !_record_params.active()) {
-    this->endRecording();
+    // if the capture button is used, assume the recording afterwards is unnecessary
+    if (_used_window_capture_button) {
+      Layer *unnecessary_recording = _recording_layer;
+      _recording_layer = nullptr;
+      delete unnecessary_recording;
+      _used_window_capture_button = false;
+    } else {
+      this->endRecording();
+    }
     this->resetEngineMode();
   }
 

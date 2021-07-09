@@ -13,17 +13,26 @@ void Engine::setFixBounds(bool fix_bounds) {
 
 void Engine::setRecordOnInnerLoop(bool record_on_inner_circle) {
   if (this->isRecording()) {
+    if (!_record_params.record_on_inner_circle && record_on_inner_circle)  {
+      _circle.first = _timeline_position.beat;
+      _circle.second = _timeline_position.beat + _loop_length;
+    }
+
     this->endRecording();
     _record_params.record_on_inner_circle = record_on_inner_circle;
     _recording_layer = this->newRecording();
-    // _write_antipop_filter.trigger();
   }
 
   _record_params.record_on_inner_circle = record_on_inner_circle;
 }
 
 void Engine::setSkipBack(bool skip_back) {
-  _skip_back = skip_back;
+  if (this->isRecording()) {
+    _used_window_capture_button = true;
+    this->endRecording();
+  } else {
+    _skip_back = skip_back;
+  }
 }
 
 void Engine::resetEngineMode() {

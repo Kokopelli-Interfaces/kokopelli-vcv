@@ -313,8 +313,15 @@ void Gko::updateLights(const ProcessArgs &args) {
   lights[RECORD_ON_INNER_CIRCLE_LIGHT + 0].value = !displayed_record_params.record_on_inner_circle;
   lights[RECORD_ON_INNER_CIRCLE_LIGHT + 1].value = displayed_record_params.record_on_inner_circle;
 
-  lights[SKIP_BACK_LIGHT + 0].value = !displayed_skip_back;
-  lights[SKIP_BACK_LIGHT + 1].value = displayed_skip_back;
+  if (default_e->isRecording()) {
+    lights[SKIP_BACK_LIGHT + 0].value = 1.f;
+    lights[SKIP_BACK_LIGHT + 1].value = 1.f;
+    lights[SKIP_BACK_LIGHT + 2].value = 1.f;
+  } else {
+    lights[SKIP_BACK_LIGHT + 0].value = !displayed_skip_back;
+    lights[SKIP_BACK_LIGHT + 1].value = displayed_skip_back;
+    lights[SKIP_BACK_LIGHT + 2].value = 0.f;
+  }
 }
 
 void Gko::postProcessAlways(const ProcessArgs &args) {

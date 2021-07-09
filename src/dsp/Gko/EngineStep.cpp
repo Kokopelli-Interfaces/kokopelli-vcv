@@ -68,8 +68,7 @@ Layer* Engine::newRecording() {
 
   unsigned int start_beat = _timeline_position.beat;
   unsigned int n_beats = 1;
-
-  if (this->_record_params.fix_bounds) {
+  if (this->_record_params.fix_bounds && this->_record_params.record_on_inner_circle) {
     start_beat = _circle.first;
     n_beats = _loop_length;
   }
@@ -130,7 +129,9 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start = this->_skip_back || (_timeline.atEnd(_timeline_position) && !this->isRecording());
+      bool skip_back_to_circle_start =
+        (this->_skip_back && !(this->isRecording() && !_record_params.record_on_inner_circle)) ||
+        (_timeline.atEnd(_timeline_position) && !this->isRecording());
       if (skip_back_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();
@@ -139,11 +140,10 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
           this->endRecording();
           _recording_layer = this->newRecording();
         }
-      } else {
+      } else { // shift circle
         unsigned int circle_shift = _circle.second - _circle.first;
         _circle.first = _circle.second;
         _circle.second += circle_shift;
-
       }
     }
   }
@@ -151,11 +151,10 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
     bool create_new_dub = this->checkState(1, 0, 1);
-    bool overwrite = this->checkState(0, 0, 1);
     if (create_new_dub) {
       this->endRecording();
       _recording_layer = this->newRecording();
-    } else if (!overwrite) {
+    } else if (!_record_params.fix_bounds || !_record_params.record_on_inner_circle) {
       _recording_layer->_n_beats++;
     }
   }

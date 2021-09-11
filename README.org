@@ -1,1 +1,2 @@
 * Manual
+[[file:img/cavee.jpg][cave]]

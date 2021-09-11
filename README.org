@@ -22,5 +22,6 @@ computer interfaces and is *not* stuck in a loop. Yes, the =Gko= module gives yo
 progressive music is now a matter of learning to use three buttons and a foot pedal. Afterall, why
 stare at your monitor when you can stare at the cosmic ocean from which all experience emerges from?
 Or, why love mind knacks and poly-techno false idols when you can love the great mother? Tribal
-Interfaces - /because alignment matters./'' #+end_quote
+Interfaces - /because alignment matters./'' 
+#+end_quote
 

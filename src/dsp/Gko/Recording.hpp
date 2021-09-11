@@ -11,9 +11,9 @@
 #include "util/math.hpp"
 
 using namespace std;
-using namespace myrisa::util;
+using namespace tribalinterfaces::util;
 
-namespace myrisa {
+namespace tribalinterfaces {
 namespace dsp {
 namespace gko {
 
@@ -21,26 +21,26 @@ struct Recording {
 
   /* read only */
 
-  myrisa::dsp::SignalType _signal_type;
+  tribalinterfaces::dsp::SignalType _signal_type;
   std::vector<std::vector<float>> _buffer;
   int _samples_per_beat;
 
   rack::dsp::ClockDivider write_divider;
 
-  Recording(myrisa::dsp::SignalType signal_type, int samples_per_beat) {
+  Recording(tribalinterfaces::dsp::SignalType signal_type, int samples_per_beat) {
     _signal_type = signal_type;
     _samples_per_beat = samples_per_beat;
     switch (_signal_type) {
-    case myrisa::dsp::SignalType::AUDIO:
+    case tribalinterfaces::dsp::SignalType::AUDIO:
       write_divider.setDivision(1);
       break;
-    case myrisa::dsp::SignalType::CV:
+    case tribalinterfaces::dsp::SignalType::CV:
       write_divider.setDivision(10);
       break;
-    case myrisa::dsp::SignalType::GATE: case myrisa::dsp::SignalType::VOCT: case myrisa::dsp::SignalType::VEL:
+    case tribalinterfaces::dsp::SignalType::GATE: case tribalinterfaces::dsp::SignalType::VOCT: case tribalinterfaces::dsp::SignalType::VEL:
       write_divider.setDivision(100); // approx every ~.25ms
       break;
-    case myrisa::dsp::SignalType::PARAM:
+    case tribalinterfaces::dsp::SignalType::PARAM:
       write_divider.setDivision(2000); // approx every ~5ms
       break;
     }
@@ -110,11 +110,11 @@ struct Recording {
     }
 
     float sample_phase = rack::math::eucMod(beat_position, 1.0f);
-    if (_signal_type == myrisa::dsp::SignalType::AUDIO) {
+    if (_signal_type == tribalinterfaces::dsp::SignalType::AUDIO) {
       return Hermite4pt3oX(s0, s1, s2, s3, sample_phase);
-    } else if (_signal_type == myrisa::dsp::SignalType::CV) {
+    } else if (_signal_type == tribalinterfaces::dsp::SignalType::CV) {
       return rack::crossfade(s1, s2, sample_phase);
-    } else if (_signal_type == myrisa::dsp::SignalType::PARAM) {
+    } else if (_signal_type == tribalinterfaces::dsp::SignalType::PARAM) {
       return rack::clamp(BSpline(s0, s1, s2, s3, sample_phase), 0.f, 10.f);
     } else {
       return s1;
@@ -142,7 +142,7 @@ struct Recording {
       x1--;
     }
 
-    if (_signal_type == myrisa::dsp::SignalType::AUDIO)  {
+    if (_signal_type == tribalinterfaces::dsp::SignalType::AUDIO)  {
       double sample_phase = beat_position - floor(beat_position);
       _buffer[t.beat][x1] = rack::crossfade(sample, _buffer[t.beat][x1], sample_phase);
 
@@ -172,4 +172,4 @@ struct Recording {
 
 } // namespace gko
 } // namespace dsp
-} // namepsace myrisa
+} // namepsace tribalinterfaces

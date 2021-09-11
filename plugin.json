@@ -1,19 +1,19 @@
 {
-  "slug": "Myrisa",
-  "name": "Myrisa",
+  "slug": "Tribal Interfaces",
+  "name": "Tribal Interfaces",
   "version": "1.0",
   "license": "MIT",
-  "author": "Myrisa",
-  "brand": "Myrisa",
+  "author": "Tribal Interfaces",
+  "brand": "Tribal Interfaces",
   "authorEmail": "michael.ampm@gmail.com",
   "authorUrl": "https://github.com/gwatcha",
-  "pluginUrl": "https://github.com/gwatcha/myrisa-modules",
-  "manualUrl": "https://github.com/gwatcha/myrisa-modules/wiki",
-  "sourceUrl": "https://github.com/gwatcha/myrisa-modules",
+  "pluginUrl": "https://github.com/gwatcha/tribal-interfaces",
+  "manualUrl": "https://github.com/gwatcha/tribal-interfaces/wiki",
+  "sourceUrl": "https://github.com/gwatcha/tribal-interfaces",
   "donateUrl": "https://ko-fi.com/michaelmuszynski",
   "modules": [
     {
-      "slug": "Myrisa-Signal",
+      "slug": "TribalInterfaces-Signal",
       "name": "Signal",
       "description": "Gko expander which adds one signal input and output.",
       "tags": [
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "slug": "Myrisa-Signal4",
+      "slug": "TribalInterfaces-Signal4",
       "name": "Signal4",
       "description": "Gko expander which adds four signal inputs and outputs.",
       "tags": [
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "slug": "Myrisa-Play",
+      "slug": "TribalInterfaces-Play",
       "name": "Play",
       "description": "Gko expander which adds midi recording inputs and outputs.",
       "tags": [
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "slug": "Myrisa-Signal",
+      "slug": "TribalInterfaces-Signal",
       "name": "Signal",
       "description": "Record, loop, edit, playback, and sequence signals.",
       "tags": [
@@ -45,7 +45,7 @@
       ]
     },
     {
-      "slug": "Myrisa-Gko",
+      "slug": "TribalInterfaces-Gko",
       "name": "Gko",
       "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more. Inspired by the advancer of existence, 'Gko'.",
       "tags": [

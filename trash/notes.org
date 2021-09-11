@@ -1,0 +1,220 @@
+* TODO Version
+A version is simply a collection of looping buffers, or, in gko's terminology, a
+collection of 'layers'.
+
+The ~VERSION~ parameter adjusts which version ~GKO~ records and reads from.
+
+If ~VERSION~'s position is between two versions, the behaviour will depend on the
+"version transition" option.
+- If set to  'smooth' it will output a weighted mix of both versions, allowing for smooth crossfading between versions.
+- If set to 'discrete', the version will snap to the nearest version.
+- If  set to 'sequence', the version will snap to the nearest version at the next
+  clk step, and will also reset the play position of the version on transitioning.
+
+The port directly under ~VERSION~ modulates the parameter, allowing for
+interesting crossfade patterns, or voltage controlled version sequencing.
+
+One may use multiple ~VERSIONs~ to sequence musical sections or, in the case ~GKO~
+is capturing control voltage, a keygkor for control voltage.
+
+Versions that have not recorded anything start with the layers of the version
+before, so one may progress to the next version to leave behind a 'checkpoint',
+that one may return to, or to just start developing a new version by altering the
+current one.
+
+* GKO Additional Uses Cases
+** Delay Unit
+~GKO~ can function as a delay unit in the case /add/ mode is consistently on
+in /layer/ mode. ~DELTA~ would control the feedback in this case.
+
+One may use ~GKO-X~ to change the rate and offset of the delays to produce
+cool delay effects.
+
+** Pitch Shifter
+When one sets up ~GKO~ as a delay unit with a small layer size and adjusts
+the ~RATE~ of ~GKO-X~, it will seem like the pitch of the sound is higher or
+lower.
+
+** Advanced Sample & Hold / Sequencer
+When one sets ~RATE~ to 0, ~GKO~ does not progress at all but still may record
+and read signals. In this case, it acts as an advanced sample and hold module.
+Adjusting the ~VERSION~ knob smoothly transitions between samples.
+
+One may sequence samples in interesting ways using the ~VERSION~ modulation port.
+** Advanced 'MIDI' Looper
+When ~GKO~ is expanding ~PLAY~, one may create interesting playback patterns
+by recording some GATE, VOCT, and VEL signals, and varying or modulating the
+~RATE~ and ~POS~ ports. One idea is to record a chord, and modulate ~RATE~ and
+~POS~ with low frequency noise sources with channel variation to create
+fluctuating, dreamy note sequences.
+** An Instrument
+One may patch the ~RATE~ port with a VOCT signal, and the ~PLAY~ port with a
+GATE signal, patch the output VCA with a GATE controlled envelope, and play
+~GKO~ as if it were an instrument.
+
+This use case applies to all the additional use cases below.
+
+** Wonky Audio Playback Unit
+One may patch the ~RATE~ port to modulate the speed of playback and recording,
+and one may patch the ~POS~ port to modulate the offset of ~GKO~ layers.
+Using these, one could get some cool sounds with ~GKO~ - especially if there
+is variation across channels. Have you ever wondered what playing back speech
+with a sin wave sounds like? I have.
+
+** Wavetable Oscillator with Additive and Subtractive Synthesis Capabilities
+~GKO~ can be a wavetable oscillator if either the ~PHASE~ rate is high, 
+
+In this use case, the ~VERSION~ parameter morphs between recorded waves, and the
+~DELTA~ parameter would add or subract from a ~VERSIONs~ wave.
+* welcome  to michaels channeling of a millenia old mouth noise asmr music shaman doing performances for his buddies around the fire they have made and are sitting around and listening but in the case while using the computer
+* TODO
+don't have jumping to extend mode leave layer option
+- interurrpted when forgetting to set record mode and in fx aply mode
+* TODO be able to add names for voices
+* TODO make tutorial
+* TODO Be able to auto emerge voices if applying fx to them
+* TODO Have one button be 'emerge with' button. 
+* TODO rename to 'LOVE'
+* TODO 'LOVE/HATE' button!!
+I LOVE IT
+
+in LOVE mode, it emerges with unit so twisting knob past threshold will create a new emerges with
+voice and layer together, making a new level in the graph of emergence
+
+-----------------  |  VOICE
+     \        /-----   | PSTT
+      \------------  | VOICE FX  WOOO
+                 \----  |  HAT  
+
+                 words fail me
+
+                 or make it like twisting it really hard hates instead !!
+                 which is so true
+                 devouring mother much lol
+                 WOW
+                 isn't that true
+                 love to all is the middle point
+                 the balance
+                 you do not want to love more
+                 because
+                 it becomes a lord of the rings power ring type of deal
+                 so it is a balance!
+                 
+
+* TODO then the knob is called the emergence strength knob if LOVE, and hate strength if HATE
+* TODO start OUTER CIRCLE recording at start of loop as well, because it may be looping back
+* TODO
+spiritually enlighten with module
+as within, so without
+* TODO
+_LOVE EVERYTHING_
+that is the goal
+we only have love
+we are only loving too much
+we are attached
+we do not want to lose
+we say 'no' to other potentiality
+
+for the devouring mother
+it is that she loves a part of the child that isn't his full being
+and loves it too hard
+so that other potentiality does not realize
+
+just as one chooses which seeds to use in their garden
+and then which flowers to grow
+
+one chooses what to love
+
+and if one loves only one seed, the others will not exist
+
+moral of the story:
+we must love emergence
+not particulars
+one ring to rule them all... no
+only gko holds the one true ring
+
+* TODO speeds for all the voices, bpm is associated with each voice! not everything
+- save phase rate bpm for voice and save it... this is what gets outputted on the output port
+  - have button at bottom which affects whether the voices phase is set to the INPUT phase...
+  - output voice phase always
+  - next voices ~is~ the input phase ~else~ the saved voice being focused
+  - if input phase and =SET= mode, output phase is still the saved voice phase (allows for slowing
+    down voice, because new input phase is saved if button transition)
+* Architecture
+_Emernet_
+What creates the network in the Emernet?
+At each node, an energy diversion occurs.
+A cell is not one cell, but two cells.
+The energy has diverged.
+Now there is a multi-cellular organism.
+Just as there are both violins and piano.
+
+An edge in the network is created through relationship.
+A cluster of voices emerge when the new voice Loves the other voices in the cluster.
+Or when it hates them and influences them to not exist.
+
+* TODO Controls
+(Input is always recording?)
+** Emerlens Focus Controls
+Provides means to select voices to love.
+*** =FOCUS=
+=TOGGLE=
+control whether voice is focused
+
+** =LOVE=
+=7o'clock=
+/love other./
+~input volume 0%~
+~focused 100%~
+
+=12 o'clock= --
+/emergence/. /love both/.
+~equal volume~
+
+=5 o'clock= --
+/love self. other is not loved. the energy of the universe goes to self, not other. Me, me, me./
+~input voice takes 100% of energy 
+focused nodes 0% to output~
+
+** =CAPTURE=
+=TAP=
+~save captured window~
+
+=HOLD=
+~undo~
+
+** =EXTEND=
+=TOGGLE=
+~if window end reached, extend window~
+
+=HOLD=
+make window size of focus
+
+** =LOOP=
+** 
+* TODO Workflow
+1. Connect clock or record initial loop to set bpm.
+2. Turn =LOVE= knob up halfway on =SIG= module in order to give energy to the =SIG= input signal and 
+   captured signals.
+3. Press the =CAPTURE= button to capture window of emernet and thus loop the =SIG= input signal.
+4. Repeat desired amount to add more to loop, adjusting =LOVE= knob for 
+
+
+/some way to section/
+
+* GLOSSARY
+*universe*
+/the host of an emernet, a universe, the material universe/
+=these are the SIG, PLAY, 4SIG modules=
+it is the frame of the emernet.png
+
+*emernet*
+/existence, the manifest energy of the universe, the love song, the universal experience, the one consciousness, all being, the sum emergence of the universe/
+==
+#+ATTR_ORG: :width 750 
+./img/emernet.png
+
+*energy*
+the energy of a voice in the emernet
+~the volume of a recorded voice, meaning how much routing power it has compared to other recordings~
+

@@ -2,7 +2,7 @@
 
 #pragma once
 
-namespace myrisa {
+namespace tribalinterfaces {
 namespace dsp {
 
 struct AntipopFilter {
@@ -29,4 +29,4 @@ struct AntipopFilter {
 };
 
 } // namespace dsp
-} // namespace myrisa
+} // namespace tribalinterfaces

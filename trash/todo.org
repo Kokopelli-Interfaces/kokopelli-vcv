@@ -1,0 +1,7 @@
+* Problems
+** get lost in layers, too many
+fix by layer grouping
+* TODO Refractor to have emergence graph API
+- will give way to extensions
+- possibly have 
+* TODO Layer grouping

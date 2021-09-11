@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace myrisa::dsp::gko;
-using namespace myrisa::dsp;
+using namespace tribalinterfaces::dsp::gko;
+using namespace tribalinterfaces::dsp;
 
 // TODO consider layer attenuations, so that you can't select fully attenuated layer
 

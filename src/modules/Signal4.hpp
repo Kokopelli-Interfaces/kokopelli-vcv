@@ -1,10 +1,10 @@
-#include "myrisa.hpp"
+#include "tribalinterfaces.hpp"
 
 extern Model *modelSignal4;
 
-namespace myrisa {
+namespace tribalinterfaces {
 
-struct Signal4 : MyrisaModule {
+struct Signal4 : TribalInterfacesModule {
   enum ParamIds { OUT_ATTENUATION_PARAM, IN_ATTENUATION_PARAM, NUM_PARAMS };
   enum InputIds {
     IN_1_INPUT,
@@ -37,4 +37,4 @@ struct Signal4 : MyrisaModule {
   void processAlways(const ProcessArgs& args) override;
 };
 
-} // namespace myrisa
+} // namespace tribalinterfaces

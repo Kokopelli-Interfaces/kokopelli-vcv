@@ -4,9 +4,9 @@
 #include "Signal.hpp"
 #include "menu.hpp"
 
-using namespace myrisa::dsp;
+using namespace tribalinterfaces::dsp;
 
-namespace myrisa {
+namespace tribalinterfaces {
 
 struct SignalWidget : ModuleWidget {
 	SignalWidget(Signal* module) {
@@ -49,4 +49,4 @@ struct SignalWidget : ModuleWidget {
 };
 
 
-} // namespace myrisa
+} // namespace tribalinterfaces

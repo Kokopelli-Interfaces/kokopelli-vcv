@@ -33,26 +33,26 @@ void Gko::sampleRateChange() {
 void Gko::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
-    myrisa::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
-    myrisa::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
-    myrisa::dsp::LongPressButton::Event _fix_bounds_event = _fix_bounds_button.process(sampleTime);
-    myrisa::dsp::LongPressButton::Event _record_on_inner_circle_event = _record_on_inner_circle_button.process(sampleTime);
-    myrisa::dsp::LongPressButton::Event _skip_back_event = _skip_back_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _fix_bounds_event = _fix_bounds_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _record_on_inner_circle_event = _record_on_inner_circle_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _skip_back_event = _skip_back_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
-    myrisa::dsp::gko::Engine *e = _engines[c];
+    tribalinterfaces::dsp::gko::Engine *e = _engines[c];
 
     switch (_select_function_event) {
-    case myrisa::dsp::LongPressButton::NO_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
       if (e->_new_layer_active) {
         e->_select_new_layers = !e->_select_new_layers;
       } else {
         e->toggleSelectLayer(e->_active_layer_i);
       }
       break;
-    case myrisa::dsp::LongPressButton::LONG_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
       if (e->isSelected(e->_active_layer_i)) {
         if (e->_selected_layers_idx.size() == 1) {
           e->_selected_layers_idx = e->_saved_selected_layers_idx;
@@ -71,41 +71,41 @@ void Gko::processButtons() {
     }
 
     switch (_select_mode_event) {
-    case myrisa::dsp::LongPressButton::NO_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
       break;
-    case myrisa::dsp::LongPressButton::LONG_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
       e->deleteSelection();
       break;
     }
 
     switch (_fix_bounds_event) {
-    case myrisa::dsp::LongPressButton::NO_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
       if (!e->_record_params.fix_bounds) {
         e->setFixBounds(true);
       } else {
         e->setFixBounds(false);
       }
       break;
-    case myrisa::dsp::LongPressButton::LONG_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
       e->undo();
       break;
     }
 
     switch (_record_on_inner_circle_event) {
-    case myrisa::dsp::LongPressButton::NO_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
       if (e->_record_params.record_on_inner_circle == false) {
         e->setRecordOnInnerLoop(true);
       } else {
         e->setRecordOnInnerLoop(false);
       }
       break;
-    case myrisa::dsp::LongPressButton::LONG_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
       // e->setCircleToActiveLayer();
       if (0 < e->_timeline.layers.size()) {
         e->_timeline.layers[e->_active_layer_i]->_loop = !e->_timeline.layers[e->_active_layer_i]->_loop;
@@ -114,16 +114,16 @@ void Gko::processButtons() {
     }
 
     switch (_skip_back_event) {
-    case myrisa::dsp::LongPressButton::NO_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case myrisa::dsp::LongPressButton::SHORT_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
       if (e->_skip_back == true) {
         e->setSkipBack(false);
       } else {
         e->setSkipBack(true);
       }
       break;
-    case myrisa::dsp::LongPressButton::LONG_PRESS:
+    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
       e->setCircleToActiveLayer();
     }
   }
@@ -137,7 +137,7 @@ void Gko::processSelect() {
   float select_change_threshold = value_per_rotation / n_increments_per_rotation;
   if (select_change_threshold < fabs(d_select)) {
     for (int c = 0; c < channels(); c++) {
-      myrisa::dsp::gko::Engine *e = _engines[c];
+      tribalinterfaces::dsp::gko::Engine *e = _engines[c];
 
       bool increment = 0.f < d_select;
       if (increment) {
@@ -178,7 +178,7 @@ void Gko::modulate() {
 
 void Gko::modulateChannel(int channel_i) {
   if (baseConnected()) {
-    myrisa::dsp::gko::Engine *e = _engines[channel_i];
+    tribalinterfaces::dsp::gko::Engine *e = _engines[channel_i];
     float record_strength = params[RECORD_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
       record_strength *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
@@ -213,7 +213,7 @@ void Gko::processChannel(const ProcessArgs& args, int channel_i) {
     return;
   }
 
-  myrisa::dsp::gko::Engine *e = _engines[channel_i];
+  tribalinterfaces::dsp::gko::Engine *e = _engines[channel_i];
 
   if (inputs[PHASE_INPUT].isConnected()) {
     float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
@@ -245,7 +245,7 @@ void Gko::updateLights(const ProcessArgs &args) {
 
   float signal_in_sum = 0.f;
 
-  myrisa::dsp::gko::Engine *default_e = _engines[0];
+  tribalinterfaces::dsp::gko::Engine *default_e = _engines[0];
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
@@ -331,7 +331,7 @@ void Gko::postProcessAlways(const ProcessArgs &args) {
 }
 
 void Gko::addChannel(int channel_i) {
-  _engines[channel_i] = new myrisa::dsp::gko::Engine();
+  _engines[channel_i] = new tribalinterfaces::dsp::gko::Engine();
   _engines[channel_i]->_sample_time = _sampleTime;
 }
 
@@ -340,4 +340,4 @@ void Gko::removeChannel(int channel_i) {
   _engines[channel_i] = nullptr;
 }
 
-Model *modelGko = rack::createModel<Gko, GkoWidget>("Myrisa-Gko");
+Model *modelGko = rack::createModel<Gko, GkoWidget>("TribalInterfaces-Gko");

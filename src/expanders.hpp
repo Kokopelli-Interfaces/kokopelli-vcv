@@ -10,7 +10,7 @@
 
 using namespace rack;
 
-namespace myrisa {
+namespace tribalinterfaces {
 
 struct ExpanderMessage {
 	int channels = 0;
@@ -26,10 +26,10 @@ struct ExpandableModule : BASE {
 
 	ExpandableModule() {
 		static_assert(std::is_base_of<ExpanderMessage, MSG>::value, "type parameter MSG must derive from ExpanderMessage");
-		static_assert(std::is_base_of<MyrisaModule, BASE>::value, "type parameter BASE must derive from MyrisaModule");
+		static_assert(std::is_base_of<TribalInterfacesModule, BASE>::value, "type parameter BASE must derive from TribalInterfacesModule");
 
-		MyrisaModule::rightExpander.producerMessage = &_messages[0];
-		MyrisaModule::rightExpander.consumerMessage = &_messages[1];
+		TribalInterfacesModule::rightExpander.producerMessage = &_messages[0];
+		TribalInterfacesModule::rightExpander.consumerMessage = &_messages[1];
 	}
 
 	void setExpanderModelPredicate(std::function<bool(Model*)> p) {
@@ -37,7 +37,7 @@ struct ExpandableModule : BASE {
 	}
 
 	bool expanderConnected() {
-		bool connected = MyrisaModule::rightExpander.module && _expanderModel && _expanderModel(MyrisaModule::rightExpander.module->model);
+		bool connected = TribalInterfacesModule::rightExpander.module && _expanderModel && _expanderModel(TribalInterfacesModule::rightExpander.module->model);
 		if (!connected && _wasConnected) {
 			_messages[1] = _messages[0] = MSG();
 		}
@@ -45,17 +45,17 @@ struct ExpandableModule : BASE {
 	}
 
 	inline MSG* toExpander() {
-		return (MSG*)MyrisaModule::rightExpander.module->leftExpander.producerMessage;
+		return (MSG*)TribalInterfacesModule::rightExpander.module->leftExpander.producerMessage;
 	}
 
 	inline MSG* fromExpander() {
-		return (MSG*)MyrisaModule::rightExpander.consumerMessage;
+		return (MSG*)TribalInterfacesModule::rightExpander.consumerMessage;
 	}
 
-	void process(const MyrisaModule::ProcessArgs& args) override {
+	void process(const TribalInterfacesModule::ProcessArgs& args) override {
 		BASE::process(args);
-		if (MyrisaModule::rightExpander.module) {
-			MyrisaModule::rightExpander.module->leftExpander.messageFlipRequested = true;
+		if (TribalInterfacesModule::rightExpander.module) {
+			TribalInterfacesModule::rightExpander.module->leftExpander.messageFlipRequested = true;
 		}
 	}
 };
@@ -69,10 +69,10 @@ struct ExpanderModule : BASE {
 
 	ExpanderModule() {
 		static_assert(std::is_base_of<ExpanderMessage, MSG>::value, "type parameter MSG must derive from ExpanderMessage");
-		static_assert(std::is_base_of<MyrisaModule, BASE>::value, "type parameter BASE must derive from MyrisaModule");
+		static_assert(std::is_base_of<TribalInterfacesModule, BASE>::value, "type parameter BASE must derive from TribalInterfacesModule");
 
-		MyrisaModule::leftExpander.producerMessage = &_messages[0];
-		MyrisaModule::leftExpander.consumerMessage = &_messages[1];
+		TribalInterfacesModule::leftExpander.producerMessage = &_messages[0];
+		TribalInterfacesModule::leftExpander.consumerMessage = &_messages[1];
 	}
 
 	void setBaseModelPredicate(std::function<bool(Model*)> p) {
@@ -80,7 +80,7 @@ struct ExpanderModule : BASE {
 	}
 
 	bool baseConnected() {
-		bool connected = MyrisaModule::leftExpander.module && _baseModel && _baseModel(MyrisaModule::leftExpander.module->model);
+		bool connected = TribalInterfacesModule::leftExpander.module && _baseModel && _baseModel(TribalInterfacesModule::leftExpander.module->model);
 		if (!connected && _wasConnected) {
 			_messages[1] = _messages[0] = MSG();
 		}
@@ -88,11 +88,11 @@ struct ExpanderModule : BASE {
 	}
 
 	inline MSG* fromBase() {
-		return (MSG*)MyrisaModule::leftExpander.consumerMessage;
+		return (MSG*)TribalInterfacesModule::leftExpander.consumerMessage;
 	}
 
 	inline MSG* toBase() {
-		return (MSG*)MyrisaModule::leftExpander.module->rightExpander.producerMessage;
+		return (MSG*)TribalInterfacesModule::leftExpander.module->rightExpander.producerMessage;
 	}
 
   // TODO instead, define based off frame
@@ -103,11 +103,11 @@ struct ExpanderModule : BASE {
 	// 	return 1;
 	// }
 
-	void process(const MyrisaModule::ProcessArgs& args) override {
+	void process(const TribalInterfacesModule::ProcessArgs& args) override {
 		BASE::process(args);
-		if (MyrisaModule::leftExpander.module) {
-			MyrisaModule::leftExpander.module->rightExpander.messageFlipRequested = true;
+		if (TribalInterfacesModule::leftExpander.module) {
+			TribalInterfacesModule::leftExpander.module->rightExpander.messageFlipRequested = true;
 		}
 	}
 };
-} // namespace myrisa
+} // namespace tribalinterfaces

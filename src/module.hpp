@@ -8,9 +8,9 @@
 
 using namespace rack;
 
-namespace myrisa {
+namespace tribalinterfaces {
 
-struct MyrisaModule : Module {
+struct TribalInterfacesModule : Module {
 	int _modulationSteps = 100;
 	int _steps = -1;
 	bool _initialized = false;
@@ -19,10 +19,10 @@ struct MyrisaModule : Module {
 	int _channels = 0;
 	float _inverseChannels = 0.f;
 
-	MyrisaModule() {
+	TribalInterfacesModule() {
 	}
 
-	virtual ~MyrisaModule() {
+	virtual ~TribalInterfacesModule() {
 		while (_channels >= 1) {
 			removeChannel(_channels - 1);
 			--_channels;
@@ -49,4 +49,4 @@ struct MyrisaModule : Module {
 	virtual void postProcessAlways(const ProcessArgs& args) {} // modulate() may not have been called.
 };
 
-} // namespace myrisa
+} // namespace tribalinterfaces

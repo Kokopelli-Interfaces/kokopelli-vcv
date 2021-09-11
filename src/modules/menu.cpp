@@ -2,7 +2,7 @@
 
 #include "menu.hpp"
 
-using namespace myrisa;
+using namespace tribalinterfaces;
 
 #define SUBMENUS 1
 

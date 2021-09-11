@@ -3,9 +3,9 @@
 #include "Gko_shared.hpp"
 #include "menu.hpp"
 
-namespace myrisa {
+namespace tribalinterfaces {
 
-struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
+struct Signal : ExpandableModule<SignalExpanderMessage, TribalInterfacesModule> {
   enum ParamIds { IN_ATTENUATION_PARAM, OUT_ATTENUATION_PARAM, NUM_PARAMS };
   enum InputIds { IN_INPUT, IN_ATTENUATION_INPUT, OUT_ATTENUATION_INPUT, NUM_INPUTS };
   enum OutputIds { SEL_OUTPUT, OUT_OUTPUT, NUM_OUTPUTS };
@@ -18,7 +18,7 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
 
   Engine *_engines[maxChannels] {};
 
-  myrisa::dsp::SignalType _signal_type = myrisa::dsp::SignalType::AUDIO;
+  tribalinterfaces::dsp::SignalType _signal_type = tribalinterfaces::dsp::SignalType::AUDIO;
 
   SignalExpanderMessage *_toGko = nullptr;
   SignalExpanderMessage *_fromGko = nullptr;
@@ -42,4 +42,4 @@ struct Signal : ExpandableModule<SignalExpanderMessage, MyrisaModule> {
   void processChannel(const ProcessArgs &args, int channel) override;
 };
 
-} // namespace myrisa
+} // namespace tribalinterfaces

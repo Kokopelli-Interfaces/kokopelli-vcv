@@ -1,22 +1,22 @@
 // adapted from bogaudio's module.cpp
 
 #include "module.hpp"
-#include "myrisa.hpp"
+#include "tribalinterfaces.hpp"
 
-using namespace myrisa;
+using namespace tribalinterfaces;
 
-void MyrisaModule::onReset() {
+void TribalInterfacesModule::onReset() {
 	_steps = _modulationSteps;
 	reset();
 }
 
-void MyrisaModule::onSampleRateChange() {
+void TribalInterfacesModule::onSampleRateChange() {
 	_modulationSteps = APP->engine->getSampleRate() * (2.5f / 1000.f); // modulate every ~2.5ms regardless of sample rate.
 	_steps = _modulationSteps;
 	sampleRateChange();
 }
 
-void MyrisaModule::process(const ProcessArgs& args) {
+void TribalInterfacesModule::process(const ProcessArgs& args) {
 	if (!_initialized) {
 		_initialized = true;
 		onReset();

@@ -7,9 +7,9 @@
 #include "widgets.hpp"
 #include <math.h>
 
-namespace myrisa {
+namespace tribalinterfaces {
 
-struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
+struct Gko : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
   enum ParamIds {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
@@ -40,14 +40,14 @@ struct Gko : ExpanderModule<SignalExpanderMessage, MyrisaModule> {
 
   float _last_select_value = 0.f;
 
-  myrisa::dsp::LongPressButton _select_function_button;
-  myrisa::dsp::LongPressButton _select_mode_button;
+  tribalinterfaces::dsp::LongPressButton _select_function_button;
+  tribalinterfaces::dsp::LongPressButton _select_mode_button;
 
-  myrisa::dsp::LongPressButton _fix_bounds_button;
-  myrisa::dsp::LongPressButton _record_on_inner_circle_button;
-  myrisa::dsp::LongPressButton _skip_back_button;
+  tribalinterfaces::dsp::LongPressButton _fix_bounds_button;
+  tribalinterfaces::dsp::LongPressButton _record_on_inner_circle_button;
+  tribalinterfaces::dsp::LongPressButton _skip_back_button;
 
-  std::array<myrisa::dsp::gko::Engine*, maxChannels> _engines;
+  std::array<tribalinterfaces::dsp::gko::Engine*, maxChannels> _engines;
 
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
@@ -72,5 +72,5 @@ private:
   void processSelect();
 };
 
-} // namespace myrisa
+} // namespace tribalinterfaces
 

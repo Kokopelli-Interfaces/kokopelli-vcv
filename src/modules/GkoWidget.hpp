@@ -2,7 +2,7 @@
 
 #include "Gko.hpp"
 
-namespace myrisa {
+namespace tribalinterfaces {
 
 struct GkoValueDisplay : TextBox {
 	Gko *_module;
@@ -41,7 +41,7 @@ struct ActiveLayerDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      tribalinterfaces::dsp::gko::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -65,7 +65,7 @@ struct LayerBeatDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      tribalinterfaces::dsp::gko::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -90,7 +90,7 @@ struct TotalLayerBeatDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      tribalinterfaces::dsp::gko::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -112,7 +112,7 @@ struct CircleBeatDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      tribalinterfaces::dsp::gko::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -129,7 +129,7 @@ struct TotalCircleBeatDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      tribalinterfaces::dsp::gko::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -144,7 +144,7 @@ struct TotalLayersDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      tribalinterfaces::dsp::gko::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -161,7 +161,7 @@ struct BeatDisplay : GkoValueDisplay {
 	void step() override {
 		GkoValueDisplay::step();
 		if(_module) {
-      myrisa::dsp::gko::Engine* e = _module->_engines[0];
+      tribalinterfaces::dsp::gko::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -301,4 +301,4 @@ struct GkoWidget : ModuleWidget {
 
 };
 
-} // namespace myrisa
+} // namespace tribalinterfaces

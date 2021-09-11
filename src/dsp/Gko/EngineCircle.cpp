@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace myrisa::dsp::gko;
-using namespace myrisa::dsp;
+using namespace tribalinterfaces::dsp::gko;
+using namespace tribalinterfaces::dsp;
 
 void Engine::setCircleToActiveLayer() {
   if (0 < _timeline.layers.size()) {

@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace myrisa::dsp::gko;
-using namespace myrisa::dsp;
+using namespace tribalinterfaces::dsp::gko;
+using namespace tribalinterfaces::dsp;
 
 bool Engine::isRecording() {
   return _recording_layer != nullptr;

@@ -8,11 +8,20 @@ A collection of vcvrack modules created through the timeless principle - /as wit
 collective unconscious. That's right. We help connect you with the tribe inside - the archetypal
 energies that dance with the sun to emerge art into being. A wurly /WeoOOoeo/ guy singing mamma mia?
 An uptight HRmmm *Hrmmm* sage humming electric snakes? Whoever it may be, it has come into being
-through yours and your ancestors concert with the rest of the song of the universe, and we can help
-you /manifest/ it! Our interfaces allow you to create an emergence of the tribe members that visit the
-temple of your body. All you have to do is create sonic representations of them, and use our
+through yours and your ancestors concert with the rest of the song of the universe, and we are here
+to help you /manifest/ it!  Tribal Interfaces - /because alignment matters./'' 
+#+end_quote
+
+** Circle
+#+ATTR_ORG: :width 300 
+[[./img/README_2021_09_11__22:23:00.png]]
+
+
+#+begin_quote
+Our =Circle=  module allows you to create an emergence of the tribe members that visit the
+temple of your body. All you have to do is create sonic representations of them, and use the
 provided means to emerge them with simplicity and /flow/. So now the drum man repeating *order* order
-*order* order can emerge with a luscious goddess of love as she dances from chord to chord as a rose grows
+*order* order can emerge with a luscious goddess of love as she dances from chord to chord just as a rose grows
 around a trellis - without the computer spirit coming between them! That's right. How do we do
 it? Ladies and gentleman, we have ingeniously intuitively ingeniated a novel mechanism of emerging
 sound representations. We combine the real-time feeling of live-looping with the features of
@@ -21,8 +30,5 @@ computer interfaces and is *not* stuck in a loop. Yes, the =Circle= module gives
 /conduct a music circle/ of your visitors, and it does it /oh soo good/. Creating multi-spirit
 progressive music is now a matter of learning to use three buttons and a foot pedal. Afterall, why
 stare at your monitor when you can stare at the cosmic ocean from which all experience emerges from?
-Or, why love mind knacks and poly-techno false idols when you can love the great mother? Tribal
-Interfaces - /because alignment matters./'' 
+Or, why love mind knacks and poly-techno false idols when you can love the great mother?
 #+end_quote
-
-** Circle

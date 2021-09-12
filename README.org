@@ -39,7 +39,20 @@ Stage 1: A file player / crossfader that allows one to filter a file bank using 
   
 #+begin_quote
 So you have a visitor. He sounds like 'KrkkrkkKKrrjjjj'. The Memory module provides you with your
-first step to manifesting the sound - by recalling an associated sound!
+first step to manifesting the sound - by recalling an associated sound. How does recall work? Well,
+just like how your memory works. 
+
+Our memory is a network of association. One approaches the network with a key, and the most
+associated experience is re-experienced. The =Memory= module works just the same though unlike most
+file players, the retrieval key used is not just the name of the audio file. One can access the
+audio of the =Memory= module with keys of more divine order - so one can recall files through abstract
+qualifiers such as 'distorted', 'complex', 'chaotic', 'fire', or combinations of them!
+
+There are thousands of examples of audio in our memory, and nature creates higher level order out of
+the examples via aggregation-emergence. On this higher plane are sound qualifiers and spectrums
+which come to being by seeing the patterns across many examples ... /Fizz, Parallelism, Chaos,
+Complexity, Character, Mood, Confidence, Velocity, Energy, Speed, Timbre, Pitch... All examples of
+order our divinity-emerging brains have come to understand through aggregation-emergence.
 #+end_quote
 
 Stage 2: Auto extract tags

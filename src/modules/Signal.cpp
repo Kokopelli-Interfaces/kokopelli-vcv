@@ -2,10 +2,10 @@
 #include "SignalWidget.hpp"
 
 int Signal::channels() {
-  // TODO define # channels based on Gko layers, may be recorded with more
+  // TODO define # channels based on Circle layers, may be recorded with more
   // or less channels also, additional behaviours with mono or stereo
   // duplication via pos & rate will increase channels
-  // best to just send # of channels from Gko
+  // best to just send # of channels from Circle
   return inputs[IN_INPUT].getChannels();
 }
 
@@ -37,18 +37,18 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
 
   float out = in;
   if (expanderConnected()) {
-    auto toGko = toExpander();
-    auto fromGko = fromExpander();
+    auto toCircle = toExpander();
+    auto fromCircle = fromExpander();
 
-    toGko->signal[c] = in;
-    toGko->signal_type = _signal_type;
-    toGko->channels = _channels;
+    toCircle->signal[c] = in;
+    toCircle->signal_type = _signal_type;
+    toCircle->channels = _channels;
 
     if (outputs[SEL_OUTPUT].isConnected()) {
-      outputs[SEL_OUTPUT].setVoltage(fromGko->sel_signal[c], c);
+      outputs[SEL_OUTPUT].setVoltage(fromCircle->sel_signal[c], c);
     }
 
-    out = tribalinterfaces::dsp::sum(fromGko->signal[c], in, _signal_type);
+    out = tribalinterfaces::dsp::sum(fromCircle->signal[c], in, _signal_type);
   }
 
   if (outputs[OUT_OUTPUT].isConnected()) {

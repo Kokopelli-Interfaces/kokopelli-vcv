@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gko_shared.hpp"
+#include "Circle_shared.hpp"
 #include "menu.hpp"
 
 namespace tribalinterfaces {
@@ -20,8 +20,8 @@ struct Signal : ExpandableModule<SignalExpanderMessage, TribalInterfacesModule> 
 
   tribalinterfaces::dsp::SignalType _signal_type = tribalinterfaces::dsp::SignalType::AUDIO;
 
-  SignalExpanderMessage *_toGko = nullptr;
-  SignalExpanderMessage *_fromGko = nullptr;
+  SignalExpanderMessage *_toCircle = nullptr;
+  SignalExpanderMessage *_fromCircle = nullptr;
 
   Signal() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -30,7 +30,7 @@ struct Signal : ExpandableModule<SignalExpanderMessage, TribalInterfacesModule> 
 
     setExpanderModelPredicate([](Model *m) {
       // TODO chainable expanders
-      return m == modelGko;
+      return m == modelCircle;
     });
   }
 

@@ -10,9 +10,9 @@ struct Rogan1HPSWhite : Rogan {
   }
 };
 
-struct Rogan1HPSBrown : Rogan {
-  Rogan1HPSBrown() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan1HPSBrown.svg")));
+struct CircleFocusKnob : Rogan {
+  CircleFocusKnob() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/CircleFocus.svg")));
   }
 };
 
@@ -93,9 +93,9 @@ struct TextBox : TransparentWidget {
   TextBox() {
     // FIXME
     // font = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/RobotoMono-Bold.ttf")); // TODO: fix paths...
-    defaultTextColor = nvgRGB(0x23, 0x23, 0x23);
+    defaultTextColor = nvgRGB(0xae, 0x28, 0x06);
     textColor = defaultTextColor;
-    backgroundColor = nvgRGB(0xc8, 0xc8, 0xc8);
+    backgroundColor = nvgRGB(0x2b, 0x16, 0x09); // cave #2b1609
     // size 20 with spacing -2 will fit 3 characters on a 30px box with Roboto
     // mono
     font_size = 20;

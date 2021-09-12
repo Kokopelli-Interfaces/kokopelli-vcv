@@ -15,7 +15,7 @@
     {
       "slug": "TribalInterfaces-Signal",
       "name": "Signal",
-      "description": "Gko expander which adds one signal input and output.",
+      "description": "Circle expander which adds one signal input and output.",
       "tags": [
         "Expander"
       ]
@@ -23,7 +23,7 @@
     {
       "slug": "TribalInterfaces-Signal4",
       "name": "Signal4",
-      "description": "Gko expander which adds four signal inputs and outputs.",
+      "description": "Circle expander which adds four signal inputs and outputs.",
       "tags": [
         "Expander"
       ]
@@ -31,7 +31,7 @@
     {
       "slug": "TribalInterfaces-Play",
       "name": "Play",
-      "description": "Gko expander which adds midi recording inputs and outputs.",
+      "description": "Circle expander which adds midi recording inputs and outputs.",
       "tags": [
         "Expander"
       ]
@@ -45,9 +45,9 @@
       ]
     },
     {
-      "slug": "TribalInterfaces-Gko",
-      "name": "Gko",
-      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more. Inspired by the advancer of existence, 'Gko'.",
+      "slug": "TribalInterfaces-Circle",
+      "name": "Circle",
+      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more. Inspired by the advancer of existence, 'Circle'.",
       "tags": [
         "Poly",
         "Recording",

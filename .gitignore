@@ -6,3 +6,6 @@
 .DS_Store
 .ccls*
 .clangd*
+
+dep/lib/**/target
+**/.rustc_info

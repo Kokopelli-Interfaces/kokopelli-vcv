@@ -1,6 +1,8 @@
 #include "Circle.hpp"
 #include "CircleWidget.hpp"
 
+extern "C" void circleprocess();
+
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
@@ -170,6 +172,8 @@ void Circle::processAlways(const ProcessArgs &args) {
   if (_button_divider.process()) {
     processButtons();
   }
+
+  circleprocess();
 }
 
 void Circle::modulate() {

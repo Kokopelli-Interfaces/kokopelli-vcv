@@ -4,8 +4,8 @@
 A collection of vcvrack modules created through the timeless principle - /as within, so without/.
 
 #+begin_quote
-"Here at tribal interfaces.. we work hard to deliver /you/ the communication you need with the
-collective unconscious. That's right. We help connect you with the tribe inside - the archetypal
+"Here at tribal interfaces.. we work hard to deliver /you/ the communication you need with your
+unconscious. That's right. We help connect you with the tribe inside - the archetypal
 energies that dance with the sun to emerge art into being. A wurly /WeoOOoeo/ guy singing mamma mia?
 An uptight HRmmm *Hrmmm* sage humming electric snakes? Whoever it may be, it has come into being
 through yours and your ancestors concert with the rest of the song of the universe, and we are here
@@ -32,11 +32,11 @@ matter of learning to use three buttons and a foot pedal. Afterall, why stare at
 you can stare at the cosmic ocean from which all experience emerges from? Or better yet, why love
 mind knacks and poly-techno false idols when you can love the great mother? 
 #+end_quote
+** TODO Timeline
+Expander for circle
+Records the Energy flow of Circle (e.g. group A... -> group B... -> new voice in group B...) on a timeline
 
 ** TODO Memory
-Stage 1: A file player / crossfader that allows one to filter a file bank using tags in file name.
-  e.g. 'fire' & 'air', 'parallel', 'electric', 'fizz', 'transients', 'energetic'
-  
 #+begin_quote
 So you have a visitor. He sounds like 'KrkkrkkKKrrjjjj'. The Memory module provides you with your
 first step to manifesting the sound - by recalling an associated sound. How does recall work? Well,
@@ -58,16 +58,13 @@ explore sound!* /Uhm sure I guess, but there's a lot of it./. *That's why the sk
 
 #+end_quote
 
+Stage 1: A file player / crossfader that allows one to filter a file bank using tags in file name.
+  e.g. 'fire' & 'air', 'parallel', 'electric', 'fizz', 'transients', 'energetic'
 Stage 2: Auto extract tags
-- train an AI model by giving it some plugins & parameters to play with, then feed it files and have
-  it spit out it's guesses for parameter settings such as 'distortion', 'space', 'pan', 'reverb',
-  'density'...
 
 ** TODO Creation
 An expander for memory  which creates new files by synaesthizing properties from existing files -
 e.g. 'pitch of guitar melody' + 'texture of steam whistle'
-
-relies on ai models extracted features
 
 ** TODO Synaesthesia
 Audio-Visual synesthesia display.

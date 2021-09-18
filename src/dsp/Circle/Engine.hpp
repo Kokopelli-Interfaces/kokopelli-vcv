@@ -47,7 +47,7 @@ struct Engine {
 
   Timeline _timeline;
   TimePosition _timeline_position;
-  bool _skip_back = true;
+  bool _reflect = true;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -65,11 +65,11 @@ struct Engine {
   bool isRecording();
   void resetEngineMode();
 
-  void setFixBounds(bool fix_bounds);
-  void setRecordOnInnerLoop(bool record_on_inner_circle);
-  void setSkipBack(bool skip_back);
+  void setFixBounds(bool previous_member);
+  void setRecordOnInnerLoop(bool next_member);
+  void setSkipBack(bool reflect);
 
-  bool checkState(int skip_back, int fix_bounds, int record_on_inner_circle);
+  bool checkState(int reflect, int previous_member, int next_member);
 
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);

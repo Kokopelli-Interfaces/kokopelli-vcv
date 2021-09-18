@@ -8,16 +8,16 @@ inline bool Engine::phaseDefined() {
 }
 
 // -1 is arbitrary card, 0 is green, 1 is red
-bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circle) {
-  if ((skip_back == 1 && _skip_back != false) || (skip_back == 0 && _skip_back != true)) {
+bool Engine::checkState(int reflect, int previous_member, int next_member) {
+  if ((reflect == 1 && _reflect != false) || (reflect == 0 && _reflect != true)) {
     return false;
   }
 
-  if ((fix_bounds == 1 && _record_params.fix_bounds) || (fix_bounds == 0 && !_record_params.fix_bounds)) {
+  if ((previous_member == 1 && _record_params.previous_member) || (previous_member == 0 && !_record_params.previous_member)) {
     return false;
   }
 
-  if ((record_on_inner_circle == 1 && _record_params.record_on_inner_circle) || (record_on_inner_circle == 0 && !_record_params.record_on_inner_circle)) {
+  if ((next_member == 1 && _record_params.next_member) || (next_member == 0 && !_record_params.next_member)) {
     return false;
   }
 
@@ -68,19 +68,19 @@ Layer* Engine::newRecording() {
 
   unsigned int start_beat = _timeline_position.beat;
   unsigned int n_beats = 1;
-  if (this->_record_params.fix_bounds && this->_record_params.record_on_inner_circle) {
+  if (this->_record_params.previous_member && this->_record_params.next_member) {
     start_beat = _circle.first;
     n_beats = _loop_length;
   }
 
-  bool shift_circle = !this->_record_params.fix_bounds;
+  bool shift_circle = !this->_record_params.previous_member;
   if (shift_circle) {
     _circle.first = start_beat;
     _circle.second = start_beat + _loop_length;
   }
 
-  if (this->_record_params.record_on_inner_circle) {
-    if (this->_record_params.fix_bounds) {
+  if (this->_record_params.next_member) {
+    if (this->_record_params.previous_member) {
       if (0 < _timeline.layers.size()) {
         if (_timeline.layers[_active_layer_i]->_loop) {
           n_beats = _timeline.layers[_active_layer_i]->_n_beats;
@@ -105,7 +105,7 @@ Layer* Engine::newRecording() {
 
   Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
-  if (this->_record_params.record_on_inner_circle) {
+  if (this->_record_params.next_member) {
     recording_layer->_loop = true;
   }
 
@@ -120,23 +120,23 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_circle_end = _timeline_position.beat == _circle.second;
   if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && !this->_record_params.fix_bounds && !this->checkState(1, 1, 0);
+    bool grow_circle = this->isRecording() && !this->_record_params.previous_member && !this->checkState(1, 1, 0);
     if (grow_circle) {
       _circle.second += _loop_length;
-      if (this->_record_params.record_on_inner_circle) {
+      if (this->_record_params.next_member) {
         _recording_layer->_n_beats += _loop_length;
       } else {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start =
-        (this->_skip_back && !(this->isRecording() && !_record_params.record_on_inner_circle)) ||
+      bool reflect_to_circle_start =
+        (this->_reflect && !(this->isRecording() && !_record_params.next_member)) ||
         (_timeline.atEnd(_timeline_position) && !this->isRecording());
-      if (skip_back_to_circle_start) {
+      if (reflect_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();
         _timeline_position.beat = _circle.first;
-        if (_options.create_new_layer_on_skip_back && this->isRecording()) {
+        if (_options.create_new_layer_on_reflect && this->isRecording()) {
           this->endRecording();
           _recording_layer = this->newRecording();
         }
@@ -154,7 +154,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
     if (create_new_dub) {
       this->endRecording();
       _recording_layer = this->newRecording();
-    } else if (!_record_params.fix_bounds || !_record_params.record_on_inner_circle) {
+    } else if (!_record_params.previous_member || !_record_params.next_member) {
       _recording_layer->_n_beats++;
     }
   }

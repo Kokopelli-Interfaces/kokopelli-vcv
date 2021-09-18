@@ -14,10 +14,10 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
-    SKIP_BACK_PARAM,
-    RECORD_ON_INNER_CIRCLE_PARAM,
-    FIX_BOUNDS_PARAM,
-    RECORD_PARAM,
+    REFLECT_PARAM,
+    NEXT_MEMBER_PARAM,
+    PREV_MEMBER_PARAM,
+    LIGHT_PARAM,
     NUM_PARAMS
   };
   enum InputIds { SCENE_INPUT, RECORD_INPUT, PHASE_INPUT, NUM_INPUTS };
@@ -25,10 +25,10 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
   enum LightIds {
     ENUMS(SELECT_FUNCTION_LIGHT, 3),
     ENUMS(SELECT_MODE_LIGHT, 3),
-    ENUMS(SKIP_BACK_LIGHT, 3),
+    ENUMS(REFLECT_LIGHT, 3),
     ENUMS(RECORD_LIGHT, 3),
-    ENUMS(FIX_BOUNDS_LIGHT, 3),
-    ENUMS(RECORD_ON_INNER_CIRCLE_LIGHT, 3),
+    ENUMS(PREVIOUS_MEMBER_LIGHT, 3),
+    ENUMS(NEXT_MEMBER_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
@@ -43,9 +43,9 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
   tribalinterfaces::dsp::LongPressButton _select_function_button;
   tribalinterfaces::dsp::LongPressButton _select_mode_button;
 
-  tribalinterfaces::dsp::LongPressButton _fix_bounds_button;
-  tribalinterfaces::dsp::LongPressButton _record_on_inner_circle_button;
-  tribalinterfaces::dsp::LongPressButton _skip_back_button;
+  tribalinterfaces::dsp::LongPressButton _previous_member_button;
+  tribalinterfaces::dsp::LongPressButton _next_member_button;
+  tribalinterfaces::dsp::LongPressButton _reflect_button;
 
   std::array<tribalinterfaces::dsp::circle::Engine*, maxChannels> _engines;
 

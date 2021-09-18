@@ -6,10 +6,10 @@ Circle::Circle() {
   configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
-  configParam(SKIP_BACK_PARAM, 0.f, 1.f, 0.f, "Skip Back");
-  configParam(FIX_BOUNDS_PARAM, 0.f, 1.f, 0.f, "Fix Recording Boundaries");
-  configParam(RECORD_ON_INNER_CIRCLE_PARAM, 0.f, 1.f, 0.f, "Record On Inner Circle");
-  configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");
+  configParam(REFLECT_PARAM, 0.f, 1.f, 0.f, "Reflect");
+  configParam(PREV_MEMBER_PARAM, 0.f, 1.f, 0.f, "Focus Previous Circle Member");
+  configParam(NEXT_MEMBER_PARAM, 0.f, 1.f, 0.f, "Focus Next Circle Member");
+  configParam(LIGHT_PARAM, 0.f, 1.f, 0.f, "Light");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
@@ -18,9 +18,9 @@ Circle::Circle() {
   _select_function_button.param = &params[SELECT_FUNCTION_PARAM];
   _select_mode_button.param = &params[SELECT_MODE_PARAM];
 
-  _fix_bounds_button.param = &params[FIX_BOUNDS_PARAM];
-  _record_on_inner_circle_button.param = &params[RECORD_ON_INNER_CIRCLE_PARAM];
-  _skip_back_button.param = &params[SKIP_BACK_PARAM];
+  _previous_member_button.param = &params[PREV_MEMBER_PARAM];
+  _next_member_button.param = &params[NEXT_MEMBER_PARAM];
+  _reflect_button.param = &params[REFLECT_PARAM];
 }
 
 void Circle::sampleRateChange() {
@@ -35,9 +35,9 @@ void Circle::processButtons() {
 
     tribalinterfaces::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
     tribalinterfaces::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _fix_bounds_event = _fix_bounds_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _record_on_inner_circle_event = _record_on_inner_circle_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _skip_back_event = _skip_back_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _previous_member_event = _previous_member_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _next_member_event = _next_member_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _reflect_event = _reflect_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
     tribalinterfaces::dsp::circle::Engine *e = _engines[c];
@@ -80,11 +80,11 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_fix_bounds_event) {
+    switch (_previous_member_event) {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (!e->_record_params.fix_bounds) {
+      if (!e->_record_params.previous_member) {
         e->setFixBounds(true);
       } else {
         e->setFixBounds(false);
@@ -95,11 +95,11 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_record_on_inner_circle_event) {
+    switch (_next_member_event) {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.record_on_inner_circle == false) {
+      if (e->_record_params.next_member == false) {
         e->setRecordOnInnerLoop(true);
       } else {
         e->setRecordOnInnerLoop(false);
@@ -113,11 +113,11 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_skip_back_event) {
+    switch (_reflect_event) {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_skip_back == true) {
+      if (e->_reflect == true) {
         e->setSkipBack(false);
       } else {
         e->setSkipBack(true);
@@ -179,14 +179,14 @@ void Circle::modulate() {
 void Circle::modulateChannel(int channel_i) {
   if (baseConnected()) {
     tribalinterfaces::dsp::circle::Engine *e = _engines[channel_i];
-    float record_strength = params[RECORD_PARAM].getValue();
+    float light = params[LIGHT_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
-      record_strength *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
+      light *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
 
     // taking to the strength of 2 gives a more intuitive curve
-    record_strength = pow(record_strength, 2);
-    e->_record_params.strength = record_strength;
+    light = pow(light, 2);
+    e->_record_params.strength = light;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
@@ -265,7 +265,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  bool displayed_skip_back = default_e->_skip_back;
+  bool displayed_reflect = default_e->_reflect;
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
@@ -277,7 +277,7 @@ void Circle::updateLights(const ProcessArgs &args) {
     signal_in_sum += _from_signal->signal[c];
     sel_signal_out_sum += _to_signal->sel_signal[c];
     if (record_active) {
-      displayed_skip_back = _engines[c]->_skip_back;
+      displayed_reflect = _engines[c]->_reflect;
       displayed_record_params = _engines[c]->_record_params;
       displayed_phase = _engines[c]->_timeline_position.phase;
     }
@@ -307,20 +307,20 @@ void Circle::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  lights[FIX_BOUNDS_LIGHT + 0].value = !displayed_record_params.fix_bounds;
-  lights[FIX_BOUNDS_LIGHT + 1].value = displayed_record_params.fix_bounds;
+  lights[PREVIOUS_MEMBER_LIGHT + 0].value = !displayed_record_params.previous_member;
+  lights[PREVIOUS_MEMBER_LIGHT + 1].value = displayed_record_params.previous_member;
 
-  lights[RECORD_ON_INNER_CIRCLE_LIGHT + 0].value = !displayed_record_params.record_on_inner_circle;
-  lights[RECORD_ON_INNER_CIRCLE_LIGHT + 1].value = displayed_record_params.record_on_inner_circle;
+  lights[NEXT_MEMBER_LIGHT + 0].value = !displayed_record_params.next_member;
+  lights[NEXT_MEMBER_LIGHT + 1].value = displayed_record_params.next_member;
 
   if (default_e->isRecording()) {
-    lights[SKIP_BACK_LIGHT + 0].value = 1.f;
-    lights[SKIP_BACK_LIGHT + 1].value = 1.f;
-    lights[SKIP_BACK_LIGHT + 2].value = 1.f;
+    lights[REFLECT_LIGHT + 0].value = 1.f;
+    lights[REFLECT_LIGHT + 1].value = 1.f;
+    lights[REFLECT_LIGHT + 2].value = 1.f;
   } else {
-    lights[SKIP_BACK_LIGHT + 0].value = !displayed_skip_back;
-    lights[SKIP_BACK_LIGHT + 1].value = displayed_skip_back;
-    lights[SKIP_BACK_LIGHT + 2].value = 0.f;
+    lights[REFLECT_LIGHT + 0].value = !displayed_reflect;
+    lights[REFLECT_LIGHT + 1].value = displayed_reflect;
+    lights[REFLECT_LIGHT + 2].value = 0.f;
   }
 }
 

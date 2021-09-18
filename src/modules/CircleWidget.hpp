@@ -6,7 +6,7 @@ namespace tribalinterfaces {
 
 struct CircleValueDisplay : TextBox {
 	Circle *_module;
-	int _previous_displayed_value = -1;
+	int _previous_member_displayed_value = -1;
 
 	CircleValueDisplay(Circle *m) : TextBox() {
     _module = m;
@@ -29,8 +29,8 @@ struct CircleValueDisplay : TextBox {
 
 	void setDisplayValue(int v) {
 		std::string s;
-		if(v != _previous_displayed_value) {
-			_previous_displayed_value = v;
+		if(v != _previous_member_displayed_value) {
+			_previous_member_displayed_value = v;
       s = string::f("%d", v);
       setText(s);
 		}
@@ -203,15 +203,15 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Circle::SELECT_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Circle::SELECT_FUNCTION_PARAM));
 
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::SKIP_BACK_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Circle::FIX_BOUNDS_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::RECORD_ON_INNER_CIRCLE_PARAM));
-		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Circle::RECORD_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::REFLECT_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Circle::PREV_MEMBER_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::NEXT_MEMBER_PARAM));
+		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Circle::LIGHT_PARAM));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Circle::SKIP_BACK_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Circle::FIX_BOUNDS_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::RECORD_ON_INNER_CIRCLE_PARAM));
-		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::RECORD_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Circle::REFLECT_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Circle::PREV_MEMBER_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::NEXT_MEMBER_PARAM));
+		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::LIGHT_PARAM));
 
 		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Circle::RECORD_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 95.706)), module, Circle::RECORD_INPUT));
@@ -221,11 +221,11 @@ struct CircleWidget : ModuleWidget {
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Circle::SELECT_FUNCTION_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.239, 34.928)), module, Circle::SELECT_MODE_LIGHT));
-		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Circle::SKIP_BACK_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Circle::SKIP_BACK_LIGHT));
+		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Circle::REFLECT_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Circle::REFLECT_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Circle::RECORD_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Circle::FIX_BOUNDS_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::RECORD_ON_INNER_CIRCLE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Circle::PREVIOUS_MEMBER_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::NEXT_MEMBER_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Circle::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));
@@ -290,7 +290,7 @@ struct CircleWidget : ModuleWidget {
     }));
 
     menu->addChild(new BoolOptionMenuItem("Create new layer on skip back", [m]() {
-      return &m->_options.create_new_layer_on_skip_back;
+      return &m->_options.create_new_layer_on_reflect;
     }));
 
     menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {

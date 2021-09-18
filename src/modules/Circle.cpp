@@ -9,7 +9,7 @@ Circle::Circle() {
   configParam(REFLECT_PARAM, 0.f, 1.f, 0.f, "Reflect");
   configParam(PREV_MEMBER_PARAM, 0.f, 1.f, 0.f, "Focus Previous Circle Member");
   configParam(NEXT_MEMBER_PARAM, 0.f, 1.f, 0.f, "Focus Next Circle Member");
-  configParam(LIGHT_PARAM, 0.f, 1.f, 0.f, "Light");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
@@ -179,14 +179,14 @@ void Circle::modulate() {
 void Circle::modulateChannel(int channel_i) {
   if (baseConnected()) {
     tribalinterfaces::dsp::circle::Engine *e = _engines[channel_i];
-    float light = params[LIGHT_PARAM].getValue();
+    float love = params[LOVE_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
-      light *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
+      love *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
 
-    // taking to the strength of 2 gives a more intuitive curve
-    light = pow(light, 2);
-    e->_record_params.strength = light;
+    // taking to the love of 2 gives a more intuitive curve
+    love = pow(love, 2);
+    e->_record_params.love = love;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
@@ -288,7 +288,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
 
   if (displayed_record_params.active()) {
-    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.strength);
+    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.love);
     lights[RECORD_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
     int light_colour = poly_record ? 2 : 0;
     lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());

@@ -17,7 +17,7 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
     REFLECT_PARAM,
     NEXT_MEMBER_PARAM,
     PREV_MEMBER_PARAM,
-    LIGHT_PARAM,
+    LOVE_PARAM,
     NUM_PARAMS
   };
   enum InputIds { SCENE_INPUT, RECORD_INPUT, PHASE_INPUT, NUM_INPUTS };

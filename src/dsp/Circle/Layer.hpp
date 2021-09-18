@@ -18,7 +18,7 @@ struct Layer {
   // std::vector<tribalinterfaces::dsp::SignalType> types;
 
   Recording *_in;
-  Recording *_recording_strength;
+  Recording *_recording_love;
 
   // FIXME change me to be an array of bools for O(1) lookup
   std::vector<unsigned int> target_layers_idx;
@@ -29,12 +29,12 @@ struct Layer {
     this->target_layers_idx = target_layers_idx;
 
     _in = new Recording(signal_type, samples_per_beat);
-    _recording_strength = new Recording(tribalinterfaces::dsp::SignalType::PARAM, samples_per_beat);
+    _recording_love = new Recording(tribalinterfaces::dsp::SignalType::PARAM, samples_per_beat);
   }
 
   inline ~Layer() {
     delete _in;
-    delete _recording_strength;
+    delete _recording_love;
   }
 
   inline unsigned int getLayerBeat(unsigned int timeline_beat) {
@@ -70,24 +70,24 @@ struct Layer {
     return _in->read(getRecordingPosition(timeline_position));
   }
 
-  inline float readRecordingStrength(TimePosition timeline_position) {
+  inline float readRecordingLove(TimePosition timeline_position) {
     if (!readableAtPosition(timeline_position)) {
       return 0.f;
     }
 
-    return _recording_strength->read(getRecordingPosition(timeline_position));
+    return _recording_love->read(getRecordingPosition(timeline_position));
   }
 
-  inline void write(TimePosition timeline_position, float in, float strength, bool phase_defined) {
+  inline void write(TimePosition timeline_position, float in, float love, bool phase_defined) {
     assert(_in->_buffer.size() <= _n_beats);
-    assert(_recording_strength->_buffer.size() <= _n_beats);
+    assert(_recording_love->_buffer.size() <= _n_beats);
 
     if (!phase_defined) {
       _in->pushBack(in);
-      _recording_strength->pushBack(strength);
+      _recording_love->pushBack(love);
     } else if (writableAtPosition(timeline_position)) {
       _in->write(getRecordingPosition(timeline_position), in);
-   _recording_strength->write(getRecordingPosition(timeline_position), strength);
+   _recording_love->write(getRecordingPosition(timeline_position), love);
     }
   }
 };

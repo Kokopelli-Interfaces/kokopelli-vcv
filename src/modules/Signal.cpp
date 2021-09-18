@@ -35,7 +35,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   float in = inputs[IN_INPUT].getPolyVoltage(c);
   in = tribalinterfaces::dsp::attenuate(in, e.in_attenuation, _signal_type);
 
-  float out = in;
+  float out = 0.f;
   if (expanderConnected()) {
     auto toCircle = toExpander();
     auto fromCircle = fromExpander();

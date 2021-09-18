@@ -4,7 +4,7 @@ using namespace tribalinterfaces::dsp::circle;
 using namespace tribalinterfaces::dsp;
 
 bool Engine::isRecording() {
-  return _recording_layer != nullptr;
+  return _recording_member != nullptr;
 }
 
 void Engine::setFixBounds(bool previous_member) {
@@ -14,13 +14,13 @@ void Engine::setFixBounds(bool previous_member) {
 void Engine::setRecordOnInnerLoop(bool next_member) {
   if (this->isRecording()) {
     if (!_record_params.next_member && next_member)  {
-      _circle.first = _timeline_position.beat;
-      _circle.second = _timeline_position.beat + _loop_length;
+      _loop.first = _circle_position.beat;
+      _loop.second = _circle_position.beat + _loop_length;
     }
 
     this->endRecording();
     _record_params.next_member = next_member;
-    _recording_layer = this->newRecording();
+    _recording_member = this->newRecording();
   }
 
   _record_params.next_member = next_member;

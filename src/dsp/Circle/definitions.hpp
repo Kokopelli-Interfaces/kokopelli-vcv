@@ -46,6 +46,6 @@ struct RecordParams {
 struct Options {
   bool use_antipop = false;
   bool strict_recording_lengths = true;
-  bool create_new_layer_on_reflect = false;
+  bool create_new_member_on_reflect = false;
   bool bipolar_phase_input = false;
 };

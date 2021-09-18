@@ -37,8 +37,8 @@ struct Member {
     delete _recording_love;
   }
 
-  inline unsigned int getMemberBeat(unsigned int circle_beat) {
-    int beat = circle_beat - _start_beat;
+  inline unsigned int getMemberBeat(unsigned int timeline_beat) {
+    int beat = timeline_beat - _start_beat;
     if (_loop && 0 < beat) {
       return beat % _n_beats;
     }
@@ -46,48 +46,48 @@ struct Member {
     return beat;
   }
 
-  inline bool readableAtPosition(TimePosition circle_position) {
-    int member_beat = getMemberBeat(circle_position.beat);
+  inline bool readableAtPosition(TimePosition timeline_position) {
+    int member_beat = getMemberBeat(timeline_position.beat);
     return (0 <= member_beat && member_beat < (int)_n_beats);
   }
 
   // TODO FIXME allow reverse recording
-  inline bool writableAtPosition(TimePosition circle_position) {
-    return _start_beat <= circle_position.beat && circle_position.beat <= _start_beat + _n_beats;
+  inline bool writableAtPosition(TimePosition timeline_position) {
+    return _start_beat <= timeline_position.beat && timeline_position.beat <= _start_beat + _n_beats;
   }
 
-  inline TimePosition getRecordingPosition(TimePosition circle_position) {
-    TimePosition recording_position = circle_position;
-    recording_position.beat = getMemberBeat(circle_position.beat);
+  inline TimePosition getRecordingPosition(TimePosition timeline_position) {
+    TimePosition recording_position = timeline_position;
+    recording_position.beat = getMemberBeat(timeline_position.beat);
     return recording_position;
   }
 
-  inline float readSignal(TimePosition circle_position) {
-    if (!readableAtPosition(circle_position)) {
+  inline float readSignal(TimePosition timeline_position) {
+    if (!readableAtPosition(timeline_position)) {
       return 0.f;
     }
 
-    return _in->read(getRecordingPosition(circle_position));
+    return _in->read(getRecordingPosition(timeline_position));
   }
 
-  inline float readRecordingLove(TimePosition circle_position) {
-    if (!readableAtPosition(circle_position)) {
+  inline float readRecordingLove(TimePosition timeline_position) {
+    if (!readableAtPosition(timeline_position)) {
       return 0.f;
     }
 
-    return _recording_love->read(getRecordingPosition(circle_position));
+    return _recording_love->read(getRecordingPosition(timeline_position));
   }
 
-  inline void write(TimePosition circle_position, float in, float love, bool phase_defined) {
+  inline void write(TimePosition timeline_position, float in, float love, bool phase_defined) {
     assert(_in->_buffer.size() <= _n_beats);
     assert(_recording_love->_buffer.size() <= _n_beats);
 
     if (!phase_defined) {
       _in->pushBack(in);
       _recording_love->pushBack(love);
-    } else if (writableAtPosition(circle_position)) {
-      _in->write(getRecordingPosition(circle_position), in);
-   _recording_love->write(getRecordingPosition(circle_position), love);
+    } else if (writableAtPosition(timeline_position)) {
+      _in->write(getRecordingPosition(timeline_position), in);
+   _recording_love->write(getRecordingPosition(timeline_position), love);
     }
   }
 };

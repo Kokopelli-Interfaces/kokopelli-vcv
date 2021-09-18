@@ -106,7 +106,7 @@ void Circle::processButtons() {
       }
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      // e->setCircleToActiveMember();
+      // e->setLoopToActiveMember();
       if (0 < e->_circle.members.size()) {
         e->_circle.members[e->_active_member_i]->_loop = !e->_circle.members[e->_active_member_i]->_loop;
       }
@@ -124,7 +124,7 @@ void Circle::processButtons() {
       }
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      e->setCircleToActiveMember();
+      e->setLoopToActiveMember();
     }
   }
 }

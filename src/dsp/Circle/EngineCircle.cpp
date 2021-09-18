@@ -3,7 +3,7 @@
 using namespace tribalinterfaces::dsp::circle;
 using namespace tribalinterfaces::dsp;
 
-void Engine::setCircleToActiveMember() {
+void Engine::setLoopToActiveMember() {
   if (0 < _circle.members.size()) {
     _loop.first = _circle.members[_active_member_i]->_start_beat;
     _loop.second =  _loop.first + _circle.members[_active_member_i]->_n_beats;

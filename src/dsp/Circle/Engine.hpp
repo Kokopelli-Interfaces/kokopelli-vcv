@@ -59,7 +59,7 @@ struct Engine {
   float readSelection();
   float readActiveMember();
 
-  void setCircleToActiveMember();
+  void setLoopToActiveMember();
 
   void undo();
   bool isRecording();

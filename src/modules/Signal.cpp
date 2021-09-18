@@ -48,7 +48,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
       outputs[SEL_OUTPUT].setVoltage(fromCircle->sel_signal[c], c);
     }
 
-    out = tribalinterfaces::dsp::sum(fromCircle->signal[c], in, _signal_type);
+    out = fromCircle->signal[c];
   }
 
   if (outputs[OUT_OUTPUT].isConnected()) {

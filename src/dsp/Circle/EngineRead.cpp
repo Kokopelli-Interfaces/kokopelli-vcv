@@ -9,7 +9,7 @@ float Engine::read() {
     timeline_out = _read_antipop_filter.process(timeline_out);
   }
 
-  return timeline_out;
+  return tribalinterfaces::dsp::sum(timeline_out, _record_params.readIn(), _signal_type);
 }
 
 float Engine::readSelection() {

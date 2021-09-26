@@ -2,7 +2,7 @@
 
 #pragma once
 
-namespace tribalinterfaces {
+namespace kokpelliinterfaces {
 namespace dsp {
 
 struct AntipopFilter {
@@ -29,4 +29,4 @@ struct AntipopFilter {
 };
 
 } // namespace dsp
-} // namespace tribalinterfaces
+} // namespace kokpelliinterfaces

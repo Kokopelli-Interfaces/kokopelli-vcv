@@ -1,22 +1,22 @@
 // adapted from bogaudio's module.cpp
 
 #include "module.hpp"
-#include "tribalinterfaces.hpp"
+#include "kokpelliinterfaces.hpp"
 
-using namespace tribalinterfaces;
+using namespace kokpelliinterfaces;
 
-void TribalInterfacesModule::onReset() {
+void KokpelliInterfacesModule::onReset() {
 	_steps = _modulationSteps;
 	reset();
 }
 
-void TribalInterfacesModule::onSampleRateChange() {
+void KokpelliInterfacesModule::onSampleRateChange() {
 	_modulationSteps = APP->engine->getSampleRate() * (2.5f / 1000.f); // modulate every ~2.5ms regardless of sample rate.
 	_steps = _modulationSteps;
 	sampleRateChange();
 }
 
-void TribalInterfacesModule::process(const ProcessArgs& args) {
+void KokpelliInterfacesModule::process(const ProcessArgs& args) {
 	if (!_initialized) {
 		_initialized = true;
 		onReset();

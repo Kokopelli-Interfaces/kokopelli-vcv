@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
-using namespace tribalinterfaces::dsp;
+using namespace kokpelliinterfaces::dsp::circle;
+using namespace kokpelliinterfaces::dsp;
 
 // TODO consider member attenuations, so that you can't select fully attenuated member
 

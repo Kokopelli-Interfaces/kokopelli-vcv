@@ -5,7 +5,7 @@
 #include "util/math.hpp"
 #include <vector>
 
-namespace tribalinterfaces {
+namespace kokpelliinterfaces {
 namespace dsp {
 namespace circle {
 
@@ -81,7 +81,7 @@ struct Circle {
     updateMemberAttenuations(position);
 
     // FIXME multiple recordings in member, have loop and array of types
-    tribalinterfaces::dsp::SignalType signal_type = tribalinterfaces::dsp::SignalType::AUDIO;
+    kokpelliinterfaces::dsp::SignalType signal_type = kokpelliinterfaces::dsp::SignalType::AUDIO;
     if (0 < members.size()) {
       signal_type = members[0]->_in->_signal_type;
     }
@@ -102,12 +102,12 @@ struct Circle {
 
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
         float member_out = members[i]->sing(position);
-        member_out = tribalinterfaces::dsp::attenuate(member_out, attenuation, signal_type);
+        member_out = kokpelliinterfaces::dsp::attenuate(member_out, attenuation, signal_type);
         if (i == active_member_i) {
           active_member_out = member_out;
         }
 
-        signal_out = tribalinterfaces::dsp::sum(signal_out, member_out, signal_type);
+        signal_out = kokpelliinterfaces::dsp::sum(signal_out, member_out, signal_type);
       }
     }
 
@@ -172,4 +172,4 @@ struct Circle {
 
 } // namespace circle
 } // namespace dsp
-} // namespace tribalinterfaces
+} // namespace kokpelliinterfaces

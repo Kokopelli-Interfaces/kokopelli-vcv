@@ -7,7 +7,7 @@
 
 using namespace rack;
 
-namespace tribalinterfaces {
+namespace kokpelliinterfaces {
 
 struct OptionMenuItem : MenuItem {
 	std::function<bool()> _check;
@@ -56,4 +56,4 @@ struct OptionsMenuItem : MenuItem {
 	static void addToMenu(OptionsMenuItem* item, Menu* menu);
 };
 
-} // namespace tribalinterfaces
+} // namespace kokpelliinterfaces

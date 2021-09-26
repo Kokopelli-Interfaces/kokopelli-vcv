@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
-using namespace tribalinterfaces::dsp;
+using namespace kokpelliinterfaces::dsp::circle;
+using namespace kokpelliinterfaces::dsp;
 
 bool Engine::isLoving() {
   return _recording_member != nullptr;

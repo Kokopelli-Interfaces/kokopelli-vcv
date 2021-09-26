@@ -11,9 +11,9 @@
 #include "util/math.hpp"
 
 using namespace std;
-using namespace tribalinterfaces::util;
+using namespace kokpelliinterfaces::util;
 
-namespace tribalinterfaces {
+namespace kokpelliinterfaces {
 namespace dsp {
 namespace circle {
 
@@ -21,26 +21,26 @@ struct Recording {
 
   /* read only */
 
-  tribalinterfaces::dsp::SignalType _signal_type;
+  kokpelliinterfaces::dsp::SignalType _signal_type;
   std::vector<std::vector<float>> _buffer;
   int _samples_per_beat;
 
   rack::dsp::ClockDivider write_divider;
 
-  Recording(tribalinterfaces::dsp::SignalType signal_type, int samples_per_beat) {
+  Recording(kokpelliinterfaces::dsp::SignalType signal_type, int samples_per_beat) {
     _signal_type = signal_type;
     _samples_per_beat = samples_per_beat;
     switch (_signal_type) {
-    case tribalinterfaces::dsp::SignalType::AUDIO:
+    case kokpelliinterfaces::dsp::SignalType::AUDIO:
       write_divider.setDivision(1);
       break;
-    case tribalinterfaces::dsp::SignalType::CV:
+    case kokpelliinterfaces::dsp::SignalType::CV:
       write_divider.setDivision(10);
       break;
-    case tribalinterfaces::dsp::SignalType::GATE: case tribalinterfaces::dsp::SignalType::VOCT: case tribalinterfaces::dsp::SignalType::VEL:
+    case kokpelliinterfaces::dsp::SignalType::GATE: case kokpelliinterfaces::dsp::SignalType::VOCT: case kokpelliinterfaces::dsp::SignalType::VEL:
       write_divider.setDivision(100); // approx every ~.25ms
       break;
-    case tribalinterfaces::dsp::SignalType::PARAM:
+    case kokpelliinterfaces::dsp::SignalType::PARAM:
       write_divider.setDivision(2000); // approx every ~5ms
       break;
     }
@@ -110,11 +110,11 @@ struct Recording {
     }
 
     float sample_phase = rack::math::eucMod(beat_position, 1.0f);
-    if (_signal_type == tribalinterfaces::dsp::SignalType::AUDIO) {
+    if (_signal_type == kokpelliinterfaces::dsp::SignalType::AUDIO) {
       return Hermite4pt3oX(s0, s1, s2, s3, sample_phase);
-    } else if (_signal_type == tribalinterfaces::dsp::SignalType::CV) {
+    } else if (_signal_type == kokpelliinterfaces::dsp::SignalType::CV) {
       return rack::crossfade(s1, s2, sample_phase);
-    } else if (_signal_type == tribalinterfaces::dsp::SignalType::PARAM) {
+    } else if (_signal_type == kokpelliinterfaces::dsp::SignalType::PARAM) {
       return rack::clamp(BSpline(s0, s1, s2, s3, sample_phase), 0.f, 10.f);
     } else {
       return s1;
@@ -142,7 +142,7 @@ struct Recording {
       x1--;
     }
 
-    if (_signal_type == tribalinterfaces::dsp::SignalType::AUDIO)  {
+    if (_signal_type == kokpelliinterfaces::dsp::SignalType::AUDIO)  {
       double sample_phase = beat_position - floor(beat_position);
       _buffer[t.beat][x1] = rack::crossfade(sample, _buffer[t.beat][x1], sample_phase);
 
@@ -172,4 +172,4 @@ struct Recording {
 
 } // namespace circle
 } // namespace dsp
-} // namepsace tribalinterfaces
+} // namepsace kokpelliinterfaces

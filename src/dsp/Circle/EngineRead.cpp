@@ -1,6 +1,6 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
+using namespace kokpelliinterfaces::dsp::circle;
 
 float Engine::read() {
   float circle_out = _circle.hear(_circle_position, _recording_member, _record_params, _active_member_i);
@@ -9,7 +9,7 @@ float Engine::read() {
     circle_out = _read_antipop_filter.process(circle_out);
   }
 
-  return tribalinterfaces::dsp::sum(circle_out, _record_params.readIn(), _signal_type);
+  return kokpelliinterfaces::dsp::sum(circle_out, _record_params.readIn(), _signal_type);
 }
 
 float Engine::readSelection() {

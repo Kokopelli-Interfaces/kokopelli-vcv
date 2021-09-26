@@ -12,6 +12,6 @@
 #include "widgets.hpp"
 
 using namespace rack;
-using namespace tribalinterfaces;
+using namespace kokpelliinterfaces;
 
 extern Plugin *pluginInstance;

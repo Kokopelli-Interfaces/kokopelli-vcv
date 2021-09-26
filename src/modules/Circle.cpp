@@ -33,62 +33,62 @@ void Circle::sampleRateChange() {
 void Circle::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
-    tribalinterfaces::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _previous_member_event = _previous_member_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _next_member_event = _next_member_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _reflect_event = _reflect_button.process(sampleTime);
+    kokpelliinterfaces::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
+    kokpelliinterfaces::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
+    kokpelliinterfaces::dsp::LongPressButton::Event _previous_member_event = _previous_member_button.process(sampleTime);
+    kokpelliinterfaces::dsp::LongPressButton::Event _next_member_event = _next_member_button.process(sampleTime);
+    kokpelliinterfaces::dsp::LongPressButton::Event _reflect_event = _reflect_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
-    tribalinterfaces::dsp::circle::Engine *e = _engines[c];
+    kokpelliinterfaces::dsp::circle::Engine *e = _engines[c];
 
     switch (_select_function_event) {
-    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::SHORT_PRESS:
       break;
-    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::LONG_PRESS:
       break;
     }
 
     switch (_select_mode_event) {
-    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::SHORT_PRESS:
       break;
-    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::LONG_PRESS:
       e->deleteSelection();
       break;
     }
 
     switch (_previous_member_event) {
-    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::SHORT_PRESS:
       e->prevMember();
       break;
-    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::LONG_PRESS:
       // TODO
       break;
     }
 
     switch (_next_member_event) {
-    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::SHORT_PRESS:
       e->nextMember();
       break;
-    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::LONG_PRESS:
       break;
     }
 
     switch (_reflect_event) {
-    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
-    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::SHORT_PRESS:
       e->reflect();
       break;
-    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
+    case kokpelliinterfaces::dsp::LongPressButton::LONG_PRESS:
       e->undo();
       break;
     }
@@ -103,7 +103,7 @@ void Circle::processSelect() {
   float select_change_threshold = value_per_rotation / n_increments_per_rotation;
   if (select_change_threshold < fabs(d_select)) {
     for (int c = 0; c < channels(); c++) {
-      tribalinterfaces::dsp::circle::Engine *e = _engines[c];
+      kokpelliinterfaces::dsp::circle::Engine *e = _engines[c];
 
       bool increment = 0.f < d_select;
       if (increment) {
@@ -144,7 +144,7 @@ void Circle::modulate() {
 
 void Circle::modulateChannel(int channel_i) {
   if (baseConnected()) {
-    tribalinterfaces::dsp::circle::Engine *e = _engines[channel_i];
+    kokpelliinterfaces::dsp::circle::Engine *e = _engines[channel_i];
     float love = params[LOVE_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
       love *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
@@ -179,7 +179,7 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     return;
   }
 
-  tribalinterfaces::dsp::circle::Engine *e = _engines[channel_i];
+  kokpelliinterfaces::dsp::circle::Engine *e = _engines[channel_i];
 
   if (inputs[PHASE_INPUT].isConnected()) {
     float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
@@ -211,7 +211,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   float signal_in_sum = 0.f;
 
-  tribalinterfaces::dsp::circle::Engine *default_e = _engines[0];
+  kokpelliinterfaces::dsp::circle::Engine *default_e = _engines[0];
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
@@ -297,7 +297,7 @@ void Circle::postProcessAlways(const ProcessArgs &args) {
 }
 
 void Circle::addChannel(int channel_i) {
-  _engines[channel_i] = new tribalinterfaces::dsp::circle::Engine();
+  _engines[channel_i] = new kokpelliinterfaces::dsp::circle::Engine();
   _engines[channel_i]->_sample_time = _sampleTime;
 }
 
@@ -306,4 +306,4 @@ void Circle::removeChannel(int channel_i) {
   _engines[channel_i] = nullptr;
 }
 
-Model *modelCircle = rack::createModel<Circle, CircleWidget>("TribalInterfaces-Circle");
+Model *modelCircle = rack::createModel<Circle, CircleWidget>("KokpelliInterfaces-Circle");

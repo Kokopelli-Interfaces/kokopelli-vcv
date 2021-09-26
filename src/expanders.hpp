@@ -10,7 +10,7 @@
 
 using namespace rack;
 
-namespace tribalinterfaces {
+namespace kokpelliinterfaces {
 
 struct ExpanderMessage {
 	int channels = 0;
@@ -26,10 +26,10 @@ struct ExpandableModule : BASE {
 
 	ExpandableModule() {
 		static_assert(std::is_base_of<ExpanderMessage, MSG>::value, "type parameter MSG must derive from ExpanderMessage");
-		static_assert(std::is_base_of<TribalInterfacesModule, BASE>::value, "type parameter BASE must derive from TribalInterfacesModule");
+		static_assert(std::is_base_of<KokpelliInterfacesModule, BASE>::value, "type parameter BASE must derive from KokpelliInterfacesModule");
 
-		TribalInterfacesModule::rightExpander.producerMessage = &_messages[0];
-		TribalInterfacesModule::rightExpander.consumerMessage = &_messages[1];
+		KokpelliInterfacesModule::rightExpander.producerMessage = &_messages[0];
+		KokpelliInterfacesModule::rightExpander.consumerMessage = &_messages[1];
 	}
 
 	void setExpanderModelPredicate(std::function<bool(Model*)> p) {
@@ -37,7 +37,7 @@ struct ExpandableModule : BASE {
 	}
 
 	bool expanderConnected() {
-		bool connected = TribalInterfacesModule::rightExpander.module && _expanderModel && _expanderModel(TribalInterfacesModule::rightExpander.module->model);
+		bool connected = KokpelliInterfacesModule::rightExpander.module && _expanderModel && _expanderModel(KokpelliInterfacesModule::rightExpander.module->model);
 		if (!connected && _wasConnected) {
 			_messages[1] = _messages[0] = MSG();
 		}
@@ -45,17 +45,17 @@ struct ExpandableModule : BASE {
 	}
 
 	inline MSG* toExpander() {
-		return (MSG*)TribalInterfacesModule::rightExpander.module->leftExpander.producerMessage;
+		return (MSG*)KokpelliInterfacesModule::rightExpander.module->leftExpander.producerMessage;
 	}
 
 	inline MSG* fromExpander() {
-		return (MSG*)TribalInterfacesModule::rightExpander.consumerMessage;
+		return (MSG*)KokpelliInterfacesModule::rightExpander.consumerMessage;
 	}
 
-	void process(const TribalInterfacesModule::ProcessArgs& args) override {
+	void process(const KokpelliInterfacesModule::ProcessArgs& args) override {
 		BASE::process(args);
-		if (TribalInterfacesModule::rightExpander.module) {
-			TribalInterfacesModule::rightExpander.module->leftExpander.messageFlipRequested = true;
+		if (KokpelliInterfacesModule::rightExpander.module) {
+			KokpelliInterfacesModule::rightExpander.module->leftExpander.messageFlipRequested = true;
 		}
 	}
 };
@@ -69,10 +69,10 @@ struct ExpanderModule : BASE {
 
 	ExpanderModule() {
 		static_assert(std::is_base_of<ExpanderMessage, MSG>::value, "type parameter MSG must derive from ExpanderMessage");
-		static_assert(std::is_base_of<TribalInterfacesModule, BASE>::value, "type parameter BASE must derive from TribalInterfacesModule");
+		static_assert(std::is_base_of<KokpelliInterfacesModule, BASE>::value, "type parameter BASE must derive from KokpelliInterfacesModule");
 
-		TribalInterfacesModule::leftExpander.producerMessage = &_messages[0];
-		TribalInterfacesModule::leftExpander.consumerMessage = &_messages[1];
+		KokpelliInterfacesModule::leftExpander.producerMessage = &_messages[0];
+		KokpelliInterfacesModule::leftExpander.consumerMessage = &_messages[1];
 	}
 
 	void setBaseModelPredicate(std::function<bool(Model*)> p) {
@@ -80,7 +80,7 @@ struct ExpanderModule : BASE {
 	}
 
 	bool baseConnected() {
-		bool connected = TribalInterfacesModule::leftExpander.module && _baseModel && _baseModel(TribalInterfacesModule::leftExpander.module->model);
+		bool connected = KokpelliInterfacesModule::leftExpander.module && _baseModel && _baseModel(KokpelliInterfacesModule::leftExpander.module->model);
 		if (!connected && _wasConnected) {
 			_messages[1] = _messages[0] = MSG();
 		}
@@ -88,11 +88,11 @@ struct ExpanderModule : BASE {
 	}
 
 	inline MSG* fromBase() {
-		return (MSG*)TribalInterfacesModule::leftExpander.consumerMessage;
+		return (MSG*)KokpelliInterfacesModule::leftExpander.consumerMessage;
 	}
 
 	inline MSG* toBase() {
-		return (MSG*)TribalInterfacesModule::leftExpander.module->rightExpander.producerMessage;
+		return (MSG*)KokpelliInterfacesModule::leftExpander.module->rightExpander.producerMessage;
 	}
 
   // TODO instead, define based off frame
@@ -103,11 +103,11 @@ struct ExpanderModule : BASE {
 	// 	return 1;
 	// }
 
-	void process(const TribalInterfacesModule::ProcessArgs& args) override {
+	void process(const KokpelliInterfacesModule::ProcessArgs& args) override {
 		BASE::process(args);
-		if (TribalInterfacesModule::leftExpander.module) {
-			TribalInterfacesModule::leftExpander.module->rightExpander.messageFlipRequested = true;
+		if (KokpelliInterfacesModule::leftExpander.module) {
+			KokpelliInterfacesModule::leftExpander.module->rightExpander.messageFlipRequested = true;
 		}
 	}
 };
-} // namespace tribalinterfaces
+} // namespace kokpelliinterfaces

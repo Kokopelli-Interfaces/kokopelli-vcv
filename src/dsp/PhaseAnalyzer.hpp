@@ -3,7 +3,7 @@
 #include <math.h>
 #include <cmath>
 
-namespace kokpelliinterfaces {
+namespace kokopelliinterfaces {
 namespace dsp {
 
 /**
@@ -93,4 +93,4 @@ struct PhaseAnalyzer {
 };
 
 } // namespace dsp
-} // namespace kokpelliinterfaces
+} // namespace kokopelliinterfaces

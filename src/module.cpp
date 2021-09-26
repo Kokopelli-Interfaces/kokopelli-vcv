@@ -1,22 +1,22 @@
 // adapted from bogaudio's module.cpp
 
 #include "module.hpp"
-#include "kokpelliinterfaces.hpp"
+#include "kokopelliinterfaces.hpp"
 
-using namespace kokpelliinterfaces;
+using namespace kokopelliinterfaces;
 
-void KokpelliInterfacesModule::onReset() {
+void KokopelliInterfacesModule::onReset() {
 	_steps = _modulationSteps;
 	reset();
 }
 
-void KokpelliInterfacesModule::onSampleRateChange() {
+void KokopelliInterfacesModule::onSampleRateChange() {
 	_modulationSteps = APP->engine->getSampleRate() * (2.5f / 1000.f); // modulate every ~2.5ms regardless of sample rate.
 	_steps = _modulationSteps;
 	sampleRateChange();
 }
 
-void KokpelliInterfacesModule::process(const ProcessArgs& args) {
+void KokopelliInterfacesModule::process(const ProcessArgs& args) {
 	if (!_initialized) {
 		_initialized = true;
 		onReset();

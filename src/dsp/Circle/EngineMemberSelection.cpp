@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace kokpelliinterfaces::dsp::circle;
-using namespace kokpelliinterfaces::dsp;
+using namespace kokopelliinterfaces::dsp::circle;
+using namespace kokopelliinterfaces::dsp;
 
 // TODO consider member attenuations, so that you can't select fully attenuated member
 

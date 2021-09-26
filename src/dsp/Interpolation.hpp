@@ -4,7 +4,7 @@
 
 #include <rack.hpp>
 
-namespace kokpelliinterfaces {
+namespace kokopelliinterfaces {
 
 enum Interpolation
 {
@@ -87,4 +87,4 @@ inline float interpolateBSpline(const float* data, float index, int dataLen) {
     return BSpline(data[x0], data[x1], data[x2], data[x3], t);
 }
 
-} // namespace kokpelliinterfaces
+} // namespace kokopelliinterfaces

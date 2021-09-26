@@ -1,10 +1,10 @@
-#include "kokpelliinterfaces.hpp"
+#include "kokopelliinterfaces.hpp"
 
 extern Model *modelPlay;
 
-namespace kokpelliinterfaces {
+namespace kokopelliinterfaces {
 
-struct Play : KokpelliInterfacesModule {
+struct Play : KokopelliInterfacesModule {
 	enum ParamIds {
 		OUT_POWER_PARAM,
 		IN_ATTENUATION_PARAM,
@@ -40,4 +40,4 @@ struct Play : KokpelliInterfacesModule {
 	void processAlways(const ProcessArgs& args) override;
 };
 
-} // namespace kokpelliinterfaces
+} // namespace kokopelliinterfaces

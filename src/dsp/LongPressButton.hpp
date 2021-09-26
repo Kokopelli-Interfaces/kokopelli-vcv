@@ -1,6 +1,6 @@
 #include "rack.hpp"
 
-namespace kokpelliinterfaces {
+namespace kokopelliinterfaces {
 namespace dsp {
 
 // adapted from stoermelders vcvrack-packone
@@ -36,4 +36,4 @@ struct LongPressButton {
 };
 
 } // namespace dsp
-} // namespace kokpelliinterfaces
+} // namespace kokopelliinterfaces

@@ -3,7 +3,7 @@
 #include "rack.hpp"
 #include <math.h>
 
-namespace kokpelliinterfaces {
+namespace kokopelliinterfaces {
 namespace dsp {
 
 struct PhaseOscillator {
@@ -40,4 +40,4 @@ struct PhaseOscillator {
 };
 
 } // namespace dsp
-} // namespace kokpelliinterfaces
+} // namespace kokopelliinterfaces

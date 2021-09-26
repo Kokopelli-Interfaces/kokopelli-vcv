@@ -2,7 +2,7 @@
 
 #include "Circle.hpp"
 
-namespace kokpelliinterfaces {
+namespace kokopelliinterfaces {
 
 struct CircleValueDisplay : TextBox {
 	Circle *_module;
@@ -42,7 +42,7 @@ struct ActiveMemberDisplay : CircleValueDisplay {
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
-      kokpelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
+      kokopelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -66,7 +66,7 @@ struct MemberBeatDisplay : CircleValueDisplay {
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
-      kokpelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
+      kokopelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -91,7 +91,7 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
-      kokpelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
+      kokopelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -113,7 +113,7 @@ struct CircleBeatDisplay : CircleValueDisplay {
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
-      kokpelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
+      kokopelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -130,7 +130,7 @@ struct TotalCircleBeatDisplay : CircleValueDisplay {
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
-      kokpelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
+      kokopelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -145,7 +145,7 @@ struct TotalMembersDisplay : CircleValueDisplay {
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
-      kokpelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
+      kokopelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -162,7 +162,7 @@ struct BeatDisplay : CircleValueDisplay {
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
-      kokpelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
+      kokopelliinterfaces::dsp::circle::Engine* e = _module->_engines[0];
       if (e == NULL) {
         return;
       }
@@ -302,4 +302,4 @@ struct CircleWidget : ModuleWidget {
 
 };
 
-} // namespace kokpelliinterfaces
+} // namespace kokopelliinterfaces

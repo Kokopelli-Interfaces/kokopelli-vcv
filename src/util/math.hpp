@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace kokpelliinterfaces {
+namespace kokopelliinterfaces {
 namespace util {
 
 inline double rescale(double x2, double x1, double y2, double y1) {
@@ -48,4 +48,4 @@ inline unsigned int lcm(std::vector<unsigned int> &numbers) {
 
 
 } // namespace util
-} // namespace kokpelliinterfaces
+} // namespace kokopelliinterfaces

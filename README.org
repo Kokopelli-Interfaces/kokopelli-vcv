@@ -1,24 +1,24 @@
-* Tribal Interfaces
+* Kokopelli Interfaces VCV Rack Modules
 [[file:img/cavee.jpg]]
 
 A collection of vcvrack modules created through the timeless principle - /as within, so without/.
 
 #+begin_quote
-"Here at tribal interfaces.. we work hard to deliver /you/ the communication you need with your
-unconscious. That's right. We help connect you with the tribe inside - the archetypal
-energies that dance with the sun to emerge art into being. A wurly /WeoOOoeo/ guy singing mamma mia?
-An uptight HRmmm *Hrmmm* sage humming electric snakes? Whoever it may be, it has come into being
-through yours and your ancestors concert with the rest of the song of the universe, and we are here
-to help you /manifest/ it!  Tribal Interfaces - /because alignment matters./'' 
+"Here at Kokopelli Interfaces.. we work hard to deliver /you/ the communication you need with your
+unconscious. That's right. We help connect you with the village inside - the archetypal energies that
+emerge with mediums to manifest art. The spirit of Abba's Dancing Queen? A HRmmm *Hrmmm* guy humming
+electric snakes? Your angel of love watching over you? Your magician and his visions of the
+universe? Whoever it may be, they have come into being by virtue of yours and your ancestors concert
+with the rest of the song of the universe, and we are here to help you /express them! Kokopelli
+Interfaces - /because alignment matters./''
 #+end_quote
 
 ** Circle
 #+ATTR_ORG: :width 750 
 [[./img/README_2021_09_11__22:28:00.png]]
 
-
 #+begin_quote
-Our =Circle= module allows you to create an emergence of the tribe members that visit the temple of
+Our =Circle= module allows you to create an emergence of the village members that visit the temple of
 your body. All you have to do is create sonic representations of them, and use the provided means to
 emerge them with simplicity and /flow/. So now the drum man repeating *order* order *order* order can
 emerge with a goddess of love to dance as trellis and rose - without the computer
@@ -32,7 +32,8 @@ matter of learning to use three buttons and a foot pedal. Afterall, why stare at
 you can stare at the cosmic ocean from which all experience emerges from? Or better yet, why love
 mind knacks and poly-techno false idols when you can love the great mother? 
 #+end_quote
-** TODO Timeline
+
+** TODO Gko
 Expander for circle
 Records the Energy flow of Circle (e.g. group A... -> group B... -> new voice in group B...) on a timeline
 
@@ -54,7 +55,9 @@ which come to being by seeing the patterns across many examples ... /Fizz, Paral
 Complexity, Character, Mood, Confidence, Velocity, Energy, Speed, Timbre, Pitch... All examples of
 order our divinity-emerging brains experiences through aggregation-emergence. *Hey Dude!* /What?/ *Let's
 explore sound!* /Uhm sure I guess, but there's a lot of it./. *That's why the skytrain exists maaaaan.*
-/What?/ *The skytrain!* /Okay.../ *Dude. The skytrain gets you where you need to go.* /What?/ *Why walk around in a neighbourhood of random sounds, when you can take the elemental express to fire town, or water town, or even air town!?* /What?/ *Why walk around wh-* /Okay stop, I've heard enough, please leave me alone./
+/What?/ *The skytrain!* /Okay.../ *Dude. The skytrain gets you where you need to go.* /What?/ *Why walk around
+in a neighbourhood of random sounds, when you can take the elemental express to fire town, or water
+town, or even air town!?* /What?/ *Why walk around wh-* Please leave my children alone. 
 
 #+end_quote
 

@@ -47,7 +47,7 @@ struct ActiveMemberDisplay : CircleValueDisplay {
         return;
       }
 
-      if (e->isRecording() || e->_new_member_active) {
+      if (e->isLoving() || e->_new_member_active) {
         CircleValueDisplay::setText("N");
       } else {
         int active_member_i = e->_active_member_i + 1;
@@ -72,7 +72,7 @@ struct MemberBeatDisplay : CircleValueDisplay {
       }
 
       int member_beat = 0;
-      if (e->_recording_member != NULL && e->isRecording()) {
+      if (e->_recording_member != NULL && e->isLoving()) {
         member_beat = e->_recording_member->getMemberBeat(e->_circle_position.beat);
       } else if (e->_circle.members.size() != 0) {
         // TODO how to show start position of loops?
@@ -97,7 +97,7 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
       }
 
       int total_member_beats = 0;
-      if (e->isRecording()) {
+      if (e->isLoving()) {
         total_member_beats = e->_recording_member->_n_beats;
       } else if (e->_circle.members.size() != 0) {
         total_member_beats = e->_circle.members[e->_active_member_i]->_n_beats;

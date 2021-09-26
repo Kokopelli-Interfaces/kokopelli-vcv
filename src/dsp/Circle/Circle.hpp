@@ -14,8 +14,9 @@ namespace circle {
 */
 struct Circle {
   std::vector<Member*> members;
-
   float active_member_out = 0.f;
+
+  float _sample_time = 1.0f;
 
   /** read only */
 
@@ -30,15 +31,6 @@ struct Circle {
   static inline float smoothValue(float current, float old) {
     const float lambda = 30.f / 44100;
     return old + (current - old) * lambda;
-  }
-
-  inline bool atEnd(TimePosition position) {
-    if (members.size() == 0) {
-      return true;
-    }
-
-    unsigned int last_member_i = members.size()-1;
-    return members[last_member_i]->_start_beat + members[last_member_i]->_n_beats <= position.beat + 1;
   }
 
   inline unsigned int getMemberIndexForPosition(TimePosition position) {
@@ -63,7 +55,7 @@ struct Circle {
       for (unsigned int member_i = 0; member_i < members.size(); member_i++) {
         float member_i_attenuation = 0.f;
         for (unsigned int j = member_i + 1; j < members.size(); j++) {
-          for (auto target_member_i : members[j]->target_members_idx) {
+          for (auto target_member_i : members[j]->members_being_observed_idx) {
             if (target_member_i == member_i) {
               member_i_attenuation += members[j]->readRecordingLove(position);
               break;
@@ -85,28 +77,7 @@ struct Circle {
     }
   }
 
-  inline float readRawMembers(TimePosition position, std::vector<unsigned int> members_idx) {
-    float signal_out = 0.f;
-
-    // FIXME multiple recordings in member, have loop and array of types
-    tribalinterfaces::dsp::SignalType signal_type = tribalinterfaces::dsp::SignalType::AUDIO;
-    if (0 < members.size()) {
-      signal_type = members[0]->_in->_signal_type;
-    }
-
-    for (auto member_i : members_idx) {
-      if (members.size() < member_i) {
-        continue;
-      }
-
-      float member_out = members[member_i]->readSignal(position);
-      signal_out = tribalinterfaces::dsp::sum(signal_out, member_out, signal_type);
-    }
-
-    return signal_out;
-  }
-
-  inline float read(TimePosition position, Member* recording, RecordParams record_params, unsigned int active_member_i) {
+  inline float hear(TimePosition position, Member* recording, RecordParams record_params, unsigned int active_member_i) {
     updateMemberAttenuations(position);
 
     // FIXME multiple recordings in member, have loop and array of types
@@ -121,16 +92,16 @@ struct Circle {
         float attenuation = _current_attenuation[i];
 
         if (record_params.active()) {
-          for (unsigned int sel_i : recording->target_members_idx) {
+          for (unsigned int sel_i : recording->members_being_observed_idx) {
             if (sel_i == i) {
               attenuation += record_params.love;
-              break;
+             break;
             }
           }
         }
 
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
-        float member_out = members[i]->readSignal(position);
+        float member_out = members[i]->sing(position);
         member_out = tribalinterfaces::dsp::attenuate(member_out, attenuation, signal_type);
         if (i == active_member_i) {
           active_member_out = member_out;
@@ -151,23 +122,43 @@ struct Circle {
     return selected_members;
   }
 
-  inline float getNumberOfBeatsOfMemberselection(std::vector<unsigned int> member_idx) {
-    assert(members.size() != 0);
-    assert(member_idx.size() != 0);
-    assert(member_idx.size() <= members.size());
+  // inline float getNumberOfBeatsOfMemberSelection(std::vector<unsigned int> member_idx) {
+  //   assert(members.size() != 0);
+  //   assert(member_idx.size() != 0);
+  //   assert(member_idx.size() <= members.size());
 
-    unsigned int max_n_beats = 0;
+  //   unsigned int max_n_beats = 0;
 
-    for (auto member : getMembersFromIdx(member_idx)) {
-      if (max_n_beats < member->_n_beats) {
-        max_n_beats = member->_n_beats;
-      }
-    }
+  //   for (auto member : getMembersFromIdx(member_idx)) {
+  //     if (max_n_beats < member->_n_beats) {
+  //       max_n_beats = member->_n_beats;
+  //     }
+  //   }
 
-    return max_n_beats;
+  //   return max_n_beats;
+  // }
+
+  // TODO all members have same beat. may be different though
+
+  inline void newMember() {
   }
 
-  inline unsigned int getNumberOfCircleBeats(TimePosition position) {
+  inline void prevBeat() {
+    for (auto member : members) {
+      member->prevBeat();
+    }
+  }
+
+  inline void nextBeat() {
+    for (auto member : members) {
+      member->nextBeat();
+    }
+  }
+
+  inline listen() {
+  }
+
+  inline unsigned int getNumberOfBeats(TimePosition position) {
     unsigned int max_n_beats = 0;
     for (auto member: members) {
       if (member->readableAtPosition(position) && member->_loop && max_n_beats < member->_n_beats) {

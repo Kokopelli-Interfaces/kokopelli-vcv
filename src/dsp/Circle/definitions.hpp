@@ -10,8 +10,6 @@ struct TimePosition {
 };
 
 struct RecordParams {
-  float in = 0.f;
-
   float love = 0.f;
   bool next_member = true;
   bool previous_member = true;
@@ -19,7 +17,7 @@ struct RecordParams {
   bool _active = false;
   float _recordActiveThreshold = 0.0001f;
 
-  inline bool active() {
+  inline bool loveActive() {
     if (_active && love <= _recordActiveThreshold) {
       _active = false;
     } else if (!_active && _recordActiveThreshold < love) {

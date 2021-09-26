@@ -3,7 +3,7 @@
 using namespace tribalinterfaces::dsp::circle;
 
 float Engine::read() {
-  float circle_out = _circle.read(_circle_position, _recording_member, _record_params, _active_member_i);
+  float circle_out = _circle.hear(_circle_position, _recording_member, _record_params, _active_member_i);
 
   if (_options.use_antipop) {
     circle_out = _read_antipop_filter.process(circle_out);
@@ -13,8 +13,10 @@ float Engine::read() {
 }
 
 float Engine::readSelection() {
-  float circle_out = _circle.readRawMembers(_circle_position, _selected_members_idx);
-  return circle_out;
+  // FIXME account for love
+  // float circle_out = _circle.readRawMembers(_circle_position, _selected_members_idx);
+  // return circle_out;
+  return 0.f;
 }
 
 float Engine::readActiveMember() {

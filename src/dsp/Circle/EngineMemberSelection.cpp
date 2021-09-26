@@ -52,7 +52,7 @@ void Engine::toggleSelectMember(unsigned int member_i) {
 }
 
 void Engine::undo() {
-  if (isRecording()) {
+  if (isLoving()) {
     endRecording();
   }
 
@@ -74,7 +74,7 @@ void Engine::deleteMember(unsigned int member_i) {
 }
 
 void Engine::deleteSelection() {
-  if (isRecording()) {
+  if (isLoving()) {
     return;
   }
 

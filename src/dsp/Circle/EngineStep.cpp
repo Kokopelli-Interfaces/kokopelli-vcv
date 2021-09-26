@@ -25,7 +25,7 @@ bool Engine::checkState(int reflect, int previous_member, int next_member) {
 }
 
 void Engine::endRecording() {
-  assert(isRecording());
+  assert(isLoving());
   assert(_recording_member->_n_beats != 0);
 
   if (!_phase_oscillator.isSet()) {
@@ -116,98 +116,42 @@ Member* Engine::newRecording() {
 }
 
 inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
-  assert(phaseDefined());
-
-  bool reached_circle_end = _circle_position.beat == _loop.second;
-  if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && !this->_record_params.previous_member && !this->checkState(1, 1, 0);
-    if (grow_circle) {
-      _loop.second += _loop_length;
-      if (this->_record_params.next_member) {
-        _recording_member->_n_beats += _loop_length;
-      } else {
-        _recording_member->_n_beats += 1;
-      }
-    } else {
-      bool reflect_to_circle_start =
-        (this->_reflect && !(this->isRecording() && !_record_params.next_member)) ||
-        (_circle.atEnd(_circle_position) && !this->isRecording());
-      if (reflect_to_circle_start) {
-        _read_antipop_filter.trigger();
-        _write_antipop_filter.trigger();
-        _circle_position.beat = _loop.first;
-        if (_options.create_new_member_on_reflect && this->isRecording()) {
-          this->endRecording();
-          _recording_member = this->newRecording();
-        }
-      } else { // shift circle
-        unsigned int circle_shift = _loop.second - _loop.first;
-        _loop.first = _loop.second;
-        _loop.second += circle_shift;
-      }
-    }
-  }
-
-  bool reached_recording_end = this->isRecording() && _recording_member->_start_beat + _recording_member->_n_beats <= _circle_position.beat;
-  if (reached_recording_end) {
-    bool create_new_dub = this->checkState(1, 0, 1);
-    if (create_new_dub) {
-      this->endRecording();
-      _recording_member = this->newRecording();
-    } else if (!_record_params.previous_member || !_record_params.next_member) {
-      _recording_member->_n_beats++;
-    }
-  }
+  return;
 }
 
-inline PhaseAnalyzer::PhaseEvent Engine::advanceCirclePosition() {
+inline void Engine::advanceTime() {
   float internal_phase = _phase_oscillator.step(_sample_time);
-  _circle_position.phase = _use_ext_phase ? _ext_phase : internal_phase;
+  _phase = _use_ext_phase ? _ext_phase : internal_phase;
 
-  PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(_circle_position.phase, _sample_time);
-
-  unsigned int new_beat = _circle_position.beat;
-  if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD && 1 <= _circle_position.beat) {
-    new_beat = _circle_position.beat - 1;
-  } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
-    new_beat = _circle_position.beat + 1;
-  }
+  PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(phase, _sample_time);
 
   if (phase_event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && _options.use_antipop) {
     _read_antipop_filter.trigger();
   }
 
-  _circle_position.beat = new_beat;
-
-  return phase_event;
+  if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
+    this->_circle.nextBeat();
+  } else if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
+    this->_circle.prevBeat();
+  }
 }
 
 void Engine::step() {
   if (this->phaseDefined()) {
-    PhaseAnalyzer::PhaseEvent phase_event = this->advanceCirclePosition();
-    if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD || phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
-      this->handleBeatChange(phase_event);
-    }
+    this->advanceTime();
   }
 
-  if (!this->isRecording() && _record_params.active()) {
-    _recording_member = this->newRecording();
+  if (!this->isLoving() && _record_params.loveActive()) {
+    _recording_member = this->_circle->newMember();
     _write_antipop_filter.trigger();
-  } else if (this->isRecording() && !_record_params.active()) {
-    // if the capture button is used, assume the recording afterwards is unnecessary
-    if (_used_window_capture_button) {
-      Member *unnecessary_recording = _recording_member;
-      _recording_member = nullptr;
-      delete unnecessary_recording;
-      _used_window_capture_button = false;
-    } else {
-      this->endRecording();
-    }
+  } else if (this->isLoving() && !_record_params.loveActive()) {
+    this->endRecording();
     this->resetEngineMode();
   }
 
-  if (this->isRecording()) {
+  if (this->isLoving()) {
     float in = _write_antipop_filter.process(_record_params.readIn());
-    _recording_member->write(_circle_position, in, _record_params.love, this->phaseDefined());
+
+    _recording_member->write(_phase, in, _record_params.love, this->phaseDefined());
   }
 }

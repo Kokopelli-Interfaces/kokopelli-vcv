@@ -35,18 +35,13 @@ struct Engine {
 
   /* read only */
 
-  std::pair<unsigned int, unsigned int> _loop = std::make_pair(0, 1);
-  unsigned int _loop_length = 1;
-
-  Member *_recording_member = nullptr;
   RecordParams _record_params;
-  bool _used_window_capture_button = false;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
 
   Circle _circle;
-  TimePosition _circle_position;
+  float _phase;
   bool _reflect = true;
 
   AntipopFilter _read_antipop_filter;
@@ -59,10 +54,8 @@ struct Engine {
   float readSelection();
   float readActiveMember();
 
-  void setLoopToActiveMember();
-
   void undo();
-  bool isRecording();
+  bool isLoving();
   void resetEngineMode();
 
   void setFixBounds(bool previous_member);

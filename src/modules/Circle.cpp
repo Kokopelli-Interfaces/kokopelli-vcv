@@ -46,27 +46,8 @@ void Circle::processButtons() {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_new_member_active) {
-        e->_select_new_members = !e->_select_new_members;
-      } else {
-        e->toggleSelectMember(e->_active_member_i);
-      }
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      if (e->isSelected(e->_active_member_i)) {
-        if (e->_selected_members_idx.size() == 1) {
-          e->_selected_members_idx = e->_saved_selected_members_idx;
-        } else {
-          e->_saved_selected_members_idx = e->_selected_members_idx;
-          e->soloSelectMember(e->_active_member_i);
-        }
-      } else {
-        if (e->_selected_members_idx.size() == 1) {
-          e->selectRange(e->_selected_members_idx[0], e->_active_member_i);
-        } else {
-          e->selectRange(0, e->_active_member_i);
-        }
-      }
       break;
     }
 
@@ -84,14 +65,10 @@ void Circle::processButtons() {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (!e->_record_params.previous_member) {
-        e->setFixBounds(true);
-      } else {
-        e->setFixBounds(false);
-      }
+      e->prevMember();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      e->undo();
+      // TODO
       break;
     }
 
@@ -99,17 +76,9 @@ void Circle::processButtons() {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.next_member == false) {
-        e->setRecordOnInnerLoop(true);
-      } else {
-        e->setRecordOnInnerLoop(false);
-      }
+      e->nextMember();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      // e->setLoopToActiveMember();
-      if (0 < e->_circle.members.size()) {
-        e->_circle.members[e->_active_member_i]->_loop = !e->_circle.members[e->_active_member_i]->_loop;
-      }
       break;
     }
 
@@ -117,14 +86,11 @@ void Circle::processButtons() {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_reflect == true) {
-        e->setSkipBack(false);
-      } else {
-        e->setSkipBack(true);
-      }
+      e->reflect();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      e->setLoopToActiveMember();
+      e->undo();
+      break;
     }
   }
 }
@@ -225,7 +191,7 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    outputs[PHASE_OUTPUT].setVoltage(e->_circle_position.phase * 10, channel_i);
+    outputs[PHASE_OUTPUT].setVoltage(e->_phase * 10, channel_i);
   }
 
   e->_record_params.in = _from_signal->signal[channel_i];
@@ -249,7 +215,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
-  if (default_e->_new_member_active || default_e->isRecording()) {
+  if (default_e->_new_member_active || default_e->isLoving()) {
     if (default_e->_select_new_members) {
       lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
       if (default_e->isSolo(default_e->_circle.members.size()-1)) {
@@ -267,7 +233,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   bool displayed_reflect = default_e->_reflect;
   RecordParams displayed_record_params = default_e->_record_params;
-  float displayed_phase = default_e->_circle_position.phase;
+  float displayed_phase = default_e->_phase;
 
   float active_member_signal_out_sum = default_e->readActiveMember();
   float sel_signal_out_sum = 0.f;
@@ -279,7 +245,7 @@ void Circle::updateLights(const ProcessArgs &args) {
     if (record_active) {
       displayed_reflect = _engines[c]->_reflect;
       displayed_record_params = _engines[c]->_record_params;
-      displayed_phase = _engines[c]->_circle_position.phase;
+      displayed_phase = _engines[c]->_phase;
     }
   }
 
@@ -313,7 +279,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   lights[NEXT_MEMBER_LIGHT + 0].value = !displayed_record_params.next_member;
   lights[NEXT_MEMBER_LIGHT + 1].value = displayed_record_params.next_member;
 
-  if (default_e->isRecording()) {
+  if (default_e->isLoving()) {
     lights[REFLECT_LIGHT + 0].value = 1.f;
     lights[REFLECT_LIGHT + 1].value = 1.f;
     lights[REFLECT_LIGHT + 2].value = 1.f;

@@ -4,9 +4,9 @@
 #include "Signal.hpp"
 #include "menu.hpp"
 
-using namespace kokopelliinterfaces::dsp;
+using namespace kokopelli::dsp;
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 
 struct SignalWidget : ModuleWidget {
 	SignalWidget(Signal* module) {
@@ -49,4 +49,4 @@ struct SignalWidget : ModuleWidget {
 };
 
 
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

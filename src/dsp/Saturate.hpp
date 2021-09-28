@@ -1,6 +1,6 @@
 #pragma once
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 namespace dsp {
 
 const float saturation_limit = 12.0f;
@@ -22,4 +22,4 @@ inline float saturate(float sample) {
 }
 
 } // namespace dsp
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

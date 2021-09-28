@@ -7,9 +7,9 @@
 #include "widgets.hpp"
 #include <math.h>
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 
-struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliInterfacesModule> {
+struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliModule> {
   enum ParamIds {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
@@ -40,14 +40,14 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliInterfacesModule>
 
   float _last_select_value = 0.f;
 
-  kokopelliinterfaces::dsp::LongPressButton _select_function_button;
-  kokopelliinterfaces::dsp::LongPressButton _select_mode_button;
+  kokopelli::dsp::LongPressButton _select_function_button;
+  kokopelli::dsp::LongPressButton _select_mode_button;
 
-  kokopelliinterfaces::dsp::LongPressButton _previous_member_button;
-  kokopelliinterfaces::dsp::LongPressButton _next_member_button;
-  kokopelliinterfaces::dsp::LongPressButton _reflect_button;
+  kokopelli::dsp::LongPressButton _previous_member_button;
+  kokopelli::dsp::LongPressButton _next_member_button;
+  kokopelli::dsp::LongPressButton _reflect_button;
 
-  std::array<kokopelliinterfaces::dsp::circle::Engine*, maxChannels> _engines;
+  std::array<kokopelli::dsp::circle::Engine*, maxChannels> _engines;
 
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
@@ -72,5 +72,5 @@ private:
   void processSelect();
 };
 
-} // namespace kokopelliinterfaces
+} // namespace kokopelli
 

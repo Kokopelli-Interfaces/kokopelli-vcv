@@ -4,7 +4,7 @@
 #include "Recording.hpp"
 #include "dsp/Signal.hpp"
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 namespace dsp {
 namespace circle {
 
@@ -16,7 +16,7 @@ struct Member {
 
   // TODO
   // std::vector<Recording*> recordings;
-  // std::vector<kokopelliinterfaces::dsp::SignalType> types;
+  // std::vector<kokopelli::dsp::SignalType> types;
 
   Recording *_in;
   Recording *_love;
@@ -24,12 +24,12 @@ struct Member {
   // FIXME change me to be an array of bools for O(1) lookup
   std::vector<unsigned int> members_being_observed_idx;
 
-  inline Member(unsigned int n_beats, std::vector<unsigned int> members_being_observed_idx, kokopelliinterfaces::dsp::SignalType signal_type, int samples_per_beat) {
+  inline Member(unsigned int n_beats, std::vector<unsigned int> members_being_observed_idx, kokopelli::dsp::SignalType signal_type, int samples_per_beat) {
     this->_n_beats = n_beats;
     this->members_being_observed_idx = members_being_observed_idx;
 
     _in = new Recording(signal_type, samples_per_beat);
-    _love = new Recording(kokopelliinterfaces::dsp::SignalType::PARAM, samples_per_beat);
+    _love = new Recording(kokopelli::dsp::SignalType::PARAM, samples_per_beat);
   }
 
   inline ~Member() {
@@ -99,4 +99,4 @@ struct Member {
 
 } // namespace circle
 } // namespace dsp
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace kokopelliinterfaces::dsp::circle;
-using namespace kokopelliinterfaces::dsp;
+using namespace kokopelli::dsp::circle;
+using namespace kokopelli::dsp;
 
 bool Engine::isLoving() {
   return _recording_member != nullptr;

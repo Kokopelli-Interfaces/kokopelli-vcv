@@ -1,4 +1,4 @@
-#include "kokopelliinterfaces.hpp"
+#include "kokopelli.hpp"
 
 #include "modules/Circle.hpp"
 #include "modules/Signal.hpp"

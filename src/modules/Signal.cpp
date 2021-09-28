@@ -33,7 +33,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
 
   float in = inputs[IN_INPUT].getPolyVoltage(c);
-  in = kokopelliinterfaces::dsp::attenuate(in, e.in_attenuation, _signal_type);
+  in = kokopelli::dsp::attenuate(in, e.in_attenuation, _signal_type);
 
   float out = 0.f;
   if (expanderConnected()) {
@@ -52,7 +52,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   }
 
   if (outputs[OUT_OUTPUT].isConnected()) {
-    out = kokopelliinterfaces::dsp::attenuate(out, e.out_attenuation, _signal_type);
+    out = kokopelli::dsp::attenuate(out, e.out_attenuation, _signal_type);
     outputs[OUT_OUTPUT].setVoltage(out, c);
   }
 }
@@ -66,4 +66,4 @@ void Signal::removeChannel(int c) {
   _engines[c] = nullptr;
 }
 
-Model* modelSignal = rack::createModel<Signal, SignalWidget>("KokopelliInterfaces-Signal");
+Model* modelSignal = rack::createModel<Signal, SignalWidget>("Kokopelli-Signal");

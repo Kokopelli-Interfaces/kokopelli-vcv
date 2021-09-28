@@ -3,9 +3,9 @@
 #include "Circle_shared.hpp"
 #include "menu.hpp"
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 
-struct Signal : ExpandableModule<SignalExpanderMessage, KokopelliInterfacesModule> {
+struct Signal : ExpandableModule<SignalExpanderMessage, KokopelliModule> {
   enum ParamIds { IN_ATTENUATION_PARAM, OUT_ATTENUATION_PARAM, NUM_PARAMS };
   enum InputIds { IN_INPUT, IN_ATTENUATION_INPUT, OUT_ATTENUATION_INPUT, NUM_INPUTS };
   enum OutputIds { SEL_OUTPUT, OUT_OUTPUT, NUM_OUTPUTS };
@@ -18,7 +18,7 @@ struct Signal : ExpandableModule<SignalExpanderMessage, KokopelliInterfacesModul
 
   Engine *_engines[maxChannels] {};
 
-  kokopelliinterfaces::dsp::SignalType _signal_type = kokopelliinterfaces::dsp::SignalType::AUDIO;
+  kokopelli::dsp::SignalType _signal_type = kokopelli::dsp::SignalType::AUDIO;
 
   SignalExpanderMessage *_toCircle = nullptr;
   SignalExpanderMessage *_fromCircle = nullptr;
@@ -42,4 +42,4 @@ struct Signal : ExpandableModule<SignalExpanderMessage, KokopelliInterfacesModul
   void processChannel(const ProcessArgs &args, int channel) override;
 };
 
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

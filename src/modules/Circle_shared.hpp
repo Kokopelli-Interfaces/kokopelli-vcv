@@ -2,18 +2,18 @@
 
 #include "expanders.hpp"
 #include "dsp/Signal.hpp"
-#include "kokopelliinterfaces.hpp"
+#include "kokopelli.hpp"
 
 extern Model *modelSignal;
 extern Model *modelCircle;
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 
 struct SignalExpanderMessage : ExpanderMessage {
-  float signal[KokopelliInterfacesModule::maxChannels]{};
-  float sel_signal[KokopelliInterfacesModule::maxChannels]{};
-  kokopelliinterfaces::dsp::SignalType signal_type;
+  float signal[KokopelliModule::maxChannels]{};
+  float sel_signal[KokopelliModule::maxChannels]{};
+  kokopelli::dsp::SignalType signal_type;
   int n_channels;
 };
 
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

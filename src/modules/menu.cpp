@@ -2,7 +2,7 @@
 
 #include "menu.hpp"
 
-using namespace kokopelliinterfaces;
+using namespace kokopelli;
 
 #define SUBMENUS 1
 

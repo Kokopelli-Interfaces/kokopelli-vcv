@@ -10,7 +10,7 @@
 
 using namespace rack;
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 
 struct ExpanderMessage {
 	int channels = 0;
@@ -26,10 +26,10 @@ struct ExpandableModule : BASE {
 
 	ExpandableModule() {
 		static_assert(std::is_base_of<ExpanderMessage, MSG>::value, "type parameter MSG must derive from ExpanderMessage");
-		static_assert(std::is_base_of<KokopelliInterfacesModule, BASE>::value, "type parameter BASE must derive from KokopelliInterfacesModule");
+		static_assert(std::is_base_of<KokopelliModule, BASE>::value, "type parameter BASE must derive from KokopelliModule");
 
-		KokopelliInterfacesModule::rightExpander.producerMessage = &_messages[0];
-		KokopelliInterfacesModule::rightExpander.consumerMessage = &_messages[1];
+		KokopelliModule::rightExpander.producerMessage = &_messages[0];
+		KokopelliModule::rightExpander.consumerMessage = &_messages[1];
 	}
 
 	void setExpanderModelPredicate(std::function<bool(Model*)> p) {
@@ -37,7 +37,7 @@ struct ExpandableModule : BASE {
 	}
 
 	bool expanderConnected() {
-		bool connected = KokopelliInterfacesModule::rightExpander.module && _expanderModel && _expanderModel(KokopelliInterfacesModule::rightExpander.module->model);
+		bool connected = KokopelliModule::rightExpander.module && _expanderModel && _expanderModel(KokopelliModule::rightExpander.module->model);
 		if (!connected && _wasConnected) {
 			_messages[1] = _messages[0] = MSG();
 		}
@@ -45,17 +45,17 @@ struct ExpandableModule : BASE {
 	}
 
 	inline MSG* toExpander() {
-		return (MSG*)KokopelliInterfacesModule::rightExpander.module->leftExpander.producerMessage;
+		return (MSG*)KokopelliModule::rightExpander.module->leftExpander.producerMessage;
 	}
 
 	inline MSG* fromExpander() {
-		return (MSG*)KokopelliInterfacesModule::rightExpander.consumerMessage;
+		return (MSG*)KokopelliModule::rightExpander.consumerMessage;
 	}
 
-	void process(const KokopelliInterfacesModule::ProcessArgs& args) override {
+	void process(const KokopelliModule::ProcessArgs& args) override {
 		BASE::process(args);
-		if (KokopelliInterfacesModule::rightExpander.module) {
-			KokopelliInterfacesModule::rightExpander.module->leftExpander.messageFlipRequested = true;
+		if (KokopelliModule::rightExpander.module) {
+			KokopelliModule::rightExpander.module->leftExpander.messageFlipRequested = true;
 		}
 	}
 };
@@ -69,10 +69,10 @@ struct ExpanderModule : BASE {
 
 	ExpanderModule() {
 		static_assert(std::is_base_of<ExpanderMessage, MSG>::value, "type parameter MSG must derive from ExpanderMessage");
-		static_assert(std::is_base_of<KokopelliInterfacesModule, BASE>::value, "type parameter BASE must derive from KokopelliInterfacesModule");
+		static_assert(std::is_base_of<KokopelliModule, BASE>::value, "type parameter BASE must derive from KokopelliModule");
 
-		KokopelliInterfacesModule::leftExpander.producerMessage = &_messages[0];
-		KokopelliInterfacesModule::leftExpander.consumerMessage = &_messages[1];
+		KokopelliModule::leftExpander.producerMessage = &_messages[0];
+		KokopelliModule::leftExpander.consumerMessage = &_messages[1];
 	}
 
 	void setBaseModelPredicate(std::function<bool(Model*)> p) {
@@ -80,7 +80,7 @@ struct ExpanderModule : BASE {
 	}
 
 	bool baseConnected() {
-		bool connected = KokopelliInterfacesModule::leftExpander.module && _baseModel && _baseModel(KokopelliInterfacesModule::leftExpander.module->model);
+		bool connected = KokopelliModule::leftExpander.module && _baseModel && _baseModel(KokopelliModule::leftExpander.module->model);
 		if (!connected && _wasConnected) {
 			_messages[1] = _messages[0] = MSG();
 		}
@@ -88,11 +88,11 @@ struct ExpanderModule : BASE {
 	}
 
 	inline MSG* fromBase() {
-		return (MSG*)KokopelliInterfacesModule::leftExpander.consumerMessage;
+		return (MSG*)KokopelliModule::leftExpander.consumerMessage;
 	}
 
 	inline MSG* toBase() {
-		return (MSG*)KokopelliInterfacesModule::leftExpander.module->rightExpander.producerMessage;
+		return (MSG*)KokopelliModule::leftExpander.module->rightExpander.producerMessage;
 	}
 
   // TODO instead, define based off frame
@@ -103,11 +103,11 @@ struct ExpanderModule : BASE {
 	// 	return 1;
 	// }
 
-	void process(const KokopelliInterfacesModule::ProcessArgs& args) override {
+	void process(const KokopelliModule::ProcessArgs& args) override {
 		BASE::process(args);
-		if (KokopelliInterfacesModule::leftExpander.module) {
-			KokopelliInterfacesModule::leftExpander.module->rightExpander.messageFlipRequested = true;
+		if (KokopelliModule::leftExpander.module) {
+			KokopelliModule::leftExpander.module->rightExpander.messageFlipRequested = true;
 		}
 	}
 };
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

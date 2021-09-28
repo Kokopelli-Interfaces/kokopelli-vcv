@@ -8,9 +8,9 @@
 
 using namespace rack;
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 
-struct KokopelliInterfacesModule : Module {
+struct KokopelliModule : Module {
 	int _modulationSteps = 100;
 	int _steps = -1;
 	bool _initialized = false;
@@ -19,10 +19,10 @@ struct KokopelliInterfacesModule : Module {
 	int _channels = 0;
 	float _inverseChannels = 0.f;
 
-	KokopelliInterfacesModule() {
+	KokopelliModule() {
 	}
 
-	virtual ~KokopelliInterfacesModule() {
+	virtual ~KokopelliModule() {
 		while (_channels >= 1) {
 			removeChannel(_channels - 1);
 			--_channels;
@@ -49,4 +49,4 @@ struct KokopelliInterfacesModule : Module {
 	virtual void postProcessAlways(const ProcessArgs& args) {} // modulate() may not have been called.
 };
 
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

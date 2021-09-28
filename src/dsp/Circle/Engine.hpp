@@ -14,7 +14,7 @@
 #include <vector>
 #include <numeric> // std::iota
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 namespace dsp {
 namespace circle {
 
@@ -24,7 +24,7 @@ struct Engine {
   float _sample_time = 1.0f;
 
   // TODO make me an array to support MIX4 & PLAY
-  kokopelliinterfaces::dsp::SignalType _signal_type;
+  kokopelli::dsp::SignalType _signal_type;
 
   std::vector<unsigned int> _selected_members_idx;
   std::vector<unsigned int> _saved_selected_members_idx;
@@ -83,4 +83,4 @@ private:
 
 } // namespace circle
 } // namespace dsp
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

@@ -1,10 +1,10 @@
-#include "kokopelliinterfaces.hpp"
+#include "kokopelli.hpp"
 
 extern Model *modelSignal4;
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 
-struct Signal4 : KokopelliInterfacesModule {
+struct Signal4 : KokopelliModule {
   enum ParamIds { OUT_ATTENUATION_PARAM, IN_ATTENUATION_PARAM, NUM_PARAMS };
   enum InputIds {
     IN_1_INPUT,
@@ -37,4 +37,4 @@ struct Signal4 : KokopelliInterfacesModule {
   void processAlways(const ProcessArgs& args) override;
 };
 
-} // namespace kokopelliinterfaces
+} // namespace kokopelli

@@ -11,9 +11,9 @@
 #include "util/math.hpp"
 
 using namespace std;
-using namespace kokopelliinterfaces::util;
+using namespace kokopelli::util;
 
-namespace kokopelliinterfaces {
+namespace kokopelli {
 namespace dsp {
 namespace circle {
 
@@ -21,26 +21,26 @@ struct Recording {
 
   /* read only */
 
-  kokopelliinterfaces::dsp::SignalType _signal_type;
+  kokopelli::dsp::SignalType _signal_type;
   std::vector<std::vector<float>> _buffer;
   int _samples_per_beat;
 
   rack::dsp::ClockDivider write_divider;
 
-  Recording(kokopelliinterfaces::dsp::SignalType signal_type, int samples_per_beat) {
+  Recording(kokopelli::dsp::SignalType signal_type, int samples_per_beat) {
     _signal_type = signal_type;
     _samples_per_beat = samples_per_beat;
     switch (_signal_type) {
-    case kokopelliinterfaces::dsp::SignalType::AUDIO:
+    case kokopelli::dsp::SignalType::AUDIO:
       write_divider.setDivision(1);
       break;
-    case kokopelliinterfaces::dsp::SignalType::CV:
+    case kokopelli::dsp::SignalType::CV:
       write_divider.setDivision(10);
       break;
-    case kokopelliinterfaces::dsp::SignalType::GATE: case kokopelliinterfaces::dsp::SignalType::VOCT: case kokopelliinterfaces::dsp::SignalType::VEL:
+    case kokopelli::dsp::SignalType::GATE: case kokopelli::dsp::SignalType::VOCT: case kokopelli::dsp::SignalType::VEL:
       write_divider.setDivision(100); // approx every ~.25ms
       break;
-    case kokopelliinterfaces::dsp::SignalType::PARAM:
+    case kokopelli::dsp::SignalType::PARAM:
       write_divider.setDivision(2000); // approx every ~5ms
       break;
     }
@@ -110,11 +110,11 @@ struct Recording {
     }
 
     float sample_phase = rack::math::eucMod(beat_position, 1.0f);
-    if (_signal_type == kokopelliinterfaces::dsp::SignalType::AUDIO) {
+    if (_signal_type == kokopelli::dsp::SignalType::AUDIO) {
       return Hermite4pt3oX(s0, s1, s2, s3, sample_phase);
-    } else if (_signal_type == kokopelliinterfaces::dsp::SignalType::CV) {
+    } else if (_signal_type == kokopelli::dsp::SignalType::CV) {
       return rack::crossfade(s1, s2, sample_phase);
-    } else if (_signal_type == kokopelliinterfaces::dsp::SignalType::PARAM) {
+    } else if (_signal_type == kokopelli::dsp::SignalType::PARAM) {
       return rack::clamp(BSpline(s0, s1, s2, s3, sample_phase), 0.f, 10.f);
     } else {
       return s1;
@@ -142,7 +142,7 @@ struct Recording {
       x1--;
     }
 
-    if (_signal_type == kokopelliinterfaces::dsp::SignalType::AUDIO)  {
+    if (_signal_type == kokopelli::dsp::SignalType::AUDIO)  {
       double sample_phase = beat_position - floor(beat_position);
       _buffer[t.beat][x1] = rack::crossfade(sample, _buffer[t.beat][x1], sample_phase);
 
@@ -172,4 +172,4 @@ struct Recording {
 
 } // namespace circle
 } // namespace dsp
-} // namepsace kokopelliinterfaces
+} // namepsace kokopelli

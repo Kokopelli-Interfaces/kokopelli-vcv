@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace kokopelliinterfaces::dsp::circle;
-using namespace kokopelliinterfaces::dsp;
+using namespace kokopelli::dsp::circle;
+using namespace kokopelli::dsp;
 
 inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();

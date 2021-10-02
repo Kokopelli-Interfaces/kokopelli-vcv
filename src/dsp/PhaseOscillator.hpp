@@ -37,6 +37,11 @@ struct PhaseOscillator {
     _phase = rack::math::eucMod(sum, 1.0f);
     return _phase;
   }
+
+  inline int getSamplesPerPeriod(float sample_time) {
+    float period = 1 / _freq;
+    return floor(period / sample_time);
+  }
 };
 
 } // namespace dsp

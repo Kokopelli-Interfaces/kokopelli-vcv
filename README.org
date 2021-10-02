@@ -14,7 +14,7 @@ with the rest of the song of the universe, and we are here to help you express t
 - Kokopelli Interfaces - /because alignment matters./
 #+end_quote
 
-** Circle
+** [#A] Circle
 #+ATTR_ORG: :width 750 
 [[./img/README_2021_09_11__22:28:00.png]]
 
@@ -34,15 +34,14 @@ you can stare at the cosmic ocean from which all experience emerges from? Or bet
 mind knacks and poly-techno false idols when you can love the great mother? 
 #+end_quote
 
-** TODO Gko
+** TODO [#B] Gko
 Expander for circle
 Records the Energy flow of Circle (e.g. group A... -> group B... -> new voice in group B...) on a timeline
 
-** TODO Memory
+** TODO [#C] Memory
 #+begin_quote
-So you have a visitor. He sounds like 'KrkkrkkKKrrjjjj'. The Memory module provides you with your
-first step to manifesting the sound - by recalling an associated sound. How does recall work? Well,
-just like how your memory works. 
+The Memory module provides you with your first step to manifesting the sound - by recalling an
+associated sound. How does recall work? Well, just like how your memory works.
 
 Our memory is a network of association. One approaches the network with a key, and the most
 associated experience is re-experienced. The =Memory= module works just the same though unlike most
@@ -51,25 +50,29 @@ audio of the =Memory= module with keys of more divine order - so one can recall 
 qualifiers such as 'distorted', 'complex', 'chaotic', 'fire', or combinations of them!
 
 There are thousands of examples of audio in our memory, and nature creates higher level order out of
-the examples via aggregation-emergence. On this higher plane are sound qualifiers and spectrums
+the examples via experiential-aggregation-emergence. On this higher plane are sound qualifiers and spectrums
 which come to being by seeing the patterns across many examples ... /Fizz, Parallelism, Chaos,
 Complexity, Character, Mood, Confidence, Velocity, Energy, Speed, Timbre, Pitch... All examples of
-order our divinity-emerging brains experiences through aggregation-emergence. *Hey Dude!* /What?/ *Let's
-explore sound!* /Uhm sure I guess, but there's a lot of it./. *That's why the skytrain exists maaaaan.*
-/What?/ *The skytrain!* /Okay.../ *Dude. The skytrain gets you where you need to go.* /What?/ *Why walk around
-in a neighbourhood of random sounds, when you can take the elemental express to fire town, or water
-town, or even air town!?* /What?/ *Why walk around wh-* Please leave my children alone. 
+order our divinity-emerging brains creates.
 
+*Hey Dude!* /What?/ *Let's explore sound!* /Uhm sure I guess, but there's a lot of it./. *That's why the
+skytrain exists maaaaan.* /What?/ *The skytrain!* /Okay.../ *Dude. The skytrain gets you where you need to
+go.* /What?/ *Why walk around in a neighbourhood of random sounds, when you can take the elemental
+express to fire town, or water town, or even air town!?* /What?/ *Why walk around wh-* Please leave my
+children alone.
 #+end_quote
 
+#+begin_example
 Stage 1: A file player / crossfader that allows one to filter a file bank using tags in file name.
   e.g. 'fire' & 'air', 'parallel', 'electric', 'fizz', 'transients', 'energetic'
-Stage 2: Auto extract tags
+Stage 2: Auto tag file collection using Qualitative Audio Features
+Stage 3: Cloud access
+#+end_example
 
-** TODO Creation
-An expander for memory  which creates new files by synaesthizing properties from existing files -
-e.g. 'pitch of guitar melody' + 'texture of steam whistle'
+** TODO [#C] Creation
+An expander for the Memory module which creates new sounds by blending properties from existing
+files - e.g. 'pitch of guitar melody' + 'texture of steam whistle'
 
-** TODO Synaesthesia
-Audio-Visual synesthesia display.
+** TODO [#B] Synaesthesia
+An audio-Visual synesthesia display.
 Audio -> (Trained Qualitative Audio Features Extractor) -> Features /e.g. pan, fuzz, distortion, pitch.../ -> Visuals

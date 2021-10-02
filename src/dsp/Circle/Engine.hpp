@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Circle.hpp"
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "dsp/PhaseOscillator.hpp"
@@ -19,9 +18,13 @@ namespace dsp {
 namespace circle {
 
 struct Engine {
-  bool _use_ext_phase = false;
-  float _ext_phase = 0.f;
-  float _sample_time = 1.0f;
+  Interface *interface;
+
+  bool _loving = false;
+  Member *_focused_member;
+  int _focused_member_i = 0;
+
+  std::vector<Member*> _circle;
 
   // TODO make me an array to support MIX4 & PLAY
   kokopelli::dsp::SignalType _signal_type;
@@ -35,14 +38,7 @@ struct Engine {
 
   /* read only */
 
-  RecordParams _record_params;
-
-  PhaseOscillator _phase_oscillator;
-  PhaseAnalyzer _phase_analyzer;
-
-  Circle _circle;
   float _phase;
-  bool _reflect = true;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -50,19 +46,15 @@ struct Engine {
   Options _options;
 
   void step();
+  void prevMember();
+  void nextMember();
+  void reflect();
+
   float read();
   float readSelection();
   float readActiveMember();
 
   void undo();
-  bool isLoving();
-  void resetEngineMode();
-
-  void setFixBounds(bool previous_member);
-  void setRecordOnInnerLoop(bool next_member);
-  void setSkipBack(bool reflect);
-
-  bool checkState(int reflect, int previous_member, int next_member);
 
   void selectRange(unsigned int member_i_1, unsigned int member_i_2);
   void soloSelectMember(unsigned int member_i);
@@ -73,8 +65,8 @@ struct Engine {
   void deleteSelection();
 
 private:
-  void endRecording();
-  Member* newRecording();
+  void endPhaseBuffer();
+  Member* newPhaseBuffer();
   inline bool phaseDefined();
   inline void write();
   inline void handleBeatChange(PhaseAnalyzer::PhaseEvent flip);

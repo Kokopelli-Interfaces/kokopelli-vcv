@@ -26,7 +26,7 @@ Circle::Circle() {
 void Circle::sampleRateChange() {
   _sampleTime = APP->engine->getSampleTime();
   for (int c = 0; c < channels(); c++) {
-    _engines[c]->_sample_time = _sampleTime;
+    _engines[c]->interface->sample_time = _sampleTime;
   }
 }
 
@@ -107,7 +107,7 @@ void Circle::processSelect() {
 
       bool increment = 0.f < d_select;
       if (increment) {
-        if ((int) e->_circle.members.size()-1 <= (int)e->_active_member_i) {
+        if ((int) e->_cicle._members.size()-1 <= (int)e->_active_member_i) {
           e->_new_member_active = true;
         } else {
           e->_active_member_i++;
@@ -150,14 +150,9 @@ void Circle::modulateChannel(int channel_i) {
       love *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
 
-    // taking to the love of 2 gives a more intuitive curve
-    love = pow(love, 2);
-    e->_record_params.love = love;
-
-    e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
-
+    e->interface->love = love;
+    e->interface->use_ext_phase = inputs[PHASE_INPUT].isConnected();
     e->_options = _options;
-
     e->_signal_type = _from_signal->signal_type;
   }
 }
@@ -187,14 +182,14 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
       phase_in += 5.0f;
     }
 
-    e->_ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+    e->interface->ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
     outputs[PHASE_OUTPUT].setVoltage(e->_phase * 10, channel_i);
   }
 
-  e->_record_params.in = _from_signal->signal[channel_i];
+  e->interface->in = _from_signal->signal[channel_i];
   e->step();
   _to_signal->signal[channel_i] = e->read();
   _to_signal->sel_signal[channel_i] = e->readSelection();
@@ -215,10 +210,10 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
-  if (default_e->_new_member_active || default_e->isLoving()) {
+  if (default_e->_new_member_active || default_e->interface->isLoving()) {
     if (default_e->_select_new_members) {
       lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
-      if (default_e->isSolo(default_e->_circle.members.size()-1)) {
+      if (default_e->isSolo(default_e->_cicle._members.size()-1)) {
         lights[SELECT_FUNCTION_LIGHT + 0].value = 1.f;
       }
     }
@@ -231,8 +226,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  bool displayed_reflect = default_e->_reflect;
-  RecordParams displayed_record_params = default_e->_record_params;
+  Interface* displayed_interface = default_e->interface;
   float displayed_phase = default_e->_phase;
 
   float active_member_signal_out_sum = default_e->readActiveMember();
@@ -243,8 +237,7 @@ void Circle::updateLights(const ProcessArgs &args) {
     signal_in_sum += _from_signal->signal[c];
     sel_signal_out_sum += _to_signal->sel_signal[c];
     if (record_active) {
-      displayed_reflect = _engines[c]->_reflect;
-      displayed_record_params = _engines[c]->_record_params;
+      displayed_interface = _engines[c]->interface;
       displayed_phase = _engines[c]->_phase;
     }
   }
@@ -253,8 +246,8 @@ void Circle::updateLights(const ProcessArgs &args) {
   active_member_signal_out_sum = rack::clamp(active_member_signal_out_sum, 0.f, 1.f);
   sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
 
-  if (displayed_record_params.active()) {
-    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.love);
+  if (displayed_interface->isLoving()) {
+    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_interface->love);
     lights[RECORD_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
     int light_colour = poly_record ? 2 : 0;
     lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
@@ -273,19 +266,18 @@ void Circle::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  lights[PREVIOUS_MEMBER_LIGHT + 0].value = !displayed_record_params.previous_member;
-  lights[PREVIOUS_MEMBER_LIGHT + 1].value = displayed_record_params.previous_member;
+  // lights[PREVIOUS_MEMBER_LIGHT + 0].value = !displayed_interface.previous_member;
+  // lights[PREVIOUS_MEMBER_LIGHT + 1].value = displayed_interface.previous_member;
+  // lights[NEXT_MEMBER_LIGHT + 0].value = !displayed_interface.next_member;
+  // lights[NEXT_MEMBER_LIGHT + 1].value = displayed_interface.next_member;
 
-  lights[NEXT_MEMBER_LIGHT + 0].value = !displayed_record_params.next_member;
-  lights[NEXT_MEMBER_LIGHT + 1].value = displayed_record_params.next_member;
-
-  if (default_e->isLoving()) {
+  if (default_e->interface->isLoving()) {
     lights[REFLECT_LIGHT + 0].value = 1.f;
     lights[REFLECT_LIGHT + 1].value = 1.f;
     lights[REFLECT_LIGHT + 2].value = 1.f;
-  } else {
-    lights[REFLECT_LIGHT + 0].value = !displayed_reflect;
-    lights[REFLECT_LIGHT + 1].value = displayed_reflect;
+  } else { // TODO depend on mode
+    lights[REFLECT_LIGHT + 0].value = 0.0f;
+    lights[REFLECT_LIGHT + 1].value = 1.0f;
     lights[REFLECT_LIGHT + 2].value = 0.f;
   }
 }
@@ -298,7 +290,7 @@ void Circle::postProcessAlways(const ProcessArgs &args) {
 
 void Circle::addChannel(int channel_i) {
   _engines[channel_i] = new kokopelli::dsp::circle::Engine();
-  _engines[channel_i]->_sample_time = _sampleTime;
+  _engines[channel_i]->interface->sample_time = _sampleTime;
 }
 
 void Circle::removeChannel(int channel_i) {

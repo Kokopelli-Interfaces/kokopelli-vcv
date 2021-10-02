@@ -47,11 +47,11 @@ struct ActiveMemberDisplay : CircleValueDisplay {
         return;
       }
 
-      if (e->isLoving() || e->_new_member_active) {
+      if (e->interface->isLoving() || e->_new_member_active) {
         CircleValueDisplay::setText("N");
       } else {
         int active_member_i = e->_active_member_i + 1;
-        if (e->_circle.members.size() == 0) {
+        if (e->_cicle._members.size() == 0) {
           active_member_i = 0;
         }
         std::string s = string::f("%d", active_member_i);
@@ -61,84 +61,84 @@ struct ActiveMemberDisplay : CircleValueDisplay {
 	}
 };
 
-struct MemberBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopelli::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
+// struct MemberBeatDisplay : CircleValueDisplay {
+//   using CircleValueDisplay::CircleValueDisplay;
+// 	void step() override {
+// 		CircleValueDisplay::step();
+// 		if(_module) {
+//       kokopelli::dsp::circle::Engine* e = _module->_engines[0];
+//       if (e == NULL) {
+//         return;
+//       }
 
-      int member_beat = 0;
-      if (e->_recording_member != NULL && e->isLoving()) {
-        member_beat = e->_recording_member->getMemberBeat(e->_circle_position.beat);
-      } else if (e->_circle.members.size() != 0) {
-        // TODO how to show start position of loops?
-        member_beat = e->_circle.members[e->_active_member_i]->getMemberBeat(e->_circle_position.beat);
-      } else {
-        member_beat = -1;
-      }
+//       int member_beat = 0;
+//       if (e->_recording_member != NULL && e->interface->isLoving()) {
+//         member_beat = e->_recording_member->getMemberBeat(e->_cicle_position.beat);
+//       } else if (e->_cicle._members.size() != 0) {
+//         // TODO how to show start position of loops?
+//         member_beat = e->_cicle._members[e->_active_member_i]->getMemberBeat(e->_cicle_position.beat);
+//       } else {
+//         member_beat = -1;
+//       }
 
-      CircleValueDisplay::setDisplayValue(member_beat + 1);
-		}
-	}
-};
+//       CircleValueDisplay::setDisplayValue(member_beat + 1);
+// 		}
+// 	}
+// };
 
-struct TotalMemberBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopelli::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
+// struct TotalMemberBeatDisplay : CircleValueDisplay {
+//   using CircleValueDisplay::CircleValueDisplay;
+// 	void step() override {
+// 		CircleValueDisplay::step();
+// 		if(_module) {
+//       kokopelli::dsp::circle::Engine* e = _module->_engines[0];
+//       if (e == NULL) {
+//         return;
+//       }
 
-      int total_member_beats = 0;
-      if (e->isLoving()) {
-        total_member_beats = e->_recording_member->_n_beats;
-      } else if (e->_circle.members.size() != 0) {
-        total_member_beats = e->_circle.members[e->_active_member_i]->_n_beats;
-      }
+//       int total_member_beats = 0;
+//       if (e->interface->isLoving()) {
+//         total_member_beats = e->_recording_member->_n_beats;
+//       } else if (e->_cicle._members.size() != 0) {
+//         total_member_beats = e->_cicle._members[e->_active_member_i]->_n_beats;
+//       }
 
-      CircleValueDisplay::setDisplayValue(total_member_beats);
-		}
-	}
-};
+//       CircleValueDisplay::setDisplayValue(total_member_beats);
+// 		}
+// 	}
+// };
 
-struct CircleBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopelli::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
+// struct CircleBeatDisplay : CircleValueDisplay {
+//   using CircleValueDisplay::CircleValueDisplay;
+// 	void step() override {
+// 		CircleValueDisplay::step();
+// 		if(_module) {
+//       kokopelli::dsp::circle::Engine* e = _module->_engines[0];
+//       if (e == NULL) {
+//         return;
+//       }
 
-      int circle_beat = e->_circle_position.beat - e->_loop.first + 1;
+//       int circle_beat = e->_cicle_position.beat - e->_loop.first + 1;
 
-      CircleValueDisplay::setDisplayValue(circle_beat);
-		}
-	}
-};
+//       CircleValueDisplay::setDisplayValue(circle_beat);
+// 		}
+// 	}
+// };
 
-struct TotalCircleBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopelli::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-      unsigned int n_circle_beats = e->_loop.second - e->_loop.first;
-      CircleValueDisplay::setDisplayValue(n_circle_beats);
-		}
-	}
-};
+// struct TotalCircleBeatDisplay : CircleValueDisplay {
+//   using CircleValueDisplay::CircleValueDisplay;
+// 	void step() override {
+// 		CircleValueDisplay::step();
+// 		if(_module) {
+//       kokopelli::dsp::circle::Engine* e = _module->_engines[0];
+//       if (e == NULL) {
+//         return;
+//       }
+//       unsigned int n_cicle_beats = e->_loop.second - e->_loop.first;
+//       CircleValueDisplay::setDisplayValue(n_cicle_beats);
+// 		}
+// 	}
+// };
 
 struct TotalMembersDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
@@ -150,27 +150,27 @@ struct TotalMembersDisplay : CircleValueDisplay {
         return;
       }
       // TODO make me just the non attenuated members
-      int total_members = e->_circle.members.size();
+      int total_members = e->_cicle._members.size();
       CircleValueDisplay::setDisplayValue(total_members);
 
 		}
 	}
 };
 
-struct BeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopelli::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-      int beat = e->_circle_position.beat;
-      CircleValueDisplay::setDisplayValue(beat+1);
-		}
-	}
-};
+// struct BeatDisplay : CircleValueDisplay {
+//   using CircleValueDisplay::CircleValueDisplay;
+// 	void step() override {
+// 		CircleValueDisplay::step();
+// 		if(_module) {
+//       kokopelli::dsp::circle::Engine* e = _module->_engines[0];
+//       if (e == NULL) {
+//         return;
+//       }
+//       int beat = e->_cicle_position.beat;
+//       CircleValueDisplay::setDisplayValue(beat+1);
+// 		}
+// 	}
+// };
 
 struct CircleWidget : ModuleWidget {
   const int hp = 4;
@@ -180,14 +180,11 @@ struct CircleWidget : ModuleWidget {
   ActiveMemberDisplay *active_member_i;
   TotalMembersDisplay *total_members;
 
-  MemberBeatDisplay *member_beat;
-  TotalMemberBeatDisplay *total_member_beats;
+  // MemberBeatDisplay *member_beat;
+  // TotalMemberBeatDisplay *total_member_beats;
 
-  CircleBeatDisplay *circle_beat;
-  TotalCircleBeatDisplay *total_circle_beats;
-
-
-  BeatDisplay *time;
+  // CircleBeatDisplay *circle_beat;
+  // TotalCircleBeatDisplay *total_cicle_beats;
 
   CircleWidget(Circle *module) {
     setModule(module);
@@ -246,33 +243,27 @@ struct CircleWidget : ModuleWidget {
 
     display_size = mm2px(Vec(23.173, 4.327));
 
-    time = new BeatDisplay(module);
-    time->box.pos = mm2px(Vec(1.088, 47.476));
-    time->box.size = display_size;
-    time->textOffset = Vec(time->box.size.x * 0.5f, 0.f);
-    addChild(time);
-
     display_size = mm2px(Vec(6.837, 4.327));
 
-    member_beat = new MemberBeatDisplay(module);
-    member_beat->box.pos = mm2px(Vec(1.05, 52.49));
-    member_beat->box.size = display_size;
-    addChild(member_beat);
+    // member_beat = new MemberBeatDisplay(module);
+    // member_beat->box.pos = mm2px(Vec(1.05, 52.49));
+    // member_beat->box.size = display_size;
+    // addChild(member_beat);
 
-    total_member_beats = new TotalMemberBeatDisplay(module);
-    total_member_beats->box.pos = mm2px(Vec(1.05, 57.592));
-    total_member_beats->box.size = display_size;
-    addChild(total_member_beats);
+    // total_member_beats = new TotalMemberBeatDisplay(module);
+    // total_member_beats->box.pos = mm2px(Vec(1.05, 57.592));
+    // total_member_beats->box.size = display_size;
+    // addChild(total_member_beats);
 
-    circle_beat = new CircleBeatDisplay(module);
-    circle_beat->box.pos = mm2px(Vec(17.49, 52.49));
-    circle_beat->box.size = display_size;
-    addChild(circle_beat);
+    // circle_beat = new CircleBeatDisplay(module);
+    // circle_beat->box.pos = mm2px(Vec(17.49, 52.49));
+    // circle_beat->box.size = display_size;
+    // addChild(circle_beat);
 
-    total_circle_beats = new TotalCircleBeatDisplay(module);
-    total_circle_beats->box.pos = mm2px(Vec(17.49, 57.592));
-    total_circle_beats->box.size = display_size;
-    addChild(total_circle_beats);
+    // total_cicle_beats = new TotalCircleBeatDisplay(module);
+    // total_cicle_beats->box.pos = mm2px(Vec(17.49, 57.592));
+    // total_cicle_beats->box.size = display_size;
+    // addChild(total_cicle_beats);
   }
 
 	void appendContextMenu(rack::Menu* menu) override {

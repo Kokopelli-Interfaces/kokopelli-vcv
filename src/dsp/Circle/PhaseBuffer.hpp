@@ -17,19 +17,18 @@ namespace kokopelli {
 namespace dsp {
 namespace circle {
 
-struct Recording {
+struct PhaseBuffer {
 
   /* read only */
 
   kokopelli::dsp::SignalType _signal_type;
   std::vector<std::vector<float>> _buffer;
-  int _samples_per_beat;
+  int _samples_per_beat = 0;
 
   rack::dsp::ClockDivider write_divider;
 
-  Recording(kokopelli::dsp::SignalType signal_type, int samples_per_beat) {
+  PhaseBuffer(kokopelli::dsp::SignalType signal_type) {
     _signal_type = signal_type;
-    _samples_per_beat = samples_per_beat;
     switch (_signal_type) {
     case kokopelli::dsp::SignalType::AUDIO:
       write_divider.setDivision(1);
@@ -57,55 +56,55 @@ struct Recording {
     _samples_per_beat++;
   }
 
-  inline float interpolateBuffer(TimePosition t) {
-    if (_buffer.size() <= t.beat) {
+  inline float interpolateBuffer(unsigned int beat, float phase) {
+    if (_buffer.size() <= beat) {
       return 0.f;
     }
 
-    double beat_position = _samples_per_beat * t.phase;
+    double beat_position = _samples_per_beat * phase;
 
     int min_samples_for_interpolation = 4;
     if (_samples_per_beat < min_samples_for_interpolation) {
-      return _buffer[t.beat][floor(beat_position)];
+      return _buffer[beat][floor(beat_position)];
     }
 
     int x1 = (int)floor(beat_position);
     if (x1 == _samples_per_beat) {
       x1--;
     }
-    float s1 = _buffer[t.beat][x1];
+    float s1 = _buffer[beat][x1];
 
     float s0;
     if (x1 == 0) {
-      if (t.beat == 0) {
+      if (beat == 0) {
         s0 = 0.f;
       } else {
-        s0 = _buffer[t.beat - 1][_samples_per_beat - 1];
+        s0 = _buffer[beat - 1][_samples_per_beat - 1];
       }
     } else {
-      s0 = _buffer[t.beat][x1 - 1];
+      s0 = _buffer[beat][x1 - 1];
     }
 
     float s2;
     float s3;
     if (x1 == _samples_per_beat - 1) {
-      if (t.beat == _buffer.size() - 1) {
+      if (beat == _buffer.size() - 1) {
         s2 = 0.f;
         s3 = 0.f;
       } else {
-        s2 = _buffer[t.beat + 1][0];
-        s3 = _buffer[t.beat + 1][1];
+        s2 = _buffer[beat + 1][0];
+        s3 = _buffer[beat + 1][1];
       }
     } else {
-      s2 = _buffer[t.beat][x1 + 1];
+      s2 = _buffer[beat][x1 + 1];
       if (x1 + 1 == _samples_per_beat - 1) {
-        if (t.beat == _buffer.size() - 1) {
+        if (beat == _buffer.size() - 1) {
           s3 = 0.f;
         } else {
-          s3 = _buffer[t.beat + 1][0];
+          s3 = _buffer[beat + 1][0];
         }
       } else {
-        s3 = _buffer[t.beat][x1 + 2];
+        s3 = _buffer[beat][x1 + 2];
       }
     }
 
@@ -121,9 +120,9 @@ struct Recording {
     }
   }
 
-  inline void write(TimePosition t, float sample) {
-    assert(0.f <= t.phase);
-    assert(t.phase <= 1.0f);
+  inline void write(unsigned int beat, float phase, float sample) {
+    assert(0.f <= phase);
+    assert(phase <= 1.0f);
 
     unsigned int n_beats = _buffer.size();
     if (n_beats == 0) {
@@ -131,12 +130,12 @@ struct Recording {
       n_beats++;;
     }
 
-    while (n_beats <= t.beat) {
+    while (n_beats <= beat) {
       _buffer.push_back(std::vector<float>(_samples_per_beat));
       n_beats++;
     }
 
-    double beat_position = _samples_per_beat * t.phase;
+    double beat_position = _samples_per_beat * phase;
     int x1 = (int)floor(beat_position);
     if (x1 == _samples_per_beat) {
       x1--;
@@ -144,28 +143,28 @@ struct Recording {
 
     if (_signal_type == kokopelli::dsp::SignalType::AUDIO)  {
       double sample_phase = beat_position - floor(beat_position);
-      _buffer[t.beat][x1] = rack::crossfade(sample, _buffer[t.beat][x1], sample_phase);
+      _buffer[beat][x1] = rack::crossfade(sample, _buffer[beat][x1], sample_phase);
 
       int x2 = ceil(beat_position);
       if (ceil(beat_position) == _samples_per_beat) {
-        if (t.beat != _buffer.size() - 1) {
-          _buffer[t.beat + 1][0] = rack::crossfade(_buffer[t.beat + 1][0], sample, sample_phase);
+        if (beat != _buffer.size() - 1) {
+          _buffer[beat + 1][0] = rack::crossfade(_buffer[beat + 1][0], sample, sample_phase);
         }
       } else {
-        _buffer[t.beat][x2] = rack::crossfade(_buffer[t.beat][x2], sample, sample_phase);
+        _buffer[beat][x2] = rack::crossfade(_buffer[beat][x2], sample, sample_phase);
       }
     } else {
-      _buffer[t.beat][x1] = sample;
+      _buffer[beat][x1] = sample;
     }
   }
 
-  inline float read(TimePosition t) {
+  inline float read(unsigned int beat, float phase) {
     int size = _buffer.size();
     if (size == 0) {
       return 0.f;
     }
 
-    return interpolateBuffer(t);
+    return interpolateBuffer(beat, phase);
   }
 };
 

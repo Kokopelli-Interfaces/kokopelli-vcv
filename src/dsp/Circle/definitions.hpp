@@ -4,27 +4,18 @@
 
 #include <vector>
 
-struct TimePosition {
-  unsigned int beat = 0;
-  double phase = 0.f;
-};
-
-struct RecordParams {
+// TODO comply
+struct Interface {
+  float in = 0.f;
   float love = 0.f;
-  bool next_member = true;
-  bool previous_member = true;
+  float ext_phase = 0.f;
+  float use_ext_phase = false;
+  float sample_time = 1.0f;
 
-  bool _active = false;
-  float _recordActiveThreshold = 0.0001f;
+  float _lovingActiveThreshold = 0.0001f;
 
-  inline bool loveActive() {
-    if (_active && love <= _recordActiveThreshold) {
-      _active = false;
-    } else if (!_active && _recordActiveThreshold < love) {
-      _active = true;
-    }
-
-    return _active;
+  inline bool isLoving() {
+    return _lovingActiveThreshold < love;
   }
 
   inline float readIn() {

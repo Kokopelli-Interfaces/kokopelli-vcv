@@ -1,35 +1,44 @@
 #pragma once
 
 #include "definitions.hpp"
-#include "Recording.hpp"
+#include "PhaseBuffer.hpp"
+#include "dsp/PhaseOscillator.hpp"
 #include "dsp/Signal.hpp"
+
+#include <vector>
 
 namespace kokopelli {
 namespace dsp {
 namespace circle {
 
+// A member which sings and also may lead a circle.
 struct Member {
   unsigned int _n_beats = 0;
   unsigned int _beat = 0;
 
+  std::vector<Member*> _circle;
+
+  std::vector<float> _current_attenuation;
+  std::vector<float> _last_calculated_attenuation;
+  rack::dsp::ClockDivider _attenuation_calculator_divider;
+
+  PhaseOscillator _phase_oscillator;
+  PhaseAnalyzer _phase_analyzer;
+
+  bool _alive = true;
   bool _loop = false;
 
   // TODO
-  // std::vector<Recording*> recordings;
+  // std::vector<PhaseBuffer*> recordings;
   // std::vector<kokopelli::dsp::SignalType> types;
 
-  Recording *_in;
-  Recording *_love;
+  PhaseBuffer *_in;
+  PhaseBuffer *_love;
 
-  // FIXME change me to be an array of bools for O(1) lookup
-  std::vector<unsigned int> members_being_observed_idx;
-
-  inline Member(unsigned int n_beats, std::vector<unsigned int> members_being_observed_idx, kokopelli::dsp::SignalType signal_type, int samples_per_beat) {
-    this->_n_beats = n_beats;
-    this->members_being_observed_idx = members_being_observed_idx;
-
-    _in = new Recording(signal_type, samples_per_beat);
-    _love = new Recording(kokopelli::dsp::SignalType::PARAM, samples_per_beat);
+  inline Member(kokopelli::dsp::SignalType signal_type) {
+    _in = new PhaseBuffer(signal_type);
+    _love = new PhaseBuffer(kokopelli::dsp::SignalType::PARAM);
+    _attenuation_calculator_divider.setDivision(2000);
   }
 
   inline ~Member() {
@@ -37,64 +46,17 @@ struct Member {
     delete _love;
   }
 
-  // inline unsigned int getMemberBeat(unsigned int timeline_beat) {
-  //   int beat = timeline_beat - _start_beat;
-  //   if (_loop && 0 < beat) {
-  //     return beat % _n_beats;
-  //   }
+  std::vector<Member*> getMembersFromIdx(std::vector<unsigned int> member_idx);
+  void updateMemberAttenuations(unsigned int beat, float phase);
 
-  //   return beat;
-  // }
+  float advance(Interface *interface);
 
-  inline bool readableAtPosition(TimePosition timeline_position) {
-    int member_beat = getMemberBeat(timeline_position.beat);
-    return (0 <= member_beat && member_beat < (int)_n_beats);
-  }
+  void prevBeat();
+  void nextBeat();
 
-  // // TODO FIXME allow reverse recording
-  // inline bool writableAtPosition(TimePosition timeline_position) {
-  //   return _start_beat <= timeline_position.beat && timeline_position.beat <= _start_beat + _n_beats;
-  // }
-
-  // inline TimePosition getRecordingPosition(TimePosition timeline_position) {
-  //   TimePosition recording_position = timeline_position;
-  //   recording_position.beat = getMemberBeat(timeline_position.beat);
-  //   return recording_position;
-  // }
-
-  // inline float readRecordingLove(TimePosition timeline_position) {
-  //   if (!readableAtPosition(timeline_position)) {
-  //     return 0.f;
-  //   }
-
-  //   return _love->read(getRecordingPosition(timeline_position));
-  // }
-
-  // inline void write(TimePosition timeline_position, float in, float love, bool phase_defined) {
-  //   assert(_in->_buffer.size() <= _n_beats);
-  //   assert(_love->_buffer.size() <= _n_beats);
-
-  //   if (!phase_defined) {
-  //     _in->pushBack(in);
-  //     _love->pushBack(love);
-  //   } else if (writableAtPosition(timeline_position)) {
-  //     _in->write(getRecordingPosition(timeline_position), in);
-  //  _love->write(getRecordingPosition(timeline_position), love);
-  //   }
-  // }
-
-  inline prevBeat() {
-  }
-
-  inline nextBeat() {
-  }
-
-  inline float sing(float phase) {
-    if (!readableAtPosition(time)) {
-      return 0.f;
-    }
-    return _in->read(getRecordingPosition(time));
-  }
+  void listen(float in, float love);
+  bool alive();
+  float sing(float phase);
 };
 
 } // namespace circle

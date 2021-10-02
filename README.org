@@ -24,31 +24,24 @@ Records the Energy flow of Circle (e.g. group A... -> group B... -> new voice in
 The Memory module provides you with your first step to manifesting the sound - by recalling an
 associated sound. How does recall work? Well, just like how your memory works.
 
-Our memory is a network of association. One approaches the network with a key, and the most
-associated experience is re-experienced. The =Memory= module works just the same though unlike most
-file players, the retrieval key used is not just the name of the audio file. One can access the
+Let's assume our memory is a network of association. One approaches the network with a key, and the most
+associated experience is re-experienced. The =Memory= module works just the same, though unlike most
+audio players, the retrieval key used is not just the name of the audio file. One can access the
 audio of the =Memory= module with keys of more divine order - so one can recall files through abstract
 qualifiers such as 'distorted', 'complex', 'chaotic', 'fire', or combinations of them!
 
-There are thousands of examples of audio in our memory, and nature creates higher level order out of
-the examples via experiential-aggregation-emergence. On this higher plane are sound qualifiers and spectrums
-which come to being by seeing the patterns across many examples ... /Fizz, Parallelism, Chaos,
-Complexity, Character, Mood, Confidence, Velocity, Energy, Speed, Timbre, Pitch... All examples of
-order our divinity-emerging brains creates.
-
-*Hey Dude!* /What?/ *Let's explore sound!* /Uhm sure I guess, but there's a lot of it./. *That's why the
-skytrain exists maaaaan.* /What?/ *The skytrain!* /Okay.../ *Dude. The skytrain gets you where you need to
-go.* /What?/ *Why walk around in a neighbourhood of random sounds, when you can take the elemental
-express to fire town, or water town, or even air town!?* /What?/ *Why walk around wh-* Please leave my
-children alone.
+There are thousands of examples of audio in our memory, and we create higher level order out of the
+examples by generalizing patterns and spectrums out of examples. What results is a higher plane of
+sound keys... /Fizz, Parallelism, Chaos, Complexity, Character, Mood, Confidence, Velocity, Energy,
+Speed, Timbre, Pitch.../
 #+end_quote
 
-#+begin_example
 Stage 1: A file player / crossfader that allows one to filter a file bank using tags in file name.
   e.g. 'fire' & 'air', 'parallel', 'electric', 'fizz', 'transients', 'energetic'
+  
 Stage 2: Auto tag file collection using Qualitative Audio Features
+
 Stage 3: Cloud access
-#+end_example
 
 ** TODO [#C] Creation
 An expander for the Memory module which creates new sounds by blending properties from existing

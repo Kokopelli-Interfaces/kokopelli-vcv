@@ -9,7 +9,7 @@ void Engine::reflect() {
     // TODO end recording
     Member* new_member = new Member(nullptr, _signal_type);
     _focused_member = new_member;
-    _cicle->_members.push_back(new_member);
+    _circle->_members.push_back(new_member);
   } else {
     // TODO alternate trim mode?
     // pedal is like solo / mute
@@ -30,7 +30,7 @@ void Engine::nextMember() {
     // TODO end recording
     Member* new_member = new Member(nullptr, _signal_type);
     _focused_member = new_member;
-    _cicle->_members.push_back(new_member);
+    _circle->_members.push_back(new_member);
   } else {
     // TODO right
   }
@@ -43,12 +43,12 @@ void Engine::step() {
     Member* new_member = new Member(nullptr, _signal_type);
 
     // TODO more than one circle (sound source class?)
-    if (_cicle->_members.size() == 0) {
-      _cicle->_members.push_back(new_member);
+    if (_circle->_members.size() == 0) {
+      _circle->_members.push_back(new_member);
     } else {
       // TODO create new circle
       // _focused_member + new_member -> new circle
-      _cicle->_members.push_back(new_member);
+      _circle->_members.push_back(new_member);
     }
 
     _focused_member = new_member;
@@ -60,7 +60,7 @@ void Engine::step() {
     _focused_member->listen(interface->in, interface->love);
   }
 
-  for (auto member : _cicle) {
+  for (auto member : _circle) {
     return member->advance();
   }
 }

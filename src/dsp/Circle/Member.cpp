@@ -86,9 +86,9 @@ float Member::listen(float in, float love) {
 //   }
 
 //   if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
-//     this->_cicle.nextBeat();
+//     this->_circle.nextBeat();
 //   } else if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
-//     this->_cicle.prevBeat();
+//     this->_circle.prevBeat();
 //   }
 // }
 
@@ -115,9 +115,9 @@ float Member::advance(Interface *interface) {
   }
 
   if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
-    this->_cicle.nextBeat();
+    this->_circle.nextBeat();
   } else if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
-    this->_cicle.prevBeat();
+    this->_circle.prevBeat();
   }
 
 

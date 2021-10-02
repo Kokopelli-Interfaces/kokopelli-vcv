@@ -46,7 +46,7 @@ void Engine::toggleSelectMember(unsigned int member_i) {
         select = false;
       }
     }
-    if (select && _cicle._members.size() != 0) {
+    if (select && _circle._members.size() != 0) {
       _selected_members_idx.push_back(_active_member_i);
     }
 }
@@ -56,19 +56,19 @@ void Engine::undo() {
     endPhaseBuffer();
   }
 
-  this->deleteMember(_cicle._members.size()-1);
+  this->deleteMember(_circle._members.size()-1);
 }
 
 
 void Engine::deleteMember(unsigned int member_i) {
-  if (member_i < _cicle._members.size()) {
-    _cicle._members.erase(_cicle._members.begin()+member_i);
+  if (member_i < _circle._members.size()) {
+    _circle._members.erase(_circle._members.begin()+member_i);
     if (_active_member_i == member_i && _active_member_i != 0) {
       _active_member_i--;
     }
   }
 
-  // if (_cicle._members.size() == 0) {
+  // if (_circle._members.size() == 0) {
   //   _phase_oscillator.reset(0.f);
   // }
 }
@@ -78,16 +78,16 @@ void Engine::deleteSelection() {
     return;
   }
 
-  for (int member_i = _cicle._members.size()-1; member_i >= 0; member_i--) {
+  for (int member_i = _circle._members.size()-1; member_i >= 0; member_i--) {
     if (isSelected(member_i)) {
       if (member_i == (int)_active_member_i) {
         _active_member_i = 0 ? 0 : _active_member_i - 1;
       }
-      _cicle._members.erase(_cicle._members.begin()+member_i);
+      _circle._members.erase(_circle._members.begin()+member_i);
     }
   }
 
-  // if (_cicle._members.size() == 0) {
+  // if (_circle._members.size() == 0) {
   //   _phase_oscillator.reset(0.f);
   // }
 }

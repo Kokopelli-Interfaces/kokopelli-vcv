@@ -107,7 +107,7 @@ void Circle::processSelect() {
 
       bool increment = 0.f < d_select;
       if (increment) {
-        if ((int) e->_cicle._members.size()-1 <= (int)e->_active_member_i) {
+        if ((int) e->_circle._members.size()-1 <= (int)e->_active_member_i) {
           e->_new_member_active = true;
         } else {
           e->_active_member_i++;
@@ -213,7 +213,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   if (default_e->_new_member_active || default_e->interface->isLoving()) {
     if (default_e->_select_new_members) {
       lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
-      if (default_e->isSolo(default_e->_cicle._members.size()-1)) {
+      if (default_e->isSolo(default_e->_circle._members.size()-1)) {
         lights[SELECT_FUNCTION_LIGHT + 0].value = 1.f;
       }
     }

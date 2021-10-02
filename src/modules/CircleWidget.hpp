@@ -51,7 +51,7 @@ struct ActiveMemberDisplay : CircleValueDisplay {
         CircleValueDisplay::setText("N");
       } else {
         int active_member_i = e->_active_member_i + 1;
-        if (e->_cicle._members.size() == 0) {
+        if (e->_circle._members.size() == 0) {
           active_member_i = 0;
         }
         std::string s = string::f("%d", active_member_i);
@@ -73,10 +73,10 @@ struct ActiveMemberDisplay : CircleValueDisplay {
 
 //       int member_beat = 0;
 //       if (e->_recording_member != NULL && e->interface->isLoving()) {
-//         member_beat = e->_recording_member->getMemberBeat(e->_cicle_position.beat);
-//       } else if (e->_cicle._members.size() != 0) {
+//         member_beat = e->_recording_member->getMemberBeat(e->_circle_position.beat);
+//       } else if (e->_circle._members.size() != 0) {
 //         // TODO how to show start position of loops?
-//         member_beat = e->_cicle._members[e->_active_member_i]->getMemberBeat(e->_cicle_position.beat);
+//         member_beat = e->_circle._members[e->_active_member_i]->getMemberBeat(e->_circle_position.beat);
 //       } else {
 //         member_beat = -1;
 //       }
@@ -99,8 +99,8 @@ struct ActiveMemberDisplay : CircleValueDisplay {
 //       int total_member_beats = 0;
 //       if (e->interface->isLoving()) {
 //         total_member_beats = e->_recording_member->_n_beats;
-//       } else if (e->_cicle._members.size() != 0) {
-//         total_member_beats = e->_cicle._members[e->_active_member_i]->_n_beats;
+//       } else if (e->_circle._members.size() != 0) {
+//         total_member_beats = e->_circle._members[e->_active_member_i]->_n_beats;
 //       }
 
 //       CircleValueDisplay::setDisplayValue(total_member_beats);
@@ -118,7 +118,7 @@ struct ActiveMemberDisplay : CircleValueDisplay {
 //         return;
 //       }
 
-//       int circle_beat = e->_cicle_position.beat - e->_loop.first + 1;
+//       int circle_beat = e->_circle_position.beat - e->_loop.first + 1;
 
 //       CircleValueDisplay::setDisplayValue(circle_beat);
 // 		}
@@ -134,8 +134,8 @@ struct ActiveMemberDisplay : CircleValueDisplay {
 //       if (e == NULL) {
 //         return;
 //       }
-//       unsigned int n_cicle_beats = e->_loop.second - e->_loop.first;
-//       CircleValueDisplay::setDisplayValue(n_cicle_beats);
+//       unsigned int n_circle_beats = e->_loop.second - e->_loop.first;
+//       CircleValueDisplay::setDisplayValue(n_circle_beats);
 // 		}
 // 	}
 // };
@@ -150,7 +150,7 @@ struct TotalMembersDisplay : CircleValueDisplay {
         return;
       }
       // TODO make me just the non attenuated members
-      int total_members = e->_cicle._members.size();
+      int total_members = e->_circle._members.size();
       CircleValueDisplay::setDisplayValue(total_members);
 
 		}
@@ -166,7 +166,7 @@ struct TotalMembersDisplay : CircleValueDisplay {
 //       if (e == NULL) {
 //         return;
 //       }
-//       int beat = e->_cicle_position.beat;
+//       int beat = e->_circle_position.beat;
 //       CircleValueDisplay::setDisplayValue(beat+1);
 // 		}
 // 	}
@@ -184,7 +184,7 @@ struct CircleWidget : ModuleWidget {
   // TotalMemberBeatDisplay *total_member_beats;
 
   // CircleBeatDisplay *circle_beat;
-  // TotalCircleBeatDisplay *total_cicle_beats;
+  // TotalCircleBeatDisplay *total_circle_beats;
 
   CircleWidget(Circle *module) {
     setModule(module);
@@ -260,10 +260,10 @@ struct CircleWidget : ModuleWidget {
     // circle_beat->box.size = display_size;
     // addChild(circle_beat);
 
-    // total_cicle_beats = new TotalCircleBeatDisplay(module);
-    // total_cicle_beats->box.pos = mm2px(Vec(17.49, 57.592));
-    // total_cicle_beats->box.size = display_size;
-    // addChild(total_cicle_beats);
+    // total_circle_beats = new TotalCircleBeatDisplay(module);
+    // total_circle_beats->box.pos = mm2px(Vec(17.49, 57.592));
+    // total_circle_beats->box.size = display_size;
+    // addChild(total_circle_beats);
   }
 
 	void appendContextMenu(rack::Menu* menu) override {

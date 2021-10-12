@@ -2,7 +2,13 @@
 [[file:img/cavee.jpg]]
 
 #+begin_quote
-"Here at Kokopelli Interfaces.. we work hard to deliver /you/ the interfaces you need to manifest your unconscious. That's right. We help you bring the village inside, outside. Our interfaces our designed with the timeless principle - /'as within, so without'/ - so your may rest assured that your archetypal energies can emerge with our mediums to create art true to your unfolding. The spirit of Abba's Dancing Queen singing inside you? Your guardian angel of love? Your magician and his visions of the universe? Whoever it may be, they have come into being by virtue of yours and your ancestors concert with the rest of the song of the universe, and we are here to help you bring them into the world!"
+"Here at Kokopelli Interfaces.. we work hard to deliver /you/ the interfaces you need to manifest your
+unconscious. That's right. We help you bring the village inside, outside. The spirit of Abba's
+Dancing Queen? Your guardian angel of love? Your magician and his visions of the universe? Whoever
+it may be, they have come into being by virtue of yours and your ancestors concert with the rest of
+the universe, and we are here to help you express them! Designed with the timeless principle - /'as
+within, so without'/, our interfaces go the extra mile to meet /you/ in your sound experience, not for
+you to meet us."
 
 - Kokopelli Interfaces - /because alignment matters./
 #+end_quote
@@ -12,41 +18,52 @@
 [[./img/README_2021_09_11__22:28:00.png]]
 
 #+begin_quote
-Our =Circle= module allows you to conduct a music circle of the village members that visit the temple of your body. You just create the sonic representations of them and use our provided means to /emerge/ them - with simplicity and /flow/. So now the drum man repeating *order* order *order* order can emerge with a goddess of love to dance as trellis and rose - without the computer spirit coming between them! How do we do it? Ladies and gentleman, we have ingeniously intuitively ingeniated a novel mechanism of composition. We combine the real-time feeling of live-looping with the features of timeline recording so that your precious aligned unfolding is *not* lost in the muck of 21st century computer interfaces and does *not* get stuck in a loop. Map your =Circle= module, and creating multi-layered progressive music is now a matter of learning to use three buttons and a foot pedal. Afterall, why stare at your monitor when you can stare at the cosmic ocean from which all experience emerges from? Or better yet, why love mind knacks and poly-techno false idols when you can love the great mother?
+Our =Circle= module allows you to conduct a music circle of village members that visit your body. You
+just create the sonic representations of them, and use our provided means to /emerge/ them with flow. How do we
+do it? Ladies and gentleman, we have intuited a new way of composing. We combine the real-time
+feeling of live-looping with the features of timeline recording. The result is that your aligned
+unfolding is *not* lost in the muck of 21st century computer interfaces and does *not* get stuck in a
+loop. Map your =Circle= module, and creating multi-layered, progressive music is now a matter of
+learning to use three buttons and a foot pedal. Because why stare at your monitor when you can stare
+at the cosmic ocean from which all experience emerges from? Why love mind knacks and poly-techno
+false idols when you can love the great mother?
 #+end_quote
 
-** TODO [#B] Gko
-Expander for circle
-Records the Energy flow of Circle (e.g. group A... -> group B... -> new voice in group B...) on a timeline
-
-** TODO [#C] Memory
+** [#B] Gko
 #+begin_quote
-The Memory module provides you with your first step to manifesting the sound - by recalling an
-associated sound. How does recall work? Well, just like how your memory works.
-
-Let's assume our memory is a network of association. One approaches the network with a key, and the most
-associated experience is re-experienced. The =Memory= module works just the same, though unlike most
-audio players, the retrieval key used is not just the name of the audio file. One can access the
-audio of the =Memory= module with keys of more divine order - so one can recall files through abstract
-qualifiers such as 'distorted', 'complex', 'chaotic', 'fire', or combinations of them!
-
-There are thousands of examples of audio in our memory, and we create higher level order out of the
-examples by generalizing patterns and spectrums out of examples. What results is a higher plane of
-sound keys... /Fizz, Parallelism, Chaos, Complexity, Character, Mood, Confidence, Velocity, Energy,
-Speed, Timbre, Pitch.../
+Gko is a word for the advancer of existence - whatever that may be. When placed by a =Circle= module, it
+can record the energy movement of the music circle onto a timeline.
 #+end_quote
 
-Stage 1: A file player / crossfader that allows one to filter a file bank using tags in file name.
-  e.g. 'fire' & 'air', 'parallel', 'electric', 'fizz', 'transients', 'energetic'
+** [#C] Memory
+#+begin_quote
+The Memory module provides you with your first step to manifesting a sound in your head - by recalling an
+associated sound.
+
+The =Memory= module works like most audio players, though the 'retrieval key' is not limited to the
+name of the audio file. One can access the audio of the =Memory= module with keys of more /divine/
+order - so one can recall files through abstract qualifiers such as 'distorted', 'complex',
+'chaotic', 'firey', or combinations of them!
+
+There are thousands of examples of audio in our memory, and higher level order emerges out of
+examples by generalizing patterns and spectrums. What results is a higher plane of retrieval keys...
+/Fizz, Parallelism, Chaos, Complexity, Character, Mood, Confidence, Velocity, Energy, Speed, Timbre,
+Pitch.../ 
+
+The Memory module interacts with you on this plane.
+#+end_quote
+
+Stage 1: A file player & crossfader that allows one to filter a file bank using tags in file name,
+  using fuzzy search bar. e.g. 'fire' & 'air', 'parallel', 'electric', 'fizz', 'transients', 'energetic'
   
-Stage 2: Auto tag file collection using Qualitative Audio Features
+Stage 2: Auto tag files using =Qualitative Audio Features= extractor
 
-Stage 3: Cloud access
+Stage 3: Access to cloud of auto-tagged audio examples
 
-** TODO [#C] Creation
+** [#C] Create
 An expander for the Memory module which creates new sounds by blending properties from existing
-files - e.g. 'pitch of guitar melody' + 'texture of steam whistle'
+files - e.g. 'pitch of guitar melody' + 'texture of steam whistle'.
 
-** TODO [#B] Synaesthesia
+** [#B] Synaesthesia
 An audio-Visual synesthesia display.
-Audio -> (Trained Qualitative Audio Features Extractor) -> Features /e.g. pan, fuzz, distortion, pitch.../ -> Visuals
+Audio -> =Qualitative Audio Features=  extractor -> Features /e.g. pan, fuzz, distortion, pitch.../ -> Visuals

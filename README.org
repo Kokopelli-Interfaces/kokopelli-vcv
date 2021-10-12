@@ -2,15 +2,16 @@
 [[file:img/cavee.jpg]]
 
 #+begin_quote
-"Here at Kokopelli Interfaces.. we work hard to deliver /you/ the interfaces you need to manifest your
-unconscious. That's right. We help you bring the village inside, outside. The spirit of Abba's
-Dancing Queen? Your guardian angel of love? Your magician and his visions of the universe? Whoever
-it may be, they have come into being by virtue of yours and your ancestors concert with the rest of
-the universe, and we are here to help you express them! Designed with the timeless principle - /'as
-within, so without'/, our interfaces go the extra mile to meet /you/ in your sound experience, not for
-you to meet us."
+"Here at Kokopelli Interfaces.. we work hard to deliver /you/ the interfaces you
+need to express your creativity. That's right. We help you bring the village
+inside, outside. The spirit of Abba's Dancing Queen? A low resonance in your
+stomach? Accents and intonations? Visions of the universe? Whatever it may be,
+it has come into being through yours and your ancestors concert with the rest of
+the universe, and we are here to help you manifest it! Designed with the
+timeless principle - /'as within, so without'/ - our interfaces go the extra mile
+to meet you in /your/ experience of music, so that home stays nearby."
 
-- Kokopelli Interfaces - /because alignment matters./
+Kokopelli Interfaces - /because alignment matters./
 #+end_quote
 
 ** [#A] Circle
@@ -19,14 +20,13 @@ you to meet us."
 
 #+begin_quote
 Our =Circle= module allows you to conduct a music circle of village members that visit your body. You
-just create the sonic representations of them, and use our provided means to /emerge/ them with flow. How do we
-do it? Ladies and gentleman, we have intuited a new way of composing. We combine the real-time
-feeling of live-looping with the features of timeline recording. The result is that your aligned
-unfolding is *not* lost in the muck of 21st century computer interfaces and does *not* get stuck in a
-loop. Map your =Circle= module, and creating multi-layered, progressive music is now a matter of
-learning to use three buttons and a foot pedal. Because why stare at your monitor when you can stare
-at the cosmic ocean from which all experience emerges from? Why love mind knacks and poly-techno
-false idols when you can love the great mother?
+just create the sonic representations of them, and use our provided means to /emerge/ them with flow.
+The =Circle= module combines the real-time feeling of live-looping with the features of timeline
+recording. The result is that your aligned unfolding is *not* lost in the muck of 21st century
+computer interfaces and does *not* get stuck in a loop. Map your =Circle= module, and creating
+multi-layered, progressive music is now a matter of learning to use three buttons and a foot pedal -
+because why stare at your monitor when you can stare at the cosmic ocean from which all experience
+emerges from? 
 #+end_quote
 
 ** [#B] Gko

@@ -6,11 +6,11 @@ using namespace kokopellivcv::dsp;
 // TODO REMOVE unnecessary circle first second updates if updateCirclePeriod
 
 // unsigned int Engine::updateCirclePeriod() {
-// // TODO depends on active layers which are repeating at current timeline beat
+// // TODO depends on active members which are repeating at current timeline beat
 // }
 
-void Engine::skipToActiveLayer() {
-  if (_timeline.layers.size() == 0) {
+void Engine::skipToActiveMember() {
+  if (_timeline.members.size() == 0) {
     _group_loop.first = 0;
     _group_loop.second = 1;
     _group_loop_length = 1;
@@ -19,8 +19,8 @@ void Engine::skipToActiveLayer() {
   }
 
   // FIXME
-  _group_loop.first = _timeline.layers[_active_layer_i]->_start.beat;
-  _group_loop.second =  _group_loop.first + _timeline.layers[_active_layer_i]->_n_beats;
+  _group_loop.first = _timeline.members[_active_member_i]->_start.beat;
+  _group_loop.second =  _group_loop.first + _timeline.members[_active_member_i]->_n_beats;
   _group_loop_length = _group_loop.second - _group_loop.first;
 
   _timeline_position.beat = _group_loop.first;

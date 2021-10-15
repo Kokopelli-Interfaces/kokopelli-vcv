@@ -11,14 +11,14 @@ void Engine::nextMember() {
     _group_loop.second = _group_loop.first + 1;
     _group_loop_length = 1;
   } else {
-    // TODO seek previous layer from current beat, may not be active
-    if (_active_layer_i == _timeline.layers.size()-1) {
-      _active_layer_i = 0;
+    // TODO seek previous member from current beat, may not be active
+    if (_active_member_i == _timeline.members.size()-1) {
+      _active_member_i = 0;
     } else {
-      _active_layer_i++;
+      _active_member_i++;
     }
 
-    skipToActiveLayer();
+    skipToActiveMember();
   }
 }
 
@@ -27,12 +27,12 @@ void Engine::prevMember() {
     // TODO create sub-circle
   } else {
     // TODO prev member
-    if (_active_layer_i == 0) {
-      _active_layer_i = _timeline.layers.size()-1;
+    if (_active_member_i == 0) {
+      _active_member_i = _timeline.members.size()-1;
     } else {
-      _active_layer_i--;
+      _active_member_i--;
     }
 
-    skipToActiveLayer();
+    skipToActiveMember();
   }
 }

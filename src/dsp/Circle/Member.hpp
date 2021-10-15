@@ -8,7 +8,7 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
-struct Layer {
+struct Member {
   TimePosition _start;
 
   unsigned int _n_beats = 0;
@@ -22,18 +22,18 @@ struct Layer {
   Recording *_love;
 
   // FIXME change me to be an array of bools for O(1) lookup
-  std::vector<unsigned int> target_layers_idx;
+  std::vector<unsigned int> target_members_idx;
 
-  inline Layer(TimePosition start, unsigned int n_beats, std::vector<unsigned int> target_layers_idx, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
+  inline Member(TimePosition start, unsigned int n_beats, std::vector<unsigned int> target_members_idx, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
     this->_start = start;
     this->_n_beats = n_beats;
-    this->target_layers_idx = target_layers_idx;
+    this->target_members_idx = target_members_idx;
 
     _in = new Recording(signal_type, samples_per_beat);
     _love = new Recording(kokopellivcv::dsp::SignalType::PARAM, samples_per_beat);
   }
 
-  inline ~Layer() {
+  inline ~Member() {
     delete _in;
     delete _love;
   }
@@ -50,7 +50,7 @@ struct Layer {
     _loop = loop;
   }
 
-  inline unsigned int getLayerBeat(unsigned int timeline_beat) {
+  inline unsigned int getMemberBeat(unsigned int timeline_beat) {
     int beat = timeline_beat - _start.beat;
     if (_loop && 0 < beat) {
       return beat % _n_beats;
@@ -60,8 +60,8 @@ struct Layer {
   }
 
   inline bool readableAtPosition(TimePosition timeline_position) {
-    int layer_beat = getLayerBeat(timeline_position.beat);
-    return (0 <= layer_beat && layer_beat < (int)_n_beats);
+    int member_beat = getMemberBeat(timeline_position.beat);
+    return (0 <= member_beat && member_beat < (int)_n_beats);
   }
 
   // TODO FIXME allow reverse recording
@@ -71,7 +71,7 @@ struct Layer {
 
   inline TimePosition getRecordingPosition(TimePosition timeline_position) {
     TimePosition recording_position = timeline_position;
-    recording_position.beat = getLayerBeat(timeline_position.beat);
+    recording_position.beat = getMemberBeat(timeline_position.beat);
     return recording_position;
   }
 

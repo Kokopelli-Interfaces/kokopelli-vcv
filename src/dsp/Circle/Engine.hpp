@@ -6,7 +6,7 @@
 #include "dsp/PhaseOscillator.hpp"
 #include "dsp/AntipopFilter.hpp"
 #include "dsp/Signal.hpp"
-#include "Layer.hpp"
+#include "Member.hpp"
 #include "rack.hpp"
 
 #include <assert.h>
@@ -26,19 +26,19 @@ struct Engine {
   // TODO make me an array to support MIX4 & PLAY
   kokopellivcv::dsp::SignalType _signal_type;
 
-  std::vector<unsigned int> _selected_layers_idx;
-  std::vector<unsigned int> _saved_selected_layers_idx;
-  bool _new_layer_active = true;
-  bool _select_new_layers = true;
+  std::vector<unsigned int> _selected_members_idx;
+  std::vector<unsigned int> _saved_selected_members_idx;
+  bool _new_member_active = true;
+  bool _select_new_members = true;
 
-  unsigned int _active_layer_i;
+  unsigned int _active_member_i;
 
   /* read only */
 
   std::pair<unsigned int, unsigned int> _group_loop = std::make_pair(0, 1);
   unsigned int _group_loop_length = 1;
 
-  Layer *_recording_layer = nullptr;
+  Member *_recording_member = nullptr;
   RecordParams _record_params;
 
   PhaseOscillator _phase_oscillator;
@@ -60,9 +60,9 @@ struct Engine {
   void step();
   float read();
   float readSelection();
-  float readActiveLayer();
+  float readActiveMember();
 
-  void skipToActiveLayer();
+  void skipToActiveMember();
 
   void undo();
   bool isRecording();
@@ -70,12 +70,12 @@ struct Engine {
 
   bool checkState(int skip_back, int fix_bounds, int record_on_inner_circle);
 
-  void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
-  void soloSelectLayer(unsigned int layer_i);
-  bool isSelected(unsigned int layer_i);
-  bool isSolo(unsigned int layer_i);
-  void toggleSelectLayer(unsigned int layer_i);
-  void deleteLayer(unsigned int layer_i);
+  void selectRange(unsigned int member_i_1, unsigned int member_i_2);
+  void soloSelectMember(unsigned int member_i);
+  bool isSelected(unsigned int member_i);
+  bool isSolo(unsigned int member_i);
+  void toggleSelectMember(unsigned int member_i);
+  void deleteMember(unsigned int member_i);
   void deleteSelection();
 
 private:
@@ -85,7 +85,7 @@ private:
   // unsigned int updateCirclePeriod();
 
   void endRecording(bool repeat_recording);
-  Layer* newRecording();
+  Member* newRecording();
   inline bool phaseDefined();
   inline void write();
   inline void handleBeatChange(PhaseAnalyzer::PhaseEvent flip);

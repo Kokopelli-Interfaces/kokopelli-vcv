@@ -4,7 +4,7 @@ using namespace kokopellivcv::dsp::circle;
 using namespace kokopellivcv::dsp;
 
 bool Engine::isRecording() {
-  return _recording_layer != nullptr;
+  return _recording_member != nullptr;
 }
 
 void Engine::setFixBounds(bool fix_bounds) {

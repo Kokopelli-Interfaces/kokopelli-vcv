@@ -1,22 +1,22 @@
 // adapted from bogaudio's module.cpp
 
 #include "module.hpp"
-#include "tribalinterfaces.hpp"
+#include "kokopellivcv.hpp"
 
-using namespace tribalinterfaces;
+using namespace kokopellivcv;
 
-void TribalInterfacesModule::onReset() {
+void KokopelliVcvModule::onReset() {
 	_steps = _modulationSteps;
 	reset();
 }
 
-void TribalInterfacesModule::onSampleRateChange() {
+void KokopelliVcvModule::onSampleRateChange() {
 	_modulationSteps = APP->engine->getSampleRate() * (2.5f / 1000.f); // modulate every ~2.5ms regardless of sample rate.
 	_steps = _modulationSteps;
 	sampleRateChange();
 }
 
-void TribalInterfacesModule::process(const ProcessArgs& args) {
+void KokopelliVcvModule::process(const ProcessArgs& args) {
 	if (!_initialized) {
 		_initialized = true;
 		onReset();

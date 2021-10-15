@@ -33,7 +33,7 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
   Engine &e = *_engines[c];
 
   float in = inputs[IN_INPUT].getPolyVoltage(c);
-  in = tribalinterfaces::dsp::attenuate(in, e.in_attenuation, _signal_type);
+  in = kokopellivcv::dsp::attenuate(in, e.in_attenuation, _signal_type);
 
   float out = in;
   if (expanderConnected()) {
@@ -48,11 +48,11 @@ void Signal::processChannel(const ProcessArgs& args, int c) {
       outputs[SEL_OUTPUT].setVoltage(fromCircle->sel_signal[c], c);
     }
 
-    out = tribalinterfaces::dsp::sum(fromCircle->signal[c], in, _signal_type);
+    out = kokopellivcv::dsp::sum(fromCircle->signal[c], in, _signal_type);
   }
 
   if (outputs[OUT_OUTPUT].isConnected()) {
-    out = tribalinterfaces::dsp::attenuate(out, e.out_attenuation, _signal_type);
+    out = kokopellivcv::dsp::attenuate(out, e.out_attenuation, _signal_type);
     outputs[OUT_OUTPUT].setVoltage(out, c);
   }
 }
@@ -66,4 +66,4 @@ void Signal::removeChannel(int c) {
   _engines[c] = nullptr;
 }
 
-Model* modelSignal = rack::createModel<Signal, SignalWidget>("TribalInterfaces-Signal");
+Model* modelSignal = rack::createModel<Signal, SignalWidget>("KokopelliVcv-Signal");

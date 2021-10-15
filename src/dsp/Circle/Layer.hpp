@@ -4,7 +4,7 @@
 #include "Recording.hpp"
 #include "dsp/Signal.hpp"
 
-namespace tribalinterfaces {
+namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
@@ -15,7 +15,7 @@ struct Layer {
 
   // TODO
   // std::vector<Recording*> recordings;
-  // std::vector<tribalinterfaces::dsp::SignalType> types;
+  // std::vector<kokopellivcv::dsp::SignalType> types;
 
   Recording *_in;
   Recording *_recording_strength;
@@ -23,13 +23,13 @@ struct Layer {
   // FIXME change me to be an array of bools for O(1) lookup
   std::vector<unsigned int> target_layers_idx;
 
-  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<unsigned int> target_layers_idx, tribalinterfaces::dsp::SignalType signal_type, int samples_per_beat) {
+  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<unsigned int> target_layers_idx, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
     this->_start_beat = start_beat;
     this->_n_beats = n_beats;
     this->target_layers_idx = target_layers_idx;
 
     _in = new Recording(signal_type, samples_per_beat);
-    _recording_strength = new Recording(tribalinterfaces::dsp::SignalType::PARAM, samples_per_beat);
+    _recording_strength = new Recording(kokopellivcv::dsp::SignalType::PARAM, samples_per_beat);
   }
 
   inline ~Layer() {
@@ -94,4 +94,4 @@ struct Layer {
 
 } // namespace circle
 } // namespace dsp
-} // namespace tribalinterfaces
+} // namespace kokopellivcv

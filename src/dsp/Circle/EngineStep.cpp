@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
-using namespace tribalinterfaces::dsp;
+using namespace kokopellivcv::dsp::circle;
+using namespace kokopellivcv::dsp;
 
 inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();

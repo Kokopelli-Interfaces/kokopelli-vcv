@@ -30,4 +30,4 @@ struct PlayWidget : ModuleWidget {
 	}
 };
 
-Model *modelPlay = rack::createModel<Play, PlayWidget>("TribalInterfaces-Play");
+Model *modelPlay = rack::createModel<Play, PlayWidget>("KokopelliVcv-Play");

@@ -2,18 +2,18 @@
 
 #include "expanders.hpp"
 #include "dsp/Signal.hpp"
-#include "tribalinterfaces.hpp"
+#include "kokopellivcv.hpp"
 
 extern Model *modelSignal;
 extern Model *modelCircle;
 
-namespace tribalinterfaces {
+namespace kokopellivcv {
 
 struct SignalExpanderMessage : ExpanderMessage {
-  float signal[TribalInterfacesModule::maxChannels]{};
-  float sel_signal[TribalInterfacesModule::maxChannels]{};
-  tribalinterfaces::dsp::SignalType signal_type;
+  float signal[KokopelliVcvModule::maxChannels]{};
+  float sel_signal[KokopelliVcvModule::maxChannels]{};
+  kokopellivcv::dsp::SignalType signal_type;
   int n_channels;
 };
 
-} // namespace tribalinterfaces
+} // namespace kokopellivcv

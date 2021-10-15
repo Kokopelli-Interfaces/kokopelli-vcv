@@ -1,19 +1,19 @@
 {
-  "slug": "tribal-interfaces",
-  "name": "Tribal Interfaces",
+  "slug": "kokopelli-vcv",
+  "name": "Kokopelli Vcv",
   "version": "1.0",
   "license": "MIT",
-  "author": "Tribal Interfaces",
-  "brand": "Tribal Interfaces",
+  "author": "Michael Muszynski",
+  "brand": "Kokopelli Interfaces",
   "authorEmail": "michael.ampm@gmail.com",
   "authorUrl": "https://github.com/gwatcha",
-  "pluginUrl": "https://github.com/gwatcha/tribal-interfaces",
-  "manualUrl": "https://github.com/gwatcha/tribal-interfaces/wiki",
-  "sourceUrl": "https://github.com/gwatcha/tribal-interfaces",
+  "pluginUrl": "https://github.com/gwatcha/kokopelli-vcv",
+  "manualUrl": "https://github.com/gwatcha/kokopelli-vcv/wiki",
+  "sourceUrl": "https://github.com/gwatcha/kokopelli-vcv",
   "donateUrl": "https://ko-fi.com/michaelmuszynski",
   "modules": [
     {
-      "slug": "TribalInterfaces-Signal",
+      "slug": "KokopelliVcv-Signal",
       "name": "Signal",
       "description": "Circle expander which adds one signal input and output.",
       "tags": [
@@ -21,7 +21,7 @@
       ]
     },
     {
-      "slug": "TribalInterfaces-Signal4",
+      "slug": "KokopelliVcv-Signal4",
       "name": "Signal4",
       "description": "Circle expander which adds four signal inputs and outputs.",
       "tags": [
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "slug": "TribalInterfaces-Play",
+      "slug": "KokopelliVcv-Play",
       "name": "Play",
       "description": "Circle expander which adds midi recording inputs and outputs.",
       "tags": [
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "slug": "TribalInterfaces-Signal",
+      "slug": "KokopelliVcv-Signal",
       "name": "Signal",
       "description": "Record, loop, edit, playback, and sequence signals.",
       "tags": [
@@ -45,9 +45,9 @@
       ]
     },
     {
-      "slug": "TribalInterfaces-Circle",
+      "slug": "KokopelliVcv-Circle",
       "name": "Circle",
-      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more. Inspired by the advancer of existence, 'Circle'.",
+      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more.",
       "tags": [
         "Poly",
         "Recording",

@@ -2,7 +2,7 @@
 
 #include "menu.hpp"
 
-using namespace tribalinterfaces;
+using namespace kokopellivcv;
 
 #define SUBMENUS 1
 

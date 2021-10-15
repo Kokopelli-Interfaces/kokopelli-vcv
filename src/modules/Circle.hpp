@@ -7,9 +7,9 @@
 #include "widgets.hpp"
 #include <math.h>
 
-namespace tribalinterfaces {
+namespace kokopellivcv {
 
-struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
+struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
   enum ParamIds {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
@@ -40,14 +40,14 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
 
   float _last_select_value = 0.f;
 
-  tribalinterfaces::dsp::LongPressButton _select_function_button;
-  tribalinterfaces::dsp::LongPressButton _select_mode_button;
+  kokopellivcv::dsp::LongPressButton _select_function_button;
+  kokopellivcv::dsp::LongPressButton _select_mode_button;
 
-  tribalinterfaces::dsp::LongPressButton _fix_bounds_button;
-  tribalinterfaces::dsp::LongPressButton _record_on_inner_circle_button;
-  tribalinterfaces::dsp::LongPressButton _skip_back_button;
+  kokopellivcv::dsp::LongPressButton _fix_bounds_button;
+  kokopellivcv::dsp::LongPressButton _record_on_inner_circle_button;
+  kokopellivcv::dsp::LongPressButton _skip_back_button;
 
-  std::array<tribalinterfaces::dsp::circle::Engine*, maxChannels> _engines;
+  std::array<kokopellivcv::dsp::circle::Engine*, maxChannels> _engines;
 
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
@@ -72,5 +72,5 @@ private:
   void processSelect();
 };
 
-} // namespace tribalinterfaces
+} // namespace kokopellivcv
 

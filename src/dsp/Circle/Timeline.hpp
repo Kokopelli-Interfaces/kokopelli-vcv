@@ -5,7 +5,7 @@
 #include "util/math.hpp"
 #include <vector>
 
-namespace tribalinterfaces {
+namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
@@ -89,7 +89,7 @@ struct Timeline {
     float signal_out = 0.f;
 
     // FIXME multiple recordings in layer, have loop and array of types
-    tribalinterfaces::dsp::SignalType signal_type = tribalinterfaces::dsp::SignalType::AUDIO;
+    kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
     if (0 < layers.size()) {
       signal_type = layers[0]->_in->_signal_type;
     }
@@ -100,7 +100,7 @@ struct Timeline {
       }
 
       float layer_out = layers[layer_i]->readSignal(position);
-      signal_out = tribalinterfaces::dsp::sum(signal_out, layer_out, signal_type);
+      signal_out = kokopellivcv::dsp::sum(signal_out, layer_out, signal_type);
     }
 
     return signal_out;
@@ -110,7 +110,7 @@ struct Timeline {
     updateLayerAttenuations(position);
 
     // FIXME multiple recordings in layer, have loop and array of types
-    tribalinterfaces::dsp::SignalType signal_type = tribalinterfaces::dsp::SignalType::AUDIO;
+    kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
     if (0 < layers.size()) {
       signal_type = layers[0]->_in->_signal_type;
     }
@@ -131,12 +131,12 @@ struct Timeline {
 
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
         float layer_out = layers[i]->readSignal(position);
-        layer_out = tribalinterfaces::dsp::attenuate(layer_out, attenuation, signal_type);
+        layer_out = kokopellivcv::dsp::attenuate(layer_out, attenuation, signal_type);
         if (i == active_layer_i) {
           active_layer_out = layer_out;
         }
 
-        signal_out = tribalinterfaces::dsp::sum(signal_out, layer_out, signal_type);
+        signal_out = kokopellivcv::dsp::sum(signal_out, layer_out, signal_type);
       }
     }
 
@@ -181,4 +181,4 @@ struct Timeline {
 
 } // namespace circle
 } // namespace dsp
-} // namespace tribalinterfaces
+} // namespace kokopellivcv

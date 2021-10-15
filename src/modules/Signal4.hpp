@@ -1,10 +1,10 @@
-#include "tribalinterfaces.hpp"
+#include "kokopellivcv.hpp"
 
 extern Model *modelSignal4;
 
-namespace tribalinterfaces {
+namespace kokopellivcv {
 
-struct Signal4 : TribalInterfacesModule {
+struct Signal4 : KokopelliVcvModule {
   enum ParamIds { OUT_ATTENUATION_PARAM, IN_ATTENUATION_PARAM, NUM_PARAMS };
   enum InputIds {
     IN_1_INPUT,
@@ -37,4 +37,4 @@ struct Signal4 : TribalInterfacesModule {
   void processAlways(const ProcessArgs& args) override;
 };
 
-} // namespace tribalinterfaces
+} // namespace kokopellivcv

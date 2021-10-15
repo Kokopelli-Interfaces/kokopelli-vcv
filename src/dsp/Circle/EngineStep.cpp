@@ -39,17 +39,16 @@ void Engine::endRecording(bool repeat_recording) {
   }
 
   if (repeat_recording) {
-    // if (phaseDefined()) {
-    //   _recording_layer->trimLength(_timeline_position);
-    // }
-
     _recording_layer->setLoop(true);
+
     unsigned int initial_loop_length = _loop_length;
-    while (_loop_length + 1 < _recording_layer->_n_beats) {
+    while (_loop_length < _recording_layer->_n_beats) {
       _circle.second += initial_loop_length;
       _loop_length = _circle.second - _circle.first;
     }
-    _recording_layer->padOrFitToLength(_loop_length);
+
+    _recording_layer->fitToLength(_loop_length);
+
   } else {
     assert(!_recording_layer->isLooping());
   }

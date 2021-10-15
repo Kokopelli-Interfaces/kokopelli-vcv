@@ -62,7 +62,7 @@ struct Engine {
   float readSelection();
   float readActiveLayer();
 
-  void setCircleToActiveLayer();
+  void skipToActiveLayer();
 
   void undo();
   bool isRecording();
@@ -81,6 +81,8 @@ struct Engine {
 private:
   void setFixBounds(bool fix_bounds);
   void setRecordOnInnerLoop(bool record_on_inner_circle);
+
+  // unsigned int updateCirclePeriod();
 
   void endRecording(bool repeat_recording);
   Layer* newRecording();

@@ -28,7 +28,17 @@ void Engine::endRecording(bool repeat_recording) {
   assert(isRecording());
   assert(_recording_layer->_n_beats != 0);
 
-  _recording_layer->setLoop(repeat_recording);
+  if (repeat_recording) {
+    _recording_layer->setLoop(true);
+    unsigned int initial_loop_length = _loop_length;
+    while (_loop_length + 1 < _recording_layer->_n_beats) {
+      _circle.second += initial_loop_length;
+      _loop_length = _circle.second - _circle.first;
+    }
+    _recording_layer->padOrFitToLength(_loop_length);
+  } else {
+    assert(!_recording_layer->isLooping());
+  }
 
   if (!_phase_oscillator.isSet()) {
     if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
@@ -52,10 +62,6 @@ void Engine::endRecording(bool repeat_recording) {
 
   if (_new_layer_active) {
     _active_layer_i = layer_i;
-  }
-
-  if (_recording_layer->isLooping() && _loop_length < _recording_layer->_n_beats) {
-    _loop_length = _recording_layer->_n_beats;
   }
 
   printf("- rec end\n");
@@ -122,38 +128,42 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_circle_end = _timeline_position.beat == _circle.second;
   if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && !this->_record_params.fix_bounds && !this->checkState(1, 1, 0);
-    if (grow_circle) {
-      _circle.second += _loop_length;
-      if (this->_record_params.record_on_inner_circle) {
-        _recording_layer->_n_beats += _loop_length;
-      } else {
-        _recording_layer->_n_beats += 1;
-      }
+    if (_skip_back) {
+      _read_antipop_filter.trigger();
+      _write_antipop_filter.trigger();
+      _timeline_position.beat = _circle.first;
     } else {
-      bool skip_back_to_circle_start = (this->_skip_back && !(this->isRecording() && !_record_params.record_on_inner_circle));
-      if (skip_back_to_circle_start) {
-        _read_antipop_filter.trigger();
-        _write_antipop_filter.trigger();
-        _timeline_position.beat = _circle.first;
-      } else { // shift circle
-        unsigned int circle_shift = _circle.second - _circle.first;
-        _circle.first = _circle.second;
-        _circle.second += circle_shift;
-      }
+      unsigned int circle_shift = _circle.second - _circle.first;
+      _circle.first = _circle.second;
+      _circle.second += circle_shift;
     }
   }
+
+  //   bool grow_circle = this->isRecording() && !this->_record_params.fix_bounds && !this->checkState(1, 1, 0);
+  //   if (grow_circle) {
+  //     _circle.second += _loop_length;
+  //     if (this->_record_params.record_on_inner_circle) {
+  //       _recording_layer->_n_beats += _loop_length;
+  //     } else {
+  //       _recording_layer->_n_beats += 1;
+  //     }
+  //   } else {
+  //     bool skip_back_to_circle_start = (this->_skip_back && !(this->isRecording() && !_record_params.record_on_inner_circle));
+  //     if (skip_back_to_circle_start) {
+  //       _read_antipop_filter.trigger();
+  //       _write_antipop_filter.trigger();
+  //       _timeline_position.beat = _circle.first;
+  //     } else { // shift circle
+  //       unsigned int circle_shift = _circle.second - _circle.first;
+  //       _circle.first = _circle.second;
+  //       _circle.second += circle_shift;
+  //     }
+  //   }
+  // }
 
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
     _recording_layer->_n_beats++;
-    // bool create_new_dub = this->checkState(1, 0, 1);
-    // if (create_new_dub) {
-    //   this->endRecording();
-    //   _recording_layer = this->newRecording();
-    // } else if (!_record_params.fix_bounds || !_record_params.record_on_inner_circle) {
-    //   _recording_layer->_n_beats++;
-    // }
   }
 }
 

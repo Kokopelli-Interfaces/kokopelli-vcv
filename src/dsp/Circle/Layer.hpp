@@ -40,7 +40,11 @@ struct Layer {
   inline bool isLooping() {
     return _loop;
   }
- 
+
+  inline void padOrFitToLength(unsigned int length) {
+    _n_beats = length;
+  }
+
   inline void setLoop(bool loop) {
     _loop = loop;
   }

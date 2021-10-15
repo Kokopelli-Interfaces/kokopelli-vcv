@@ -98,7 +98,7 @@ void Circle::processButtons() {
       e->nextMember();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      // e->setCircleToActiveLayer();
+      // e->skipToActiveLayer();
       if (0 < e->_timeline.layers.size()) {
         e->_timeline.layers[e->_active_layer_i]->_loop = !e->_timeline.layers[e->_active_layer_i]->_loop;
       }
@@ -112,7 +112,7 @@ void Circle::processButtons() {
       e->repeat();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->setCircleToActiveLayer();
+      e->skipToActiveLayer();
     }
   }
 }

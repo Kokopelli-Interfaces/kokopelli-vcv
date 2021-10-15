@@ -6,10 +6,10 @@ Circle::Circle() {
   configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
-  configParam(SKIP_BACK_PARAM, 0.f, 1.f, 0.f, "Skip Back");
-  configParam(FIX_BOUNDS_PARAM, 0.f, 1.f, 0.f, "Fix Recording Boundaries");
-  configParam(RECORD_ON_INNER_CIRCLE_PARAM, 0.f, 1.f, 0.f, "Record On Inner Circle");
-  configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");
+  configParam(REPEAT_PARAM, 0.f, 1.f, 0.f, "Repeat");
+  configParam(PREV_MEMBER_PARAM, 0.f, 1.f, 0.f, "Previous Member");
+  configParam(NEXT_MEMBER_PARAM, 0.f, 1.f, 0.f, "Next Member");
+  configParam(NEW_LOVE_PARAM, 0.f, 1.f, 0.f, "New Love");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
@@ -18,9 +18,9 @@ Circle::Circle() {
   _select_function_button.param = &params[SELECT_FUNCTION_PARAM];
   _select_mode_button.param = &params[SELECT_MODE_PARAM];
 
-  _fix_bounds_button.param = &params[FIX_BOUNDS_PARAM];
-  _record_on_inner_circle_button.param = &params[RECORD_ON_INNER_CIRCLE_PARAM];
-  _skip_back_button.param = &params[SKIP_BACK_PARAM];
+  _prev_member_button.param = &params[PREV_MEMBER_PARAM];
+  _next_member_button.param = &params[NEXT_MEMBER_PARAM];
+  _repeat_button.param = &params[REPEAT_PARAM];
 }
 
 void Circle::sampleRateChange() {
@@ -35,9 +35,9 @@ void Circle::processButtons() {
 
     kokopellivcv::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _fix_bounds_event = _fix_bounds_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _record_on_inner_circle_event = _record_on_inner_circle_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _skip_back_event = _skip_back_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _prev_member_event = _prev_member_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _next_member_event = _next_member_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _repeat_event = _repeat_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
@@ -80,7 +80,7 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_fix_bounds_event) {
+    switch (_prev_member_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
@@ -95,7 +95,7 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_record_on_inner_circle_event) {
+    switch (_next_member_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
@@ -113,7 +113,7 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_skip_back_event) {
+    switch (_repeat_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
@@ -179,14 +179,14 @@ void Circle::modulate() {
 void Circle::modulateChannel(int channel_i) {
   if (baseConnected()) {
     kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
-    float record_strength = params[RECORD_PARAM].getValue();
-    if (inputs[RECORD_INPUT].isConnected()) {
-      record_strength *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
+    float new_love = params[NEW_LOVE_PARAM].getValue();
+    if (inputs[NEW_LOVE_INPUT].isConnected()) {
+      new_love *= rack::clamp(inputs[NEW_LOVE_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
 
-    // taking to the strength of 2 gives a more intuitive curve
-    record_strength = pow(record_strength, 2);
-    e->_record_params.strength = record_strength;
+    // taking to the power of 2 gives a more intuitive curve
+    new_love = pow(new_love, 2);
+    e->_record_params.new_love = new_love;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
@@ -263,7 +263,7 @@ void Circle::updateLights(const ProcessArgs &args) {
     }
   }
 
-  bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
+  bool poly_record = (inputs[NEW_LOVE_INPUT].isConnected() && 1 < inputs[NEW_LOVE_INPUT].getChannels());
 
   bool displayed_skip_back = default_e->_skip_back;
   RecordParams displayed_record_params = default_e->_record_params;
@@ -288,7 +288,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
 
   if (displayed_record_params.active()) {
-    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.strength);
+    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.new_love);
     lights[RECORD_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
     int light_colour = poly_record ? 2 : 0;
     lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());

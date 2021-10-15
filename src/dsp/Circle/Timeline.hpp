@@ -65,7 +65,7 @@ struct Timeline {
         for (unsigned int j = layer_i + 1; j < layers.size(); j++) {
           for (auto target_layer_i : layers[j]->target_layers_idx) {
             if (target_layer_i == layer_i) {
-              layer_i_attenuation += layers[j]->readRecordingStrength(position);
+              layer_i_attenuation += layers[j]->readRecordingLove(position);
               break;
             }
           }
@@ -123,7 +123,7 @@ struct Timeline {
         if (record_params.active()) {
           for (unsigned int sel_i : recording->target_layers_idx) {
             if (sel_i == i) {
-              attenuation += record_params.strength;
+              attenuation += record_params.new_love;
               break;
             }
           }

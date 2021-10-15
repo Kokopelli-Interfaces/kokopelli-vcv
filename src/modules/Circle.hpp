@@ -14,13 +14,13 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
-    SKIP_BACK_PARAM,
-    RECORD_ON_INNER_CIRCLE_PARAM,
-    FIX_BOUNDS_PARAM,
-    RECORD_PARAM,
+    REPEAT_PARAM,
+    NEXT_MEMBER_PARAM,
+    PREV_MEMBER_PARAM,
+    NEW_LOVE_PARAM,
     NUM_PARAMS
   };
-  enum InputIds { SCENE_INPUT, RECORD_INPUT, PHASE_INPUT, NUM_INPUTS };
+  enum InputIds { SCENE_INPUT, NEW_LOVE_INPUT, PHASE_INPUT, NUM_INPUTS };
   enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
   enum LightIds {
     ENUMS(SELECT_FUNCTION_LIGHT, 3),
@@ -43,9 +43,9 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
   kokopellivcv::dsp::LongPressButton _select_function_button;
   kokopellivcv::dsp::LongPressButton _select_mode_button;
 
-  kokopellivcv::dsp::LongPressButton _fix_bounds_button;
-  kokopellivcv::dsp::LongPressButton _record_on_inner_circle_button;
-  kokopellivcv::dsp::LongPressButton _skip_back_button;
+  kokopellivcv::dsp::LongPressButton _prev_member_button;
+  kokopellivcv::dsp::LongPressButton _next_member_button;
+  kokopellivcv::dsp::LongPressButton _repeat_button;
 
   std::array<kokopellivcv::dsp::circle::Engine*, maxChannels> _engines;
 

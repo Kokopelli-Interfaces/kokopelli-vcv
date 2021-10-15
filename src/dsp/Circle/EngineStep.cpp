@@ -208,6 +208,6 @@ void Engine::step() {
 
   if (this->isRecording()) {
     float in = _write_antipop_filter.process(_record_params.readIn());
-    _recording_layer->write(_timeline_position, in, _record_params.strength, this->phaseDefined());
+    _recording_layer->write(_timeline_position, in, _record_params.new_love, this->phaseDefined());
   }
 }

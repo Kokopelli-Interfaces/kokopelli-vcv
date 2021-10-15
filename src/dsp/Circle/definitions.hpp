@@ -12,7 +12,7 @@ struct TimePosition {
 struct RecordParams {
   float in = 0.f;
 
-  float strength = 0.f;
+  float new_love = 0.f;
   bool record_on_inner_circle = true;
   bool fix_bounds = true;
 
@@ -20,9 +20,9 @@ struct RecordParams {
   float _recordActiveThreshold = 0.0001f;
 
   inline bool active() {
-    if (_active && strength <= _recordActiveThreshold) {
+    if (_active && new_love <= _recordActiveThreshold) {
       _active = false;
-    } else if (!_active && _recordActiveThreshold < strength) {
+    } else if (!_active && _recordActiveThreshold < new_love) {
       _active = true;
     }
 
@@ -30,9 +30,9 @@ struct RecordParams {
   }
 
   inline float readIn() {
-    // avoids pops when engaging / disengaging strength parameter
-    if (0.0001f <= strength && strength <= 0.033f) {
-      float engage_attenuation = -1.f * pow((30.f * strength - _recordActiveThreshold), 3) + 1.f;
+    // avoids pops when engaging / disengaging new_love parameter
+    if (0.0001f <= new_love && new_love <= 0.033f) {
+      float engage_attenuation = -1.f * pow((30.f * new_love - _recordActiveThreshold), 3) + 1.f;
       engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
       return in * (1.f - engage_attenuation);
     }

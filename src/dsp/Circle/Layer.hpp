@@ -37,6 +37,14 @@ struct Layer {
     delete _love;
   }
 
+  inline bool isLooping() {
+    return _loop;
+  }
+ 
+  inline void setLoop(bool loop) {
+    _loop = loop;
+  }
+
   inline unsigned int getLayerBeat(unsigned int timeline_beat) {
     int beat = timeline_beat - _start_beat;
     if (_loop && 0 < beat) {

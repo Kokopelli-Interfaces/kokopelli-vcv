@@ -84,11 +84,7 @@ void Circle::processButtons() {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      if (!e->_record_params.fix_bounds) {
-        e->setFixBounds(true);
-      } else {
-        e->setFixBounds(false);
-      }
+      e->prevMember();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->undo();
@@ -99,11 +95,7 @@ void Circle::processButtons() {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.record_on_inner_circle == false) {
-        e->setRecordOnInnerLoop(true);
-      } else {
-        e->setRecordOnInnerLoop(false);
-      }
+      e->nextMember();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       // e->setCircleToActiveLayer();
@@ -117,11 +109,7 @@ void Circle::processButtons() {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_skip_back == true) {
-        e->setSkipBack(false);
-      } else {
-        e->setSkipBack(true);
-      }
+      e->repeat();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->setCircleToActiveLayer();

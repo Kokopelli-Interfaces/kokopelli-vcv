@@ -53,7 +53,7 @@ void Engine::toggleSelectLayer(unsigned int layer_i) {
 
 void Engine::undo() {
   if (isRecording()) {
-    endRecording();
+    endRecording(false);
   }
 
   this->deleteLayer(_timeline.layers.size()-1);

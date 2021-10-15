@@ -24,9 +24,11 @@ bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circl
   return true;
 }
 
-void Engine::endRecording() {
+void Engine::endRecording(bool repeat_recording) {
   assert(isRecording());
   assert(_recording_layer->_n_beats != 0);
+
+  _recording_layer->setLoop(repeat_recording);
 
   if (!_phase_oscillator.isSet()) {
     if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
@@ -52,12 +54,12 @@ void Engine::endRecording() {
     _active_layer_i = layer_i;
   }
 
-  if (_recording_layer->_loop && _loop_length < _recording_layer->_n_beats) {
+  if (_recording_layer->isLooping() && _loop_length < _recording_layer->_n_beats) {
     _loop_length = _recording_layer->_n_beats;
   }
 
   printf("- rec end\n");
-  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
+  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->isLooping(), _recording_layer->_in->_samples_per_beat, layer_i);
 
   _recording_layer = nullptr;
 }
@@ -105,12 +107,12 @@ Layer* Engine::newRecording() {
 
   Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
-  if (this->_record_params.record_on_inner_circle) {
-    recording_layer->_loop = true;
-  }
+  // if (this->_record_params.record_on_inner_circle) {
+  //   recording_layer->_loop = true;
+  // }
 
-  // printf("Recording Activate:\n");
-  // printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
+  printf("Recording Activate:\n");
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
 
   return recording_layer;
 }
@@ -129,17 +131,11 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
         _recording_layer->_n_beats += 1;
       }
     } else {
-      bool skip_back_to_circle_start =
-        (this->_skip_back && !(this->isRecording() && !_record_params.record_on_inner_circle)) ||
-        (_timeline.atEnd(_timeline_position) && !this->isRecording());
+      bool skip_back_to_circle_start = (this->_skip_back && !(this->isRecording() && !_record_params.record_on_inner_circle));
       if (skip_back_to_circle_start) {
         _read_antipop_filter.trigger();
         _write_antipop_filter.trigger();
         _timeline_position.beat = _circle.first;
-        if (_options.create_new_layer_on_skip_back && this->isRecording()) {
-          this->endRecording();
-          _recording_layer = this->newRecording();
-        }
       } else { // shift circle
         unsigned int circle_shift = _circle.second - _circle.first;
         _circle.first = _circle.second;
@@ -150,13 +146,14 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
 
   bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
-    bool create_new_dub = this->checkState(1, 0, 1);
-    if (create_new_dub) {
-      this->endRecording();
-      _recording_layer = this->newRecording();
-    } else if (!_record_params.fix_bounds || !_record_params.record_on_inner_circle) {
-      _recording_layer->_n_beats++;
-    }
+    _recording_layer->_n_beats++;
+    // bool create_new_dub = this->checkState(1, 0, 1);
+    // if (create_new_dub) {
+    //   this->endRecording();
+    //   _recording_layer = this->newRecording();
+    // } else if (!_record_params.fix_bounds || !_record_params.record_on_inner_circle) {
+    //   _recording_layer->_n_beats++;
+    // }
   }
 }
 
@@ -194,15 +191,7 @@ void Engine::step() {
     _recording_layer = this->newRecording();
     _write_antipop_filter.trigger();
   } else if (this->isRecording() && !_record_params.active()) {
-    // if the capture button is used, assume the recording afterwards is unnecessary
-    if (_used_window_capture_button) {
-      Layer *unnecessary_recording = _recording_layer;
-      _recording_layer = nullptr;
-      delete unnecessary_recording;
-      _used_window_capture_button = false;
-    } else {
-      this->endRecording();
-    }
+    this->endRecording(false);
     this->resetEngineMode();
   }
 

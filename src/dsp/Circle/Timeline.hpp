@@ -170,7 +170,7 @@ struct Timeline {
   inline unsigned int getNumberOfCircleBeats(TimePosition position) {
     unsigned int max_n_beats = 0;
     for (auto layer: layers) {
-      if (layer->readableAtPosition(position) && layer->_loop && max_n_beats < layer->_n_beats) {
+      if (layer->readableAtPosition(position) && layer->isLooping() && max_n_beats < layer->_n_beats) {
         max_n_beats = layer->_n_beats;
       }
     }

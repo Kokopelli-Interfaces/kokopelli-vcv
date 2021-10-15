@@ -40,7 +40,6 @@ struct Engine {
 
   Layer *_recording_layer = nullptr;
   RecordParams _record_params;
-  bool _used_window_capture_button = false;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
@@ -54,6 +53,10 @@ struct Engine {
 
   Options _options;
 
+  void repeat();
+  void nextMember();
+  void prevMember();
+
   void step();
   float read();
   float readSelection();
@@ -64,10 +67,6 @@ struct Engine {
   void undo();
   bool isRecording();
   void resetEngineMode();
-
-  void setFixBounds(bool fix_bounds);
-  void setRecordOnInnerLoop(bool record_on_inner_circle);
-  void setSkipBack(bool skip_back);
 
   bool checkState(int skip_back, int fix_bounds, int record_on_inner_circle);
 
@@ -80,7 +79,10 @@ struct Engine {
   void deleteSelection();
 
 private:
-  void endRecording();
+  void setFixBounds(bool fix_bounds);
+  void setRecordOnInnerLoop(bool record_on_inner_circle);
+
+  void endRecording(bool repeat_recording);
   Layer* newRecording();
   inline bool phaseDefined();
   inline void write();

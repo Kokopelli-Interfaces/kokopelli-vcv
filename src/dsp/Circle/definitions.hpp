@@ -14,7 +14,7 @@ struct RecordParams {
 
   float new_love = 0.f;
   bool record_on_inner_circle = true;
-  bool fix_bounds = true;
+  bool fix_bounds = false;
 
   bool _active = false;
   float _recordActiveThreshold = 0.0001f;
@@ -44,6 +44,5 @@ struct RecordParams {
 struct Options {
   bool use_antipop = false;
   bool strict_recording_lengths = true;
-  bool create_new_layer_on_skip_back = false;
   bool bipolar_phase_input = false;
 };

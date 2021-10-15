@@ -9,7 +9,8 @@ namespace dsp {
 namespace circle {
 
 struct Layer {
-  unsigned int _start_beat = 0;
+  TimePosition _start;
+
   unsigned int _n_beats = 0;
   bool _loop = false;
 
@@ -23,8 +24,8 @@ struct Layer {
   // FIXME change me to be an array of bools for O(1) lookup
   std::vector<unsigned int> target_layers_idx;
 
-  inline Layer(unsigned int start_beat, unsigned int n_beats, std::vector<unsigned int> target_layers_idx, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
-    this->_start_beat = start_beat;
+  inline Layer(TimePosition start, unsigned int n_beats, std::vector<unsigned int> target_layers_idx, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
+    this->_start = start;
     this->_n_beats = n_beats;
     this->target_layers_idx = target_layers_idx;
 
@@ -41,6 +42,20 @@ struct Layer {
     return _loop;
   }
 
+  // // FIXME have layer start positions float
+  // inline void trimLength(TimePosition end_position) {
+  //   int beat_diff = end_position.beat - _start.beat;
+  //   if (0 < beat_diff) {
+  //     double phase_diff =  end_position.phase - _start.phase;
+  //     // does not qualify for the extra beat
+  //     if (phase_diff < 0.5f) {
+  //       beat_diff--;
+  //     }
+
+  //     _n_beats = beat_diff;
+  //   }
+  // }
+
   inline void padOrFitToLength(unsigned int length) {
     _n_beats = length;
   }
@@ -50,7 +65,7 @@ struct Layer {
   }
 
   inline unsigned int getLayerBeat(unsigned int timeline_beat) {
-    int beat = timeline_beat - _start_beat;
+    int beat = timeline_beat - _start.beat;
     if (_loop && 0 < beat) {
       return beat % _n_beats;
     }
@@ -65,7 +80,7 @@ struct Layer {
 
   // TODO FIXME allow reverse recording
   inline bool writableAtPosition(TimePosition timeline_position) {
-    return _start_beat <= timeline_position.beat && timeline_position.beat <= _start_beat + _n_beats;
+    return _start.beat <= timeline_position.beat && timeline_position.beat <= _start.beat + _n_beats;
   }
 
   inline TimePosition getRecordingPosition(TimePosition timeline_position) {

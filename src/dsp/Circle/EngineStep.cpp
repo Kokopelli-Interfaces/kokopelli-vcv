@@ -28,7 +28,21 @@ void Engine::endRecording(bool repeat_recording) {
   assert(isRecording());
   assert(_recording_layer->_n_beats != 0);
 
+  if (!_phase_oscillator.isSet()) {
+    if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
+      _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
+    } else {
+      float recording_time = _recording_layer->_in->_samples_per_beat * _sample_time;
+      _phase_oscillator.setFrequency(1 / recording_time);
+    }
+    printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
+  }
+
   if (repeat_recording) {
+    // if (phaseDefined()) {
+    //   _recording_layer->trimLength(_timeline_position);
+    // }
+
     _recording_layer->setLoop(true);
     unsigned int initial_loop_length = _loop_length;
     while (_loop_length + 1 < _recording_layer->_n_beats) {
@@ -38,16 +52,6 @@ void Engine::endRecording(bool repeat_recording) {
     _recording_layer->padOrFitToLength(_loop_length);
   } else {
     assert(!_recording_layer->isLooping());
-  }
-
-  if (!_phase_oscillator.isSet()) {
-    if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
-      _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
-    } else {
-      float recording_time = _recording_layer->_in->_samples_per_beat * _sample_time;
-      _phase_oscillator.setFrequency(1 / recording_time);
-    }
-    printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
   }
 
   _timeline.layers.push_back(_recording_layer);
@@ -65,7 +69,7 @@ void Engine::endRecording(bool repeat_recording) {
   }
 
   printf("- rec end\n");
-  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->isLooping(), _recording_layer->_in->_samples_per_beat, layer_i);
+  printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start.beat, _recording_layer->_n_beats,  _recording_layer->isLooping(), _recording_layer->_in->_samples_per_beat, layer_i);
 
   _recording_layer = nullptr;
 }
@@ -74,17 +78,22 @@ Layer* Engine::newRecording() {
   assert(_record_params.active());
   assert(_recording_layer == nullptr);
 
-  unsigned int start_beat = _timeline_position.beat;
+  TimePosition start;
+  start.beat = _timeline_position.beat;
+  start.phase = _timeline_position.phase;
+
   unsigned int n_beats = 1;
   if (this->_record_params.fix_bounds && this->_record_params.record_on_inner_circle) {
-    start_beat = _circle.first;
+    start.beat = _circle.first;
+    start.phase = 0.f; // FIXME circle bounds should have phase
+
     n_beats = _loop_length;
   }
 
   bool shift_circle = !this->_record_params.fix_bounds;
   if (shift_circle) {
-    _circle.first = start_beat;
-    _circle.second = start_beat + _loop_length;
+    _circle.first = _timeline_position.beat;
+    _circle.second = _circle.first + _loop_length;
   }
 
   if (this->_record_params.record_on_inner_circle) {
@@ -111,14 +120,14 @@ Layer* Engine::newRecording() {
     }
   }
 
-  Layer* recording_layer = new Layer(start_beat, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
+  Layer* recording_layer = new Layer(_timeline_position, n_beats, _selected_layers_idx, _signal_type, samples_per_beat);
 
   // if (this->_record_params.record_on_inner_circle) {
   //   recording_layer->_loop = true;
   // }
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start_beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active layer %d\n", recording_layer->_start.beat, recording_layer->_n_beats, recording_layer->_loop, recording_layer->_in->_samples_per_beat, _active_layer_i);
 
   return recording_layer;
 }
@@ -161,10 +170,11 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   //   }
   // }
 
-  bool reached_recording_end = this->isRecording() && _recording_layer->_start_beat + _recording_layer->_n_beats <= _timeline_position.beat;
+  bool reached_recording_end = this->isRecording() && _recording_layer->_start.beat + _recording_layer->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
     _recording_layer->_n_beats++;
   }
+
 }
 
 inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {

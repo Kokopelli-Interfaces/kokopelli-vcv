@@ -2,6 +2,14 @@
 
 using namespace kokopellivcv::dsp::circle;
 
+void Engine::undo() {
+  if (isRecording()) {
+    endRecording(false);
+  }
+
+  this->deleteMember(_timeline.members.size()-1);
+}
+
 void Engine::next() {
   if (this->isRecording()) {
     this->endRecording(false);

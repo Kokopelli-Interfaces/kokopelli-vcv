@@ -51,15 +51,6 @@ void Engine::toggleSelectMember(unsigned int member_i) {
     }
 }
 
-void Engine::undo() {
-  if (isRecording()) {
-    endRecording(false);
-  }
-
-  this->deleteMember(_timeline.members.size()-1);
-}
-
-
 void Engine::deleteMember(unsigned int member_i) {
   if (member_i < _timeline.members.size()) {
     _timeline.members.erase(_timeline.members.begin()+member_i);

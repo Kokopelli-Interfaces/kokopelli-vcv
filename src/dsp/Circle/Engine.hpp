@@ -53,7 +53,7 @@ struct Engine {
 
   Options _options;
 
-  void repeat();
+  void loop();
   void nextMember();
   void prevMember();
 
@@ -84,7 +84,7 @@ private:
 
   // unsigned int updateCirclePeriod();
 
-  void endRecording(bool repeat_recording);
+  void endRecording(bool loop_recording);
   Member* newRecording();
   inline bool phaseDefined();
   inline void write();

@@ -24,7 +24,7 @@ bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circl
   return true;
 }
 
-void Engine::endRecording(bool repeat_recording) {
+void Engine::endRecording(bool loop_recording) {
   assert(isRecording());
   assert(_recording_member->_n_beats != 0);
 
@@ -38,7 +38,7 @@ void Engine::endRecording(bool repeat_recording) {
     printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
   }
 
-  if (repeat_recording) {
+  if (loop_recording) {
     _recording_member->setLoop(true);
 
     unsigned int initial_group_loop_length = _group_loop_length;

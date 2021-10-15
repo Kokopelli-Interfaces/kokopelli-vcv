@@ -14,7 +14,7 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
-    REPEAT_PARAM,
+    LOOP_PARAM,
     NEXT_MEMBER_PARAM,
     PREV_MEMBER_PARAM,
     NEW_LOVE_PARAM,
@@ -45,7 +45,7 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
 
   kokopellivcv::dsp::LongPressButton _prev_member_button;
   kokopellivcv::dsp::LongPressButton _next_member_button;
-  kokopellivcv::dsp::LongPressButton _repeat_button;
+  kokopellivcv::dsp::LongPressButton _loop_button;
 
   std::array<kokopellivcv::dsp::circle::Engine*, maxChannels> _engines;
 

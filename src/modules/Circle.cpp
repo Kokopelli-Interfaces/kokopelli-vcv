@@ -6,7 +6,7 @@ Circle::Circle() {
   configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
-  configParam(REPEAT_PARAM, 0.f, 1.f, 0.f, "Repeat");
+  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
   configParam(PREV_MEMBER_PARAM, 0.f, 1.f, 0.f, "Previous Member");
   configParam(NEXT_MEMBER_PARAM, 0.f, 1.f, 0.f, "Next Member");
   configParam(NEW_LOVE_PARAM, 0.f, 1.f, 0.f, "New Love");
@@ -20,7 +20,7 @@ Circle::Circle() {
 
   _prev_member_button.param = &params[PREV_MEMBER_PARAM];
   _next_member_button.param = &params[NEXT_MEMBER_PARAM];
-  _repeat_button.param = &params[REPEAT_PARAM];
+  _loop_button.param = &params[LOOP_PARAM];
 }
 
 void Circle::sampleRateChange() {
@@ -37,7 +37,7 @@ void Circle::processButtons() {
     kokopellivcv::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _prev_member_event = _prev_member_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _next_member_event = _next_member_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _repeat_event = _repeat_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _loop_event = _loop_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
@@ -105,11 +105,11 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_repeat_event) {
+    switch (_loop_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->repeat();
+      e->loop();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->skipToActiveMember();

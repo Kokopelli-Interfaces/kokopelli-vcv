@@ -15,7 +15,7 @@ void Engine::setRecordOnInnerLoop(bool record_on_inner_circle) {
   _record_params.record_on_inner_circle = record_on_inner_circle;
 }
 
-void Engine::repeat() {
+void Engine::loop() {
   if (this->isRecording()) {
     this->endRecording(true);
   } else {

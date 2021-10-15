@@ -6,7 +6,7 @@ using namespace kokopellivcv::dsp;
 // TODO REMOVE unnecessary circle first second updates if updateCirclePeriod
 
 // unsigned int Engine::updateCirclePeriod() {
-// // TODO depends on active members which are repeating at current timeline beat
+// // TODO depends on active members which are looping at current timeline beat
 // }
 
 void Engine::skipToActiveMember() {

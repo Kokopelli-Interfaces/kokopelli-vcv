@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Member.hpp"
+#include "CircleMember.hpp"
 #include "definitions.hpp"
 #include "util/math.hpp"
 #include <vector>
@@ -13,7 +13,7 @@ namespace circle {
    The Timeline is the top level structure for content.
 */
 struct Timeline {
-  std::vector<Member*> members;
+  std::vector<CircleMember*> members;
 
   float active_member_out = 0.f;
 
@@ -106,7 +106,7 @@ struct Timeline {
     return signal_out;
   }
 
-  inline float read(TimePosition position, Member* recording, RecordParams record_params, unsigned int active_member_i) {
+  inline float read(TimePosition position, CircleMember* recording, RecordParams record_params, unsigned int active_member_i) {
     updateMemberAttenuations(position);
 
     // FIXME multiple recordings in member, have loop and array of types
@@ -143,8 +143,8 @@ struct Timeline {
     return signal_out;
   }
 
-  inline std::vector<Member*> getMembersFromIdx(std::vector<unsigned int> member_idx) {
-    std::vector<Member*> selected_members;
+  inline std::vector<CircleMember*> getMembersFromIdx(std::vector<unsigned int> member_idx) {
+    std::vector<CircleMember*> selected_members;
     for (auto member_id : member_idx) {
       selected_members.push_back(members[member_id]);
     }

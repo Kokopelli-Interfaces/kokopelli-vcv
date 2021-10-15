@@ -6,7 +6,7 @@
 #include "dsp/PhaseOscillator.hpp"
 #include "dsp/AntipopFilter.hpp"
 #include "dsp/Signal.hpp"
-#include "Member.hpp"
+#include "CircleMember.hpp"
 #include "rack.hpp"
 
 #include <assert.h>
@@ -38,7 +38,7 @@ struct Engine {
   std::pair<unsigned int, unsigned int> _group_loop = std::make_pair(0, 1);
   unsigned int _group_loop_length = 1;
 
-  Member *_recording_member = nullptr;
+  CircleMember *_recording_member = nullptr;
   RecordParams _record_params;
 
   PhaseOscillator _phase_oscillator;
@@ -46,7 +46,8 @@ struct Engine {
 
   Timeline _timeline;
   TimePosition _timeline_position;
-  bool _skip_back = true;
+
+  LoopMode _loop_mode = LoopMode::Group;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -54,6 +55,7 @@ struct Engine {
   Options _options;
 
   void loop();
+  void loopLongPress();
   void nextMember();
   void prevMember();
 
@@ -85,7 +87,7 @@ private:
   // unsigned int updateCirclePeriod();
 
   void endRecording(bool loop_recording);
-  Member* newRecording();
+  CircleMember* newRecording();
   inline bool phaseDefined();
   inline void write();
   inline void handleBeatChange(PhaseAnalyzer::PhaseEvent flip);

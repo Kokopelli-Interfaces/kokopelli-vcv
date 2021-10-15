@@ -15,8 +15,8 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
     LOOP_PARAM,
-    NEXT_MEMBER_PARAM,
-    PREV_MEMBER_PARAM,
+    NEXT_PARAM,
+    PREV_PARAM,
     NEW_LOVE_PARAM,
     NUM_PARAMS
   };
@@ -25,10 +25,10 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
   enum LightIds {
     ENUMS(SELECT_FUNCTION_LIGHT, 3),
     ENUMS(SELECT_MODE_LIGHT, 3),
-    ENUMS(SKIP_BACK_LIGHT, 3),
-    ENUMS(RECORD_LIGHT, 3),
-    ENUMS(FIX_BOUNDS_LIGHT, 3),
-    ENUMS(RECORD_ON_INNER_CIRCLE_LIGHT, 3),
+    ENUMS(LOOP_MODE_LIGHT, 3),
+    ENUMS(EMERSIGN_LIGHT, 3),
+    ENUMS(PREV_LIGHT, 3),
+    ENUMS(NEXT_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
@@ -43,8 +43,8 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
   kokopellivcv::dsp::LongPressButton _select_function_button;
   kokopellivcv::dsp::LongPressButton _select_mode_button;
 
-  kokopellivcv::dsp::LongPressButton _prev_member_button;
-  kokopellivcv::dsp::LongPressButton _next_member_button;
+  kokopellivcv::dsp::LongPressButton _prev_button;
+  kokopellivcv::dsp::LongPressButton _next_button;
   kokopellivcv::dsp::LongPressButton _loop_button;
 
   std::array<kokopellivcv::dsp::circle::Engine*, maxChannels> _engines;
@@ -52,7 +52,7 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
 
-  Options _options;
+  kokopellivcv::dsp::circle::Options _options;
 
   Circle();
 
@@ -68,6 +68,7 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
   void updateLights(const ProcessArgs &args);
 
 private:
+  void setLight(int light_n, float r, float g, float b);
   void processButtons();
   void processSelect();
 };

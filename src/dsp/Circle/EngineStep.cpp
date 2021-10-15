@@ -8,21 +8,21 @@ inline bool Engine::phaseDefined() {
 }
 
 // -1 is arbitrary card, 0 is green, 1 is red
-bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circle) {
-  if ((skip_back == 1 && _skip_back != false) || (skip_back == 0 && _skip_back != true)) {
-    return false;
-  }
+// bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circle) {
+//   if ((skip_back == 1 && _loop_mode != false) || (skip_back == 0 && _loop_mode != true)) {
+//     return false;
+//   }
 
-  if ((fix_bounds == 1 && _record_params.fix_bounds) || (fix_bounds == 0 && !_record_params.fix_bounds)) {
-    return false;
-  }
+//   if ((fix_bounds == 1 && _record_params.fix_bounds) || (fix_bounds == 0 && !_record_params.fix_bounds)) {
+//     return false;
+//   }
 
-  if ((record_on_inner_circle == 1 && _record_params.record_on_inner_circle) || (record_on_inner_circle == 0 && !_record_params.record_on_inner_circle)) {
-    return false;
-  }
+//   if ((record_on_inner_circle == 1 && _record_params.record_on_inner_circle) || (record_on_inner_circle == 0 && !_record_params.record_on_inner_circle)) {
+//     return false;
+//   }
 
-  return true;
-}
+//   return true;
+// }
 
 void Engine::endRecording(bool loop_recording) {
   assert(isRecording());
@@ -73,7 +73,7 @@ void Engine::endRecording(bool loop_recording) {
   _recording_member = nullptr;
 }
 
-Member* Engine::newRecording() {
+CircleMember* Engine::newRecording() {
   assert(_record_params.active());
   assert(_recording_member == nullptr);
 
@@ -89,8 +89,8 @@ Member* Engine::newRecording() {
     n_beats = _group_loop_length;
   }
 
-  bool shift_circle = !this->_record_params.fix_bounds;
-  if (shift_circle) {
+  bool shift_group_loop = !this->_record_params.fix_bounds;
+  if (shift_group_loop) {
     _group_loop.first = _timeline_position.beat;
     _group_loop.second = _group_loop.first + _group_loop_length;
   }
@@ -119,14 +119,14 @@ Member* Engine::newRecording() {
     }
   }
 
-  Member* recording_member = new Member(_timeline_position, n_beats, _selected_members_idx, _signal_type, samples_per_beat);
+  CircleMember* recording_member = new CircleMember(_timeline_position, n_beats, _selected_members_idx, _signal_type, samples_per_beat);
 
   // if (this->_record_params.record_on_inner_circle) {
   //   recording_member->_loop = true;
   // }
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active member %d\n", recording_member->_start.beat, recording_member->_n_beats, recording_member->_loop, recording_member->_in->_samples_per_beat, _active_member_i);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active circle member %d\n", recording_member->_start.beat, recording_member->_n_beats, recording_member->_loop, recording_member->_in->_samples_per_beat, _active_member_i);
 
   return recording_member;
 }
@@ -134,16 +134,16 @@ Member* Engine::newRecording() {
 inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   assert(phaseDefined());
 
-  bool reached_circle_end = _timeline_position.beat == _group_loop.second;
-  if (reached_circle_end) {
-    if (_skip_back) {
+  bool reached_group_loop_end = _timeline_position.beat == _group_loop.second;
+  if (reached_group_loop_end) {
+    if (_loop_mode == LoopMode::Group) {
       _read_antipop_filter.trigger();
       _write_antipop_filter.trigger();
       _timeline_position.beat = _group_loop.first;
-    } else {
-      unsigned int circle_shift = _group_loop.second - _group_loop.first;
+    } else if (_loop_mode == LoopMode::None) {
+      unsigned int group_loop_shift = _group_loop.second - _group_loop.first;
       _group_loop.first = _group_loop.second;
-      _group_loop.second += circle_shift;
+      _group_loop.second += group_loop_shift;
     }
   }
 
@@ -156,15 +156,15 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   //       _recording_member->_n_beats += 1;
   //     }
   //   } else {
-  //     bool skip_back_to_circle_start = (this->_skip_back && !(this->isRecording() && !_record_params.record_on_inner_circle));
+  //     bool skip_back_to_circle_start = (this->_loop_mode && !(this->isRecording() && !_record_params.record_on_inner_circle));
   //     if (skip_back_to_circle_start) {
   //       _read_antipop_filter.trigger();
   //       _write_antipop_filter.trigger();
   //       _timeline_position.beat = _group_loop.first;
   //     } else { // shift circle
-  //       unsigned int circle_shift = _group_loop.second - _group_loop.first;
+  //       unsigned int group_loop_shift = _group_loop.second - _group_loop.first;
   //       _group_loop.first = _group_loop.second;
-  //       _group_loop.second += circle_shift;
+  //       _group_loop.second += group_loop_shift;
   //     }
   //   }
   // }

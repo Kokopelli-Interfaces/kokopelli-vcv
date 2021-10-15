@@ -4,7 +4,11 @@
 
 #include <vector>
 
-// enum LoopMode { None, Group, Member };
+namespace kokopellivcv {
+namespace dsp {
+namespace circle {
+
+enum class LoopMode { None, Group, Member };
 
 struct TimePosition {
   unsigned int beat = 0;
@@ -48,3 +52,7 @@ struct Options {
   bool strict_recording_lengths = true;
   bool bipolar_phase_input = false;
 };
+
+} // namespace circle
+} // namespace dsp
+} // namespace kokopellivcv

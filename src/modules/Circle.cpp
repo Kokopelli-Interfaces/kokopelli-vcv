@@ -7,8 +7,8 @@ Circle::Circle() {
   configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
   configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
-  configParam(PREV_MEMBER_PARAM, 0.f, 1.f, 0.f, "Previous Member");
-  configParam(NEXT_MEMBER_PARAM, 0.f, 1.f, 0.f, "Next Member");
+  configParam(PREV_PARAM, 0.f, 1.f, 0.f, "Prev");
+  configParam(NEXT_PARAM, 0.f, 1.f, 0.f, "Next");
   configParam(NEW_LOVE_PARAM, 0.f, 1.f, 0.f, "New Love");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
@@ -18,8 +18,8 @@ Circle::Circle() {
   _select_function_button.param = &params[SELECT_FUNCTION_PARAM];
   _select_mode_button.param = &params[SELECT_MODE_PARAM];
 
-  _prev_member_button.param = &params[PREV_MEMBER_PARAM];
-  _next_member_button.param = &params[NEXT_MEMBER_PARAM];
+  _prev_button.param = &params[PREV_PARAM];
+  _next_button.param = &params[NEXT_PARAM];
   _loop_button.param = &params[LOOP_PARAM];
 }
 
@@ -35,8 +35,8 @@ void Circle::processButtons() {
 
     kokopellivcv::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _prev_member_event = _prev_member_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _next_member_event = _next_member_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _prev_event = _prev_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _next_event = _next_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _loop_event = _loop_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
@@ -80,7 +80,7 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_prev_member_event) {
+    switch (_prev_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
@@ -91,7 +91,7 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_next_member_event) {
+    switch (_next_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
@@ -112,7 +112,8 @@ void Circle::processButtons() {
       e->loop();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->skipToActiveMember();
+      e->loopLongPress();
+      break;
     }
   }
 }
@@ -223,15 +224,9 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
 }
 
 void Circle::updateLights(const ProcessArgs &args) {
-  // LIGHT + 0 = RED
-  // LIGHT + 1 = GREEN
-  // LIGHT + 2 = BLUE
-
   if (!baseConnected()) {
     return;
   }
-
-  float signal_in_sum = 0.f;
 
   kokopellivcv::dsp::circle::Engine *default_e = _engines[0];
 
@@ -253,37 +248,57 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[NEW_LOVE_INPUT].isConnected() && 1 < inputs[NEW_LOVE_INPUT].getChannels());
 
-  bool displayed_skip_back = default_e->_skip_back;
-  RecordParams displayed_record_params = default_e->_record_params;
+  kokopellivcv::dsp::circle::LoopMode displayed_loop_mode = default_e->_loop_mode;
+  kokopellivcv::dsp::circle::RecordParams displayed_record_params = default_e->_record_params;
+
   float displayed_phase = default_e->_timeline_position.phase;
 
-  float active_member_signal_out_sum = default_e->readActiveMember();
   float sel_signal_out_sum = 0.f;
-
+  float signal_in_sum = 0.f;
   bool record_active = false;
   for (int c = 0; c < channels(); c++) {
     signal_in_sum += _from_signal->signal[c];
     sel_signal_out_sum += _to_signal->sel_signal[c];
     if (record_active) {
-      displayed_skip_back = _engines[c]->_skip_back;
+      displayed_loop_mode = _engines[c]->_loop_mode;
       displayed_record_params = _engines[c]->_record_params;
       displayed_phase = _engines[c]->_timeline_position.phase;
     }
   }
 
-  signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
+  float active_member_signal_out_sum = default_e->readActiveMember();
   active_member_signal_out_sum = rack::clamp(active_member_signal_out_sum, 0.f, 1.f);
+  signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
   sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
 
   if (displayed_record_params.active()) {
     sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.new_love);
-    lights[RECORD_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
+    lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
     int light_colour = poly_record ? 2 : 0;
-    lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
+    lights[EMERSIGN_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
   } else {
-    lights[RECORD_LIGHT + 0].value = 0.f;
-    lights[RECORD_LIGHT + 1].setSmoothBrightness(active_member_signal_out_sum, _sampleTime * _light_divider.getDivision());
-    lights[RECORD_LIGHT + 2].value = 0.f;
+    lights[EMERSIGN_LIGHT + 0].value = 0.f;
+    lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(active_member_signal_out_sum, _sampleTime * _light_divider.getDivision());
+    lights[EMERSIGN_LIGHT + 2].value = 0.f;
+  }
+
+  setLight(PREV_LIGHT, 0.f, 1.f, 0.f);
+  setLight(NEXT_LIGHT, 0.f, 1.f, 0.f);
+
+  if (default_e->isRecording()) {
+    setLight(LOOP_MODE_LIGHT, 1.f, 1.f, 1.f);
+  } else {
+    switch (displayed_loop_mode) {
+    case kokopellivcv::dsp::circle::LoopMode::None:
+      setLight(LOOP_MODE_LIGHT, 1.f, 0.f, 0.f);
+      break;
+    case kokopellivcv::dsp::circle::LoopMode::Group:
+      setLight(LOOP_MODE_LIGHT, 1.f, 1.f, 0.f);
+      break;
+    case kokopellivcv::dsp::circle::LoopMode::Member:
+      setLight(LOOP_MODE_LIGHT, 0.f, 0.f, 1.f);
+      break;
+    }
   }
 
   bool poly_phase = (inputs[PHASE_INPUT].isConnected() && 1 < inputs[PHASE_INPUT].getChannels());
@@ -294,22 +309,12 @@ void Circle::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 1].setSmoothBrightness(displayed_phase, _sampleTime * _light_divider.getDivision());
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
+}
 
-  lights[FIX_BOUNDS_LIGHT + 0].value = !displayed_record_params.fix_bounds;
-  lights[FIX_BOUNDS_LIGHT + 1].value = displayed_record_params.fix_bounds;
-
-  lights[RECORD_ON_INNER_CIRCLE_LIGHT + 0].value = !displayed_record_params.record_on_inner_circle;
-  lights[RECORD_ON_INNER_CIRCLE_LIGHT + 1].value = displayed_record_params.record_on_inner_circle;
-
-  if (default_e->isRecording()) {
-    lights[SKIP_BACK_LIGHT + 0].value = 1.f;
-    lights[SKIP_BACK_LIGHT + 1].value = 1.f;
-    lights[SKIP_BACK_LIGHT + 2].value = 1.f;
-  } else {
-    lights[SKIP_BACK_LIGHT + 0].value = !displayed_skip_back;
-    lights[SKIP_BACK_LIGHT + 1].value = displayed_skip_back;
-    lights[SKIP_BACK_LIGHT + 2].value = 0.f;
-  }
+void Circle::setLight(int light_n, float r, float g, float b) {
+  lights[light_n + 0].value = r;
+  lights[light_n + 1].value = g;
+  lights[light_n + 2].value = b;
 }
 
 void Circle::postProcessAlways(const ProcessArgs &args) {

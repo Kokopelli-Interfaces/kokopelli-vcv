@@ -8,7 +8,7 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
-struct Member {
+struct CircleMember {
   TimePosition _start;
 
   unsigned int _n_beats = 0;
@@ -24,7 +24,7 @@ struct Member {
   // FIXME change me to be an array of bools for O(1) lookup
   std::vector<unsigned int> target_members_idx;
 
-  inline Member(TimePosition start, unsigned int n_beats, std::vector<unsigned int> target_members_idx, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
+  inline CircleMember(TimePosition start, unsigned int n_beats, std::vector<unsigned int> target_members_idx, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
     this->_start = start;
     this->_n_beats = n_beats;
     this->target_members_idx = target_members_idx;
@@ -33,7 +33,7 @@ struct Member {
     _love = new Recording(kokopellivcv::dsp::SignalType::PARAM, samples_per_beat);
   }
 
-  inline ~Member() {
+  inline ~CircleMember() {
     delete _in;
     delete _love;
   }

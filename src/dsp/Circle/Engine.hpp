@@ -56,8 +56,8 @@ struct Engine {
 
   void loop();
   void loopLongPress();
-  void nextMember();
-  void prevMember();
+  void next();
+  void prev();
 
   void step();
   float read();

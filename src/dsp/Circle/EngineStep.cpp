@@ -7,22 +7,7 @@ inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();
 }
 
-// -1 is arbitrary card, 0 is green, 1 is red
 // bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circle) {
-//   if ((skip_back == 1 && _loop_mode != false) || (skip_back == 0 && _loop_mode != true)) {
-//     return false;
-//   }
-
-//   if ((fix_bounds == 1 && _record_params.fix_bounds) || (fix_bounds == 0 && !_record_params.fix_bounds)) {
-//     return false;
-//   }
-
-//   if ((record_on_inner_circle == 1 && _record_params.record_on_inner_circle) || (record_on_inner_circle == 0 && !_record_params.record_on_inner_circle)) {
-//     return false;
-//   }
-
-//   return true;
-// }
 
 void Engine::endRecording(bool loop_recording) {
   assert(isRecording());
@@ -169,6 +154,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   //   }
   // }
 
+  // TODO do in recording, not here
   bool reached_recording_end = this->isRecording() && _recording_member->_start.beat + _recording_member->_n_beats <= _timeline_position.beat;
   if (reached_recording_end) {
     _recording_member->_n_beats++;

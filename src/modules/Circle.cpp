@@ -84,7 +84,7 @@ void Circle::processButtons() {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->prevMember();
+      e->prev();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->undo();
@@ -95,7 +95,7 @@ void Circle::processButtons() {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->nextMember();
+      e->next();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       // e->skipToActiveMember();

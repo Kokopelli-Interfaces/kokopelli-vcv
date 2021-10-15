@@ -2,7 +2,7 @@
 
 using namespace kokopellivcv::dsp::circle;
 
-void Engine::nextMember() {
+void Engine::next() {
   if (this->isRecording()) {
     this->endRecording(false);
 
@@ -22,7 +22,7 @@ void Engine::nextMember() {
   }
 }
 
-void Engine::prevMember() {
+void Engine::prev() {
   if (this->isRecording()) {
     // TODO create sub-circle
   } else {
@@ -35,4 +35,34 @@ void Engine::prevMember() {
 
     skipToActiveMember();
   }
+}
+
+void Engine::loopLongPress() {
+  // TODO QUICK EDIT REC
+  if (this->isRecording()) {
+    this->endRecording(true);
+    // TODO focus member
+  }
+
+  _loop_mode = LoopMode::Member;
+}
+
+void Engine::loop() {
+  if (this->isRecording()) {
+    this->endRecording(true);
+    return;
+  }
+
+  switch (_loop_mode) {
+  case LoopMode::Member:
+    _loop_mode = LoopMode::Group;
+    break;
+  case LoopMode::Group:
+    _loop_mode = LoopMode::None;
+    break;
+  case LoopMode::None:
+    _loop_mode = LoopMode::Group;
+    break;
+  }
+
 }

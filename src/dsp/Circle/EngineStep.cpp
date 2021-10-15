@@ -13,6 +13,8 @@ void Engine::endRecording(bool loop_recording) {
   assert(isRecording());
   assert(_recording_member->_n_beats != 0);
 
+  printf("- RECORDING END\n");
+
   if (!_phase_oscillator.isSet()) {
     if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
       _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
@@ -24,6 +26,7 @@ void Engine::endRecording(bool loop_recording) {
   }
 
   if (loop_recording) {
+    printf("-- group loop length: before %d -> after ", _group_loop_length);
     _recording_member->setLoop(true);
 
     unsigned int initial_group_loop_length = _group_loop_length;
@@ -32,8 +35,8 @@ void Engine::endRecording(bool loop_recording) {
       _group_loop_length = _group_loop.second - _group_loop.first;
     }
 
+    printf("%d\n", _group_loop_length);
     _recording_member->fitToLength(_group_loop_length);
-
   } else {
     assert(!_recording_member->isLooping());
   }
@@ -52,7 +55,6 @@ void Engine::endRecording(bool loop_recording) {
     _active_member_i = member_i;
   }
 
-  printf("- rec end\n");
   printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d member_i %d\n", _recording_member->_start.beat, _recording_member->_n_beats,  _recording_member->isLooping(), _recording_member->_in->_samples_per_beat, member_i);
 
   _recording_member = nullptr;
@@ -63,36 +65,36 @@ CircleMember* Engine::newRecording() {
   assert(_recording_member == nullptr);
 
   TimePosition start;
-  start.beat = _timeline_position.beat;
-  start.phase = _timeline_position.phase;
+  start = _timeline_position;
 
   unsigned int n_beats = 1;
-  if (this->_record_params.fix_bounds && this->_record_params.record_on_inner_circle) {
+  // TODO ???
+  // if (this->_record_params.fix_bounds && this->_record_params.record_on_inner_circle) {
+  if (_loop_mode == LoopMode::Group) {
     start.beat = _group_loop.first;
     start.phase = 0.f; // FIXME circle bounds should have phase
-
     n_beats = _group_loop_length;
   }
 
-  bool shift_group_loop = !this->_record_params.fix_bounds;
-  if (shift_group_loop) {
-    _group_loop.first = _timeline_position.beat;
-    _group_loop.second = _group_loop.first + _group_loop_length;
-  }
+  // bool shift_group_loop = !this->_record_params.fix_bounds;
+  // if (shift_group_loop) {
+  //   _group_loop.first = _timeline_position.beat;
+  //   _group_loop.second = _group_loop.first + _group_loop_length;
+  // }
 
-  if (this->_record_params.record_on_inner_circle) {
-    if (this->_record_params.fix_bounds) {
-      if (0 < _timeline.members.size()) {
-        if (_timeline.members[_active_member_i]->_loop) {
-          n_beats = _timeline.members[_active_member_i]->_n_beats;
-        } else {
-          n_beats = _group_loop_length;
-        }
-      }
-    } else {
-      n_beats = _timeline_position.beat - _group_loop.first + 1;
-    }
-  }
+  // if (this->_record_params.record_on_inner_circle) {
+  //   if (this->_record_params.fix_bounds) {
+  //     if (0 < _timeline.members.size()) {
+  //       if (_timeline.members[_active_member_i]->_loop) {
+  //         n_beats = _timeline.members[_active_member_i]->_n_beats;
+  //       } else {
+  //         n_beats = _group_loop_length;
+  //       }
+  //     }
+  //   } else {
+  //     n_beats = _timeline_position.beat - _group_loop.first + 1;
+  //   }
+  // }
 
   int samples_per_beat = 0;
   if (phaseDefined()) {

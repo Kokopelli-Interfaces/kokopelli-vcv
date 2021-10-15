@@ -12,16 +12,6 @@ void Engine::setFixBounds(bool fix_bounds) {
 }
 
 void Engine::setRecordOnInnerLoop(bool record_on_inner_circle) {
-  // if (this->isRecording()) {
-  //   if (!_record_params.record_on_inner_circle && record_on_inner_circle)  {
-  //     _circle.first = _timeline_position.beat;
-  //     _circle.second = _timeline_position.beat + _loop_length;
-  //   }
-
-  //   this->endRecording();
-  //   _record_params.record_on_inner_circle = record_on_inner_circle;
-  //   _recording_layer = this->newRecording();
-  // }
   _record_params.record_on_inner_circle = record_on_inner_circle;
 }
 

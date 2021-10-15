@@ -4,6 +4,8 @@
 
 #include <vector>
 
+// enum LoopMode { None, Group, Member };
+
 struct TimePosition {
   unsigned int beat = 0;
   double phase = 0.f;

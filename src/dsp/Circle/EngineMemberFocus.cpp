@@ -7,9 +7,9 @@ void Engine::nextMember() {
     this->endRecording(false);
 
     // TODO put member in NEW circle
-    _circle.first = _timeline_position.beat;
-    _circle.second = _circle.first + 1;
-    _loop_length = 1;
+    _group_loop.first = _timeline_position.beat;
+    _group_loop.second = _group_loop.first + 1;
+    _group_loop_length = 1;
   } else {
     // TODO seek previous layer from current beat, may not be active
     if (_active_layer_i == _timeline.layers.size()-1) {

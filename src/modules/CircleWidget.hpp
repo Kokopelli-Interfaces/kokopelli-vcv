@@ -108,7 +108,7 @@ struct TotalLayerBeatDisplay : CircleValueDisplay {
 	}
 };
 
-struct CircleBeatDisplay : CircleValueDisplay {
+struct GroupLoopBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -118,14 +118,14 @@ struct CircleBeatDisplay : CircleValueDisplay {
         return;
       }
 
-      int circle_beat = e->_timeline_position.beat - e->_circle.first + 1;
+      int group_loop_beat = e->_timeline_position.beat - e->_group_loop.first + 1;
 
-      CircleValueDisplay::setDisplayValue(circle_beat);
+      CircleValueDisplay::setDisplayValue(group_loop_beat);
 		}
 	}
 };
 
-struct TotalCircleBeatDisplay : CircleValueDisplay {
+struct TotalGroupLoopBeatsDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -134,8 +134,8 @@ struct TotalCircleBeatDisplay : CircleValueDisplay {
       if (e == NULL) {
         return;
       }
-      unsigned int n_circle_beats = e->_circle.second - e->_circle.first;
-      CircleValueDisplay::setDisplayValue(n_circle_beats);
+      unsigned int n_group_loop_beats = e->_group_loop.second - e->_group_loop.first;
+      CircleValueDisplay::setDisplayValue(n_group_loop_beats);
 		}
 	}
 };
@@ -152,7 +152,6 @@ struct TotalLayersDisplay : CircleValueDisplay {
       // TODO make me just the non attenuated layers
       int total_layers = e->_timeline.layers.size();
       CircleValueDisplay::setDisplayValue(total_layers);
-
 		}
 	}
 };
@@ -183,8 +182,8 @@ struct CircleWidget : ModuleWidget {
   LayerBeatDisplay *layer_beat;
   TotalLayerBeatDisplay *total_layer_beats;
 
-  CircleBeatDisplay *circle_beat;
-  TotalCircleBeatDisplay *total_circle_beats;
+  GroupLoopBeatDisplay *group_loop_beat;
+  TotalGroupLoopBeatsDisplay *total_group_loop_beats;
 
 
   BeatDisplay *time;
@@ -264,15 +263,15 @@ struct CircleWidget : ModuleWidget {
     total_layer_beats->box.size = display_size;
     addChild(total_layer_beats);
 
-    circle_beat = new CircleBeatDisplay(module);
-    circle_beat->box.pos = mm2px(Vec(17.49, 52.49));
-    circle_beat->box.size = display_size;
-    addChild(circle_beat);
+    group_loop_beat = new GroupLoopBeatDisplay(module);
+    group_loop_beat->box.pos = mm2px(Vec(17.49, 52.49));
+    group_loop_beat->box.size = display_size;
+    addChild(group_loop_beat);
 
-    total_circle_beats = new TotalCircleBeatDisplay(module);
-    total_circle_beats->box.pos = mm2px(Vec(17.49, 57.592));
-    total_circle_beats->box.size = display_size;
-    addChild(total_circle_beats);
+    total_group_loop_beats = new TotalGroupLoopBeatsDisplay(module);
+    total_group_loop_beats->box.pos = mm2px(Vec(17.49, 57.592));
+    total_group_loop_beats->box.size = display_size;
+    addChild(total_group_loop_beats);
   }
 
 	void appendContextMenu(rack::Menu* menu) override {

@@ -35,8 +35,8 @@ struct Engine {
 
   /* read only */
 
-  std::pair<unsigned int, unsigned int> _circle = std::make_pair(0, 1);
-  unsigned int _loop_length = 1;
+  std::pair<unsigned int, unsigned int> _group_loop = std::make_pair(0, 1);
+  unsigned int _group_loop_length = 1;
 
   Layer *_recording_layer = nullptr;
   RecordParams _record_params;

@@ -19,8 +19,8 @@ void Engine::skipToActiveMember() {
   }
 
   // FIXME
-  _group_loop.first = _timeline.members[_active_member_i]->_start.beat;
-  _group_loop.second =  _group_loop.first + _timeline.members[_active_member_i]->_n_beats;
+  _group_loop.first = _timeline.members[_focused_member_i]->_start.beat;
+  _group_loop.second =  _group_loop.first + _timeline.members[_focused_member_i]->_n_beats;
   _group_loop_length = _group_loop.second - _group_loop.first;
 
   _timeline_position.beat = _group_loop.first;

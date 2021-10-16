@@ -106,7 +106,7 @@ struct Timeline {
     return signal_out;
   }
 
-  inline float read(TimePosition position, CircleMember* recording, RecordParams record_params, unsigned int active_member_i) {
+  inline float read(TimePosition position, CircleMember* recording, RecordParams params, unsigned int active_member_i) {
     updateMemberAttenuations(position);
 
     // FIXME multiple recordings in member, have loop and array of types
@@ -120,10 +120,10 @@ struct Timeline {
       if (members[i]->readableAtPosition(position)) {
         float attenuation = _current_attenuation[i];
 
-        if (record_params.active()) {
+        if (params.loveActive()) {
           for (unsigned int sel_i : recording->target_members_idx) {
             if (sel_i == i) {
-              attenuation += record_params.new_love;
+              attenuation += params.love;
               break;
             }
           }

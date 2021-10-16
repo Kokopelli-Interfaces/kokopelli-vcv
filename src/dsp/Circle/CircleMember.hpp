@@ -11,9 +11,11 @@ namespace circle {
 
 struct CircleMember {
   TimePosition _start;
+  TimePosition _time;
 
   unsigned int _n_beats = 0;
   bool _loop = false;
+  bool _listening = false;
 
   // TODO multiple I/O modules on left
   // std::vector<Recording*> recordings;
@@ -88,16 +90,28 @@ struct CircleMember {
     return _love->read(getRecordingTime(time));
   }
 
-  inline void write(TimePosition time, float in, float new_love, bool phase_defined) {
+  inline void write(TimePosition time, float in, float love, bool phase_defined) {
     assert(_in->_buffer.size() <= _n_beats);
     assert(_love->_buffer.size() <= _n_beats);
 
     if (!phase_defined) {
       _in->pushBack(in);
-      _love->pushBack(new_love);
+      _love->pushBack(love);
     } else if (writableAtTime(time)) {
       _in->write(getRecordingTime(time), in);
-   _love->write(getRecordingTime(time), new_love);
+   _love->write(getRecordingTime(time), love);
+    }
+  }
+
+  inline float step(TimePosition time, RecordParams params) {
+    if (_listening) {
+      if (!phase_defined) {
+        _in->pushBack(params.readIn());
+        _love->pushBack(params.love);
+      } else if (writableAtTime(time)) {
+        _in->write(getRecordingTime(time), params.readIn());
+        _love->write(getRecordingTime(time), params.love);
+      }
     }
   }
 };

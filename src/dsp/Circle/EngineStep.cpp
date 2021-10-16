@@ -3,11 +3,6 @@
 using namespace kokopellivcv::dsp::circle;
 using namespace kokopellivcv::dsp;
 
-inline bool Engine::phaseDefined() {
-  return _use_ext_phase || _phase_oscillator.isSet();
-}
-
-// bool Engine::checkState(int skip_back, int fix_bounds, int record_on_inner_circle) {
 
 void Engine::endRecording(bool loop_recording) {
   assert(isRecording());
@@ -52,7 +47,7 @@ void Engine::endRecording(bool loop_recording) {
   }
 
   if (_new_member_active) {
-    _active_member_i = member_i;
+    _focused_member_i = member_i;
   }
 
   printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d member_i %d\n", _recording_member->_start.beat, _recording_member->_n_beats,  _recording_member->isLooping(), _recording_member->_in->_samples_per_beat, member_i);
@@ -61,7 +56,7 @@ void Engine::endRecording(bool loop_recording) {
 }
 
 CircleMember* Engine::newRecording() {
-  assert(_record_params.active());
+  assert(_params.loveActive());
   assert(_recording_member == nullptr);
 
   TimePosition start;
@@ -69,24 +64,24 @@ CircleMember* Engine::newRecording() {
 
   unsigned int n_beats = 1;
   // TODO ???
-  // if (this->_record_params.fix_bounds && this->_record_params.record_on_inner_circle) {
+  // if (this->_params.fix_bounds && this->_params.record_on_inner_circle) {
   if (_loop_mode == LoopMode::Group) {
     start.beat = _group_loop.first;
     start.phase = 0.f; // FIXME circle bounds should have phase
     n_beats = _group_loop_length;
   }
 
-  // bool shift_group_loop = !this->_record_params.fix_bounds;
+  // bool shift_group_loop = !this->_params.fix_bounds;
   // if (shift_group_loop) {
   //   _group_loop.first = _timeline_position.beat;
   //   _group_loop.second = _group_loop.first + _group_loop_length;
   // }
 
-  // if (this->_record_params.record_on_inner_circle) {
-  //   if (this->_record_params.fix_bounds) {
+  // if (this->_params.record_on_inner_circle) {
+  //   if (this->_params.fix_bounds) {
   //     if (0 < _timeline.members.size()) {
-  //       if (_timeline.members[_active_member_i]->_loop) {
-  //         n_beats = _timeline.members[_active_member_i]->_n_beats;
+  //       if (_timeline.members[_focused_member_i]->_loop) {
+  //         n_beats = _timeline.members[_focused_member_i]->_n_beats;
   //       } else {
   //         n_beats = _group_loop_length;
   //       }
@@ -108,12 +103,12 @@ CircleMember* Engine::newRecording() {
 
   CircleMember* recording_member = new CircleMember(_timeline_position, n_beats, _selected_members_idx, _signal_type, samples_per_beat);
 
-  // if (this->_record_params.record_on_inner_circle) {
+  // if (this->_params.record_on_inner_circle) {
   //   recording_member->_loop = true;
   // }
 
   printf("Recording Activate:\n");
-  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active circle member %d\n", recording_member->_start.beat, recording_member->_n_beats, recording_member->_loop, recording_member->_in->_samples_per_beat, _active_member_i);
+  printf("-- start_beat %d n_beats %d loop %d samples per beat %d active circle member %d\n", recording_member->_start.beat, recording_member->_n_beats, recording_member->_loop, recording_member->_in->_samples_per_beat, _focused_member_i);
 
   return recording_member;
 }
@@ -134,16 +129,16 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
     }
   }
 
-  //   bool grow_circle = this->isRecording() && !this->_record_params.fix_bounds && !this->checkState(1, 1, 0);
+  //   bool grow_circle = this->isRecording() && !this->_params.fix_bounds && !this->checkState(1, 1, 0);
   //   if (grow_circle) {
   //     _group_loop.second += _group_loop_length;
-  //     if (this->_record_params.record_on_inner_circle) {
+  //     if (this->_params.record_on_inner_circle) {
   //       _recording_member->_n_beats += _group_loop_length;
   //     } else {
   //       _recording_member->_n_beats += 1;
   //     }
   //   } else {
-  //     bool skip_back_to_circle_start = (this->_loop_mode && !(this->isRecording() && !_record_params.record_on_inner_circle));
+  //     bool skip_back_to_circle_start = (this->_loop_mode && !(this->isRecording() && !_params.record_on_inner_circle));
   //     if (skip_back_to_circle_start) {
   //       _read_antipop_filter.trigger();
   //       _write_antipop_filter.trigger();
@@ -161,52 +156,9 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   if (reached_recording_end) {
     _recording_member->_n_beats++;
   }
-
 }
 
-inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
-  float internal_phase = _phase_oscillator.step(_sample_time);
-  _timeline_position.phase = _use_ext_phase ? _ext_phase : internal_phase;
+float Engine::step() {
+  return _gko->advance(_music_circle, this->params);
 
-  PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(_timeline_position.phase, _sample_time);
-
-  unsigned int new_beat = _timeline_position.beat;
-  if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD && 1 <= _timeline_position.beat) {
-    new_beat = _timeline_position.beat - 1;
-  } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
-    new_beat = _timeline_position.beat + 1;
-  }
-
-  if (phase_event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && _options.use_antipop) {
-    _read_antipop_filter.trigger();
-  }
-
-  _timeline_position.beat = new_beat;
-
-  return phase_event;
-}
-
-void Engine::step() {
-  if (this->phaseDefined()) {
-    PhaseAnalyzer::PhaseEvent phase_event = this->advanceTimelinePosition();
-    // if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD || phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
-    //   this->handleBeatChange(phase_event);
-    // }
-  }
-
-  _circle_group->step()
-
-
-  if (!this->isRecording() && _record_params.active()) {
-    _recording_member = this->newRecording();
-    _write_antipop_filter.trigger();
-  } else if (this->isRecording() && !_record_params.active()) {
-    this->endRecording(false);
-    this->resetEngineMode();
-  }
-
-  if (this->isRecording()) {
-    float in = _write_antipop_filter.process(_record_params.readIn());
-    _recording_member->write(_timeline_position, in, _record_params.new_love, this->phaseDefined());
-  }
 }

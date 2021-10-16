@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rack.hpp"
+#include "dsp/Signal.hpp"
 #include "CircleMember.hpp"
 #include "CircleGroup.hpp"
 
@@ -10,6 +11,10 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
+typedef std::vector<unsigned int> voice_id;
+
+typedef std::variant<CircleMember*, CircleGroup*> CircleVoice;
+
 enum class LoopMode { None, Group, Member };
 
 struct TimePosition {
@@ -17,30 +22,27 @@ struct TimePosition {
   double phase = 0.f;
 };
 
-struct RecordParams {
+struct Parameters {
+  bool use_ext_phase = false;
+  float ext_phase = 0.f;
+  float sample_time = 1.0f;
+
   float in = 0.f;
+  float love = 0.f;
 
-  float new_love = 0.f;
-  bool record_on_inner_circle = true;
-  bool fix_bounds = false;
+  // TODO make me an array to support MIX4 & PLAY
+  kokopellivcv::dsp::SignalType signal_type;
 
-  bool _active = false;
-  float _recordActiveThreshold = 0.0001f;
+  float _loveActiveThreshold = 0.0001f;
 
-  inline bool active() {
-    if (_active && new_love <= _recordActiveThreshold) {
-      _active = false;
-    } else if (!_active && _recordActiveThreshold < new_love) {
-      _active = true;
-    }
-
-    return _active;
+  inline bool loveActive() {
+    return _loveActiveThreshold < love;
   }
 
   inline float readIn() {
-    // avoids pops when engaging / disengaging new_love parameter
-    if (0.0001f <= new_love && new_love <= 0.033f) {
-      float engage_attenuation = -1.f * pow((30.f * new_love - _recordActiveThreshold), 3) + 1.f;
+    // avoids pops when engaging / disengaging love parameter
+    if (_loveActiveThreshold < love && love <= 0.033f) {
+      float engage_attenuation = -1.f * pow((30.f * love - _loveActiveThreshold), 3) + 1.f;
       engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
       return in * (1.f - engage_attenuation);
     }

@@ -1,0 +1,31 @@
+* Finish CIRCLE with love self functionality
+** New Framework
+*** PHASE dependency across groups
+- if you slow down the outer period, all periods inside slow, though they may spin at different rates
+
+** NEXT/PREV buttons with group creation
+
+* Create gko expander for timeline
+/** Records Love movement on timeline
+
+    v~~LOVE-G1~~___~~
+    ---------------------------------
+          ^--LOVE~G2~~~_~
+
+    IDEA: potentialities[timelines]
+
+  This means timeline is handled by external unit
+  Members are relative to groups
+  Do not need timelinepositions
+  AFTERALL, what if you want to go to 2->3->2? it skips back in timeline now! but this is not what we need.
+  */
+struct Gko {
+
+* When you START loving a group/member which is zero'd, PLAY from start
+* TODO Love Self/Other Param
+** TODO Rename NewLove to Love
+** Add Love Other mode
+prev / next changes focus group
+love acts as A/B -- focus group is focus
+
+

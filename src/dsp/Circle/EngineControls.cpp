@@ -20,10 +20,10 @@ void Engine::next() {
     _group_loop_length = 1;
   } else {
     // TODO seek previous member from current beat, may not be active
-    if (_active_member_i == _timeline.members.size()-1) {
-      _active_member_i = 0;
+    if (_focused_member_i == _timeline.members.size()-1) {
+      _focused_member_i = 0;
     } else {
-      _active_member_i++;
+      _focused_member_i++;
     }
 
     skipToActiveMember();
@@ -35,10 +35,10 @@ void Engine::prev() {
     // TODO create sub-circle
   } else {
     // TODO prev member
-    if (_active_member_i == 0) {
-      _active_member_i = _timeline.members.size()-1;
+    if (_focused_member_i == 0) {
+      _focused_member_i = _timeline.members.size()-1;
     } else {
-      _active_member_i--;
+      _focused_member_i--;
     }
 
     skipToActiveMember();

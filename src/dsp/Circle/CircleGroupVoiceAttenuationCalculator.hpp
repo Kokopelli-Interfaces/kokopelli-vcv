@@ -26,13 +26,13 @@ struct CircleGroupVoiceAttenuationCalculator {
     return _current_attenuation[voice_id]
   }
 
-  inline void step(TimePosition position, std::vector<CircleVoice*> voices) {
+  inline void step(TimePosition play_head, std::vector<CircleVoice*> voices) {
     // FIXME increase vector size if new voices
     if (_attenuation_calculator_divider.process()) {
       for (unsigned int voice_i = 0; voice_i < voices.size(); voice_i++) {
         float voice_i_attenuation = 0.f;
         for (unsigned int j = voice_i + 1; j < voices.size(); j++) {
-          voice_i_attenuation += voices[j]->readLove(position);
+          voice_i_attenuation += voices[j]->readLove(play_head);
 
           if (1.f <= voice_i_attenuation)  {
             voice_i_attenuation = 1.f;

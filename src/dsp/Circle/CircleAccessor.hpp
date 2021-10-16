@@ -9,22 +9,16 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
-typedef std::vector<unsigned int> circle_voice_id;
-typedef std::variant<CircleMember*, CircleGroup*> CircleVoice;
-
 struct CircleAccessor {
-  static inline CircleVoice getVoice(CircleGroup* base_group, circle_voice_id id) {
-
-    CircleVoice voice;
-    for (unsigned int voice_i: id) {
-
-      voice = base_group[voice_i];
-
-      auto str = std::get<std::string>(var);
-      auto* str  = std::get_if<std::string>(&var);
+  static inline CircleVoice getVoice(CircleGroup* base_group, voice_id id) {
+    CircleGroup* next_group = base_group;
+    for (unsigned int i = 0; i < id.size() - 1; i++) {
+      unsigned int voice_i = id[i];
+      next_group = std::get<CircleGroup*>(next_group->_voices[voice_i])
     }
 
-    return voice;
+    unsigned int voice_i = id[id.size()-1];
+    return next_group->_voices[voice_i];
   }
 };
 

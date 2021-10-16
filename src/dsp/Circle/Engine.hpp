@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Timeline.hpp"
+#include "CircleGroup.hpp"
 #include "definitions.hpp"
 #include "dsp/PhaseAnalyzer.hpp"
 #include "dsp/PhaseOscillator.hpp"
 #include "dsp/AntipopFilter.hpp"
 #include "dsp/Signal.hpp"
-#include "CircleMember.hpp"
 #include "rack.hpp"
 
 #include <assert.h>
@@ -19,12 +18,20 @@ namespace dsp {
 namespace circle {
 
 struct Engine {
+  // externally set
   bool _use_ext_phase = false;
   float _ext_phase = 0.f;
   float _sample_time = 1.0f;
-
   // TODO make me an array to support MIX4 & PLAY
   kokopellivcv::dsp::SignalType _signal_type;
+  // ---
+
+  CircleGroup *_main_group;
+  CircleGroup *_focused_group;
+
+  // for progressing the circle with an internal phase
+  PhaseOscillator _phase_oscillator;
+  PhaseAnalyzer _phase_analyzer;
 
   std::vector<unsigned int> _selected_members_idx;
   std::vector<unsigned int> _saved_selected_members_idx;
@@ -33,18 +40,9 @@ struct Engine {
 
   unsigned int _active_member_i;
 
-  /* read only */
-
-  std::pair<unsigned int, unsigned int> _group_loop = std::make_pair(0, 1);
-  unsigned int _group_loop_length = 1;
-
   CircleMember *_recording_member = nullptr;
   RecordParams _record_params;
 
-  PhaseOscillator _phase_oscillator;
-  PhaseAnalyzer _phase_analyzer;
-
-  Timeline _timeline;
   TimePosition _timeline_position;
 
   LoopMode _loop_mode = LoopMode::Group;

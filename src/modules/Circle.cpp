@@ -220,7 +220,8 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   e->_record_params.in = _from_signal->signal[channel_i];
   e->step();
   _to_signal->signal[channel_i] = e->read();
-  _to_signal->sel_signal[channel_i] = e->readSelection();
+  // FIXME rename to GROUP and add functionality
+  // _to_signal->sel_signal[channel_i] = e->read();
 }
 
 void Circle::updateLights(const ProcessArgs &args) {

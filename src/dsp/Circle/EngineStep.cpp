@@ -189,10 +189,13 @@ inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
 void Engine::step() {
   if (this->phaseDefined()) {
     PhaseAnalyzer::PhaseEvent phase_event = this->advanceTimelinePosition();
-    if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD || phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
-      this->handleBeatChange(phase_event);
-    }
+    // if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD || phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
+    //   this->handleBeatChange(phase_event);
+    // }
   }
+
+  _circle_group->step()
+
 
   if (!this->isRecording() && _record_params.active()) {
     _recording_member = this->newRecording();

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "rack.hpp"
+#include "CircleMember.hpp"
+#include "CircleGroup.hpp"
 
 #include <vector>
 

@@ -12,11 +12,6 @@ float Engine::read() {
   return timeline_out;
 }
 
-float Engine::readSelection() {
-  float timeline_out = _timeline.readRawMembers(_timeline_position, _selected_members_idx);
-  return timeline_out;
-}
-
 float Engine::readActiveMember() {
   return _timeline.active_member_out;
 }

@@ -3,7 +3,7 @@
 using namespace kokopellivcv::dsp::circle;
 
 void Engine::undo() {
-  if (isRecording()) {
+  if (_state.loving) {
     endRecording(false);
   }
 
@@ -11,7 +11,7 @@ void Engine::undo() {
 }
 
 void Engine::next() {
-  if (this->isRecording()) {
+  if (this->_state.loving) {
     this->endRecording(false);
 
     // TODO put member in NEW circle
@@ -31,7 +31,7 @@ void Engine::next() {
 }
 
 void Engine::prev() {
-  if (this->isRecording()) {
+  if (this->_state.loving) {
     // TODO create sub-circle
   } else {
     // TODO prev member
@@ -47,7 +47,7 @@ void Engine::prev() {
 
 void Engine::loopLongPress() {
   // TODO QUICK EDIT REC
-  if (this->isRecording()) {
+  if (this->_state.loving) {
     this->endRecording(true);
     // TODO focus member
   }
@@ -56,7 +56,7 @@ void Engine::loopLongPress() {
 }
 
 void Engine::loop() {
-  if (this->isRecording()) {
+  if (this->_state.loving) {
     this->endRecording(true);
     return;
   }

@@ -106,7 +106,7 @@ struct Timeline {
     return signal_out;
   }
 
-  inline float read(TimePosition position, CircleMember* recording, RecordParams params, unsigned int active_member_i) {
+  inline float read(TimePosition position, CircleMember* recording, Parameters params, unsigned int active_member_i) {
     updateMemberAttenuations(position);
 
     // FIXME multiple recordings in member, have loop and array of types

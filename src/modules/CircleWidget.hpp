@@ -47,7 +47,7 @@ struct ActiveMemberDisplay : CircleValueDisplay {
         return;
       }
 
-      if (e->isRecording() || e->_new_member_active) {
+      if (e->_state.loving || e->_new_member_active) {
         CircleValueDisplay::setText("N");
       } else {
         int focused_member_i = e->_focused_member_i + 1;
@@ -72,7 +72,7 @@ struct MemberBeatDisplay : CircleValueDisplay {
       }
 
       int member_beat = 0;
-      if (e->_recording_member != NULL && e->isRecording()) {
+      if (e->_recording_member != NULL && e->_state.loving) {
         member_beat = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
       } else if (e->_timeline.members.size() != 0) {
         // TODO how to show start position of loops?
@@ -97,7 +97,7 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
       }
 
       int total_member_beats = 0;
-      if (e->isRecording()) {
+      if (e->_state.loving) {
         total_member_beats = e->_recording_member->_n_beats;
       } else if (e->_timeline.members.size() != 0) {
         total_member_beats = e->_timeline.members[e->_focused_member_i]->_n_beats;

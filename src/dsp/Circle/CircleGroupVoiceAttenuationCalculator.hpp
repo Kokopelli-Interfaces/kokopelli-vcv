@@ -22,8 +22,8 @@ struct CircleGroupVoiceAttenuationCalculator {
     return old + (current - old) * lambda;
   }
 
-  inline float getAttenuation(int voice_id) {
-    return _current_attenuation[voice_id]
+  inline float getAttenuation(int circle_voice_id) {
+    return _current_attenuation[circle_voice_id]
   }
 
   inline void step(TimePosition play_head, std::vector<CircleVoice*> voices) {

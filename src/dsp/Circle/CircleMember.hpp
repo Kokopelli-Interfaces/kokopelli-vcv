@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CircleVoice.hpp"
 #include "definitions.hpp"
 #include "Recording.hpp"
 #include "dsp/Signal.hpp"
@@ -11,11 +10,11 @@ namespace circle {
 
 struct CircleMember {
   TimePosition _start;
-  TimePosition _time;
 
   unsigned int _n_beats = 0;
   bool _loop = false;
-  bool _listening = false;
+
+  bool _recording = false;
 
   // TODO multiple I/O modules on left
   // std::vector<Recording*> recordings;
@@ -24,12 +23,7 @@ struct CircleMember {
   Recording *_in;
   Recording *_love;
 
-  inline CircleMember(TimePosition start, unsigned int n_beats) {
-    this->_start = start;
-    this->_n_beats = n_beats;
-
-    _in = new Recording(signal_type, samples_per_beat);
-    _love = new Recording(kokopellivcv::dsp::SignalType::PARAM, samples_per_beat);
+  inline CircleMember() {
   }
 
   inline ~CircleMember() {
@@ -51,67 +45,83 @@ struct CircleMember {
 
   inline unsigned int getMemberBeat(unsigned int timeline_beat) {
     int beat = timeline_beat - _start.beat;
-    if (_loop && 0 < beat) {
-      return beat % _n_beats;
-    }
-
-    return beat;
+    return beat % _n_beats;
   }
 
-  inline bool readableAtTime(TimePosition time) {
-    int member_beat = getMemberBeat(time.beat);
-    return (0 <= member_beat && member_beat < (int)_n_beats);
-  }
-
-  // TODO FIXME allow reverse recording
-  inline bool writableAtTime(TimePosition time) {
-    return _start.beat <= time.beat && time.beat <= _start.beat + _n_beats;
-  }
-
-  inline TimePosition getRecordingTime(TimePosition time) {
-    TimePosition recording_time = time;
-    recording_time.beat = getMemberBeat(time.beat);
+  inline TimePosition getRecordingPosition(TimePosition play_head) {
+    TimePosition recording_time = play_head;
+    recording_time.beat = getMemberBeat(play_head.beat);
     return recording_time;
   }
 
-  inline float readSignal(TimePosition time) {
-    if (!readableAtTime(time)) {
+  inline float readLove(TimePosition play_head) {
+    if (!readableAtTime(play_head)) {
       return 0.f;
     }
-
-    return _in->read(getRecordingTime(time));
+    return _love->read(getRecordingPosition(play_head));
   }
 
-  inline float readLove(TimePosition time) {
-    if (!readableAtTime(time)) {
+  inline void clearMemory() {
+    if (_in) {
+      delete _in;
+    }
+    if (_love) {
+      delete _love;
+    }
+  }
+
+  inline void startRecording(Parameters params) {
+
+    clearMemory();
+
+    // FIXME
+    _in = new Recording(params.signal_type, params.samples_per_beat);
+    _love = new Recording(kokopellivcv::dsp::SignalType::PARAM, params.samples_per_beat);
+    _recording = true;
+  }
+
+  inline void stopRecording() {
+    assert(_recording);
+    _recording = false;
+  }
+
+  // inline void write(TimePosition play_head, float in, float love, bool phase_defined) {
+  //   assert(_in->_buffer.size() <= _n_beats);
+  //   assert(_love->_buffer.size() <= _n_beats);
+  //   if (!phase_defined) {
+  //     _in->pushBack(in);
+  //     _love->pushBack(love);
+  //   } else if (writableAtTime(play_head)) {
+  //     _in->write(getRecordingPosition(play_head), in);
+  //   _love->write(getRecordingPosition(play_head), love);
+  //   }
+  // }
+
+  // inline TimePosition advancePlayHead(TimePosition play_head) {
+  //   _play_head.phase = play_head.phase;
+  //   if (_last_play_head.beat != play_head.beat) {
+  //     unsigned int n_group_beats = this->getPeriod();
+  //     if (n_group_beats != 0) {
+  //       _play_head.beat = _last_play_head.beat % n_group_beats;
+  //     } else {
+  //       _play_head.beat = 0;
+  //     }
+  //   }
+  //   _last_play_head = play_head;
+  // }
+
+  inline float step(TimePosition play_head, Inputs inputs, Parameters params) {
+    if (_recording) {
+      // if (!phase_defined) {
+      _in->pushBack(Inputs::readIn(inputs.in, inputs.love));
+      _love->pushBack(inputs.love);
+      // } else if (writableAtTime(play_head)) {
+      //   _in->write(getRecordingPosition(play_head), params.readIn());
+      //   _love->write(getRecordingPosition(play_head), _inputs.love);
+      // }
       return 0.f;
-    }
-
-    return _love->read(getRecordingTime(time));
-  }
-
-  inline void write(TimePosition time, float in, float love, bool phase_defined) {
-    assert(_in->_buffer.size() <= _n_beats);
-    assert(_love->_buffer.size() <= _n_beats);
-
-    if (!phase_defined) {
-      _in->pushBack(in);
-      _love->pushBack(love);
-    } else if (writableAtTime(time)) {
-      _in->write(getRecordingTime(time), in);
-   _love->write(getRecordingTime(time), love);
-    }
-  }
-
-  inline float step(TimePosition time, RecordParams params) {
-    if (_listening) {
-      if (!phase_defined) {
-        _in->pushBack(params.readIn());
-        _love->pushBack(params.love);
-      } else if (writableAtTime(time)) {
-        _in->write(getRecordingTime(time), params.readIn());
-        _love->write(getRecordingTime(time), params.love);
-      }
+    } else {
+      return _in->read(getRecordingPosition(play_head));
     }
   }
 };

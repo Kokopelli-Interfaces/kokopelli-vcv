@@ -151,10 +151,10 @@ void Circle::modulateChannel(int channel_i) {
 
     // taking to the power of 2 gives a more intuitive curve
     love = pow(love, 2);
-    e->params->love = love;
+    e->_inputs.love = love;
 
-    e->params->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
-    e->params->signal_type = _from_signal->signal_type;
+    e->_params.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+    e->_params.signal_type = _from_signal->signal_type;
 
     e->_options = _options;
   }
@@ -185,14 +185,14 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
       phase_in += 5.0f;
     }
 
-    e->params->_ext_phase = rack::clamp(phase_in, 0.f, 10.0f);
+    e->_inputs.ext_phase = rack::clamp(phase_in, 0.f, 10.0f);
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
     outputs[PHASE_OUTPUT].setVoltage(e->_gko->_timeline_position.phase * 10, channel_i);
   }
 
-  e->params->in = _from_signal->signal[channel_i];
+  e->_params.in = _from_signal->signal[channel_i];
   float out = e->step();
   _to_signal->signal[channel_i] = out;
 
@@ -209,7 +209,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
-  if (default_e->_new_member_active || default_e->isRecording()) {
+  if (default_e->_new_member_active || default_e->_state.loving) {
     if (default_e->_select_new_members) {
       lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
       if (default_e->isSolo(default_e->_timeline.members.size()-1)) {
@@ -225,10 +225,9 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[LOVE_INPUT].isConnected() && 1 < inputs[LOVE_INPUT].getChannels());
 
-  kokopellivcv::dsp::circle::LoopMode displayed_loop_mode = default_e->_loop_mode;
-  kokopellivcv::dsp::circle::RecordParams displayed_params = default_e->params;
+  kokopellivcv::dsp::circle::Parameters displayed_params = default_e->_params;
 
-  float displayed_phase = default_e->_timeline_position.phase;
+  float displayed_phase = default_e->_inputs.ext_phase;
 
   float sel_signal_out_sum = 0.f;
   float signal_in_sum = 0.f;
@@ -237,35 +236,33 @@ void Circle::updateLights(const ProcessArgs &args) {
     signal_in_sum += _from_signal->signal[c];
     sel_signal_out_sum += _to_signal->sel_signal[c];
     if (record_active) {
-      displayed_loop_mode = _engines[c]->_loop_mode;
       displayed_params = _engines[c]->_params;
-      displayed_phase = _engines[c]->_timeline_position.phase;
+      displayed_phase = _engines[c]->_inputs.phase;
     }
   }
 
-  float active_member_signal_out_sum = default_e->readActiveMember();
-  active_member_signal_out_sum = rack::clamp(active_member_signal_out_sum, 0.f, 1.f);
-  signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
-  sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
-
-  if (displayed_params.loveActive()) {
-    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_params.love);
-    lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
-    int light_colour = poly_record ? 2 : 0;
-    lights[EMERSIGN_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
-  } else {
-    lights[EMERSIGN_LIGHT + 0].value = 0.f;
-    lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(active_member_signal_out_sum, _sampleTime * _light_divider.getDivision());
-    lights[EMERSIGN_LIGHT + 2].value = 0.f;
-  }
+  // float active_member_signal_out_sum = default_e->readActiveMember();
+  // active_member_signal_out_sum = rack::clamp(active_member_signal_out_sum, 0.f, 1.f);
+  // signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
+  // sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
+  // if (displayed_params.loveActive()) {
+  //   sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_params.love);
+  //   lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
+  //   int light_colour = poly_record ? 2 : 0;
+  //   lights[EMERSIGN_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
+  // } else {
+  //   lights[EMERSIGN_LIGHT + 0].value = 0.f;
+  //   lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(active_member_signal_out_sum, _sampleTime * _light_divider.getDivision());
+  //   lights[EMERSIGN_LIGHT + 2].value = 0.f;
+  // }
 
   setLight(PREV_LIGHT, 0.f, 1.f, 0.f);
   setLight(NEXT_LIGHT, 0.f, 1.f, 0.f);
 
-  if (default_e->isRecording()) {
+  if (default_e->_state.loving) {
     setLight(LOOP_MODE_LIGHT, 1.f, 1.f, 1.f);
   } else {
-    switch (displayed_loop_mode) {
+    switch (default_e->_state.loop_mode) {
     case kokopellivcv::dsp::circle::LoopMode::None:
       setLight(LOOP_MODE_LIGHT, 1.f, 0.f, 0.f);
       break;

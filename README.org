@@ -2,19 +2,19 @@
 [[file:img/cavee.jpg]]
 
 #+begin_quote
-"Here at Kokopelli Interfaces.. we work hard to deliver /you/ the interfaces you
-need to express your creativity. That's right. We help you bring the village
-inside, outside. The spirit of Abba's Dancing Queen? A low resonance in your
-stomach? Accents and intonations? Visions of the universe? Whatever it may be,
-it has come into being through yours and your ancestors concert with the rest of
-the universe, and we are here to help you manifest it! Designed with the
-timeless principle - /'as within, so without'/ - our interfaces go the extra mile
-to meet you in /your/ experience of music, so that home stays nearby."
+"Here at Kokopelli Interfaces.. we work hard to deliver /you/ the interfaces you need to express your
+bodies energies. That's right. We help you bring the village inside, outside. The humming melancholy
+above your stomach as you bring to mind the leaves of october turning yellow to die? A chariot of
+energetic tapping the thinking mind conjures? The glowing pads the flames of your heart
+sing? Whatever it may be, it has come into being through yours and your ancestors concert with the
+rest of the universe, and we are here to help you manifest it! Designed with the timeless
+principle - /'as within, so without'/ - our interfaces go the extra mile to meet you in /your/
+experience of music, so that home stays nearby."
 
 Kokopelli Interfaces - /because alignment matters./
 #+end_quote
 
-** [#A] Circle
+** Circle
 #+ATTR_ORG: :width 750 
 [[./img/README_2021_09_11__22:28:00.png]]
 
@@ -67,3 +67,5 @@ files - e.g. 'pitch of guitar melody' + 'texture of steam whistle'.
 ** [#B] Synaesthesia
 An audio-Visual synesthesia display.
 Audio -> =Qualitative Audio Features=  extractor -> Features /e.g. pan, fuzz, distortion, pitch.../ -> Visuals
+
+** 

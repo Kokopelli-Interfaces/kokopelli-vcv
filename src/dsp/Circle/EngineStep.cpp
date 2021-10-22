@@ -7,15 +7,35 @@ inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();
 }
 
-inline unsigned int getNewCircleLength(std::pair<unsigned int, unsigned int> circle, unsigned int new_loop_n_beats) {
-  unsigned int circle_n_beats = circle.second - circle.first;
-  unsigned int new_circle_n_beats = circle_n_beats;
+inline int findNiceNumberAroundFirstThatFitsIntoSecond(int n1, int n2) {
+  assert(n1 < n2);
 
-  while (new_circle_n_beats < new_loop_n_beats) {
-    new_circle_n_beats += circle_n_beats;
+  while (n2 % n1 != 0) {
+    n1++;
+    if (n1 == n2) {
+      return n1;
+    }
   }
 
-  return new_circle_n_beats;
+  return n1;
+}
+
+void Engine::fitLayerIntoCircle(Layer* layer) {
+  unsigned int circle_n_beats = _circle.second - _circle.first;
+  if (layer->_n_beats == circle_n_beats) {
+    return;
+  }
+
+  if (layer->_n_beats < circle_n_beats) {
+    layer->_n_beats = findNiceNumberAroundFirstThatFitsIntoSecond(layer->_n_beats, circle_n_beats);
+  } else {
+    unsigned int new_circle_n_beats = circle_n_beats;
+    while (new_circle_n_beats < layer->_n_beats) {
+      new_circle_n_beats += circle_n_beats;
+    }
+    layer->_n_beats = new_circle_n_beats;
+    _circle.second = _circle.first + new_circle_n_beats;
+  }
 }
 
 void Engine::endRecording(bool loop, bool create_new_circle) {
@@ -34,15 +54,12 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
 
   if (loop) {
     _recording_layer->_loop = true;
-    unsigned int new_circle_n_beats;
     if (create_new_circle) {
-      new_circle_n_beats = _recording_layer->_n_beats;
+      unsigned int new_circle_n_beats = _recording_layer->_n_beats;
+      _circle.second = _circle.first + new_circle_n_beats;
     } else {
-      new_circle_n_beats = getNewCircleLength(_circle, _recording_layer->_n_beats);
-      _recording_layer->_n_beats = new_circle_n_beats;
+      fitLayerIntoCircle(_recording_layer);
     }
-
-    _circle.second = _circle.first + new_circle_n_beats;
   }
 
   _timeline.layers.push_back(_recording_layer);
@@ -129,7 +146,8 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
       _circle.second += circle_shift;
     } else {
       // _read_antipop_filter.trigger();
-      // _write_antipop_filter.trigger();
+      // TODO doesnt work too well, use antipop trigger instead
+      _write_antipop_filter.trigger();
       _timeline_position.beat = _circle.first;
     }
   }

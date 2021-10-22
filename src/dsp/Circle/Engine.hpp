@@ -83,6 +83,7 @@ struct Engine {
   void deleteSelection();
 
 private:
+  void fitLayerIntoCircle(Layer* layer);
   void endRecording(bool loop, bool create_new_circle);
   Layer* newRecording();
   inline bool phaseDefined();

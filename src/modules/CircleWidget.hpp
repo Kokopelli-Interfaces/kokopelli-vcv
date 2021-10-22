@@ -283,10 +283,6 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.use_antipop;
     }));
 
-    menu->addChild(new BoolOptionMenuItem("Snap to divisible recording lengths", [m]() {
-      return &m->_options.strict_recording_lengths;
-    }));
-
     menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {
       return &m->_options.bipolar_phase_input;
     }));

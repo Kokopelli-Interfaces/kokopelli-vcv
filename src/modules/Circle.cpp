@@ -261,12 +261,19 @@ void Circle::updateLights(const ProcessArgs &args) {
   lights[FIX_BOUNDS_LIGHT + 0].value = !displayed_record_params.fix_bounds;
   lights[FIX_BOUNDS_LIGHT + 1].value = displayed_record_params.fix_bounds;
 
-  lights[UNDO_LIGHT + 0].value = 0.f;
-  lights[UNDO_LIGHT + 1].value = 1.f;
+  if (default_e->isRecording()) {
+    lights[UNDO_LIGHT + 0].value = !displayed_record_params.fix_bounds;
+    lights[UNDO_LIGHT + 1].value = displayed_record_params.fix_bounds;
+    lights[UNDO_LIGHT + 2].value = 1.f;
+  } else {
+    lights[UNDO_LIGHT + 0].value = 0.f;
+    lights[UNDO_LIGHT + 1].value = 1.f;
+    lights[UNDO_LIGHT + 2].value = 0.f;
+  }
 
   if (default_e->isRecording()) {
-    lights[SKIP_BACK_LIGHT + 0].value = 1.f;
-    lights[SKIP_BACK_LIGHT + 1].value = 1.f;
+    lights[SKIP_BACK_LIGHT + 0].value = !displayed_record_params.fix_bounds;
+    lights[SKIP_BACK_LIGHT + 1].value = displayed_record_params.fix_bounds;
     lights[SKIP_BACK_LIGHT + 2].value = 1.f;
   } else {
     lights[SKIP_BACK_LIGHT + 0].value = 0.f;
@@ -291,4 +298,4 @@ void Circle::removeChannel(int channel_i) {
   _engines[channel_i] = nullptr;
 }
 
-Model *modelCircle = rack::createModel<Circle, CircleWidget>("KokopelliVcv-Circle");
+Model *modelCircle = rack::createModel<Circle, CircleWidget>("KokopelliInterfaces-Circle");

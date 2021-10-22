@@ -66,4 +66,4 @@ void Signal::removeChannel(int c) {
   _engines[c] = nullptr;
 }
 
-Model* modelSignal = rack::createModel<Signal, SignalWidget>("KokopelliVcv-Signal");
+Model* modelSignal = rack::createModel<Signal, SignalWidget>("KokopelliInterfaces-Signal");

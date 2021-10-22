@@ -1,4 +1,4 @@
-#pragma once
+#SKIP_BACK_LIGHTpragma once
 
 #include "Layer.hpp"
 #include "definitions.hpp"
@@ -24,7 +24,7 @@ struct Timeline {
   rack::dsp::ClockDivider _attenuation_calculator_divider;
 
   Timeline() {
-    _attenuation_calculator_divider.setDivision(2000);
+    _attenuation_calculator_divider.setDivision(4000);
   }
 
   static inline float smoothValue(float current, float old) {

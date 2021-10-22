@@ -7,6 +7,17 @@ inline bool Engine::phaseDefined() {
   return _use_ext_phase || _phase_oscillator.isSet();
 }
 
+inline unsigned int getNewCircleLength(std::pair<unsigned int, unsigned int> circle, unsigned int new_loop_n_beats) {
+  unsigned int circle_n_beats = circle.second - circle.first;
+  unsigned int new_circle_n_beats = circle_n_beats;
+
+  while (new_circle_n_beats < new_loop_n_beats) {
+    new_circle_n_beats += circle_n_beats;
+  }
+
+  return new_circle_n_beats;
+}
+
 void Engine::endRecording(bool loop) {
   assert(isRecording());
   assert(_recording_layer->_n_beats != 0);
@@ -38,11 +49,10 @@ void Engine::endRecording(bool loop) {
       _active_layer_i = layer_i;
     }
 
-    if (_loop_length < _recording_layer->_n_beats) {
-      _loop_length = _recording_layer->_n_beats;
-    }
-  } else {
-    _circle = _recording_layer->_circle_before;
+    unsigned int new_circle_n_beats = getNewCircleLength(_circle, _recording_layer->_n_beats);
+
+    _recording_layer->_n_beats = new_circle_n_beats;
+    _circle.second = _circle.first + new_circle_n_beats;
   }
 
   // printf("- rec end\n");
@@ -56,15 +66,17 @@ Layer* Engine::newRecording() {
 
   unsigned int start_beat = _timeline_position.beat;
   unsigned int n_beats = 1;
+
+  unsigned int circle_n_beats = _circle.second - _circle.first;
   if (this->_record_params.fix_bounds) {
     start_beat = _circle.first;
-    n_beats = _loop_length;
+    n_beats = circle_n_beats;
   }
 
   bool shift_circle = !this->_record_params.fix_bounds;
   if (shift_circle) {
     _circle.first = start_beat;
-    _circle.second = start_beat + _loop_length;
+    _circle.second = start_beat + circle_n_beats;
   }
 
   if (this->_record_params.fix_bounds) {
@@ -72,7 +84,7 @@ Layer* Engine::newRecording() {
       if (_timeline.layers[_active_layer_i]->_loop) {
         n_beats = _timeline.layers[_active_layer_i]->_n_beats;
       } else {
-        n_beats = _loop_length;
+        n_beats = circle_n_beats;
       }
     }
   } else {
@@ -103,29 +115,17 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   assert(phaseDefined());
 
   bool reached_circle_end = _timeline_position.beat == _circle.second;
-  unsigned int circle_shift = _circle.second - _circle.first;
-  _circle.first = _circle.second;
-  _circle.second += circle_shift;
 
   if (reached_circle_end) {
-    bool grow_circle = this->isRecording() && !this->_record_params.fix_bounds;
-    if (grow_circle) {
-      _circle.second += _loop_length;
-      _recording_layer->_n_beats += _loop_length;
-      // _recording_layer->_n_beats += 1;
+    bool shift_circle = this->isRecording() && !_record_params.fix_bounds;
+    if (shift_circle) {
+      unsigned int circle_shift = _circle.second - _circle.first;
+      _circle.first = _circle.second;
+      _circle.second += circle_shift;
     } else {
-      // bool skip_back_to_circle_start =
-      //   (true) ||
-      //   (_timeline.atEnd(_timeline_position) && !this->isRecording());
-      // if (skip_back_to_circle_start) {
-        // _read_antipop_filter.trigger();
-        // _write_antipop_filter.trigger();
-        _timeline_position.beat = _circle.first;
-      // } else { // shift circle
-        unsigned int circle_shift = _circle.second - _circle.first;
-        _circle.first = _circle.second;
-        _circle.second += circle_shift;
-      // }
+      // _read_antipop_filter.trigger();
+      // _write_antipop_filter.trigger();
+      _timeline_position.beat = _circle.first;
     }
   }
 

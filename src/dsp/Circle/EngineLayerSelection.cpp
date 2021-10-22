@@ -58,6 +58,12 @@ void Engine::undo() {
     int last_i = _timeline.layers.size()-1;
     if (0 <= last_i) {
       _circle = _timeline.layers[last_i]->_circle_before;
+      unsigned int circle_length = _circle.second - _circle.first;
+
+      while (_circle.second <= _timeline_position.beat) {
+        _timeline_position.beat -= circle_length;
+      }
+
       this->deleteLayer(last_i);
     }
   }

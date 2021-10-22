@@ -30,11 +30,12 @@ struct RecordParams {
 
   inline float readIn() {
     // avoids pops when engaging / disengaging strength parameter
-    if (0.0001f <= strength && strength <= 0.033f) {
-      float engage_attenuation = -1.f * pow((30.f * strength - _recordActiveThreshold), 3) + 1.f;
-      engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
-      return in * (1.f - engage_attenuation);
-    }
+    // if (0.0001f <= strength && strength <= 0.033f) {
+    //   float engage_attenuation = -1.f * pow((30.f * strength - _recordActiveThreshold), 3) + 1.f;
+    //   engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
+      // return in * (1.f - engage_attenuation);
+      // return in;
+    // }
 
     return in;
   }

@@ -25,7 +25,8 @@ inline float attenuate(float sample, float attenuation, SignalType signal_type) 
 inline float sum(float sample_1, float sample_2, SignalType signal_type) {
   switch (signal_type) {
   case SignalType::AUDIO:
-    return tribalinterfaces::dsp::saturate(sample_1 + sample_2);
+    // return tribalinterfaces::dsp::saturate(sample_1 + sample_2);
+    return sample_1 + sample_2;
   case SignalType::PARAM: case SignalType::VEL:
     return rack::clamp(sample_1 + sample_2, 0.f, 10.f);
   case SignalType::CV:

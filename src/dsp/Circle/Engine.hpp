@@ -40,14 +40,12 @@ struct Engine {
 
   Layer *_recording_layer = nullptr;
   RecordParams _record_params;
-  bool _used_window_capture_button = false;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
 
   Timeline _timeline;
   TimePosition _timeline_position;
-  bool _skip_back = true;
 
   AntipopFilter _read_antipop_filter;
   AntipopFilter _write_antipop_filter;
@@ -66,10 +64,7 @@ struct Engine {
   void resetEngineMode();
 
   void setFixBounds(bool fix_bounds);
-  void setRecordOnInnerLoop(bool record_on_inner_circle);
-  void setSkipBack(bool skip_back);
-
-  bool checkState(int skip_back, int fix_bounds, int record_on_inner_circle);
+  void loop();
 
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);
@@ -80,7 +75,7 @@ struct Engine {
   void deleteSelection();
 
 private:
-  void endRecording();
+  void endRecording(bool loop);
   Layer* newRecording();
   inline bool phaseDefined();
   inline void write();

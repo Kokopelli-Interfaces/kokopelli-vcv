@@ -200,17 +200,16 @@ struct CircleWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParam<CircleFocusKnob>(mm2px(Vec(5.333, 21.157)), module, Circle::SELECT_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.774, 33.464)), module, Circle::SELECT_MODE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Circle::SELECT_FUNCTION_PARAM));
 
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::SKIP_BACK_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::LOOP_PARAM));
 		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Circle::FIX_BOUNDS_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::RECORD_ON_INNER_CIRCLE_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::UNDO_PARAM));
 		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Circle::RECORD_PARAM));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Circle::SKIP_BACK_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Circle::LOOP_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Circle::FIX_BOUNDS_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::RECORD_ON_INNER_CIRCLE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::UNDO_PARAM));
 		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::RECORD_PARAM));
 
 		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Circle::RECORD_INPUT));
@@ -220,12 +219,11 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Circle::PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Circle::SELECT_FUNCTION_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.239, 34.928)), module, Circle::SELECT_MODE_LIGHT));
 		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Circle::SKIP_BACK_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Circle::SKIP_BACK_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Circle::RECORD_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Circle::FIX_BOUNDS_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::RECORD_ON_INNER_CIRCLE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::UNDO_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Circle::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));
@@ -287,10 +285,6 @@ struct CircleWidget : ModuleWidget {
 
     menu->addChild(new BoolOptionMenuItem("Snap to divisible recording lengths", [m]() {
       return &m->_options.strict_recording_lengths;
-    }));
-
-    menu->addChild(new BoolOptionMenuItem("Create new layer on skip back", [m]() {
-      return &m->_options.create_new_layer_on_skip_back;
     }));
 
     menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {

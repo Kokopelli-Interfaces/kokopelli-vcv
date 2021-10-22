@@ -4,6 +4,8 @@
 #include "Recording.hpp"
 #include "dsp/Signal.hpp"
 
+#include <numeric> // std::iota
+
 namespace tribalinterfaces {
 namespace dsp {
 namespace circle {
@@ -12,6 +14,8 @@ struct Layer {
   unsigned int _start_beat = 0;
   unsigned int _n_beats = 0;
   bool _loop = false;
+
+  std::pair<unsigned int, unsigned int> _circle_before = std::make_pair(0, 1);
 
   // TODO
   // std::vector<Recording*> recordings;

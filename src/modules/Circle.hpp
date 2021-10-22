@@ -14,8 +14,8 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
     SELECT_PARAM,
     SELECT_MODE_PARAM,
     SELECT_FUNCTION_PARAM,
-    SKIP_BACK_PARAM,
-    RECORD_ON_INNER_CIRCLE_PARAM,
+    LOOP_PARAM,
+    UNDO_PARAM,
     FIX_BOUNDS_PARAM,
     RECORD_PARAM,
     NUM_PARAMS
@@ -28,7 +28,7 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
     ENUMS(SKIP_BACK_LIGHT, 3),
     ENUMS(RECORD_LIGHT, 3),
     ENUMS(FIX_BOUNDS_LIGHT, 3),
-    ENUMS(RECORD_ON_INNER_CIRCLE_LIGHT, 3),
+    ENUMS(UNDO_LIGHT, 3),
     ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
@@ -44,8 +44,8 @@ struct Circle : ExpanderModule<SignalExpanderMessage, TribalInterfacesModule> {
   tribalinterfaces::dsp::LongPressButton _select_mode_button;
 
   tribalinterfaces::dsp::LongPressButton _fix_bounds_button;
-  tribalinterfaces::dsp::LongPressButton _record_on_inner_circle_button;
-  tribalinterfaces::dsp::LongPressButton _skip_back_button;
+  tribalinterfaces::dsp::LongPressButton _undo_button;
+  tribalinterfaces::dsp::LongPressButton _loop_button;
 
   std::array<tribalinterfaces::dsp::circle::Engine*, maxChannels> _engines;
 

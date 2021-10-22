@@ -53,10 +53,15 @@ void Engine::toggleSelectLayer(unsigned int layer_i) {
 
 void Engine::undo() {
   if (isRecording()) {
-    endRecording();
+    endRecording(false);
+  } else {
+    int last_i = _timeline.layers.size()-1;
+    if (0 <= last_i) {
+      _circle = _timeline.layers[last_i]->_circle_before;
+      this->deleteLayer(last_i);
+    }
   }
 
-  this->deleteLayer(_timeline.layers.size()-1);
 }
 
 

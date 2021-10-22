@@ -4,23 +4,21 @@
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
-  configParam(SELECT_MODE_PARAM, 0.f, 1.f, 0.f, "Select Mode");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
-  configParam(SKIP_BACK_PARAM, 0.f, 1.f, 0.f, "Skip Back");
+  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
   configParam(FIX_BOUNDS_PARAM, 0.f, 1.f, 0.f, "Fix Recording Boundaries");
-  configParam(RECORD_ON_INNER_CIRCLE_PARAM, 0.f, 1.f, 0.f, "Record On Inner Circle");
-  configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Record Strength");
+  configParam(UNDO_PARAM, 0.f, 1.f, 0.f, "Undo/Restart");
+  configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Love");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
 
   _select_function_button.param = &params[SELECT_FUNCTION_PARAM];
-  _select_mode_button.param = &params[SELECT_MODE_PARAM];
 
   _fix_bounds_button.param = &params[FIX_BOUNDS_PARAM];
-  _record_on_inner_circle_button.param = &params[RECORD_ON_INNER_CIRCLE_PARAM];
-  _skip_back_button.param = &params[SKIP_BACK_PARAM];
+  _undo_button.param = &params[UNDO_PARAM];
+  _loop_button.param = &params[LOOP_PARAM];
 }
 
 void Circle::sampleRateChange() {
@@ -34,10 +32,9 @@ void Circle::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
     tribalinterfaces::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _select_mode_event = _select_mode_button.process(sampleTime);
     tribalinterfaces::dsp::LongPressButton::Event _fix_bounds_event = _fix_bounds_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _record_on_inner_circle_event = _record_on_inner_circle_button.process(sampleTime);
-    tribalinterfaces::dsp::LongPressButton::Event _skip_back_event = _skip_back_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _undo_event = _undo_button.process(sampleTime);
+    tribalinterfaces::dsp::LongPressButton::Event _loop_event = _loop_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
     tribalinterfaces::dsp::circle::Engine *e = _engines[c];
@@ -70,16 +67,6 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_select_mode_event) {
-    case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
-      break;
-    case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      break;
-    case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      e->deleteSelection();
-      break;
-    }
-
     switch (_fix_bounds_event) {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
@@ -91,40 +78,30 @@ void Circle::processButtons() {
       }
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      e->undo();
       break;
     }
 
-    switch (_record_on_inner_circle_event) {
+    switch (_undo_event) {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_record_params.record_on_inner_circle == false) {
-        e->setRecordOnInnerLoop(true);
-      } else {
-        e->setRecordOnInnerLoop(false);
-      }
+      e->undo();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
       // e->setCircleToActiveLayer();
-      if (0 < e->_timeline.layers.size()) {
-        e->_timeline.layers[e->_active_layer_i]->_loop = !e->_timeline.layers[e->_active_layer_i]->_loop;
-      }
+      e->deleteSelection();
+      e->setCircleToActiveLayer();
       break;
     }
 
-    switch (_skip_back_event) {
+    switch (_loop_event) {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_skip_back == true) {
-        e->setSkipBack(false);
-      } else {
-        e->setSkipBack(true);
-      }
+      e->loop();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      e->setCircleToActiveLayer();
+      break;
     }
   }
 }
@@ -185,7 +162,7 @@ void Circle::modulateChannel(int channel_i) {
     }
 
     // taking to the strength of 2 gives a more intuitive curve
-    record_strength = pow(record_strength, 2);
+    record_strength = pow(record_strength, 4);
     e->_record_params.strength = record_strength;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
@@ -265,7 +242,6 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
 
-  bool displayed_skip_back = default_e->_skip_back;
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
@@ -277,7 +253,6 @@ void Circle::updateLights(const ProcessArgs &args) {
     signal_in_sum += _from_signal->signal[c];
     sel_signal_out_sum += _to_signal->sel_signal[c];
     if (record_active) {
-      displayed_skip_back = _engines[c]->_skip_back;
       displayed_record_params = _engines[c]->_record_params;
       displayed_phase = _engines[c]->_timeline_position.phase;
     }
@@ -310,16 +285,16 @@ void Circle::updateLights(const ProcessArgs &args) {
   lights[FIX_BOUNDS_LIGHT + 0].value = !displayed_record_params.fix_bounds;
   lights[FIX_BOUNDS_LIGHT + 1].value = displayed_record_params.fix_bounds;
 
-  lights[RECORD_ON_INNER_CIRCLE_LIGHT + 0].value = !displayed_record_params.record_on_inner_circle;
-  lights[RECORD_ON_INNER_CIRCLE_LIGHT + 1].value = displayed_record_params.record_on_inner_circle;
+  lights[UNDO_LIGHT + 0].value = 0.f;
+  lights[UNDO_LIGHT + 1].value = 1.f;
 
   if (default_e->isRecording()) {
     lights[SKIP_BACK_LIGHT + 0].value = 1.f;
     lights[SKIP_BACK_LIGHT + 1].value = 1.f;
     lights[SKIP_BACK_LIGHT + 2].value = 1.f;
   } else {
-    lights[SKIP_BACK_LIGHT + 0].value = !displayed_skip_back;
-    lights[SKIP_BACK_LIGHT + 1].value = displayed_skip_back;
+    lights[SKIP_BACK_LIGHT + 0].value = 0.f;
+    lights[SKIP_BACK_LIGHT + 1].value = 0.f;
     lights[SKIP_BACK_LIGHT + 2].value = 0.f;
   }
 }

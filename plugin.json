@@ -1,19 +1,19 @@
 {
-  "slug": "tribal-interfaces",
-  "name": "Tribal Interfaces",
+  "slug": "kokopelli-vcv",
+  "name": "Kokopelli Vcv",
   "version": "1.0",
   "license": "MIT",
-  "author": "Tribal Interfaces",
-  "brand": "Tribal Interfaces",
+  "author": "Michael Muszynski",
+  "brand": "Kokopelli Interfaces",
   "authorEmail": "michael.ampm@gmail.com",
   "authorUrl": "https://github.com/gwatcha",
-  "pluginUrl": "https://github.com/gwatcha/tribal-interfaces",
-  "manualUrl": "https://github.com/gwatcha/tribal-interfaces/wiki",
-  "sourceUrl": "https://github.com/gwatcha/tribal-interfaces",
+  "pluginUrl": "",
+  "manualUrl": "https://kokopelli-interfaces.github.io/",
+  "sourceUrl": "",
   "donateUrl": "https://ko-fi.com/michaelmuszynski",
   "modules": [
     {
-      "slug": "TribalInterfaces-Signal",
+      "slug": "KokopelliInterfaces-Signal",
       "name": "Signal",
       "description": "Circle expander which adds one signal input and output.",
       "tags": [
@@ -21,33 +21,9 @@
       ]
     },
     {
-      "slug": "TribalInterfaces-Signal4",
-      "name": "Signal4",
-      "description": "Circle expander which adds four signal inputs and outputs.",
-      "tags": [
-        "Expander"
-      ]
-    },
-    {
-      "slug": "TribalInterfaces-Play",
-      "name": "Play",
-      "description": "Circle expander which adds midi recording inputs and outputs.",
-      "tags": [
-        "Expander"
-      ]
-    },
-    {
-      "slug": "TribalInterfaces-Signal",
-      "name": "Signal",
-      "description": "Record, loop, edit, playback, and sequence signals.",
-      "tags": [
-        "Expander"
-      ]
-    },
-    {
-      "slug": "TribalInterfaces-Circle",
+      "slug": "KokopelliInterfaces-Circle",
       "name": "Circle",
-      "description": "Record, loop, edit, playback, and sequence signals. Designed for adding structure to patches, live loop recording, and more. Inspired by the advancer of existence, 'Circle'.",
+      "description": "Music circle facillitator for body energies. A swiss army knife of music creation - live looper, timeline recorder, multi-track DAW... It's magic!",
       "tags": [
         "Poly",
         "Recording",

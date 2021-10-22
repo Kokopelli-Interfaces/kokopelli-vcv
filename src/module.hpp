@@ -8,9 +8,9 @@
 
 using namespace rack;
 
-namespace tribalinterfaces {
+namespace kokopellivcv {
 
-struct TribalInterfacesModule : Module {
+struct KokopelliVcvModule : Module {
 	int _modulationSteps = 100;
 	int _steps = -1;
 	bool _initialized = false;
@@ -19,10 +19,10 @@ struct TribalInterfacesModule : Module {
 	int _channels = 0;
 	float _inverseChannels = 0.f;
 
-	TribalInterfacesModule() {
+	KokopelliVcvModule() {
 	}
 
-	virtual ~TribalInterfacesModule() {
+	virtual ~KokopelliVcvModule() {
 		while (_channels >= 1) {
 			removeChannel(_channels - 1);
 			--_channels;
@@ -49,4 +49,4 @@ struct TribalInterfacesModule : Module {
 	virtual void postProcessAlways(const ProcessArgs& args) {} // modulate() may not have been called.
 };
 
-} // namespace tribalinterfaces
+} // namespace kokopellivcv

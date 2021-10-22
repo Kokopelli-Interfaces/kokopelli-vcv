@@ -4,9 +4,9 @@
 #include "Signal.hpp"
 #include "menu.hpp"
 
-using namespace tribalinterfaces::dsp;
+using namespace kokopellivcv::dsp;
 
-namespace tribalinterfaces {
+namespace kokopellivcv {
 
 struct SignalWidget : ModuleWidget {
 	SignalWidget(Signal* module) {
@@ -49,4 +49,4 @@ struct SignalWidget : ModuleWidget {
 };
 
 
-} // namespace tribalinterfaces
+} // namespace kokopellivcv

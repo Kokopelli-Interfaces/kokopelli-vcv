@@ -1,6 +1,6 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
+using namespace kokopellivcv::dsp::circle;
 
 float Engine::read() {
   float timeline_out = _timeline.read(_timeline_position, _recording_layer, _record_params, _active_layer_i);

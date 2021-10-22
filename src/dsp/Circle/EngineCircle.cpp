@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
-using namespace tribalinterfaces::dsp;
+using namespace kokopellivcv::dsp::circle;
+using namespace kokopellivcv::dsp;
 
 void Engine::setCircleToLayer(unsigned int layer_i) {
   _circle.first = _timeline.layers[layer_i]->_start_beat;

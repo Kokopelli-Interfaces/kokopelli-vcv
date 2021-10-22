@@ -35,4 +35,4 @@ struct Signal4Widget : ModuleWidget {
 	}
 };
 
-Model *modelSignal4 = rack::createModel<Signal4, Signal4Widget>("TribalInterfaces-Signal4");
+Model *modelSignal4 = rack::createModel<Signal4, Signal4Widget>("KokopelliVcv-Signal4");

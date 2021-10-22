@@ -1,6 +1,6 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
+using namespace kokopellivcv::dsp::circle;
 
 void Engine::undo() {
   if (isRecording()) {

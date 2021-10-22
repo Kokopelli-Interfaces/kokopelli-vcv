@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
-using namespace tribalinterfaces::dsp;
+using namespace kokopellivcv::dsp::circle;
+using namespace kokopellivcv::dsp;
 
 // TODO consider layer attenuations, so that you can't select fully attenuated layer
 

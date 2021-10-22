@@ -1,7 +1,7 @@
 #include "Engine.hpp"
 
-using namespace tribalinterfaces::dsp::circle;
-using namespace tribalinterfaces::dsp;
+using namespace kokopellivcv::dsp::circle;
+using namespace kokopellivcv::dsp;
 
 bool Engine::isRecording() {
   return _recording_layer != nullptr;

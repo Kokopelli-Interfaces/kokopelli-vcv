@@ -39,40 +39,52 @@ bool Engine::isSelected(unsigned int layer_i) {
 }
 
 void Engine::toggleSelectLayer(unsigned int layer_i) {
-    bool select = true;
-    for (unsigned int layer_i_i = 0; layer_i_i < _selected_layers_idx.size(); layer_i_i++) {
-      if (_selected_layers_idx[layer_i_i] == _active_layer_i) {
-        _selected_layers_idx.erase(_selected_layers_idx.begin() + layer_i_i);
-        select = false;
-      }
-    }
-    if (select && _timeline.layers.size() != 0) {
-      _selected_layers_idx.push_back(_active_layer_i);
-    }
-}
+  bool select = true;
 
-void Engine::undo() {
-  if (isRecording()) {
-    endRecording(false, false);
+  for (unsigned int layer_i_i = 0; layer_i_i < _selected_layers_idx.size(); layer_i_i++) {
+    if (_selected_layers_idx[layer_i_i] == _active_layer_i) {
+      _selected_layers_idx.erase(_selected_layers_idx.begin() + layer_i_i);
+      select = false;
+    }
   }
-
-  // if this was an unfixed recording, just leave it to make transitions easier
-  // in fix_bounds mode, it acts as 'restart' or 'clear' memory
-  if (!isRecording() || _record_params.fix_bounds) {
-    int last_i = _timeline.layers.size()-1;
-    if (0 <= last_i) {
-      _circle = _timeline.layers[last_i]->_circle_before;
-      unsigned int circle_length = _circle.second - _circle.first;
-
-      while (_circle.second <= _timeline_position.beat) {
-        _timeline_position.beat -= circle_length;
-      }
-
-      this->deleteLayer(last_i);
-    }
+  if (select && _timeline.layers.size() != 0) {
+    _selected_layers_idx.push_back(_active_layer_i);
   }
 }
 
+void Engine::nextLayer() {
+  if ((int) _timeline.layers.size()-1 <= (int)_active_layer_i) {
+    _new_layer_active = true;
+  } else {
+    _active_layer_i++;
+  }
+
+  if (_layer_mode) {
+    skipToActiveLayer();
+    soloSelectLayer(_active_layer_i);
+  }
+}
+
+void Engine::prevLayer() {
+  if (_new_layer_active) {
+    _new_layer_active = false;
+  } else if (0 < _active_layer_i) {
+    _active_layer_i--;
+  }
+
+  if (_layer_mode) {
+    skipToActiveLayer();
+    soloSelectLayer(_active_layer_i);
+  }
+}
+
+void Engine::toggleSelectActiveLayer() {
+  if (_new_layer_active) {
+    _select_new_layers = !_select_new_layers;
+  } else {
+    toggleSelectLayer(_active_layer_i);
+  }
+}
 
 void Engine::deleteLayer(unsigned int layer_i) {
   if (layer_i < _timeline.layers.size()) {
@@ -105,3 +117,21 @@ void Engine::deleteSelection() {
     _phase_oscillator.reset(0.f);
   }
 }
+
+void Engine::soloOrSelectUpToActiveLayer() {
+  if (isSelected(_active_layer_i)) {
+    if (_selected_layers_idx.size() == 1) {
+      _selected_layers_idx = _saved_selected_layers_idx;
+    } else {
+      _saved_selected_layers_idx = _selected_layers_idx;
+      soloSelectLayer(_active_layer_i);
+    }
+  } else {
+    if (_selected_layers_idx.size() == 1) {
+      selectRange(_selected_layers_idx[0], _active_layer_i);
+    } else {
+      selectRange(0, _active_layer_i);
+    }
+  }
+}
+

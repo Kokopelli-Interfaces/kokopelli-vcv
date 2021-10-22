@@ -19,5 +19,10 @@ void Engine::skipToActiveLayer() {
   }
 
   _read_antipop_filter.trigger();
-  _write_antipop_filter.trigger();
+
+  if (isRecording()) {
+    delete _recording_layer;
+    _recording_layer = nullptr;
+    _write_antipop_filter.trigger();
+  }
 }

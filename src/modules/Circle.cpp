@@ -43,27 +43,10 @@ void Circle::processButtons() {
     case tribalinterfaces::dsp::LongPressButton::NO_PRESS:
       break;
     case tribalinterfaces::dsp::LongPressButton::SHORT_PRESS:
-      if (e->_new_layer_active) {
-        e->_select_new_layers = !e->_select_new_layers;
-      } else {
-        e->toggleSelectLayer(e->_active_layer_i);
-      }
+      e->toggleSelectActiveLayer();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      if (e->isSelected(e->_active_layer_i)) {
-        if (e->_selected_layers_idx.size() == 1) {
-          e->_selected_layers_idx = e->_saved_selected_layers_idx;
-        } else {
-          e->_saved_selected_layers_idx = e->_selected_layers_idx;
-          e->soloSelectLayer(e->_active_layer_i);
-        }
-      } else {
-        if (e->_selected_layers_idx.size() == 1) {
-          e->selectRange(e->_selected_layers_idx[0], e->_active_layer_i);
-        } else {
-          e->selectRange(0, e->_active_layer_i);
-        }
-      }
+      e->soloOrSelectUpToActiveLayer();
       break;
     }
 
@@ -101,7 +84,7 @@ void Circle::processButtons() {
       e->loop();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      e->soloSelectLayer();
+      e->toggleLayerMode();
       break;
     }
   }
@@ -119,17 +102,9 @@ void Circle::processSelect() {
 
       bool increment = 0.f < d_select;
       if (increment) {
-        if ((int) e->_timeline.layers.size()-1 <= (int)e->_active_layer_i) {
-          e->_new_layer_active = true;
-        } else {
-          e->_active_layer_i++;
-        }
+        e->nextLayer();
       } else {
-        if (e->_new_layer_active) {
-          e->_new_layer_active = false;
-        } else if (0 < e->_active_layer_i) {
-          e->_active_layer_i--;
-        }
+        e->prevLayer();
       }
     }
 
@@ -295,8 +270,8 @@ void Circle::updateLights(const ProcessArgs &args) {
     lights[SKIP_BACK_LIGHT + 2].value = 1.f;
   } else {
     lights[SKIP_BACK_LIGHT + 0].value = 0.f;
-    lights[SKIP_BACK_LIGHT + 1].value = 1.f;
-    lights[SKIP_BACK_LIGHT + 2].value = 0.f;
+    lights[SKIP_BACK_LIGHT + 1].value = !default_e->_layer_mode;
+    lights[SKIP_BACK_LIGHT + 2].value = default_e->_layer_mode;
   }
 }
 

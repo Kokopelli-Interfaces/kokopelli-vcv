@@ -33,7 +33,9 @@ struct Engine {
 
   unsigned int _active_layer_i;
 
-  bool _circle_follows_layer_selection = false;
+  bool _layer_mode = false;
+  std::vector<unsigned int> _selected_layers_idx_before_layer_mode;
+  std::pair<unsigned int, unsigned int> _circle_before_layer_mode;
 
   /* read only */
 
@@ -66,12 +68,17 @@ struct Engine {
 
   void setFixBounds(bool fix_bounds);
   void loop();
+  void toggleLayerMode();
 
+  void nextLayer();
+  void prevLayer();
   void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
   void soloSelectLayer(unsigned int layer_i);
   bool isSelected(unsigned int layer_i);
   bool isSolo(unsigned int layer_i);
   void toggleSelectLayer(unsigned int layer_i);
+  void toggleSelectActiveLayer();
+  void soloOrSelectUpToActiveLayer();
   void deleteLayer(unsigned int layer_i);
   void deleteSelection();
 

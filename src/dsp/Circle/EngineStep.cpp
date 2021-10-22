@@ -172,7 +172,7 @@ void Engine::step() {
 
   if (!this->isRecording() && _record_params.active()) {
     _recording_layer = this->newRecording();
-    // _write_antipop_filter.trigger();
+    _write_antipop_filter.trigger();
   } else if (this->isRecording() && !_record_params.active()) {
     this->endRecording(true, false);
     if (!_record_params.fix_bounds) {

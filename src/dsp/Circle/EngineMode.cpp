@@ -13,10 +13,13 @@ void Engine::setFixBounds(bool fix_bounds) {
 
 void Engine::loop() {
   if (this->isRecording()) {
-    this->endRecording(true);
+    if (_record_params.fix_bounds) {
+      this->endRecording(true, false);
+    } else {
+      _record_params.fix_bounds = true;
+      this->endRecording(true, true);
+    }
+  } else {
+    skipToActiveLayer();
   }
-}
-
-void Engine::resetEngineMode() {
-  _record_params.fix_bounds = true;
 }

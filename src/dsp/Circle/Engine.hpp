@@ -33,6 +33,8 @@ struct Engine {
 
   unsigned int _active_layer_i;
 
+  bool _circle_follows_layer_selection = false;
+
   /* read only */
 
   std::pair<unsigned int, unsigned int> _circle = std::make_pair(0, 1);
@@ -56,11 +58,11 @@ struct Engine {
   float readSelection();
   float readActiveLayer();
 
-  void setCircleToActiveLayer();
+  void setCircleToLayer(unsigned int layer_i);
+  void skipToActiveLayer();
 
   void undo();
   bool isRecording();
-  void resetEngineMode();
 
   void setFixBounds(bool fix_bounds);
   void loop();
@@ -74,7 +76,7 @@ struct Engine {
   void deleteSelection();
 
 private:
-  void endRecording(bool loop);
+  void endRecording(bool loop, bool create_new_circle);
   Layer* newRecording();
   inline bool phaseDefined();
   inline void write();

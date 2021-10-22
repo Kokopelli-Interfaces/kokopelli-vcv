@@ -88,9 +88,9 @@ void Circle::processButtons() {
       e->undo();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
-      // e->setCircleToActiveLayer();
+      // e->skipToActiveLayer();
       e->deleteSelection();
-      e->setCircleToActiveLayer();
+      e->skipToActiveLayer();
       break;
     }
 
@@ -101,6 +101,7 @@ void Circle::processButtons() {
       e->loop();
       break;
     case tribalinterfaces::dsp::LongPressButton::LONG_PRESS:
+      e->soloSelectLayer();
       break;
     }
   }
@@ -294,7 +295,7 @@ void Circle::updateLights(const ProcessArgs &args) {
     lights[SKIP_BACK_LIGHT + 2].value = 1.f;
   } else {
     lights[SKIP_BACK_LIGHT + 0].value = 0.f;
-    lights[SKIP_BACK_LIGHT + 1].value = 0.f;
+    lights[SKIP_BACK_LIGHT + 1].value = 1.f;
     lights[SKIP_BACK_LIGHT + 2].value = 0.f;
   }
 }

@@ -18,7 +18,7 @@ inline unsigned int getNewCircleLength(std::pair<unsigned int, unsigned int> cir
   return new_circle_n_beats;
 }
 
-void Engine::endRecording(bool loop) {
+void Engine::endRecording(bool loop, bool create_new_circle) {
   assert(isRecording());
   assert(_recording_layer->_n_beats != 0);
 
@@ -34,26 +34,31 @@ void Engine::endRecording(bool loop) {
 
   if (loop) {
     _recording_layer->_loop = true;
-
-    _timeline.layers.push_back(_recording_layer);
-    _timeline._last_calculated_attenuation.resize(_timeline.layers.size());
-    _timeline._current_attenuation.resize(_timeline.layers.size());
-
-    unsigned int layer_i = _timeline.layers.size() - 1;
-
-    if (_select_new_layers) {
-      _selected_layers_idx.push_back(layer_i);
+    unsigned int new_circle_n_beats;
+    if (create_new_circle) {
+      new_circle_n_beats = _recording_layer->_n_beats;
+    } else {
+      new_circle_n_beats = getNewCircleLength(_circle, _recording_layer->_n_beats);
+      _recording_layer->_n_beats = new_circle_n_beats;
     }
 
-    if (_new_layer_active) {
-      _active_layer_i = layer_i;
-    }
-
-    unsigned int new_circle_n_beats = getNewCircleLength(_circle, _recording_layer->_n_beats);
-
-    _recording_layer->_n_beats = new_circle_n_beats;
     _circle.second = _circle.first + new_circle_n_beats;
   }
+
+  _timeline.layers.push_back(_recording_layer);
+  _timeline._last_calculated_attenuation.resize(_timeline.layers.size());
+  _timeline._current_attenuation.resize(_timeline.layers.size());
+
+  unsigned int layer_i = _timeline.layers.size() - 1;
+
+  if (_select_new_layers) {
+    _selected_layers_idx.push_back(layer_i);
+  }
+
+  if (_new_layer_active) {
+    _active_layer_i = layer_i;
+  }
+
 
   // printf("- rec end\n");
   // printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d layer_i %d\n", _recording_layer->_start_beat, _recording_layer->_n_beats,  _recording_layer->_loop, _recording_layer->_in->_samples_per_beat, layer_i);
@@ -169,8 +174,10 @@ void Engine::step() {
     _recording_layer = this->newRecording();
     // _write_antipop_filter.trigger();
   } else if (this->isRecording() && !_record_params.active()) {
-    this->endRecording(true);
-    this->resetEngineMode();
+    this->endRecording(true, false);
+    if (!_record_params.fix_bounds) {
+      _record_params.fix_bounds = true;
+    }
   }
 
   if (this->isRecording()) {

@@ -53,8 +53,12 @@ void Engine::toggleSelectLayer(unsigned int layer_i) {
 
 void Engine::undo() {
   if (isRecording()) {
-    endRecording(false);
-  } else {
+    endRecording(false, false);
+  }
+
+  // if this was an unfixed recording, just leave it to make transitions easier
+  // in fix_bounds mode, it acts as 'restart' or 'clear' memory
+  if (!isRecording() || _record_params.fix_bounds) {
     int last_i = _timeline.layers.size()-1;
     if (0 <= last_i) {
       _circle = _timeline.layers[last_i]->_circle_before;
@@ -67,7 +71,6 @@ void Engine::undo() {
       this->deleteLayer(last_i);
     }
   }
-
 }
 
 

@@ -3,10 +3,14 @@
 using namespace tribalinterfaces::dsp::circle;
 using namespace tribalinterfaces::dsp;
 
-void Engine::setCircleToActiveLayer() {
+void Engine::setCircleToLayer(unsigned int layer_i) {
+  _circle.first = _timeline.layers[layer_i]->_start_beat;
+  _circle.second =  _circle.first + _timeline.layers[layer_i]->_n_beats;
+}
+
+void Engine::skipToActiveLayer() {
   if (0 < _timeline.layers.size()) {
-    _circle.first = _timeline.layers[_active_layer_i]->_start_beat;
-    _circle.second =  _circle.first + _timeline.layers[_active_layer_i]->_n_beats;
+    setCircleToLayer(_active_layer_i);
     _timeline_position.beat = _circle.first;
   } else {
     _circle.first = 0;

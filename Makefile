@@ -15,7 +15,9 @@ SOURCES += $(wildcard src/*cpp)
 SOURCES += $(wildcard src/util/*cpp)
 SOURCES += $(wildcard src/modules/*cpp)
 SOURCES += $(wildcard src/dsp/*cpp)
-SOURCES += $(wildcard src/dsp/Circle/*cpp)
+SOURCES += $(wildcard src/dsp/misc/*cpp)
+SOURCES += $(wildcard src/dsp/engines/Circle/*cpp)
+SOURCES += $(wildcard src/dsp/emernet/*cpp)
 
 # Add files to the ZIP package when running `make dist`
 # The compiled plugin and "plugin.json" are automatically added.

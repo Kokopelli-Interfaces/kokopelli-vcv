@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dsp/Signal.hpp"
+#include "dsp/misc/signal.hpp"
 #include "Signal.hpp"
 #include "menu.hpp"
 

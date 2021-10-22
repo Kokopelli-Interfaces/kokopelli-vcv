@@ -1,7 +1,7 @@
 #pragma once
 
 #include "expanders.hpp"
-#include "dsp/Signal.hpp"
+#include "dsp/misc/signal.hpp"
 #include "kokopellivcv.hpp"
 
 extern Model *modelSignal;

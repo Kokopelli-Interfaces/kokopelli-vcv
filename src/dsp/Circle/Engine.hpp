@@ -63,7 +63,7 @@ struct Engine {
   void setCircleToLayer(unsigned int layer_i);
   void skipToActiveLayer();
 
-  void undo();
+  void forget();
   bool isRecording();
 
   void setFixBounds(bool fix_bounds);

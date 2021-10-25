@@ -25,8 +25,8 @@ struct Signal : ExpandableModule<SignalExpanderMessage, KokopelliVcvModule> {
 
   Signal() {
     config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-    configParam(IN_ATTENUATION_PARAM, 0.f, 1.f, 0.f, "In Attenuation");
-    configParam(OUT_ATTENUATION_PARAM, 0.f, 1.f, 0.f, "Out Attenuation");
+    configParam(IN_ATTENUATION_PARAM, 0.f, 1.f, 1.f, "In Attenuation");
+    configParam(OUT_ATTENUATION_PARAM, 0.f, 1.f, 1.f, "Out Attenuation");
 
     setExpanderModelPredicate([](Model *m) {
       // TODO chainable expanders

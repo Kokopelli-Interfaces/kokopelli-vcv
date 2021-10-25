@@ -1,4 +1,4 @@
-#SKIP_BACK_LIGHTpragma once
+#pragma once
 
 #include "Layer.hpp"
 #include "definitions.hpp"

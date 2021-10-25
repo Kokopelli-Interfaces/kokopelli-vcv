@@ -204,12 +204,12 @@ struct CircleWidget : ModuleWidget {
 
 		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::LOOP_PARAM));
 		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Circle::FIX_BOUNDS_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::UNDO_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::FORGET_PARAM));
 		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Circle::RECORD_PARAM));
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Circle::LOOP_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Circle::FIX_BOUNDS_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::UNDO_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::FORGET_PARAM));
 		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::RECORD_PARAM));
 
 		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Circle::RECORD_INPUT));
@@ -223,7 +223,7 @@ struct CircleWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Circle::SKIP_BACK_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Circle::RECORD_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Circle::FIX_BOUNDS_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::UNDO_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::FORGET_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Circle::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));

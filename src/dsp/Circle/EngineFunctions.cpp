@@ -2,7 +2,7 @@
 
 using namespace kokopellivcv::dsp::circle;
 
-void Engine::undo() {
+void Engine::forget() {
   if (isRecording()) {
     endRecording(false, false);
   }
@@ -29,8 +29,8 @@ void Engine::loop() {
     if (_record_params.fix_bounds) {
       this->endRecording(true, false);
     } else {
-      _record_params.fix_bounds = true;
       this->endRecording(true, true);
+      _record_params.fix_bounds = true;
     }
   } else {
     skipToActiveLayer();

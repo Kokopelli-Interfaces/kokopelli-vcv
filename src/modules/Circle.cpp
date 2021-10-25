@@ -7,7 +7,7 @@ Circle::Circle() {
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
   configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
   configParam(FIX_BOUNDS_PARAM, 0.f, 1.f, 0.f, "Fix Recording Boundaries");
-  configParam(UNDO_PARAM, 0.f, 1.f, 0.f, "Undo/Restart");
+  configParam(FORGET_PARAM, 0.f, 1.f, 0.f, "Forget");
   configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Love");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
@@ -17,7 +17,7 @@ Circle::Circle() {
   _select_function_button.param = &params[SELECT_FUNCTION_PARAM];
 
   _fix_bounds_button.param = &params[FIX_BOUNDS_PARAM];
-  _undo_button.param = &params[UNDO_PARAM];
+  _forget_button.param = &params[FORGET_PARAM];
   _loop_button.param = &params[LOOP_PARAM];
 }
 
@@ -33,7 +33,7 @@ void Circle::processButtons() {
 
     kokopellivcv::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _fix_bounds_event = _fix_bounds_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _undo_event = _undo_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _forget_event = _forget_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _loop_event = _loop_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
@@ -64,11 +64,11 @@ void Circle::processButtons() {
       break;
     }
 
-    switch (_undo_event) {
+    switch (_forget_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->undo();
+      e->forget();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       // e->skipToActiveLayer();
@@ -262,13 +262,13 @@ void Circle::updateLights(const ProcessArgs &args) {
   lights[FIX_BOUNDS_LIGHT + 1].value = displayed_record_params.fix_bounds;
 
   if (default_e->isRecording()) {
-    lights[UNDO_LIGHT + 0].value = !displayed_record_params.fix_bounds;
-    lights[UNDO_LIGHT + 1].value = displayed_record_params.fix_bounds;
-    lights[UNDO_LIGHT + 2].value = 1.f;
+    lights[FORGET_LIGHT + 0].value = !displayed_record_params.fix_bounds;
+    lights[FORGET_LIGHT + 1].value = displayed_record_params.fix_bounds;
+    lights[FORGET_LIGHT + 2].value = 1.f;
   } else {
-    lights[UNDO_LIGHT + 0].value = 0.f;
-    lights[UNDO_LIGHT + 1].value = 1.f;
-    lights[UNDO_LIGHT + 2].value = 0.f;
+    lights[FORGET_LIGHT + 0].value = 0.f;
+    lights[FORGET_LIGHT + 1].value = 1.f;
+    lights[FORGET_LIGHT + 2].value = 0.f;
   }
 
   if (default_e->isRecording()) {

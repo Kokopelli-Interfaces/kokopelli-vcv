@@ -37,7 +37,7 @@ struct CircleValueDisplay : TextBox {
 	}
 };
 
-struct ActiveLayerDisplay : CircleValueDisplay {
+struct ActiveMemberDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -47,21 +47,21 @@ struct ActiveLayerDisplay : CircleValueDisplay {
         return;
       }
 
-      if (e->isRecording() || e->_new_layer_active) {
+      if (e->isRecording() || e->_new_member_active) {
         CircleValueDisplay::setText("N");
       } else {
-        int active_layer_i = e->_active_layer_i + 1;
-        if (e->_timeline.layers.size() == 0) {
-          active_layer_i = 0;
+        int active_member_i = e->_active_member_i + 1;
+        if (e->_timeline.members.size() == 0) {
+          active_member_i = 0;
         }
-        std::string s = string::f("%d", active_layer_i);
+        std::string s = string::f("%d", active_member_i);
         CircleValueDisplay::setText(s);
       }
 		}
 	}
 };
 
-struct LayerBeatDisplay : CircleValueDisplay {
+struct MemberBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -71,22 +71,22 @@ struct LayerBeatDisplay : CircleValueDisplay {
         return;
       }
 
-      int layer_beat = 0;
-      if (e->_recording_layer != NULL && e->isRecording()) {
-        layer_beat = e->_recording_layer->getLayerBeat(e->_timeline_position.beat);
-      } else if (e->_timeline.layers.size() != 0) {
+      int member_beat = 0;
+      if (e->_recording_member != NULL && e->isRecording()) {
+        member_beat = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
+      } else if (e->_timeline.members.size() != 0) {
         // TODO how to show start position of loops?
-        layer_beat = e->_timeline.layers[e->_active_layer_i]->getLayerBeat(e->_timeline_position.beat);
+        member_beat = e->_timeline.members[e->_active_member_i]->getMemberBeat(e->_timeline_position.beat);
       } else {
-        layer_beat = -1;
+        member_beat = -1;
       }
 
-      CircleValueDisplay::setDisplayValue(layer_beat + 1);
+      CircleValueDisplay::setDisplayValue(member_beat + 1);
 		}
 	}
 };
 
-struct TotalLayerBeatDisplay : CircleValueDisplay {
+struct TotalMemberBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -96,14 +96,14 @@ struct TotalLayerBeatDisplay : CircleValueDisplay {
         return;
       }
 
-      int total_layer_beats = 0;
+      int total_member_beats = 0;
       if (e->isRecording()) {
-        total_layer_beats = e->_recording_layer->_n_beats;
-      } else if (e->_timeline.layers.size() != 0) {
-        total_layer_beats = e->_timeline.layers[e->_active_layer_i]->_n_beats;
+        total_member_beats = e->_recording_member->_n_beats;
+      } else if (e->_timeline.members.size() != 0) {
+        total_member_beats = e->_timeline.members[e->_active_member_i]->_n_beats;
       }
 
-      CircleValueDisplay::setDisplayValue(total_layer_beats);
+      CircleValueDisplay::setDisplayValue(total_member_beats);
 		}
 	}
 };
@@ -140,7 +140,7 @@ struct TotalCircleBeatDisplay : CircleValueDisplay {
 	}
 };
 
-struct TotalLayersDisplay : CircleValueDisplay {
+struct TotalMembersDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -149,9 +149,9 @@ struct TotalLayersDisplay : CircleValueDisplay {
       if (e == NULL) {
         return;
       }
-      // TODO make me just the non attenuated layers
-      int total_layers = e->_timeline.layers.size();
-      CircleValueDisplay::setDisplayValue(total_layers);
+      // TODO make me just the non attenuated members
+      int total_members = e->_timeline.members.size();
+      CircleValueDisplay::setDisplayValue(total_members);
 
 		}
 	}
@@ -177,11 +177,11 @@ struct CircleWidget : ModuleWidget {
 
   bool _use_antipop = false;
 
-  ActiveLayerDisplay *active_layer_i;
-  TotalLayersDisplay *total_layers;
+  ActiveMemberDisplay *active_member_i;
+  TotalMembersDisplay *total_members;
 
-  LayerBeatDisplay *layer_beat;
-  TotalLayerBeatDisplay *total_layer_beats;
+  MemberBeatDisplay *member_beat;
+  TotalMemberBeatDisplay *total_member_beats;
 
   CircleBeatDisplay *circle_beat;
   TotalCircleBeatDisplay *total_circle_beats;
@@ -202,15 +202,15 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<CircleFocusKnob>(mm2px(Vec(5.333, 21.157)), module, Circle::SELECT_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Circle::SELECT_FUNCTION_PARAM));
 
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::LOOP_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Circle::FIX_BOUNDS_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::FORGET_PARAM));
-		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Circle::RECORD_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::PREV_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Circle::LOOP_PARAM));
+		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::NEXT_PARAM));
+		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Circle::LOVE_PARAM));
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Circle::LOOP_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Circle::FIX_BOUNDS_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::FORGET_PARAM));
-		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::RECORD_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Circle::PREV_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::NEXT_PARAM));
+		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::LOVE_PARAM));
 
 		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Circle::RECORD_INPUT));
 		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 95.706)), module, Circle::RECORD_INPUT));
@@ -219,24 +219,24 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Circle::PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Circle::SELECT_FUNCTION_LIGHT));
-		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Circle::SKIP_BACK_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Circle::SKIP_BACK_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Circle::RECORD_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Circle::FIX_BOUNDS_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::FORGET_LIGHT));
+		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Circle::LOOP_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Circle::LOOP_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Circle::LOVE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Circle::PREV_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::NEXT_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Circle::PHASE_LIGHT));
 
     auto display_size = mm2px(Vec(9.096, 4.327));
 
-		active_layer_i = new ActiveLayerDisplay(module);
-    active_layer_i->box.pos = mm2px(Vec(2.921, 16.235));
-    active_layer_i->box.size = display_size;
-    addChild(active_layer_i);
+		active_member_i = new ActiveMemberDisplay(module);
+    active_member_i->box.pos = mm2px(Vec(2.921, 16.235));
+    active_member_i->box.size = display_size;
+    addChild(active_member_i);
 
-    total_layers = new TotalLayersDisplay(module);
-    total_layers->box.pos = mm2px(Vec(13.387, 16.236));
-    total_layers->box.size = display_size;
-    addChild(total_layers);
+    total_members = new TotalMembersDisplay(module);
+    total_members->box.pos = mm2px(Vec(13.387, 16.236));
+    total_members->box.size = display_size;
+    addChild(total_members);
 
 		// mm2px(Vec(7.391, 4.327))
     // display_size = mm2px(Vec(7.391, 4.327));
@@ -252,15 +252,15 @@ struct CircleWidget : ModuleWidget {
 
     display_size = mm2px(Vec(6.837, 4.327));
 
-    layer_beat = new LayerBeatDisplay(module);
-    layer_beat->box.pos = mm2px(Vec(1.05, 52.49));
-    layer_beat->box.size = display_size;
-    addChild(layer_beat);
+    member_beat = new MemberBeatDisplay(module);
+    member_beat->box.pos = mm2px(Vec(1.05, 52.49));
+    member_beat->box.size = display_size;
+    addChild(member_beat);
 
-    total_layer_beats = new TotalLayerBeatDisplay(module);
-    total_layer_beats->box.pos = mm2px(Vec(1.05, 57.592));
-    total_layer_beats->box.size = display_size;
-    addChild(total_layer_beats);
+    total_member_beats = new TotalMemberBeatDisplay(module);
+    total_member_beats->box.pos = mm2px(Vec(1.05, 57.592));
+    total_member_beats->box.size = display_size;
+    addChild(total_member_beats);
 
     circle_beat = new CircleBeatDisplay(module);
     circle_beat->box.pos = mm2px(Vec(17.49, 52.49));

@@ -2,61 +2,61 @@
 
 using namespace kokopellivcv::dsp::circle;
 
-void Engine::forget() {
+void Engine::next() {
   if (isRecording()) {
-    endRecording(false, false);
-  }
-
-  // if this was an unfixed recording, just leave it to make transitions easier
-  // in fix_bounds mode, it acts as 'restart' or 'clear' memory
-  if (!isRecording() || _record_params.fix_bounds) {
-    int last_i = _timeline.layers.size()-1;
-    if (0 <= last_i) {
-      _circle = _timeline.layers[last_i]->_circle_before;
-      unsigned int circle_length = _circle.second - _circle.first;
-
-      while (_circle.second <= _timeline_position.beat) {
-        _timeline_position.beat -= circle_length;
-      }
-
-      this->deleteLayer(last_i);
-    }
-  }
-}
-
-void Engine::loop() {
-  if (this->isRecording()) {
     if (_record_params.fix_bounds) {
       this->endRecording(true, false);
     } else {
-      this->endRecording(true, true);
-      _record_params.fix_bounds = true;
+      endRecording(false, false);
     }
   } else {
-    skipToActiveLayer();
+    nextMember();
   }
 }
 
-void Engine::toggleLayerMode() {
-  unsigned int layer_i = _active_layer_i;
+void Engine::forget() {
+  int last_i = _timeline.members.size()-1;
+  if (0 <= last_i) {
+    _circle = _timeline.members[last_i]->_circle_before;
+    unsigned int circle_length = _circle.second - _circle.first;
+
+    while (_circle.second <= _timeline_position.beat) {
+      _timeline_position.beat -= circle_length;
+    }
+
+    this->deleteMember(last_i);
+  }
+}
+
+void Engine::prev() {
+  if (this->isRecording()) {
+    this->endRecording(false, false);
+    forget();
+  } else {
+    prevMember();
+  }
+}
+
+void Engine::toggleMemberMode() {
+  unsigned int member_i = _active_member_i;
 
   if (isRecording()) {
-    loop();
-    layer_i = _timeline.layers.size()-1;
+    prev();
+    member_i = _timeline.members.size()-1;
   }
 
-  if (!_layer_mode) {
-    _layer_mode = true;
-    _selected_layers_idx_before_layer_mode = _selected_layers_idx;
-    _circle_before_layer_mode = _circle;
+  if (!_member_mode) {
+    _member_mode = true;
+    _selected_members_idx_before_member_mode = _selected_members_idx;
+    _circle_before_member_mode = _circle;
 
-    setCircleToLayer(layer_i);
+    setCircleToMember(member_i);
     _timeline_position.beat = _circle.first;
     _read_antipop_filter.trigger();
-    soloSelectLayer(_active_layer_i);
+    soloSelectMember(_active_member_i);
   } else {
-    _selected_layers_idx = _selected_layers_idx_before_layer_mode;
-    _circle = _circle_before_layer_mode;
-    _layer_mode = false;
+    _selected_members_idx = _selected_members_idx_before_member_mode;
+    _circle = _circle_before_member_mode;
+    _member_mode = false;
   }
 }

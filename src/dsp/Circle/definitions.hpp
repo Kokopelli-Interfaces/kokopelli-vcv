@@ -12,16 +12,16 @@ struct TimePosition {
 struct RecordParams {
   float in = 0.f;
 
-  float strength = 0.f;
+  float love = 0.f;
   bool fix_bounds = true;
 
   bool _active = false;
   float _recordActiveThreshold = 0.0001f;
 
   inline bool active() {
-    if (_active && strength <= _recordActiveThreshold) {
+    if (_active && love <= _recordActiveThreshold) {
       _active = false;
-    } else if (!_active && _recordActiveThreshold < strength) {
+    } else if (!_active && _recordActiveThreshold < love) {
       _active = true;
     }
 
@@ -29,11 +29,12 @@ struct RecordParams {
   }
 
   inline float readIn() {
-    // if (0.0001f <= strength && strength <= 0.1f) {
-    //   float engage_attenuation = -1.f * pow((10.f * strength - _recordActiveThreshold), 3) + 1.f;
-    //   // engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
-    //   return in * (1.f - engage_attenuation);
-    // }
+    // avoids pops when engaging / disengaging love parameter
+    if (0.0001f <= love && love <= 0.033f) {
+      float engage_attenuation = -1.f * pow((30.f * love - _recordActiveThreshold), 3) + 1.f;
+      engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
+      return in * (1.f - engage_attenuation);
+    }
 
     return in;
   }

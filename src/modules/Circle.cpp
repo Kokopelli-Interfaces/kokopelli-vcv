@@ -5,10 +5,10 @@ Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(SELECT_PARAM, -INFINITY, INFINITY, 0.f, "Select");
   configParam(SELECT_FUNCTION_PARAM, 0.f, 1.f, 0.f, "Select Function");
-  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop");
-  configParam(FIX_BOUNDS_PARAM, 0.f, 1.f, 0.f, "Fix Recording Boundaries");
-  configParam(FORGET_PARAM, 0.f, 1.f, 0.f, "Forget");
-  configParam(RECORD_PARAM, 0.f, 1.f, 0.f, "Love");
+  configParam(PREV_PARAM, 0.f, 1.f, 0.f, "Previous Member");
+  configParam(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop Mode");
+  configParam(NEXT_PARAM, 0.f, 1.f, 0.f, "Next Member");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love");
 
   setBaseModelPredicate([](Model *m) { return m == modelSignal; });
   _light_divider.setDivision(512);
@@ -16,9 +16,9 @@ Circle::Circle() {
 
   _select_function_button.param = &params[SELECT_FUNCTION_PARAM];
 
-  _fix_bounds_button.param = &params[FIX_BOUNDS_PARAM];
-  _forget_button.param = &params[FORGET_PARAM];
   _loop_button.param = &params[LOOP_PARAM];
+  _next_button.param = &params[NEXT_PARAM];
+  _prev_button.param = &params[PREV_PARAM];
 }
 
 void Circle::sampleRateChange() {
@@ -32,9 +32,9 @@ void Circle::processButtons() {
   float sampleTime = _sampleTime * _button_divider.division;
 
     kokopellivcv::dsp::LongPressButton::Event _select_function_event = _select_function_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _fix_bounds_event = _fix_bounds_button.process(sampleTime);
-    kokopellivcv::dsp::LongPressButton::Event _forget_event = _forget_button.process(sampleTime);
     kokopellivcv::dsp::LongPressButton::Event _loop_event = _loop_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _next_event = _next_button.process(sampleTime);
+    kokopellivcv::dsp::LongPressButton::Event _prev_event = _prev_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
@@ -43,37 +43,10 @@ void Circle::processButtons() {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->toggleSelectActiveLayer();
+      e->toggleSelectActiveMember();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->soloOrSelectUpToActiveLayer();
-      break;
-    }
-
-    switch (_fix_bounds_event) {
-    case kokopellivcv::dsp::LongPressButton::NO_PRESS:
-      break;
-    case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      if (!e->_record_params.fix_bounds) {
-        e->setFixBounds(true);
-      } else {
-        e->setFixBounds(false);
-      }
-      break;
-    case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      break;
-    }
-
-    switch (_forget_event) {
-    case kokopellivcv::dsp::LongPressButton::NO_PRESS:
-      break;
-    case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->forget();
-      break;
-    case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      // e->skipToActiveLayer();
-      e->deleteSelection();
-      e->skipToActiveLayer();
+      e->soloOrSelectUpToActiveMember();
       break;
     }
 
@@ -81,10 +54,34 @@ void Circle::processButtons() {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->loop();
+      e->toggleFixBounds();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->toggleLayerMode();
+      e->toggleMemberMode();
+      break;
+    }
+
+    switch (_prev_event) {
+    case kokopellivcv::dsp::LongPressButton::NO_PRESS:
+      break;
+    case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
+      e->prev();
+      break;
+    case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
+      e->forget();
+      break;
+    }
+
+    switch (_next_event) {
+    case kokopellivcv::dsp::LongPressButton::NO_PRESS:
+      break;
+    case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
+      e->next();
+      break;
+    case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
+      // e->skipToActiveMember();
+      e->deleteSelection();
+      e->skipToActiveMember();
       break;
     }
   }
@@ -102,9 +99,9 @@ void Circle::processSelect() {
 
       bool increment = 0.f < d_select;
       if (increment) {
-        e->nextLayer();
+        e->nextMember();
       } else {
-        e->prevLayer();
+        e->prevMember();
       }
     }
 
@@ -132,14 +129,14 @@ void Circle::modulate() {
 void Circle::modulateChannel(int channel_i) {
   if (baseConnected()) {
     kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
-    float record_strength = params[RECORD_PARAM].getValue();
+    float love = params[LOVE_PARAM].getValue();
     if (inputs[RECORD_INPUT].isConnected()) {
-      record_strength *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
+      love *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
 
     // taking to the strength of 2 gives a more intuitive curve
-    record_strength = pow(record_strength, 4);
-    e->_record_params.strength = record_strength;
+    love = pow(love, 4);
+    e->_record_params.love = love;
 
     e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
@@ -202,16 +199,16 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   lights[SELECT_FUNCTION_LIGHT + 0].value = 0.f;
   lights[SELECT_FUNCTION_LIGHT + 1].value = 0.f;
-  if (default_e->_new_layer_active || default_e->isRecording()) {
-    if (default_e->_select_new_layers) {
+  if (default_e->_new_member_active || default_e->isRecording()) {
+    if (default_e->_select_new_members) {
       lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
-      if (default_e->isSolo(default_e->_timeline.layers.size()-1)) {
+      if (default_e->isSolo(default_e->_timeline.members.size()-1)) {
         lights[SELECT_FUNCTION_LIGHT + 0].value = 1.f;
       }
     }
-  } else if (default_e->isSelected(default_e->_active_layer_i)) {
+  } else if (default_e->isSelected(default_e->_active_member_i)) {
     lights[SELECT_FUNCTION_LIGHT + 1].value = 1.f;
-    if (default_e->_selected_layers_idx.size() == 1) {
+    if (default_e->_selected_members_idx.size() == 1) {
       lights[SELECT_FUNCTION_LIGHT + 0].value = 1.f;
     }
   }
@@ -221,7 +218,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;
 
-  float active_layer_signal_out_sum = default_e->readActiveLayer();
+  float active_member_signal_out_sum = default_e->readActiveMember();
   float sel_signal_out_sum = 0.f;
 
   bool record_active = false;
@@ -235,18 +232,18 @@ void Circle::updateLights(const ProcessArgs &args) {
   }
 
   signal_in_sum = rack::clamp(signal_in_sum, 0.f, 1.f);
-  active_layer_signal_out_sum = rack::clamp(active_layer_signal_out_sum, 0.f, 1.f);
+  active_member_signal_out_sum = rack::clamp(active_member_signal_out_sum, 0.f, 1.f);
   sel_signal_out_sum = rack::clamp(sel_signal_out_sum, 0.f, 1.f);
 
   if (displayed_record_params.active()) {
-    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.strength);
-    lights[RECORD_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
+    sel_signal_out_sum = sel_signal_out_sum * (1 - displayed_record_params.love);
+    lights[LOVE_LIGHT + 1].setSmoothBrightness(sel_signal_out_sum, _sampleTime * _light_divider.getDivision());
     int light_colour = poly_record ? 2 : 0;
-    lights[RECORD_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
+    lights[LOVE_LIGHT + light_colour].setSmoothBrightness(signal_in_sum, _sampleTime * _light_divider.getDivision());
   } else {
-    lights[RECORD_LIGHT + 0].value = 0.f;
-    lights[RECORD_LIGHT + 1].setSmoothBrightness(active_layer_signal_out_sum, _sampleTime * _light_divider.getDivision());
-    lights[RECORD_LIGHT + 2].value = 0.f;
+    lights[LOVE_LIGHT + 0].value = 0.f;
+    lights[LOVE_LIGHT + 1].setSmoothBrightness(active_member_signal_out_sum, _sampleTime * _light_divider.getDivision());
+    lights[LOVE_LIGHT + 2].value = 0.f;
   }
 
   bool poly_phase = (inputs[PHASE_INPUT].isConnected() && 1 < inputs[PHASE_INPUT].getChannels());
@@ -258,27 +255,34 @@ void Circle::updateLights(const ProcessArgs &args) {
     lights[PHASE_LIGHT + 2].value = 0.f;
   }
 
-  lights[FIX_BOUNDS_LIGHT + 0].value = !displayed_record_params.fix_bounds;
-  lights[FIX_BOUNDS_LIGHT + 1].value = displayed_record_params.fix_bounds;
-
   if (default_e->isRecording()) {
-    lights[FORGET_LIGHT + 0].value = !displayed_record_params.fix_bounds;
-    lights[FORGET_LIGHT + 1].value = displayed_record_params.fix_bounds;
-    lights[FORGET_LIGHT + 2].value = 1.f;
+    lights[LOOP_LIGHT + 0].value = !displayed_record_params.fix_bounds;
+    lights[LOOP_LIGHT + 1].value = displayed_record_params.fix_bounds;
+    lights[LOOP_LIGHT + 2].value = !displayed_record_params.fix_bounds;
   } else {
-    lights[FORGET_LIGHT + 0].value = 0.f;
-    lights[FORGET_LIGHT + 1].value = 1.f;
-    lights[FORGET_LIGHT + 2].value = 0.f;
+    lights[LOOP_LIGHT + 0].value = !displayed_record_params.fix_bounds;
+    lights[LOOP_LIGHT + 1].value = displayed_record_params.fix_bounds;
+    lights[LOOP_LIGHT + 2].value = default_e->_member_mode;
   }
 
   if (default_e->isRecording()) {
-    lights[SKIP_BACK_LIGHT + 0].value = !displayed_record_params.fix_bounds;
-    lights[SKIP_BACK_LIGHT + 1].value = displayed_record_params.fix_bounds;
-    lights[SKIP_BACK_LIGHT + 2].value = 1.f;
+    lights[PREV_LIGHT + 0].value = !displayed_record_params.fix_bounds;
+    lights[PREV_LIGHT + 1].value = displayed_record_params.fix_bounds;
+    lights[PREV_LIGHT + 2].value = 1.f;
   } else {
-    lights[SKIP_BACK_LIGHT + 0].value = 0.f;
-    lights[SKIP_BACK_LIGHT + 1].value = !default_e->_layer_mode;
-    lights[SKIP_BACK_LIGHT + 2].value = default_e->_layer_mode;
+    lights[PREV_LIGHT + 0].value = 0.f;
+    lights[PREV_LIGHT + 1].value = 1.f;
+    lights[PREV_LIGHT + 2].value = 0.f;
+  }
+
+  if (default_e->isRecording()) {
+    lights[NEXT_LIGHT + 0].value = !displayed_record_params.fix_bounds;
+    lights[NEXT_LIGHT + 1].value = displayed_record_params.fix_bounds;
+    lights[NEXT_LIGHT + 2].value = 1.f;
+  } else {
+    lights[NEXT_LIGHT + 0].value = 0.f;
+    lights[NEXT_LIGHT + 1].value = 1.f;
+    lights[NEXT_LIGHT + 2].value = 0.f;
   }
 }
 

@@ -6,7 +6,7 @@
 #include "dsp/PhaseOscillator.hpp"
 #include "dsp/AntipopFilter.hpp"
 #include "dsp/Signal.hpp"
-#include "Layer.hpp"
+#include "Member.hpp"
 #include "rack.hpp"
 
 #include <assert.h>
@@ -26,22 +26,22 @@ struct Engine {
   // TODO make me an array to support MIX4 & PLAY
   kokopellivcv::dsp::SignalType _signal_type;
 
-  std::vector<unsigned int> _selected_layers_idx;
-  std::vector<unsigned int> _saved_selected_layers_idx;
-  bool _new_layer_active = true;
-  bool _select_new_layers = true;
+  std::vector<unsigned int> _selected_members_idx;
+  std::vector<unsigned int> _saved_selected_members_idx;
+  bool _new_member_active = true;
+  bool _select_new_members = true;
 
-  unsigned int _active_layer_i;
+  unsigned int _active_member_i;
 
-  bool _layer_mode = false;
-  std::vector<unsigned int> _selected_layers_idx_before_layer_mode;
-  std::pair<unsigned int, unsigned int> _circle_before_layer_mode;
+  bool _member_mode = false;
+  std::vector<unsigned int> _selected_members_idx_before_member_mode;
+  std::pair<unsigned int, unsigned int> _circle_before_member_mode;
 
   /* read only */
 
   std::pair<unsigned int, unsigned int> _circle = std::make_pair(0, 1);
 
-  Layer *_recording_layer = nullptr;
+  Member *_recording_member = nullptr;
   RecordParams _record_params;
 
   PhaseOscillator _phase_oscillator;
@@ -58,34 +58,35 @@ struct Engine {
   void step();
   float read();
   float readSelection();
-  float readActiveLayer();
+  float readActiveMember();
 
-  void setCircleToLayer(unsigned int layer_i);
-  void skipToActiveLayer();
+  void setCircleToMember(unsigned int member_i);
+  void skipToActiveMember();
 
+  void next();
   void forget();
   bool isRecording();
 
-  void setFixBounds(bool fix_bounds);
-  void loop();
-  void toggleLayerMode();
+  void toggleFixBounds();
+  void prev();
+  void toggleMemberMode();
 
-  void nextLayer();
-  void prevLayer();
-  void selectRange(unsigned int layer_i_1, unsigned int layer_i_2);
-  void soloSelectLayer(unsigned int layer_i);
-  bool isSelected(unsigned int layer_i);
-  bool isSolo(unsigned int layer_i);
-  void toggleSelectLayer(unsigned int layer_i);
-  void toggleSelectActiveLayer();
-  void soloOrSelectUpToActiveLayer();
-  void deleteLayer(unsigned int layer_i);
+  void nextMember();
+  void prevMember();
+  void selectRange(unsigned int member_i_1, unsigned int member_i_2);
+  void soloSelectMember(unsigned int member_i);
+  bool isSelected(unsigned int member_i);
+  bool isSolo(unsigned int member_i);
+  void toggleSelectMember(unsigned int member_i);
+  void toggleSelectActiveMember();
+  void soloOrSelectUpToActiveMember();
+  void deleteMember(unsigned int member_i);
   void deleteSelection();
 
 private:
-  void fitLayerIntoCircle(Layer* layer);
+  void fitMemberIntoCircle(Member* member);
   void endRecording(bool loop, bool create_new_circle);
-  Layer* newRecording();
+  Member* newRecording();
   inline bool phaseDefined();
   inline void write();
   inline void handleBeatChange(PhaseAnalyzer::PhaseEvent flip);

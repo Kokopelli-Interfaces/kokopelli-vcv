@@ -20,7 +20,7 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
     LOVE_PARAM,
     NUM_PARAMS
   };
-  enum InputIds { SCENE_INPUT, RECORD_INPUT, PHASE_INPUT, NUM_INPUTS };
+  enum InputIds { SCENE_INPUT, LOVE_INPUT, PHASE_INPUT, NUM_INPUTS };
   enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
   enum LightIds {
     ENUMS(SELECT_FUNCTION_LIGHT, 3),

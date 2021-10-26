@@ -102,13 +102,13 @@ Member* Engine::newRecording() {
   }
 
   if (this->_record_params.fix_bounds) {
-    if (0 < _timeline.members.size()) {
-      if (_timeline.members[_active_member_i]->_loop) {
-        n_beats = _timeline.members[_active_member_i]->_n_beats;
-      } else {
-        n_beats = circle_n_beats;
-      }
-    }
+    // if (0 < _timeline.members.size()) {
+    //   if (_timeline.members[_active_member_i]->_loop) {
+    //     n_beats = _timeline.members[_active_member_i]->_n_beats;
+    //   } else {
+    n_beats = circle_n_beats;
+    //   }
+    // }
   } else {
     n_beats = _timeline_position.beat - _circle.first + 1;
   }

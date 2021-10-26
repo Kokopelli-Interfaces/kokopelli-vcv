@@ -212,8 +212,8 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::NEXT_PARAM));
 		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::LOVE_PARAM));
 
-		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Circle::RECORD_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 95.706)), module, Circle::RECORD_INPUT));
+		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Circle::LOVE_INPUT));
+		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 95.706)), module, Circle::LOVE_INPUT));
 
 		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 108.114)), module, Circle::PHASE_INPUT));
 		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Circle::PHASE_OUTPUT));

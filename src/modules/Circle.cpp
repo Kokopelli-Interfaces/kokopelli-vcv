@@ -130,8 +130,8 @@ void Circle::modulateChannel(int channel_i) {
   if (baseConnected()) {
     kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
     float love = params[LOVE_PARAM].getValue();
-    if (inputs[RECORD_INPUT].isConnected()) {
-      love *= rack::clamp(inputs[RECORD_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
+    if (inputs[LOVE_INPUT].isConnected()) {
+      love *= rack::clamp(inputs[LOVE_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
     }
 
     // taking to the strength of 2 gives a more intuitive curve
@@ -213,7 +213,7 @@ void Circle::updateLights(const ProcessArgs &args) {
     }
   }
 
-  bool poly_record = (inputs[RECORD_INPUT].isConnected() && 1 < inputs[RECORD_INPUT].getChannels());
+  bool poly_record = (inputs[LOVE_INPUT].isConnected() && 1 < inputs[LOVE_INPUT].getChannels());
 
   RecordParams displayed_record_params = default_e->_record_params;
   float displayed_phase = default_e->_timeline_position.phase;

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 25.2.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.0"
+   id="svg18800"
+   x="0px"
+   y="0px"
+   width="15px"
+   height="14.9989px"
+   viewBox="0 0 15 14.9989"
+   enable-background="new 0 0 15 14.9989"
+   xml:space="preserve"
+   sodipodi:docname="KokopelliScrew.svg"
+   inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs29"><linearGradient
+     id="linearGradient9067"
+     inkscape:swatch="solid"><stop
+       style="stop-color:#563535;stop-opacity:1;"
+       offset="0"
+       id="stop9065" /></linearGradient><linearGradient
+     inkscape:collect="always"
+     xlink:href="#linearGradient9067"
+     id="linearGradient11507"
+     gradientUnits="userSpaceOnUse"
+     x1="1.6880598"
+     y1="7.49891"
+     x2="13.31194"
+     y2="7.49891" /></defs>
+<sodipodi:namedview
+   bordercolor="#666666"
+   borderopacity="1.0"
+   fit-margin-bottom="0"
+   fit-margin-left="0"
+   fit-margin-right="0"
+   fit-margin-top="0"
+   id="base"
+   inkscape:current-layer="svg18800"
+   inkscape:cx="-4.2559732"
+   inkscape:cy="9.1633709"
+   inkscape:document-units="mm"
+   inkscape:pageopacity="0.0"
+   inkscape:pageshadow="2"
+   inkscape:window-height="1080"
+   inkscape:window-maximized="1"
+   inkscape:window-width="1920"
+   inkscape:window-x="0"
+   inkscape:window-y="0"
+   inkscape:zoom="11.51323"
+   pagecolor="#ffffff"
+   showgrid="false"
+   units="px"
+   inkscape:pagecheckerboard="0"
+   showguides="false"
+   inkscape:snap-global="true"
+   inkscape:snap-object-midpoints="true">
+	</sodipodi:namedview>
+<linearGradient
+   id="SVGID_1_"
+   gradientUnits="userSpaceOnUse"
+   x1="219.99944"
+   y1="6477.3999"
+   x2="232.99944"
+   y2="6477.3999"
+   gradientTransform="matrix(0,1,1,0,-6469.8999,-219)"
+   xlink:href="#SVGID_2_">
+	<stop
+   offset="0"
+   style="stop-color:#ABA9A9"
+   id="stop3" />
+	<stop
+   offset="1"
+   style="stop-color:#8F8F8F"
+   id="stop5" />
+</linearGradient>
+<circle
+   fill="url(#SVGID_1_)"
+   cx="7.5"
+   cy="7.49944"
+   r="6.5"
+   id="circle8"
+   style="fill-opacity:1;fill:#8a6565" />
+<linearGradient
+   id="SVGID_2_"
+   gradientUnits="userSpaceOnUse"
+   x1="220.68697"
+   y1="6477.3999"
+   x2="232.31085"
+   y2="6477.3999"
+   gradientTransform="matrix(6.123234e-17 1 1 -6.123234e-17 -6469.8999 -219)">
+	<stop
+   offset="0.00559"
+   style="stop-color:#F5F5F5"
+   id="stop10" />
+	<stop
+   offset="1"
+   style="stop-color:#C2C2C2"
+   id="stop12" />
+</linearGradient>
+<circle
+   fill="url(#SVGID_2_)"
+   cx="7.5"
+   cy="7.49891"
+   r="5.81194"
+   id="circle15"
+   style="fill-opacity:1.0;fill:url(#linearGradient11507)" />
+<linearGradient
+   id="SVGID_3_"
+   gradientUnits="userSpaceOnUse"
+   x1="221.13403"
+   y1="6477.3999"
+   x2="231.86378"
+   y2="6477.3999"
+   gradientTransform="matrix(0,1,1,0,-6470.2029,-218.94976)"
+   spreadMethod="pad"
+   inkscape:swatch="gradient">
+	<stop
+   offset="0.00559"
+   style="stop-color:#e9c6c6;stop-opacity:1;"
+   id="stop17" />
+	<stop
+   offset="1"
+   style="stop-color:#CCCCCC"
+   id="stop19" />
+</linearGradient>
+
+<g
+   id="g26"
+   style="fill:#492727;fill-opacity:1"
+   transform="rotate(78.918562,7.5,7.4989104)">
+	
+<rect
+   style="fill:#492727;fill-opacity:1;fill-rule:nonzero;stroke:#270c0b;stroke-width:0.188976;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0.0755905;stroke-opacity:1"
+   id="rect9173"
+   width="1.0685627"
+   height="7.4799395"
+   x="9.7103643"
+   y="-0.99572283"
+   transform="rotate(30)" /></g>
+</svg>

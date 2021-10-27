@@ -37,8 +37,29 @@ struct CircleValueDisplay : TextBox {
 	}
 };
 
-struct ActiveMemberDisplay : CircleValueDisplay {
+
+struct FocusedGroupDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
+  FocusedGroupDisplay(Circle *m) : CircleValueDisplay(m) {
+    textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
+  }
+
+  void step() override {
+		CircleValueDisplay::step();
+
+    // FIXME
+    CircleValueDisplay::setText("A");
+  }
+};
+
+
+struct FocusedMemberDisplay : CircleValueDisplay {
+  using CircleValueDisplay::CircleValueDisplay;
+
+	FocusedMemberDisplay(Circle *m) : CircleValueDisplay(m) {
+    textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.7f);
+  }
+
 	void step() override {
 		CircleValueDisplay::step();
 		if(_module) {
@@ -47,16 +68,18 @@ struct ActiveMemberDisplay : CircleValueDisplay {
         return;
       }
 
-      if (e->isRecording() || e->_new_member_active) {
-        CircleValueDisplay::setText("N");
+      int focused_member_display = 0;
+      if (e->isRecording() || e->_new_member_focused) {
+        focused_member_display = e->_timeline.members.size() + 1;
       } else {
-        int active_member_i = e->_active_member_i + 1;
+        focused_member_display = e->_focused_member_i + 1;
         if (e->_timeline.members.size() == 0) {
-          active_member_i = 0;
+          focused_member_display = 0;
         }
-        std::string s = string::f("%d", active_member_i);
-        CircleValueDisplay::setText(s);
       }
+
+      std::string s = string::f("%d", focused_member_display);
+      CircleValueDisplay::setText(s);
 		}
 	}
 };
@@ -71,17 +94,18 @@ struct MemberBeatDisplay : CircleValueDisplay {
         return;
       }
 
-      int member_beat = 0;
+      int member_beat_display = 0;
+
       if (e->_recording_member != NULL && e->isRecording()) {
-        member_beat = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
+        member_beat_display = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
       } else if (e->_timeline.members.size() != 0) {
         // TODO how to show start position of loops?
-        member_beat = e->_timeline.members[e->_active_member_i]->getMemberBeat(e->_timeline_position.beat);
+        member_beat_display = e->_timeline.members[e->_focused_member_i]->getMemberBeat(e->_timeline_position.beat);
       } else {
-        member_beat = -1;
+        member_beat_display = -1;
       }
 
-      CircleValueDisplay::setDisplayValue(member_beat + 1);
+      CircleValueDisplay::setDisplayValue(member_beat_display + 1);
 		}
 	}
 };
@@ -96,19 +120,20 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
         return;
       }
 
-      int total_member_beats = 0;
+      int total_member_beats_display = 0;
       if (e->isRecording()) {
-        total_member_beats = e->_recording_member->_n_beats;
+        CircleValueDisplay::setText("--");
+        return;
       } else if (e->_timeline.members.size() != 0) {
-        total_member_beats = e->_timeline.members[e->_active_member_i]->_n_beats;
+        total_member_beats_display = e->_timeline.members[e->_focused_member_i]->_n_beats;
       }
 
-      CircleValueDisplay::setDisplayValue(total_member_beats);
+      CircleValueDisplay::setDisplayValue(total_member_beats_display);
 		}
 	}
 };
 
-struct CircleBeatDisplay : CircleValueDisplay {
+struct GroupBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -118,14 +143,14 @@ struct CircleBeatDisplay : CircleValueDisplay {
         return;
       }
 
-      int circle_beat = e->_timeline_position.beat - e->_circle.first + 1;
+      int group_beat_display = e->_timeline_position.beat - e->_circle.first + 1;
 
-      CircleValueDisplay::setDisplayValue(circle_beat);
+      CircleValueDisplay::setDisplayValue(group_beat_display);
 		}
 	}
 };
 
-struct TotalCircleBeatDisplay : CircleValueDisplay {
+struct TotalGroupBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 	void step() override {
 		CircleValueDisplay::step();
@@ -140,137 +165,106 @@ struct TotalCircleBeatDisplay : CircleValueDisplay {
 	}
 };
 
-struct TotalMembersDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-      // TODO make me just the non attenuated members
-      int total_members = e->_timeline.members.size();
-      CircleValueDisplay::setDisplayValue(total_members);
-
-		}
-	}
-};
-
-struct BeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-      int beat = e->_timeline_position.beat;
-      CircleValueDisplay::setDisplayValue(beat+1);
-		}
-	}
-};
-
 struct CircleWidget : ModuleWidget {
-  const int hp = 4;
+  const int hp = 6;
 
   bool _use_antipop = false;
 
-  ActiveMemberDisplay *active_member_i;
-  TotalMembersDisplay *total_members;
+  CircleValueDisplay *prev_group_display;
+  CircleValueDisplay *current_group_display;
+  CircleValueDisplay *next_group_display;
 
-  MemberBeatDisplay *member_beat;
-  TotalMemberBeatDisplay *total_member_beats;
+  FocusedGroupDisplay *focused_group_display;
+  FocusedMemberDisplay *focused_member_display;
 
-  CircleBeatDisplay *circle_beat;
-  TotalCircleBeatDisplay *total_circle_beats;
+  MemberBeatDisplay *member_beat_display;
+  TotalMemberBeatDisplay *total_member_beats_display;
 
-
-  BeatDisplay *time;
+  GroupBeatDisplay *group_beat_display;
+  TotalGroupBeatDisplay *total_group_beats_display;
 
   CircleWidget(Circle *module) {
     setModule(module);
     box.size = Vec(RACK_GRID_WIDTH * hp, RACK_GRID_HEIGHT);
     setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Circle.svg")));
 
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
-		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
-		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
+		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
+		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<CircleFocusKnob>(mm2px(Vec(5.333, 21.157)), module, Circle::SELECT_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.618, 33.463)), module, Circle::SELECT_FUNCTION_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.933)), module, Circle::MODE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.74, 73.943)), module, Circle::PREVIOUS_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(25.733, 73.943)), module, Circle::NEXT_PARAM));
+		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 78.64)), module, Circle::LOVE_PARAM));
 
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(9.64, 51.330)), module, Circle::PREV_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 65.437)), module, Circle::LOOP_PARAM));
-		// addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 65.436)), module, Circle::NEXT_PARAM));
-		// addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 73.118)), module, Circle::LOVE_PARAM));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(24.279, 94.783)), module, Circle::MEMBER_INPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(13.65, 96.334)), module, Circle::LOVE_INPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 107.705)), module, Circle::PHASE_INPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(13.475, 109.166)), module, Circle::FOCUS_MODULATION_INPUT));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(9.665, 55.94)), module, Circle::LOOP_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(1.447, 72.433)), module, Circle::PREV_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(17.849, 72.433)), module, Circle::NEXT_PARAM));
-		addParam(createParam<Rogan3PDarkRed>(mm2px(Vec(5.334, 79.758)), module, Circle::LOVE_PARAM));
+		addOutput(createOutput<CircleOutputPort>(mm2px(Vec(13.65, 21.180)), module, Circle::CIRCLE_OUTPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.783)), module, Circle::GROUP_OUTPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Circle::PHASE_OUTPUT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 56.339)), module, Circle::MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.178, 68.279)), module, Circle::EMERSIGN_LIGHT));
 
-		// addInput(createInput<PJ301MPort>(mm2px(Vec(8.384, 88.869)), module, Circle::LOVE_INPUT));
-		addInput(createInput<PJ301MPort>(mm2px(Vec(8.522, 95.706)), module, Circle::LOVE_INPUT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(5.205, 75.407)), module, Circle::PREVIOUS_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.197, 75.407)), module, Circle::NEXT_LIGHT));
 
-		addInput(createInput<PJ301MPort>(mm2px(Vec(1.798, 108.114)), module, Circle::PHASE_INPUT));
-		addOutput(createOutput<PJ301MPort>(mm2px(Vec(15.306, 108.114)), module, Circle::PHASE_OUTPUT));
+    // NOTE do the displays too
+    auto group_display_size = mm2px(Vec(8.603, 4.327));
 
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(3.083, 34.928)), module, Circle::SELECT_FUNCTION_LIGHT));
-		// addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.155, 52.736)), module, Circle::LOOP_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.133, 57.346)), module, Circle::LOOP_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.097, 68.279)), module, Circle::LOVE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(2.912, 73.898)), module, Circle::PREV_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(19.313, 73.898)), module, Circle::NEXT_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(11.181, 110.546)), module, Circle::PHASE_LIGHT));
+		prev_group_display = new CircleValueDisplay(module);
+    prev_group_display->box.pos = mm2px(Vec(1.326, 46.042));
+    prev_group_display->box.size = group_display_size;
+    addChild(prev_group_display);
 
-    auto display_size = mm2px(Vec(9.096, 4.327));
+		current_group_display = new CircleValueDisplay(module);
+    current_group_display->box.pos = mm2px(Vec(13.47, 46.042));
+    current_group_display->box.size = group_display_size;
+    addChild(current_group_display);
 
-		active_member_i = new ActiveMemberDisplay(module);
-    active_member_i->box.pos = mm2px(Vec(2.921, 16.235));
-    active_member_i->box.size = display_size;
-    addChild(active_member_i);
+		next_group_display = new CircleValueDisplay(module);
+    next_group_display->box.pos = mm2px(Vec(25.603, 46.042));
+    next_group_display->box.size = group_display_size;
+    addChild(next_group_display);
 
-    total_members = new TotalMembersDisplay(module);
-    total_members->box.pos = mm2px(Vec(13.387, 16.236));
-    total_members->box.size = display_size;
-    addChild(total_members);
 
-		// mm2px(Vec(7.391, 4.327))
-    // display_size = mm2px(Vec(7.391, 4.327));
-    // two displays TODO
+    auto focused_display_size = mm2px(Vec(5.834, 9.571));
 
-    display_size = mm2px(Vec(23.173, 4.327));
+		focused_group_display = new FocusedGroupDisplay(module);
+    focused_group_display->box.pos = mm2px(Vec(1.388, 52.344));
+    focused_group_display->box.size = focused_display_size;
+    addChild(focused_group_display);
 
-    time = new BeatDisplay(module);
-    time->box.pos = mm2px(Vec(1.088, 47.476));
-    time->box.size = display_size;
-    time->textOffset = Vec(time->box.size.x * 0.5f, 0.f);
-    addChild(time);
+		focused_member_display = new FocusedMemberDisplay(module);
+    focused_member_display->box.pos = mm2px(Vec(28.412, 52.344));
+    focused_member_display->box.size = focused_display_size;
+    addChild(focused_member_display);
 
-    display_size = mm2px(Vec(6.837, 4.327));
 
-    member_beat = new MemberBeatDisplay(module);
-    member_beat->box.pos = mm2px(Vec(1.05, 52.49));
-    member_beat->box.size = display_size;
-    addChild(member_beat);
+    auto beat_display_size = mm2px(Vec(6.385, 4.327));
 
-    total_member_beats = new TotalMemberBeatDisplay(module);
-    total_member_beats->box.pos = mm2px(Vec(1.05, 57.592));
-    total_member_beats->box.size = display_size;
-    addChild(total_member_beats);
+    group_beat_display = new GroupBeatDisplay(module);
+    group_beat_display->box.pos = mm2px(Vec(7.75, 52.344));
+    group_beat_display->box.size = beat_display_size;
+    addChild(group_beat_display);
 
-    circle_beat = new CircleBeatDisplay(module);
-    circle_beat->box.pos = mm2px(Vec(17.49, 52.49));
-    circle_beat->box.size = display_size;
-    addChild(circle_beat);
+    member_beat_display = new MemberBeatDisplay(module);
+    member_beat_display->box.pos = mm2px(Vec(21.549, 52.344));
+    member_beat_display->box.size = beat_display_size;
+    addChild(member_beat_display);
 
-    total_circle_beats = new TotalCircleBeatDisplay(module);
-    total_circle_beats->box.pos = mm2px(Vec(17.49, 57.592));
-    total_circle_beats->box.size = display_size;
-    addChild(total_circle_beats);
+    total_group_beats_display = new TotalGroupBeatDisplay(module);
+    total_group_beats_display->box.pos = mm2px(Vec(7.75, 57.447));
+    total_group_beats_display->box.size = beat_display_size;
+    addChild(total_group_beats_display);
+
+    total_member_beats_display = new TotalMemberBeatDisplay(module);
+    total_member_beats_display->box.pos = mm2px(Vec(21.549, 57.447));
+    total_member_beats_display->box.size = beat_display_size;
+    addChild(total_member_beats_display);
   }
 
 	void appendContextMenu(rack::Menu* menu) override {
@@ -287,9 +281,9 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.bipolar_phase_input;
     }));
 
+    // TODO
     // menu->addChild(new Slider());
   }
-
 };
 
 } // namespace kokopellivcv

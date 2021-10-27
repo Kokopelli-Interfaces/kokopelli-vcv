@@ -72,8 +72,8 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
     _selected_members_idx.push_back(member_i);
   }
 
-  if (_new_member_active) {
-    _active_member_i = member_i;
+  if (_new_member_focused) {
+    _focused_member_i = member_i;
   }
 
 
@@ -103,8 +103,8 @@ Member* Engine::newRecording() {
 
   if (this->_record_params.fix_bounds) {
     // if (0 < _timeline.members.size()) {
-    //   if (_timeline.members[_active_member_i]->_loop) {
-    //     n_beats = _timeline.members[_active_member_i]->_n_beats;
+    //   if (_timeline.members[_focused_member_i]->_loop) {
+    //     n_beats = _timeline.members[_focused_member_i]->_n_beats;
     //   } else {
     n_beats = circle_n_beats;
     //   }
@@ -128,7 +128,7 @@ Member* Engine::newRecording() {
   recording_member->_circle_before = _circle;
 
   // printf("Recording Activate:\n");
-  // printf("-- start_beat %d n_beats %d loop %d samples per beat %d active member %d\n", recording_member->_start_beat, recording_member->_n_beats, recording_member->_loop, recording_member->_in->_samples_per_beat, _active_member_i);
+  // printf("-- start_beat %d n_beats %d loop %d samples per beat %d focused member %d\n", recording_member->_start_beat, recording_member->_n_beats, recording_member->_loop, recording_member->_in->_samples_per_beat, _focused_member_i);
 
   return recording_member;
 }

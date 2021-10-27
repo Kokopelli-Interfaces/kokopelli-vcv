@@ -6,24 +6,16 @@
   "author": "Michael Muszynski",
   "brand": "Kokopelli Interfaces",
   "authorEmail": "michael.ampm@gmail.com",
-  "authorUrl": "https://github.com/gwatcha",
+  "authorUrl": "https://michaelmuszynski.bandcamp.com/",
   "pluginUrl": "",
   "manualUrl": "https://kokopelli-interfaces.github.io/",
   "sourceUrl": "",
   "donateUrl": "https://ko-fi.com/michaelmuszynski",
   "modules": [
     {
-      "slug": "KokopelliInterfaces-Signal",
-      "name": "Signal",
-      "description": "Circle expander which adds one signal input and output.",
-      "tags": [
-        "Expander"
-      ]
-    },
-    {
       "slug": "KokopelliInterfaces-Circle",
       "name": "Circle",
-      "description": "Music circle facillitator for body energies. A swiss army knife of music creation - live looper, timeline recorder, multi-track DAW... It's magic!",
+      "description": "Music circle facillitator for body energies. A more human alternative to the DAW.",
       "tags": [
         "Poly",
         "Recording",

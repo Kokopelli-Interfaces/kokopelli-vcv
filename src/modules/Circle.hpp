@@ -1,51 +1,53 @@
 #pragma once
 
-#include "Circle_shared.hpp"
+#include "kokopellivcv.hpp"
+#include "Circle.hpp"
 #include "menu.hpp"
 #include "dsp/Circle/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
 #include "widgets.hpp"
+
 #include <math.h>
+
+extern Model *modelCircle;
 
 namespace kokopellivcv {
 
-struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
+struct Circle : KokopelliVcvModule {
   enum ParamIds {
-    SELECT_PARAM,
-    SELECT_MODE_PARAM,
-    SELECT_FUNCTION_PARAM,
-    PREV_PARAM,
-    NEXT_PARAM,
-    LOOP_PARAM,
-    LOVE_PARAM,
-    NUM_PARAMS
+		MODE_PARAM,
+		NEXT_PARAM,
+		PREVIOUS_PARAM,
+		LOVE_PARAM,
+		NUM_PARAMS
   };
-  enum InputIds { SCENE_INPUT, LOVE_INPUT, PHASE_INPUT, NUM_INPUTS };
-  enum OutputIds { PHASE_OUTPUT, NUM_OUTPUTS };
+	enum InputIds {
+		MEMBER_INPUT,
+		LOVE_INPUT,
+		PHASE_INPUT,
+		FOCUS_MODULATION_INPUT,
+		NUM_INPUTS
+	};
+	enum OutputIds {
+		CIRCLE_OUTPUT,
+		GROUP_OUTPUT,
+		PHASE_OUTPUT,
+		NUM_OUTPUTS
+	};
+
   enum LightIds {
-    ENUMS(SELECT_FUNCTION_LIGHT, 3),
-    ENUMS(SELECT_MODE_LIGHT, 3),
-    ENUMS(LOOP_LIGHT, 3),
-    ENUMS(LOVE_LIGHT, 3),
-    ENUMS(PREV_LIGHT, 3),
+    ENUMS(MODE_LIGHT, 3),
+    ENUMS(EMERSIGN_LIGHT, 3),
+    ENUMS(PREVIOUS_LIGHT, 3),
     ENUMS(NEXT_LIGHT, 3),
-    ENUMS(PHASE_LIGHT, 3),
     NUM_LIGHTS
   };
 
-  SignalExpanderMessage *_to_signal = nullptr;
-  SignalExpanderMessage *_from_signal = nullptr;
-
   float _sampleTime = 1.0f;
 
-  float _last_select_value = 0.f;
-
-  kokopellivcv::dsp::LongPressButton _select_function_button;
-  kokopellivcv::dsp::LongPressButton _select_mode_button;
-
-  kokopellivcv::dsp::LongPressButton _loop_button;
+  kokopellivcv::dsp::LongPressButton _mode_button;
   kokopellivcv::dsp::LongPressButton _next_button;
-  kokopellivcv::dsp::LongPressButton _prev_button;
+  kokopellivcv::dsp::LongPressButton _previous_button;
 
   std::array<kokopellivcv::dsp::circle::Engine*, maxChannels> _engines;
 
@@ -66,10 +68,10 @@ struct Circle : ExpanderModule<SignalExpanderMessage, KokopelliVcvModule> {
   void processChannel(const ProcessArgs &args, int channel) override;
   void postProcessAlways(const ProcessArgs &args) override;
   void updateLights(const ProcessArgs &args);
+  void updateLight(int light, float r, float g, float b);
 
 private:
   void processButtons();
-  void processSelect();
 };
 
 } // namespace kokopellivcv

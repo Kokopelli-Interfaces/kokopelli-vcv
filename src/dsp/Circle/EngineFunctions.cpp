@@ -38,7 +38,7 @@ void Engine::prev() {
 }
 
 void Engine::toggleMemberMode() {
-  unsigned int member_i = _active_member_i;
+  unsigned int member_i = _focused_member_i;
 
   if (isRecording()) {
     prev();
@@ -53,7 +53,7 @@ void Engine::toggleMemberMode() {
     setCircleToMember(member_i);
     _timeline_position.beat = _circle.first;
     _read_antipop_filter.trigger();
-    soloSelectMember(_active_member_i);
+    soloSelectMember(_focused_member_i);
   } else {
     _selected_members_idx = _selected_members_idx_before_member_mode;
     _circle = _circle_before_member_mode;

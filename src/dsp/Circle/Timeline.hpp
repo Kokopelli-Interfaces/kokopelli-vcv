@@ -15,7 +15,7 @@ namespace circle {
 struct Timeline {
   std::vector<Member*> members;
 
-  float active_member_out = 0.f;
+  float focused_member_out = 0.f;
 
   /** read only */
 
@@ -106,7 +106,7 @@ struct Timeline {
     return signal_out;
   }
 
-  inline float read(TimePosition position, Member* recording, RecordParams record_params, unsigned int active_member_i) {
+  inline float read(TimePosition position, Member* recording, RecordParams record_params, unsigned int focused_member_i) {
     updateMemberAttenuations(position);
 
     // FIXME multiple recordings in member, have loop and array of types
@@ -132,8 +132,8 @@ struct Timeline {
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
         float member_out = members[i]->readSignal(position);
         member_out = kokopellivcv::dsp::attenuate(member_out, attenuation, signal_type);
-        if (i == active_member_i) {
-          active_member_out = member_out;
+        if (i == focused_member_i) {
+          focused_member_out = member_out;
         }
 
         signal_out = kokopellivcv::dsp::sum(signal_out, member_out, signal_type);

@@ -4,67 +4,53 @@
 
 extern Plugin *pluginInstance;
 
-struct Rogan1HPSWhite : Rogan {
-  Rogan1HPSWhite() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan1HPSWhite.svg")));
-  }
-};
-
-struct CircleFocusKnob : Rogan {
-  CircleFocusKnob() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/CircleFocus.svg")));
-  }
-};
-
-struct Rogan1PGray : Rogan {
-  Rogan1PGray() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan1PGray.svg")));
-  }
-};
-
-struct Rogan4PSGray : Rogan {
-  Rogan4PSGray() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan4PSGray.svg")));
-  }
-};
-
-struct RoganHalfPSRed : Rogan {
-  RoganHalfPSRed() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPSRed.svg")));
-  }
-};
-
-struct RoganHalfPSLightBrown : Rogan {
-  RoganHalfPSLightBrown() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPSLightBrown.svg")));
-  }
-};
-
-struct RoganHalfPGray : Rogan {
-  RoganHalfPGray() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPGray.svg")));
-  }
-};
-
-struct RoganHalfPRed : Rogan {
-  RoganHalfPRed() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/RoganHalfPRed.svg")));
-  }
-};
-
 struct MediumLEDButton : rack::app::SvgSwitch {
   MediumLEDButton() {
 		momentary = true; addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/MediumLEDButton.svg")));
   }
 };
 
-struct Rogan3PDarkRed : Rogan {
-  Rogan3PDarkRed() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/Rogan3PDarkRed.svg")));
+struct LoveKnob : Rogan {
+  LoveKnob() {
+		minAngle = -0.70 * M_PI;
+		maxAngle = 0.70 * M_PI;
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/LoveKnob.svg")));
   }
 };
 
-// same as LittleUtils ToggleLEDButton in 'Widgets.hpp'
+struct KokopelliPort : SvgPort {
+	KokopelliPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/KokopelliPort.svg")));
+  }
+};
+
+struct CircleOutputPort : SvgPort {
+	CircleOutputPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/CircleOutputPort.svg")));
+  }
+};
+
+struct KokopelliScrew : FramebufferWidget {
+  SvgWidget *svg_widget;
+  TransformWidget *transform_widget;
+
+  KokopelliScrew() {
+    transform_widget = new TransformWidget();
+    addChild(transform_widget);
+
+    svg_widget = new SvgWidget();
+    transform_widget->addChild(svg_widget);
+    svg_widget->setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/KokopelliScrew.svg")));
+  transform_widget->box.size = svg_widget->box.size;
+
+    float angle = 1.71f * (rand() / (static_cast<double>(RAND_MAX) + 1.0));
+    Vec transl = transform_widget->box.getCenter();
+    transform_widget->translate( transl );
+    transform_widget->rotate(angle);
+    transform_widget->translate( transl.neg() );
+  }
+};
+
 struct ToggleLEDButton : SVGSwitch {
   BNDwidgetState state = BND_DEFAULT;
   NVGcolor defaultColor;

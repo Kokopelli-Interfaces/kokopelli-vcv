@@ -42,55 +42,55 @@ void Engine::toggleSelectMember(unsigned int member_i) {
   bool select = true;
 
   for (unsigned int member_i_i = 0; member_i_i < _selected_members_idx.size(); member_i_i++) {
-    if (_selected_members_idx[member_i_i] == _active_member_i) {
+    if (_selected_members_idx[member_i_i] == _focused_member_i) {
       _selected_members_idx.erase(_selected_members_idx.begin() + member_i_i);
       select = false;
     }
   }
   if (select && _timeline.members.size() != 0) {
-    _selected_members_idx.push_back(_active_member_i);
+    _selected_members_idx.push_back(_focused_member_i);
   }
 }
 
 void Engine::nextMember() {
-  if ((int) _timeline.members.size()-1 <= (int)_active_member_i) {
-    _new_member_active = true;
+  if ((int) _timeline.members.size()-1 <= (int)_focused_member_i) {
+    _new_member_focused = true;
   } else {
-    _active_member_i++;
+    _focused_member_i++;
   }
 
   if (_member_mode) {
-    skipToActiveMember();
-    soloSelectMember(_active_member_i);
+    skipToFocusedMember();
+    soloSelectMember(_focused_member_i);
   }
 }
 
 void Engine::prevMember() {
-  if (_new_member_active) {
-    _new_member_active = false;
-  } else if (0 < _active_member_i) {
-    _active_member_i--;
+  if (_new_member_focused) {
+    _new_member_focused = false;
+  } else if (0 < _focused_member_i) {
+    _focused_member_i--;
   }
 
   if (_member_mode) {
-    skipToActiveMember();
-    soloSelectMember(_active_member_i);
+    skipToFocusedMember();
+    soloSelectMember(_focused_member_i);
   }
 }
 
-void Engine::toggleSelectActiveMember() {
-  if (_new_member_active) {
+void Engine::toggleSelectFocusedMember() {
+  if (_new_member_focused) {
     _select_new_members = !_select_new_members;
   } else {
-    toggleSelectMember(_active_member_i);
+    toggleSelectMember(_focused_member_i);
   }
 }
 
 void Engine::deleteMember(unsigned int member_i) {
   if (member_i < _timeline.members.size()) {
     _timeline.members.erase(_timeline.members.begin()+member_i);
-    if (_active_member_i == member_i && _active_member_i != 0) {
-      _active_member_i--;
+    if (_focused_member_i == member_i && _focused_member_i != 0) {
+      _focused_member_i--;
     }
   }
 
@@ -106,8 +106,8 @@ void Engine::deleteSelection() {
 
   for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
     if (isSelected(member_i)) {
-      if (member_i == (int)_active_member_i) {
-        _active_member_i = 0 ? 0 : _active_member_i - 1;
+      if (member_i == (int)_focused_member_i) {
+        _focused_member_i = 0 ? 0 : _focused_member_i - 1;
       }
       _timeline.members.erase(_timeline.members.begin()+member_i);
     }
@@ -118,19 +118,19 @@ void Engine::deleteSelection() {
   }
 }
 
-void Engine::soloOrSelectUpToActiveMember() {
-  if (isSelected(_active_member_i)) {
+void Engine::soloOrSelectUpToFocusedMember() {
+  if (isSelected(_focused_member_i)) {
     if (_selected_members_idx.size() == 1) {
       _selected_members_idx = _saved_selected_members_idx;
     } else {
       _saved_selected_members_idx = _selected_members_idx;
-      soloSelectMember(_active_member_i);
+      soloSelectMember(_focused_member_i);
     }
   } else {
     if (_selected_members_idx.size() == 1) {
-      selectRange(_selected_members_idx[0], _active_member_i);
+      selectRange(_selected_members_idx[0], _focused_member_i);
     } else {
-      selectRange(0, _active_member_i);
+      selectRange(0, _focused_member_i);
     }
   }
 }

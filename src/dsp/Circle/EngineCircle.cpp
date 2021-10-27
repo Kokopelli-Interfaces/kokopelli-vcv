@@ -8,9 +8,9 @@ void Engine::setCircleToMember(unsigned int member_i) {
   _circle.second =  _circle.first + _timeline.members[member_i]->_n_beats;
 }
 
-void Engine::skipToActiveMember() {
+void Engine::skipToFocusedMember() {
   if (0 < _timeline.members.size()) {
-    setCircleToMember(_active_member_i);
+    setCircleToMember(_focused_member_i);
     _timeline_position.beat = _circle.first;
   } else {
     _circle.first = 0;

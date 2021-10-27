@@ -24,14 +24,14 @@ struct Engine {
   float _sample_time = 1.0f;
 
   // TODO make me an array to support MIX4 & PLAY
-  kokopellivcv::dsp::SignalType _signal_type;
+  kokopellivcv::dsp::SignalType _signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
   std::vector<unsigned int> _selected_members_idx;
   std::vector<unsigned int> _saved_selected_members_idx;
-  bool _new_member_active = true;
+  bool _new_member_focused = true;
   bool _select_new_members = true;
 
-  unsigned int _active_member_i;
+  unsigned int _focused_member_i;
 
   bool _member_mode = false;
   std::vector<unsigned int> _selected_members_idx_before_member_mode;
@@ -58,10 +58,10 @@ struct Engine {
   void step();
   float read();
   float readSelection();
-  float readActiveMember();
+  float readFocusedMember();
 
   void setCircleToMember(unsigned int member_i);
-  void skipToActiveMember();
+  void skipToFocusedMember();
 
   void next();
   void forget();
@@ -78,8 +78,8 @@ struct Engine {
   bool isSelected(unsigned int member_i);
   bool isSolo(unsigned int member_i);
   void toggleSelectMember(unsigned int member_i);
-  void toggleSelectActiveMember();
-  void soloOrSelectUpToActiveMember();
+  void toggleSelectFocusedMember();
+  void soloOrSelectUpToFocusedMember();
   void deleteMember(unsigned int member_i);
   void deleteSelection();
 

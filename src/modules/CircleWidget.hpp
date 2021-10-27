@@ -69,8 +69,10 @@ struct FocusedMemberDisplay : CircleValueDisplay {
       }
 
       int focused_member_display = 0;
-      if (e->isRecording() || e->_new_member_focused) {
+      if (e->isRecording()) {
         focused_member_display = e->_timeline.members.size() + 1;
+      } else if (e->_new_member_focused) {
+        focused_member_display = e->_timeline.members.size();
       } else {
         focused_member_display = e->_focused_member_i + 1;
         if (e->_timeline.members.size() == 0) {
@@ -122,8 +124,12 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
 
       int total_member_beats_display = 0;
       if (e->isRecording()) {
-        CircleValueDisplay::setText("--");
-        return;
+        if (e->_record_params.fix_bounds) {
+          total_member_beats_display = e->_recording_member->_n_beats;
+        } else {
+          CircleValueDisplay::setText("--");
+          return;
+        }
       } else if (e->_timeline.members.size() != 0) {
         total_member_beats_display = e->_timeline.members[e->_focused_member_i]->_n_beats;
       }

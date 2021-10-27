@@ -71,8 +71,6 @@ struct FocusedMemberDisplay : CircleValueDisplay {
       int focused_member_display = 0;
       if (e->isRecording()) {
         focused_member_display = e->_timeline.members.size() + 1;
-      } else if (e->_new_member_focused) {
-        focused_member_display = e->_timeline.members.size();
       } else {
         focused_member_display = e->_focused_member_i + 1;
         if (e->_timeline.members.size() == 0) {

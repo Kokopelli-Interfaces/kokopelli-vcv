@@ -28,8 +28,6 @@ struct Engine {
 
   std::vector<unsigned int> _selected_members_idx;
   std::vector<unsigned int> _saved_selected_members_idx;
-  bool _new_member_focused = true;
-  bool _select_new_members = true;
 
   unsigned int _focused_member_i;
 

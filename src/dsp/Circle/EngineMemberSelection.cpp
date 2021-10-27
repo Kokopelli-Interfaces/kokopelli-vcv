@@ -53,9 +53,7 @@ void Engine::toggleSelectMember(unsigned int member_i) {
 }
 
 void Engine::nextMember() {
-  if ((int) _timeline.members.size()-1 <= (int)_focused_member_i) {
-    _new_member_focused = true;
-  } else {
+  if ((int)_focused_member_i < (int) _timeline.members.size()-1) {
     _focused_member_i++;
   }
 
@@ -66,9 +64,7 @@ void Engine::nextMember() {
 }
 
 void Engine::prevMember() {
-  if (_new_member_focused) {
-    _new_member_focused = false;
-  } else if (0 < _focused_member_i) {
+  if (0 < _focused_member_i) {
     _focused_member_i--;
   }
 
@@ -79,11 +75,7 @@ void Engine::prevMember() {
 }
 
 void Engine::toggleSelectFocusedMember() {
-  if (_new_member_focused) {
-    _select_new_members = !_select_new_members;
-  } else {
-    toggleSelectMember(_focused_member_i);
-  }
+  toggleSelectMember(_focused_member_i);
 }
 
 void Engine::deleteMember(unsigned int member_i) {

@@ -68,13 +68,8 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
 
   unsigned int member_i = _timeline.members.size() - 1;
 
-  if (_select_new_members) {
-    _selected_members_idx.push_back(member_i);
-  }
-
-  if (_new_member_focused) {
-    _focused_member_i = member_i;
-  }
+  _selected_members_idx.push_back(member_i);
+  _focused_member_i = member_i;
 
 
   // printf("- rec end\n");

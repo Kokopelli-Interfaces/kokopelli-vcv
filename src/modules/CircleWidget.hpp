@@ -285,6 +285,14 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.bipolar_phase_input;
     }));
 
+    menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {
+      return &m->_options.bipolar_phase_input;
+    }));
+
+		FadeSliderItem *attenuation_resolution_slider = new FadeSliderItem(&m->_attenuation_resolution, "Attenuation Resolution");
+		attenuation_resolution_slider->box.size.x = 190.f;
+		menu->addChild(attenuation_resolution_slider);
+
     // TODO
     // menu->addChild(new Slider());
   }

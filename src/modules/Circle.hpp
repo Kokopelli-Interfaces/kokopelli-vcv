@@ -5,6 +5,7 @@
 #include "menu.hpp"
 #include "dsp/Circle/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
+#include "dsp/LightBlinker.hpp"
 #include "widgets.hpp"
 
 #include <math.h>
@@ -49,14 +50,18 @@ struct Circle : KokopelliVcvModule {
   kokopellivcv::dsp::LongPressButton _next_button;
   kokopellivcv::dsp::LongPressButton _previous_button;
 
+  kokopellivcv::dsp::LightBlinker *_light_blinker;
+
   std::array<kokopellivcv::dsp::circle::Engine*, maxChannels> _engines;
 
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
 
+  float _attenuation_resolution = 10000.f;
   Options _options;
 
   Circle();
+  ~Circle();
 
   void sampleRateChange() override;
   int channels() override;
@@ -71,7 +76,7 @@ struct Circle : KokopelliVcvModule {
   void updateLight(int light, float r, float g, float b);
 
 private:
-  void processButtons();
+  void processButtons(const ProcessArgs &args);
 };
 
 } // namespace kokopellivcv

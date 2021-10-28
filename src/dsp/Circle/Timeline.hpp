@@ -23,12 +23,14 @@ struct Timeline {
   std::vector<float> _last_calculated_attenuation;
   rack::dsp::ClockDivider _attenuation_calculator_divider;
 
+  float _attenuation_resolution = 10000.f;
+
   Timeline() {
-    _attenuation_calculator_divider.setDivision(10000);
+    _attenuation_calculator_divider.setDivision(5000);
   }
 
-  static inline float smoothValue(float current, float old) {
-    const float lambda = 10000.f / 44100;
+  inline float smoothValue(float current, float old) {
+    const float lambda = _attenuation_resolution / 44100;
     return old + (current - old) * lambda;
   }
 

@@ -2,6 +2,8 @@
 
 #include "rack.hpp"
 
+#include <thread>
+
 extern Plugin *pluginInstance;
 
 struct MediumLEDButton : rack::app::SvgSwitch {
@@ -114,4 +116,77 @@ struct TextBox : TransparentWidget {
 
     nvgResetScissor(vg);
   };
+};
+
+// fade duration for fade slider menu item
+struct FadeDuration : Quantity {
+	float *srcFadeRate = NULL;
+	std::string label = "";
+
+	FadeDuration(float *_srcFadeRate, std::string fade_label) {
+		srcFadeRate = _srcFadeRate;
+		label = fade_label;
+	}
+	void setValue(float value) override {
+		*srcFadeRate = math::clamp(value, getMinValue(), getMaxValue());
+	}
+	float getValue() override {
+		return *srcFadeRate;
+	}
+	float getMinValue() override {return 26.0f;}
+	float getMaxValue() override {return 44100.0f * 2;}
+	float getDefaultValue() override {return 26.0f;}
+	float getDisplayValue() override {return getValue() / 44100;}
+	std::string getDisplayValueString() override {
+		float value = getDisplayValue();
+		return string::f("%.2f", value);
+	}
+	void setDisplayValue(float displayValue) override {setValue(displayValue);}
+	std::string getLabel() override {return label;}
+	std::string getUnit() override {return " sec";}
+};
+
+
+// fade automation sliders
+struct FadeSliderItem : ui::Slider {
+	FadeSliderItem(float *fade_rate, std::string fade_label) {
+		quantity = new FadeDuration(fade_rate, fade_label);
+	}
+
+	~FadeSliderItem() {
+		delete quantity;
+	}
+};
+
+struct BlinkableRedGreenBlueLight : RedGreenBlueLight {
+  std::chrono::time_point<std::chrono::system_clock> blink;
+  bool op = true;
+
+  BlinkableRedGreenBlueLight() {
+    blink = std::chrono::system_clock::now();
+  }
+
+  void blinkLight() {
+    op = true;
+  }
+
+  void step() override {
+    if (module) {
+      auto now = std::chrono::system_clock::now();
+      if (now - blink > std::chrono::milliseconds{300}) {
+        op = false;
+        blink = now;
+      }
+
+      std::vector<float> brightnesses(baseColors.size());
+      for (size_t i = 0; i < baseColors.size(); i++) {
+        float b = module->lights[firstLightId + i].getBrightness();
+        if (b > 0.f) {
+          b = op ? 1.f : 0.6f;
+        }
+        brightnesses[i] = b;
+      }
+      setBrightnesses(brightnesses);
+    }
+  }
 };

@@ -42,6 +42,5 @@ struct RecordParams {
 
 struct Options {
   bool use_antipop = false;
-  bool strict_recording_lengths = true;
   bool bipolar_phase_input = false;
 };

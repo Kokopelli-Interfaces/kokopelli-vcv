@@ -2,15 +2,33 @@
 
 using namespace kokopellivcv::dsp::circle;
 
+
+bool Engine::isRecording() {
+  return _recording_member != nullptr;
+}
+
+void Engine::toggleFixBounds() {
+  if (isRecording() && !_record_params.fix_bounds) {
+    this->endRecording(true, false);
+
+    // _recording_member->_start_beat = _circle.first;
+    // _recording_member->_n_beats = _circle.second - _circle.first;
+
+    // int recent_loop_length = getMostRecentLoopLength();
+    // if (recent_loop_length != -1) {
+    //   _recording_member->_n_beats = recent_loop_length;
+    // }
+  }
+
+  _record_params.fix_bounds = !_record_params.fix_bounds;
+}
+
+
 void Engine::next() {
-  if (isRecording()) {
-    if (_record_params.fix_bounds) {
-      this->endRecording(true, false);
-    } else {
-      endRecording(false, false);
-    }
+  if (_record_params.fix_bounds) {
+    this->endRecording(true, false);
   } else {
-    nextMember();
+    endRecording(false, false);
   }
 }
 
@@ -29,19 +47,16 @@ void Engine::forget() {
 }
 
 void Engine::prev() {
-  if (this->isRecording()) {
-    this->endRecording(false, false);
-    forget();
-  } else {
-    prevMember();
-  }
+  unsigned int start_beat = _recording_member->_start_beat;
+  this->endRecording(false, false);
+  forget();
+  _timeline_position.beat = start_beat;
 }
 
 void Engine::toggleMemberMode() {
   unsigned int member_i = _focused_member_i;
 
   if (isRecording()) {
-    prev();
     member_i = _timeline.members.size()-1;
   }
 

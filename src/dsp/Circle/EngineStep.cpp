@@ -52,8 +52,8 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
     // printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
   }
 
+  _recording_member->_loop = loop;
   if (loop) {
-    _recording_member->_loop = true;
     if (create_new_circle) {
       unsigned int new_circle_n_beats = _recording_member->_n_beats;
       _circle.second = _circle.first + new_circle_n_beats;
@@ -78,7 +78,7 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
 }
 
 Member* Engine::newRecording() {
-  assert(_record_params.active());
+  // assert(_record_params.active());
   assert(_recording_member == nullptr);
 
   unsigned int start_beat = _timeline_position.beat;
@@ -92,21 +92,22 @@ Member* Engine::newRecording() {
 
   bool shift_circle = !this->_record_params.fix_bounds;
   if (shift_circle) {
-    _circle.first = start_beat;
-    _circle.second = start_beat + circle_n_beats;
+    _circle.first = _timeline_position.beat;
+    _circle.second = _timeline_position.beat + circle_n_beats;
   }
 
   if (this->_record_params.fix_bounds) {
-    // if (0 < _timeline.members.size()) {
-    //   if (_timeline.members[_focused_member_i]->_loop) {
-    //     n_beats = _timeline.members[_focused_member_i]->_n_beats;
-    //   } else {
-    n_beats = circle_n_beats;
-    //   }
-    // }
-  } else {
-    n_beats = _timeline_position.beat - _circle.first + 1;
+    int recent_loop_length = getMostRecentLoopLength();
+    if (recent_loop_length != -1) {
+      n_beats = recent_loop_length;
+    } else {
+      n_beats = circle_n_beats;
+    }
   }
+
+  // else {
+  //   n_beats = _timeline_position.beat - _circle.first + 1;
+  // }
 
   int samples_per_beat = 0;
   if (phaseDefined()) {
@@ -183,18 +184,11 @@ void Engine::step() {
     }
   }
 
-  if (!this->isRecording() && _record_params.active()) {
+  if (!this->isRecording()) {
     _recording_member = this->newRecording();
     _write_antipop_filter.trigger();
-  } else if (this->isRecording() && !_record_params.active()) {
-    this->endRecording(true, false);
-    if (!_record_params.fix_bounds) {
-      _record_params.fix_bounds = true;
-    }
   }
 
-  if (this->isRecording()) {
-    float in = _write_antipop_filter.process(_record_params.readIn());
-    _recording_member->write(_timeline_position, in, _record_params.love, this->phaseDefined());
-  }
+  float in = _write_antipop_filter.process(_record_params.readIn());
+  _recording_member->write(_timeline_position, in, _record_params.love, this->phaseDefined());
 }

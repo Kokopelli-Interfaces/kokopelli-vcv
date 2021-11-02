@@ -69,7 +69,7 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       // e->skipToFocusedMember();
-      e->deleteSelection();
+      e->nextGroup();
       e->skipToFocusedMember();
       break;
     }
@@ -78,6 +78,7 @@ void Circle::processButtons(const ProcessArgs &args) {
 
 void Circle::processAlways(const ProcessArgs &args) {
   outputs[PHASE_OUTPUT].setChannels(this->channels());
+  outputs[CIRCLE_OUTPUT].setChannels(this->channels());
 
   if (_button_divider.process()) {
     processButtons(args);
@@ -105,7 +106,6 @@ void Circle::modulateChannel(int channel_i) {
   // e->_signal_type = _from_signal->signal_type;
 }
 
-// TODO base off max of Circle & sig
 int Circle::channels() {
   int input_channels = inputs[MEMBER_INPUT].getChannels();
   if (_channels < input_channels) {
@@ -144,7 +144,7 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   if (outputs[GROUP_OUTPUT].isConnected()) {
-    outputs[GROUP_OUTPUT].setVoltage(e->readSelection(), channel_i);
+    outputs[GROUP_OUTPUT].setVoltage(e->readWithoutRecordingMember(), channel_i);
   }
 }
 

@@ -26,3 +26,11 @@ void Engine::skipToFocusedMember() {
     _write_antipop_filter.trigger();
   }
 }
+
+void Engine::nextSection() {
+  int loop_length = _circle.second - _circle.first;
+  _circle.second += loop_length;
+  _circle.first += loop_length;
+  _timeline_position.beat += loop_length;
+// TODO new section
+}

@@ -81,7 +81,12 @@ struct TextBox : TransparentWidget {
   TextBox() {
     // FIXME
     // font = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/RobotoMono-Bold.ttf")); // TODO: fix paths...
-    defaultTextColor = nvgRGB(0xae, 0x28, 0x06);
+
+    // defaultTextColor = nvgRGB(0xae, 0x28, 0x06); // cave orange
+    // defaultTextColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
+    // defaultTextColor = nvgRGB(0x9b, 0x44, 0x42); // red
+    defaultTextColor = nvgRGB(0x6e, 0xaf, 0x71); // emersign green
+#
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0x2b, 0x16, 0x09); // cave #2b1609
     // size 20 with spacing -2 will fit 3 characters on a 30px box with Roboto
@@ -135,7 +140,7 @@ struct FadeDuration : Quantity {
 	}
 	float getMinValue() override {return 26.0f;}
 	float getMaxValue() override {return 44100.0f * 2;}
-	float getDefaultValue() override {return 26.0f;}
+	float getDefaultValue() override {return 20000.0f;}
 	float getDisplayValue() override {return getValue() / 44100;}
 	std::string getDisplayValueString() override {
 		float value = getDisplayValue();

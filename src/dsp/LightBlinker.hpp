@@ -8,7 +8,7 @@ namespace dsp {
 
 struct LightBlinker {
   std::chrono::time_point<std::chrono::system_clock> _time;
-  bool _op = true;
+  bool _op = false;
   std::vector<rack::engine::Light> *_lights;
   int _light_i;
   std::vector<float> _saved_light_brightness = {0.f, 0.f, 0.f};

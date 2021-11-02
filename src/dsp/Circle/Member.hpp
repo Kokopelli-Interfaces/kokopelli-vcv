@@ -13,7 +13,7 @@ namespace circle {
 struct Member {
   unsigned int _start_beat = 0;
   unsigned int _n_beats = 0;
-  bool _loop = false;
+  bool _loop = true;
 
   std::pair<unsigned int, unsigned int> _circle_before = std::make_pair(0, 1);
 
@@ -83,8 +83,9 @@ struct Member {
   }
 
   inline void write(TimePosition timeline_position, float in, float strength, bool phase_defined) {
-    assert(_in->_buffer.size() <= _n_beats);
-    assert(_recording_strength->_buffer.size() <= _n_beats);
+    // TODO why ??
+    // assert(_in->_buffer.size() <= _n_beats);
+    // assert(_recording_strength->_buffer.size() <= _n_beats);
 
     if (!phase_defined) {
       _in->pushBack(in);

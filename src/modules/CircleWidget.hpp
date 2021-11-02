@@ -68,8 +68,10 @@ struct FocusedMemberDisplay : CircleValueDisplay {
         return;
       }
 
+      textColor = defaultTextColor;
       int focused_member_display = 0;
       if (e->isRecording()) {
+        textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         focused_member_display = e->_timeline.members.size() + 1;
       } else {
         focused_member_display = e->_focused_member_i + 1;
@@ -96,8 +98,11 @@ struct MemberBeatDisplay : CircleValueDisplay {
 
       int member_beat_display = 0;
 
-      if (e->_recording_member != NULL && e->isRecording()) {
+      textColor = defaultTextColor;
+      if (e->isRecording()) {
+        textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         member_beat_display = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
+
       } else if (e->_timeline.members.size() != 0) {
         // TODO how to show start position of loops?
         member_beat_display = e->_timeline.members[e->_focused_member_i]->getMemberBeat(e->_timeline_position.beat);
@@ -121,15 +126,19 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
       }
 
       int total_member_beats_display = 0;
+      textColor = defaultTextColor;
       if (e->isRecording()) {
+        textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         if (e->_record_params.fix_bounds) {
           total_member_beats_display = e->_recording_member->_n_beats;
-        } else {
+        } else if (e->_timeline.members.size() != 0) {
+          total_member_beats_display = e->getMostRecentLoopLength();
+          textColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
+          } else {
           CircleValueDisplay::setText("--");
+          CircleValueDisplay::_previous_displayed_value = -1;
           return;
         }
-      } else if (e->_timeline.members.size() != 0) {
-        total_member_beats_display = e->_timeline.members[e->_focused_member_i]->_n_beats;
       }
 
       CircleValueDisplay::setDisplayValue(total_member_beats_display);

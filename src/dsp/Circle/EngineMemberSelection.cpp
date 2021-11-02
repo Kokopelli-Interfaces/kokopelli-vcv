@@ -38,6 +38,16 @@ bool Engine::isSelected(unsigned int member_i) {
   return false;
 }
 
+int Engine::getMostRecentLoopLength() {
+  for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
+    if (_timeline.members[member_i]->_loop) {
+      return _timeline.members[member_i]->_n_beats;
+    }
+  }
+
+  return -1;
+}
+
 void Engine::toggleSelectMember(unsigned int member_i) {
   bool select = true;
 
@@ -91,23 +101,13 @@ void Engine::deleteMember(unsigned int member_i) {
   }
 }
 
-void Engine::deleteSelection() {
-  if (isRecording()) {
-    return;
-  }
-
+// FIXME
+void Engine::nextGroup() {
   for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
-    if (isSelected(member_i)) {
-      if (member_i == (int)_focused_member_i) {
-        _focused_member_i = 0 ? 0 : _focused_member_i - 1;
-      }
-      _timeline.members.erase(_timeline.members.begin()+member_i);
-    }
+    _timeline.members.erase(_timeline.members.begin()+member_i);
   }
 
-  if (_timeline.members.size() == 0) {
-    _phase_oscillator.reset(0.f);
-  }
+  _phase_oscillator.reset(0.f);
 }
 
 void Engine::soloOrSelectUpToFocusedMember() {

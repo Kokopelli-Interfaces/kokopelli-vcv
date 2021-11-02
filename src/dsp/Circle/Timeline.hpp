@@ -26,7 +26,7 @@ struct Timeline {
   float _attenuation_resolution = 10000.f;
 
   Timeline() {
-    _attenuation_calculator_divider.setDivision(5000);
+    _attenuation_calculator_divider.setDivision(10000);
   }
 
   inline float smoothValue(float current, float old) {
@@ -65,13 +65,7 @@ struct Timeline {
       for (unsigned int member_i = 0; member_i < members.size(); member_i++) {
         float member_i_attenuation = 0.f;
         for (unsigned int j = member_i + 1; j < members.size(); j++) {
-          for (auto target_member_i : members[j]->target_members_idx) {
-            if (target_member_i == member_i) {
-              member_i_attenuation += members[j]->readRecordingStrength(position);
-              break;
-            }
-          }
-
+          member_i_attenuation += members[j]->readRecordingStrength(position);
           if (1.f <= member_i_attenuation)  {
             member_i_attenuation = 1.f;
             break;
@@ -121,15 +115,6 @@ struct Timeline {
     for (unsigned int i = 0; i < members.size(); i++) {
       if (members[i]->readableAtPosition(position)) {
         float attenuation = _current_attenuation[i];
-
-        if (record_params.active()) {
-          for (unsigned int sel_i : recording->target_members_idx) {
-            if (sel_i == i) {
-              attenuation += record_params.love;
-              break;
-            }
-          }
-        }
 
         attenuation = rack::clamp(attenuation, 0.f, 1.f);
         float member_out = members[i]->readSignal(position);

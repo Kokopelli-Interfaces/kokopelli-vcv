@@ -55,7 +55,7 @@ struct Engine {
 
   void step();
   float read();
-  float readSelection();
+  float readWithoutRecordingMember();
   float readFocusedMember();
 
   void setCircleToMember(unsigned int member_i);
@@ -69,6 +69,10 @@ struct Engine {
   void prev();
   void toggleMemberMode();
 
+  int getMostRecentLoopLength();
+
+  void nextSection();
+
   void nextMember();
   void prevMember();
   void selectRange(unsigned int member_i_1, unsigned int member_i_2);
@@ -79,7 +83,7 @@ struct Engine {
   void toggleSelectFocusedMember();
   void soloOrSelectUpToFocusedMember();
   void deleteMember(unsigned int member_i);
-  void deleteSelection();
+  void nextGroup();
 
 private:
   void fitMemberIntoCircle(Member* member);

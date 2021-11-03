@@ -70,13 +70,16 @@ struct FocusedMemberDisplay : CircleValueDisplay {
 
       textColor = defaultTextColor;
       int focused_member_display = 0;
-      if (e->isRecording()) {
+      bool show_recording_member = !e->_fully_love_group;
+      if (show_recording_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         focused_member_display = e->_timeline.members.size() + 1;
       } else {
         focused_member_display = e->_focused_member_i + 1;
         if (e->_timeline.members.size() == 0) {
-          focused_member_display = 0;
+          CircleValueDisplay::setText("--");
+          CircleValueDisplay::_previous_displayed_value = -1;
+          return;
         }
       }
 
@@ -99,7 +102,8 @@ struct MemberBeatDisplay : CircleValueDisplay {
       int member_beat_display = 0;
 
       textColor = defaultTextColor;
-      if (e->isRecording()) {
+      bool show_recording_member = !e->_fully_love_group;
+      if (show_recording_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         member_beat_display = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
 
@@ -107,7 +111,9 @@ struct MemberBeatDisplay : CircleValueDisplay {
         // TODO how to show start position of loops?
         member_beat_display = e->_timeline.members[e->_focused_member_i]->getMemberBeat(e->_timeline_position.beat);
       } else {
-        member_beat_display = -1;
+        CircleValueDisplay::setText("--");
+        CircleValueDisplay::_previous_displayed_value = -1;
+        return;
       }
 
       CircleValueDisplay::setDisplayValue(member_beat_display + 1);
@@ -125,23 +131,30 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
         return;
       }
 
-      int total_member_beats_display = 0;
+      int total_member_beats = 0;
       textColor = defaultTextColor;
-      if (e->isRecording()) {
+      bool show_recording_member = !e->_fully_love_group;
+      if (show_recording_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         if (e->_record_params.fix_bounds) {
-          total_member_beats_display = e->_recording_member->_n_beats;
+          total_member_beats = e->_recording_member->_n_beats;
         } else if (e->_timeline.members.size() != 0) {
-          total_member_beats_display = e->getMostRecentLoopLength();
+          total_member_beats = e->getMostRecentLoopLength();
           textColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
-          } else {
+        } else {
           CircleValueDisplay::setText("--");
           CircleValueDisplay::_previous_displayed_value = -1;
           return;
         }
+      } else if (e->_timeline.members.size() != 0) {
+        total_member_beats = e->_timeline.members[e->_focused_member_i]->_n_beats;
+      } else {
+        CircleValueDisplay::setText("--");
+        CircleValueDisplay::_previous_displayed_value = -1;
+        return;
       }
 
-      CircleValueDisplay::setDisplayValue(total_member_beats_display);
+      CircleValueDisplay::setDisplayValue(total_member_beats);
 		}
 	}
 };

@@ -31,6 +31,8 @@ struct Engine {
 
   unsigned int _focused_member_i;
 
+  bool _fully_love_group = true;
+
   bool _member_mode = false;
   std::vector<unsigned int> _selected_members_idx_before_member_mode;
   std::pair<unsigned int, unsigned int> _circle_before_member_mode;

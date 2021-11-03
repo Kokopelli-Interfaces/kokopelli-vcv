@@ -2,22 +2,13 @@
 
 using namespace kokopellivcv::dsp::circle;
 
-
 bool Engine::isRecording() {
   return _recording_member != nullptr;
 }
 
 void Engine::toggleFixBounds() {
-  if (isRecording() && !_record_params.fix_bounds) {
+  if (this->isRecording() && !_record_params.fix_bounds) {
     this->endRecording(true, false);
-
-    // _recording_member->_start_beat = _circle.first;
-    // _recording_member->_n_beats = _circle.second - _circle.first;
-
-    // int recent_loop_length = getMostRecentLoopLength();
-    // if (recent_loop_length != -1) {
-    //   _recording_member->_n_beats = recent_loop_length;
-    // }
   }
 
   _record_params.fix_bounds = !_record_params.fix_bounds;
@@ -28,7 +19,7 @@ void Engine::next() {
   if (_record_params.fix_bounds) {
     this->endRecording(true, false);
   } else {
-    endRecording(false, false);
+    this->endRecording(false, false);
   }
 }
 
@@ -49,7 +40,7 @@ void Engine::forget() {
 void Engine::prev() {
   unsigned int start_beat = _recording_member->_start_beat;
   this->endRecording(false, false);
-  forget();
+  this->forget();
   _timeline_position.beat = start_beat;
 }
 

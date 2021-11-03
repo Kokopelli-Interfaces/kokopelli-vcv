@@ -79,6 +79,11 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
 
 Member* Engine::newRecording() {
   // assert(_record_params.active());
+  if (_recording_member) {
+    delete _recording_member;
+    _recording_member = nullptr;
+  }
+
   assert(_recording_member == nullptr);
 
   unsigned int start_beat = _timeline_position.beat;
@@ -191,4 +196,15 @@ void Engine::step() {
 
   float in = _write_antipop_filter.process(_record_params.readIn());
   _recording_member->write(_timeline_position, in, _record_params.love, this->phaseDefined());
+
+  if (_fully_love_group && _record_params.active()) {
+    _fully_love_group = false;
+    if (_record_params.fix_bounds) {
+      _recording_member = this->newRecording();
+    }
+    _write_antipop_filter.trigger();
+  } else if (!_fully_love_group && !_record_params.active()) {
+    _fully_love_group = true;
+    this->endRecording(true, false);
+  }
 }

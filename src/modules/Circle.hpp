@@ -16,9 +16,9 @@ namespace kokopellivcv {
 
 struct Circle : KokopelliVcvModule {
   enum ParamIds {
-		MODE_PARAM,
-		NEXT_PARAM,
-		PREVIOUS_PARAM,
+		TUNE_PARAM,
+		FORWARD_PARAM,
+		BACKWARD_PARAM,
 		LOVE_PARAM,
 		NUM_PARAMS
   };
@@ -37,18 +37,18 @@ struct Circle : KokopelliVcvModule {
 	};
 
   enum LightIds {
-    ENUMS(MODE_LIGHT, 3),
+    ENUMS(TUNE_LIGHT, 3),
     ENUMS(EMERSIGN_LIGHT, 3),
-    ENUMS(PREVIOUS_LIGHT, 3),
-    ENUMS(NEXT_LIGHT, 3),
+    ENUMS(BACKWARD_LIGHT, 3),
+    ENUMS(FORWARD_LIGHT, 3),
     NUM_LIGHTS
   };
 
   float _sampleTime = 1.0f;
 
-  kokopellivcv::dsp::LongPressButton _mode_button;
-  kokopellivcv::dsp::LongPressButton _next_button;
-  kokopellivcv::dsp::LongPressButton _previous_button;
+  kokopellivcv::dsp::LongPressButton _tune_button;
+  kokopellivcv::dsp::LongPressButton _forward_button;
+  kokopellivcv::dsp::LongPressButton _backward_button;
 
   kokopellivcv::dsp::LightBlinker *_light_blinker;
 
@@ -57,7 +57,7 @@ struct Circle : KokopelliVcvModule {
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
 
-  float _attenuation_resolution = 10000.f;
+  float _love_resolution = 10000.f;
   Options _options;
 
   Circle();

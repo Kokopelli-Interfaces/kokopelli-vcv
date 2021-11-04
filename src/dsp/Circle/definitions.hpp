@@ -13,7 +13,7 @@ struct RecordParams {
   float in = 0.f;
 
   float love = 0.f;
-  bool fix_bounds = true;
+  bool tuned_to_group_frequency = true;
 
   bool _active = false;
   float _recordActiveThreshold = 0.0001f;

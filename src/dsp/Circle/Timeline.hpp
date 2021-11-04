@@ -15,22 +15,26 @@ namespace circle {
 struct Timeline {
   std::vector<Member*> members;
 
+  std::vector<float> _next_love;
+
   float focused_member_out = 0.f;
+  unsigned int _n_loved_members = 0;
 
   /** read only */
 
-  std::vector<float> _current_attenuation;
-  std::vector<float> _last_calculated_attenuation;
-  rack::dsp::ClockDivider _attenuation_calculator_divider;
-
-  float _attenuation_resolution = 10000.f;
+  rack::dsp::ClockDivider _love_calculator_divider;
+  float _love_resolution = 10000.f;
 
   Timeline() {
-    _attenuation_calculator_divider.setDivision(10000);
+    _love_calculator_divider.setDivision(10000);
+  }
+
+  inline unsigned int getNumberOfActiveMembers() {
+    return _n_loved_members;
   }
 
   inline float smoothValue(float current, float old) {
-    const float lambda = _attenuation_resolution / 44100;
+    const float lambda = _love_resolution / 44100;
     return old + (current - old) * lambda;
   }
 
@@ -60,29 +64,37 @@ struct Timeline {
     return member_i;
   }
 
-  inline void updateMemberAttenuations(TimePosition position) {
-    if (_attenuation_calculator_divider.process()) {
+  inline void updateMemberLove(TimePosition position) {
+    if (_love_calculator_divider.process()) {
+      unsigned int n_loved = 0;
       for (unsigned int member_i = 0; member_i < members.size(); member_i++) {
-        float member_i_attenuation = 0.f;
+
+        float member_i_love = 1.f;
         for (unsigned int j = member_i + 1; j < members.size(); j++) {
-          member_i_attenuation += members[j]->readRecordingStrength(position);
-          if (1.f <= member_i_attenuation)  {
-            member_i_attenuation = 1.f;
+          member_i_love -= members[j]->readLove(position);
+          if (member_i_love <= 0.f)  {
+            member_i_love = 0.f;
             break;
           }
         }
 
-        _last_calculated_attenuation[member_i] = member_i_attenuation;
+        if (0.f < member_i_love) {
+          n_loved++;
+        }
+
+        _next_love[member_i] = member_i_love;
       }
+
+      _n_loved_members = n_loved;
     }
 
     for (unsigned int i = 0; i < members.size(); i++) {
-      _current_attenuation[i] = smoothValue(_last_calculated_attenuation[i], _current_attenuation[i]);
+      members[i]->_love = smoothValue(_next_love[i], members[i]->_love);
     }
   }
 
-  inline float readRawMembers(TimePosition position, std::vector<unsigned int> members_idx) {
-    float signal_out = 0.f;
+  inline float read(TimePosition position, unsigned int focused_member_i) {
+    updateMemberLove(position);
 
     // FIXME multiple recordings in member, have loop and array of types
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
@@ -90,41 +102,18 @@ struct Timeline {
       signal_type = members[0]->_in->_signal_type;
     }
 
-    for (auto member_i : members_idx) {
-      if (members.size() < member_i) {
+    float signal_out = 0.f;
+    for (unsigned int i = 0; i < members.size(); i++) {
+      if (members[i]->_love <= 0.f || !members[i]->readableAtPosition(position)) {
         continue;
       }
 
-      float member_out = members[member_i]->readSignal(position);
-      signal_out = kokopellivcv::dsp::sum(signal_out, member_out, signal_type);
-    }
-
-    return signal_out;
-  }
-
-  inline float read(TimePosition position, Member* recording, RecordParams record_params, unsigned int focused_member_i) {
-    updateMemberAttenuations(position);
-
-    // FIXME multiple recordings in member, have loop and array of types
-    kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
-    if (0 < members.size()) {
-      signal_type = members[0]->_in->_signal_type;
-    }
-
-    float signal_out = 0.f;
-    for (unsigned int i = 0; i < members.size(); i++) {
-      if (members[i]->readableAtPosition(position)) {
-        float attenuation = _current_attenuation[i];
-
-        attenuation = rack::clamp(attenuation, 0.f, 1.f);
-        float member_out = members[i]->readSignal(position);
-        member_out = kokopellivcv::dsp::attenuate(member_out, attenuation, signal_type);
-        if (i == focused_member_i) {
-          focused_member_out = member_out;
-        }
-
-        signal_out = kokopellivcv::dsp::sum(signal_out, member_out, signal_type);
+      float member_out = members[i]->readSignal(position) * members[i]->_love;
+      if (i == focused_member_i) {
+        focused_member_out = member_out;
       }
+
+      signal_out = kokopellivcv::dsp::sum(signal_out, member_out, signal_type);
     }
 
     return signal_out;

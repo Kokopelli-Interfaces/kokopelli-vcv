@@ -67,7 +67,7 @@ struct Engine {
   void forget();
   bool isRecording();
 
-  void toggleFixBounds();
+  void toggleTuneToGroupFrequency();
   void prev();
   void toggleMemberMode();
 

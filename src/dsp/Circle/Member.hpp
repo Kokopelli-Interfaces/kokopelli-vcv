@@ -11,6 +11,8 @@ namespace dsp {
 namespace circle {
 
 struct Member {
+  float _love = 0.f;
+
   unsigned int _start_beat = 0;
   unsigned int _n_beats = 0;
   bool _loop = true;
@@ -74,7 +76,7 @@ struct Member {
     return _in->read(getRecordingPosition(timeline_position));
   }
 
-  inline float readRecordingStrength(TimePosition timeline_position) {
+  inline float readLove(TimePosition timeline_position) {
     if (!readableAtPosition(timeline_position)) {
       return 0.f;
     }

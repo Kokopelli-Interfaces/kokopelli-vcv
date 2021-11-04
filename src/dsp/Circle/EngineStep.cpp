@@ -63,8 +63,7 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
   }
 
   _timeline.members.push_back(_recording_member);
-  _timeline._last_calculated_attenuation.resize(_timeline.members.size());
-  _timeline._current_attenuation.resize(_timeline.members.size());
+  _timeline._next_love.resize(_timeline.members.size());
 
   unsigned int member_i = _timeline.members.size() - 1;
 
@@ -90,18 +89,18 @@ Member* Engine::newRecording() {
   unsigned int n_beats = 1;
 
   unsigned int circle_n_beats = _circle.second - _circle.first;
-  if (this->_record_params.fix_bounds) {
+  if (this->_record_params.tuned_to_group_frequency) {
     start_beat = _circle.first;
     n_beats = circle_n_beats;
   }
 
-  bool shift_circle = !this->_record_params.fix_bounds;
+  bool shift_circle = !this->_record_params.tuned_to_group_frequency;
   if (shift_circle) {
     _circle.first = _timeline_position.beat;
     _circle.second = _timeline_position.beat + circle_n_beats;
   }
 
-  if (this->_record_params.fix_bounds) {
+  if (this->_record_params.tuned_to_group_frequency) {
     int recent_loop_length = getMostRecentLoopLength();
     if (recent_loop_length != -1) {
       n_beats = recent_loop_length;
@@ -140,7 +139,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   bool reached_circle_end = _timeline_position.beat == _circle.second;
 
   if (reached_circle_end) {
-    bool shift_circle = this->isRecording() && !_record_params.fix_bounds;
+    bool shift_circle = this->isRecording() && !_record_params.tuned_to_group_frequency;
     if (shift_circle) {
       unsigned int circle_shift = _circle.second - _circle.first;
       _circle.first = _circle.second;
@@ -154,7 +153,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   }
 
   bool reached_recording_end = this->isRecording() && _recording_member->_start_beat + _recording_member->_n_beats <= _timeline_position.beat;
-  if (reached_recording_end && !_record_params.fix_bounds) {
+  if (reached_recording_end && !(_record_params.tuned_to_group_frequency && _fully_love_group)) {
     _recording_member->_n_beats++;
   }
 }
@@ -197,14 +196,15 @@ void Engine::step() {
   float in = _write_antipop_filter.process(_record_params.readIn());
   _recording_member->write(_timeline_position, in, _record_params.love, this->phaseDefined());
 
+  // able to create new members with just pedal in tuned_to_group_frequency mode
   if (_fully_love_group && _record_params.active()) {
     _fully_love_group = false;
-    if (_record_params.fix_bounds) {
-      _recording_member = this->newRecording();
-    }
-    _write_antipop_filter.trigger();
+    _recording_member = this->newRecording();
   } else if (!_fully_love_group && !_record_params.active()) {
     _fully_love_group = true;
-    this->endRecording(true, false);
+    // if (_record_params.tuned_to_group_frequency) {
+      this->endRecording(true, false);
+      // _recording_member = this->newRecording();
+    // }
   }
 }

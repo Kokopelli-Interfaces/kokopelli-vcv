@@ -3,18 +3,18 @@
 
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(MODE_PARAM, 0.f, 1.f, 0.f, "Mode");
-  configParam(PREVIOUS_PARAM, 0.f, 1.f, 0.f, "Focus Previous");
-  configParam(NEXT_PARAM, 0.f, 1.f, 0.f, "Focus Next");
+  configParam(TUNE_PARAM, 0.f, 1.f, 0.f, "Tune to Group Frequency");
+  configParam(BACKWARD_PARAM, 0.f, 1.f, 0.f, "Backward");
+  configParam(FORWARD_PARAM, 0.f, 1.f, 0.f, "Forward");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love");
 
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
   _light_blinker = new kokopellivcv::dsp::LightBlinker(&lights);
 
-  _mode_button.param = &params[MODE_PARAM];
-  _next_button.param = &params[NEXT_PARAM];
-  _previous_button.param = &params[PREVIOUS_PARAM];
+  _tune_button.param = &params[TUNE_PARAM];
+  _forward_button.param = &params[FORWARD_PARAM];
+  _backward_button.param = &params[BACKWARD_PARAM];
 }
 
 Circle::~Circle() {
@@ -28,44 +28,44 @@ void Circle::sampleRateChange() {
 void Circle::processButtons(const ProcessArgs &args) {
   float sampleTime = _sampleTime * _button_divider.division;
 
-  kokopellivcv::dsp::LongPressButton::Event _mode_event = _mode_button.process(sampleTime);
-  kokopellivcv::dsp::LongPressButton::Event _next_event = _next_button.process(sampleTime);
-  kokopellivcv::dsp::LongPressButton::Event _prev_event = _previous_button.process(sampleTime);
+  kokopellivcv::dsp::LongPressButton::Event _tune_event = _tune_button.process(sampleTime);
+  kokopellivcv::dsp::LongPressButton::Event _forward_event = _forward_button.process(sampleTime);
+  kokopellivcv::dsp::LongPressButton::Event _backward_event = _backward_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
 
-    switch (_mode_event) {
+    switch (_tune_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->toggleFixBounds();
+      e->toggleTuneToGroupFrequency();
       updateLights(args);
-      _light_blinker->blinkLight(MODE_LIGHT);
+      _light_blinker->blinkLight(TUNE_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       // e->toggleMemberMode();
       break;
     }
 
-    switch (_prev_event) {
+    switch (_backward_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       e->prev();
-      _light_blinker->blinkLight(PREVIOUS_LIGHT);
+      _light_blinker->blinkLight(BACKWARD_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->forget();
       break;
     }
 
-    switch (_next_event) {
+    switch (_forward_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       e->next();
-      _light_blinker->blinkLight(NEXT_LIGHT);
+      _light_blinker->blinkLight(FORWARD_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       // e->skipToFocusedMember();
@@ -102,7 +102,7 @@ void Circle::modulateChannel(int channel_i) {
 
   e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
   e->_options = _options;
-  e->_timeline._attenuation_resolution = _attenuation_resolution;
+  e->_timeline._love_resolution = _love_resolution;
   // e->_signal_type = _from_signal->signal_type;
 }
 
@@ -192,15 +192,15 @@ void Circle::updateLights(const ProcessArgs &args) {
     lights[EMERSIGN_LIGHT + 2].value = 0.f;
   }
 
-  bool fix_bounds = displayed_record_params.fix_bounds;
+  bool tuned_to_group_frequency = displayed_record_params.tuned_to_group_frequency;
   if (default_e->isRecording()) {
-    updateLight(MODE_LIGHT, !fix_bounds, fix_bounds, default_e->_member_mode);
-    updateLight(PREVIOUS_LIGHT, (float)!fix_bounds * .2f, 1.f, (float)fix_bounds * .2f);
-    updateLight(NEXT_LIGHT, (float)!fix_bounds * .2f, 1.f, (float)fix_bounds * .2f);
+    updateLight(TUNE_LIGHT, !tuned_to_group_frequency, tuned_to_group_frequency, default_e->_member_mode);
+    updateLight(BACKWARD_LIGHT, (float)!tuned_to_group_frequency * .2f, 1.f, (float)tuned_to_group_frequency * .2f);
+    updateLight(FORWARD_LIGHT, (float)!tuned_to_group_frequency * .2f, 1.f, (float)tuned_to_group_frequency * .2f);
   } else {
-    updateLight(MODE_LIGHT, !fix_bounds, fix_bounds, default_e->_member_mode);
-    updateLight(PREVIOUS_LIGHT, 0.f, 1.f,  0.f);
-    updateLight(NEXT_LIGHT, 0.f, 1.0,  0.f);
+    updateLight(TUNE_LIGHT, !tuned_to_group_frequency, tuned_to_group_frequency, default_e->_member_mode);
+    updateLight(BACKWARD_LIGHT, 0.f, 1.f,  0.f);
+    updateLight(FORWARD_LIGHT, 0.f, 1.0,  0.f);
   }
 }
 

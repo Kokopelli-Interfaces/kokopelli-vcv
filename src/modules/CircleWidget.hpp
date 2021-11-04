@@ -6,7 +6,7 @@ namespace kokopellivcv {
 
 struct CircleValueDisplay : TextBox {
 	Circle *_module;
-	int _previous_displayed_value = -1;
+	int _backward_displayed_value = -1;
 
 	CircleValueDisplay(Circle *m) : TextBox() {
     _module = m;
@@ -29,8 +29,8 @@ struct CircleValueDisplay : TextBox {
 
 	void setDisplayValue(int v) {
 		std::string s;
-		if(v != _previous_displayed_value) {
-			_previous_displayed_value = v;
+		if(v != _backward_displayed_value) {
+			_backward_displayed_value = v;
       s = string::f("%d", v);
       setText(s);
 		}
@@ -70,15 +70,18 @@ struct FocusedMemberDisplay : CircleValueDisplay {
 
       textColor = defaultTextColor;
       int focused_member_display = 0;
-      bool show_recording_member = !e->_fully_love_group;
+      // bool show_recording_member = true;
+      bool show_recording_member = !(e->_fully_love_group && e->_record_params.tuned_to_group_frequency);
       if (show_recording_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
+        // focused_member_display = e->_timeline.getNumberOfActiveMembers() + 1;
         focused_member_display = e->_timeline.members.size() + 1;
       } else {
         focused_member_display = e->_focused_member_i + 1;
+        // focused_member_display = e->_timeline.getNumberOfActiveMembers();
         if (e->_timeline.members.size() == 0) {
           CircleValueDisplay::setText("--");
-          CircleValueDisplay::_previous_displayed_value = -1;
+          CircleValueDisplay::_backward_displayed_value = -1;
           return;
         }
       }
@@ -102,8 +105,9 @@ struct MemberBeatDisplay : CircleValueDisplay {
       int member_beat_display = 0;
 
       textColor = defaultTextColor;
-      bool show_recording_member = !e->_fully_love_group;
-      if (show_recording_member) {
+      // bool show_recording_member = true;
+      bool show_recording_member = !(e->_fully_love_group && e->_record_params.tuned_to_group_frequency);
+      if (e->isRecording() && show_recording_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         member_beat_display = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
 
@@ -112,7 +116,7 @@ struct MemberBeatDisplay : CircleValueDisplay {
         member_beat_display = e->_timeline.members[e->_focused_member_i]->getMemberBeat(e->_timeline_position.beat);
       } else {
         CircleValueDisplay::setText("--");
-        CircleValueDisplay::_previous_displayed_value = -1;
+        CircleValueDisplay::_backward_displayed_value = -1;
         return;
       }
 
@@ -133,24 +137,25 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
 
       int total_member_beats = 0;
       textColor = defaultTextColor;
-      bool show_recording_member = !e->_fully_love_group;
+      // bool show_recording_member = true;
+      bool show_recording_member = !(e->_fully_love_group && e->_record_params.tuned_to_group_frequency);
       if (show_recording_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
-        if (e->_record_params.fix_bounds) {
+        if (e->_record_params.tuned_to_group_frequency) {
           total_member_beats = e->_recording_member->_n_beats;
         } else if (e->_timeline.members.size() != 0) {
           total_member_beats = e->getMostRecentLoopLength();
           textColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
         } else {
           CircleValueDisplay::setText("--");
-          CircleValueDisplay::_previous_displayed_value = -1;
+          CircleValueDisplay::_backward_displayed_value = -1;
           return;
         }
       } else if (e->_timeline.members.size() != 0) {
         total_member_beats = e->_timeline.members[e->_focused_member_i]->_n_beats;
       } else {
         CircleValueDisplay::setText("--");
-        CircleValueDisplay::_previous_displayed_value = -1;
+        CircleValueDisplay::_backward_displayed_value = -1;
         return;
       }
 
@@ -219,9 +224,9 @@ struct CircleWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.933)), module, Circle::MODE_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.74, 73.943)), module, Circle::PREVIOUS_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(25.733, 73.943)), module, Circle::NEXT_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.933)), module, Circle::TUNE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.74, 73.943)), module, Circle::BACKWARD_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(25.733, 73.943)), module, Circle::FORWARD_PARAM));
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 78.64)), module, Circle::LOVE_PARAM));
 
 		addInput(createInput<KokopelliPort>(mm2px(Vec(24.279, 94.783)), module, Circle::MEMBER_INPUT));
@@ -232,11 +237,11 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<CircleOutputPort>(mm2px(Vec(13.65, 21.180)), module, Circle::CIRCLE_OUTPUT));
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.783)), module, Circle::GROUP_OUTPUT));
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Circle::PHASE_OUTPUT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 56.339)), module, Circle::MODE_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 56.339)), module, Circle::TUNE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.178, 68.279)), module, Circle::EMERSIGN_LIGHT));
 
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(5.205, 75.407)), module, Circle::PREVIOUS_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.197, 75.407)), module, Circle::NEXT_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(5.205, 75.407)), module, Circle::BACKWARD_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.197, 75.407)), module, Circle::FORWARD_LIGHT));
 
     // NOTE do the displays too
     auto group_display_size = mm2px(Vec(8.603, 4.327));
@@ -311,9 +316,9 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.bipolar_phase_input;
     }));
 
-		FadeSliderItem *attenuation_resolution_slider = new FadeSliderItem(&m->_attenuation_resolution, "Attenuation Resolution");
-		attenuation_resolution_slider->box.size.x = 190.f;
-		menu->addChild(attenuation_resolution_slider);
+		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_love_resolution, "Attenuation Resolution");
+		love_resolution_slider->box.size.x = 190.f;
+		menu->addChild(love_resolution_slider);
 
     // TODO
     // menu->addChild(new Slider());

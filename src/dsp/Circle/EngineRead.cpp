@@ -3,7 +3,7 @@
 using namespace kokopellivcv::dsp::circle;
 
 float Engine::read() {
-  float timeline_out = _timeline.read(_timeline_position, _recording_member, _record_params, _focused_member_i);
+  float timeline_out = _timeline.read(_timeline_position, _focused_member_i);
 
   // FIXME assumes all selected
   if (_record_params.active()) {
@@ -18,7 +18,7 @@ float Engine::read() {
 }
 
 float Engine::readWithoutRecordingMember() {
-  float timeline_out = _timeline.read(_timeline_position, _recording_member, _record_params, _focused_member_i);
+  float timeline_out = _timeline.read(_timeline_position, _focused_member_i);
   return timeline_out;
 }
 

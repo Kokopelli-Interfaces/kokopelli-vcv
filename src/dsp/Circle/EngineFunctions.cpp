@@ -6,20 +6,33 @@ bool Engine::isRecording() {
   return _recording_member != nullptr;
 }
 
-void Engine::toggleFixBounds() {
-  if (this->isRecording() && !_record_params.fix_bounds) {
-    this->endRecording(true, false);
+void Engine::toggleTuneToGroupFrequency() {
+  if (!_fully_love_group && !_record_params.tuned_to_group_frequency) {
+    this->endRecording(true, true);
   }
 
-  _record_params.fix_bounds = !_record_params.fix_bounds;
+  _record_params.tuned_to_group_frequency = !_record_params.tuned_to_group_frequency;
 }
 
 
 void Engine::next() {
-  if (_record_params.fix_bounds) {
-    this->endRecording(true, false);
+  if (_record_params.tuned_to_group_frequency) {
+    if (_fully_love_group) {
+      // I -> II.
+      unsigned int circle_n_beats = _circle.second - _circle.first;
+      _circle.first = _timeline_position.beat;
+      _circle.second = _timeline_position.beat + circle_n_beats;
+    } else {
+      this->endRecording(true, false);
+    }
   } else {
-    this->endRecording(false, false);
+    if (_fully_love_group) {
+      // A -> B
+      this->endRecording(false, false);
+    } else {
+      // I -> II.
+      this->endRecording(false, false);
+    }
   }
 }
 
@@ -38,10 +51,10 @@ void Engine::forget() {
 }
 
 void Engine::prev() {
-  unsigned int start_beat = _recording_member->_start_beat;
+  // unsigned int start_beat = _recording_member->_start_beat;
   this->endRecording(false, false);
   this->forget();
-  _timeline_position.beat = start_beat;
+  // _timeline_position.beat = start_beat;
 }
 
 void Engine::toggleMemberMode() {

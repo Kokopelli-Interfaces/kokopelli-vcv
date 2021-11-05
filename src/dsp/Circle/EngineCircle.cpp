@@ -21,8 +21,8 @@ void Engine::skipToFocusedMember() {
   _read_antipop_filter.trigger();
 
   if (isRecording()) {
-    delete _recording_member;
-    _recording_member = nullptr;
+    delete _new_member;
+    _new_member = nullptr;
     _write_antipop_filter.trigger();
   }
 }

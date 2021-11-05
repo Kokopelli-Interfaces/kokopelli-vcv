@@ -39,7 +39,7 @@ void Circle::processButtons(const ProcessArgs &args) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->toggleTuneToGroupFrequency();
+      e->toggleTuneToFrequencyOfEstablished();
       updateLights(args);
       _light_blinker->blinkLight(TUNE_LIGHT);
       break;
@@ -52,7 +52,7 @@ void Circle::processButtons(const ProcessArgs &args) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->prev();
+      e->backward();
       _light_blinker->blinkLight(BACKWARD_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
@@ -64,7 +64,7 @@ void Circle::processButtons(const ProcessArgs &args) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->next();
+      e->forward();
       _light_blinker->blinkLight(FORWARD_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
@@ -98,7 +98,7 @@ void Circle::modulateChannel(int channel_i) {
 
   // taking to the strength of 2 gives a more intuitive curve
   love = pow(love, 2);
-  e->_record_params.love = love;
+  e->_inputs.love = love;
 
   e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
   e->_options = _options;
@@ -107,7 +107,7 @@ void Circle::modulateChannel(int channel_i) {
 }
 
 int Circle::channels() {
-  int input_channels = inputs[MEMBER_INPUT].getChannels();
+  int input_channels = inputs[NEW_INPUT].getChannels();
   if (_channels < input_channels) {
     return input_channels;
   }
@@ -131,20 +131,20 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     outputs[PHASE_OUTPUT].setVoltage(e->_timeline_position.phase * 10, channel_i);
   }
 
-  if (inputs[MEMBER_INPUT].isConnected()) {
-    e->_record_params.in = inputs[MEMBER_INPUT].getPolyVoltage(channel_i);
+  if (inputs[NEW_INPUT].isConnected()) {
+    e->_inputs.in = inputs[NEW_INPUT].getPolyVoltage(channel_i);
   } else {
-    e->_record_params.in = 0.f;
+    e->_inputs.in = 0.f;
   }
 
   e->step();
 
   if (outputs[CIRCLE_OUTPUT].isConnected()) {
-    outputs[CIRCLE_OUTPUT].setVoltage(e->read(), channel_i);
+    outputs[CIRCLE_OUTPUT].setVoltage(e->readAll(), channel_i);
   }
 
-  if (outputs[GROUP_OUTPUT].isConnected()) {
-    outputs[GROUP_OUTPUT].setVoltage(e->readWithoutRecordingMember(), channel_i);
+  if (outputs[ESTABLISHED_OUTPUT].isConnected()) {
+    outputs[ESTABLISHED_OUTPUT].setVoltage(e->readEstablished(), channel_i);
   }
 }
 
@@ -163,45 +163,40 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   kokopellivcv::dsp::circle::Engine *default_e = _engines[0];
 
-  bool poly_record = (inputs[LOVE_INPUT].isConnected() && 1 < inputs[LOVE_INPUT].getChannels());
-
-  RecordParams displayed_record_params = default_e->_record_params;
-
-  float focused_member_signal_out_sum = default_e->readFocusedMember();
-
-  float member_in_sum = 0.f;
-  bool record_active = false;
+  float new_sum = 0.f;
+  float established_sum = 0.f;
   for (int c = 0; c < channels(); c++) {
-    member_in_sum += inputs[MEMBER_INPUT].getPolyVoltage(c);
-    if (record_active) {
-      displayed_record_params = _engines[c]->_record_params;
-    }
+    new_sum += inputs[NEW_INPUT].getPolyVoltage(c);
+    established_sum += outputs[ESTABLISHED_OUTPUT].getPolyVoltage(c);
   }
+  new_sum = rack::clamp(new_sum, 0.f, 1.f);
+  established_sum = rack::clamp(established_sum, 0.f, 1.f);
+  established_sum = established_sum * (1.f - default_e->_inputs.love);
 
-  member_in_sum = rack::clamp(member_in_sum, 0.f, 1.f);
-  focused_member_signal_out_sum = rack::clamp(focused_member_signal_out_sum, 0.f, 1.f);
+  lights[EMERSIGN_LIGHT + 0].setSmoothBrightness(new_sum, _sampleTime * _light_divider.getDivision());
+  lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(established_sum, _sampleTime * _light_divider.getDivision());
 
-  // NOTE fix
-  if (default_e->isRecording()) {
-    lights[EMERSIGN_LIGHT + 1].value = 0.f;
-    int light_colour = poly_record ? 2 : 0;
-    lights[EMERSIGN_LIGHT + light_colour].setSmoothBrightness(member_in_sum, _sampleTime * _light_divider.getDivision());
+  LoveDirection love_direction = default_e->_love_direction;
+  if (default_e->_tune_to_frequency_of_established) {
+    // TODO set to establisehd phase
+    updateLight(TUNE_LIGHT, 0.0f, 0.5f, 0.0f);
+  } else if (love_direction != LoveDirection::ESTABLISHED) {
+    updateLight(TUNE_LIGHT, .2f, 0.2f, 0.f);
   } else {
-    lights[EMERSIGN_LIGHT + 0].value = 0.f;
-    lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(focused_member_signal_out_sum, _sampleTime * _light_divider.getDivision());
-    lights[EMERSIGN_LIGHT + 2].value = 0.f;
+    updateLight(TUNE_LIGHT, .02f, .02f, .02f);
   }
 
-  bool tuned_to_group_frequency = displayed_record_params.tuned_to_group_frequency;
-  if (default_e->isRecording()) {
-    updateLight(TUNE_LIGHT, !tuned_to_group_frequency, tuned_to_group_frequency, default_e->_member_mode);
-    updateLight(BACKWARD_LIGHT, (float)!tuned_to_group_frequency * .2f, 1.f, (float)tuned_to_group_frequency * .2f);
-    updateLight(FORWARD_LIGHT, (float)!tuned_to_group_frequency * .2f, 1.f, (float)tuned_to_group_frequency * .2f);
-  } else {
-    updateLight(TUNE_LIGHT, !tuned_to_group_frequency, tuned_to_group_frequency, default_e->_member_mode);
-    updateLight(BACKWARD_LIGHT, 0.f, 1.f,  0.f);
-    updateLight(FORWARD_LIGHT, 0.f, 1.0,  0.f);
+  if (love_direction == LoveDirection::ESTABLISHED) {
+    updateLight(BACKWARD_LIGHT, 0.f, .5f, 0.f);
+    updateLight(FORWARD_LIGHT, 0.f, .5f, 0.f);
+  } else if (love_direction == LoveDirection::EMERGENCE) {
+    updateLight(BACKWARD_LIGHT, .5f, .5f, 0.f);
+    updateLight(FORWARD_LIGHT, .5f, .5f, 0.f);
+  } else { // LoveDirection::NEW
+    updateLight(BACKWARD_LIGHT, .5f, .0f, 0.f);
+    updateLight(FORWARD_LIGHT, .5f, .0f, 0.f);
   }
+
 }
 
 void Circle::postProcessAlways(const ProcessArgs &args) {

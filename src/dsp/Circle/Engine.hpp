@@ -31,7 +31,7 @@ struct Engine {
 
   unsigned int _focused_member_i;
 
-  bool _fully_love_group = true;
+  LoveDirection _love_direction = LoveDirection::ESTABLISHED;
 
   bool _member_mode = false;
   std::vector<unsigned int> _selected_members_idx_before_member_mode;
@@ -41,8 +41,10 @@ struct Engine {
 
   std::pair<unsigned int, unsigned int> _circle = std::make_pair(0, 1);
 
-  Member *_recording_member = nullptr;
-  RecordParams _record_params;
+  bool _tune_to_frequency_of_established = true;
+
+  Member *_new_member = nullptr;
+  Inputs _inputs;
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
@@ -56,34 +58,24 @@ struct Engine {
   Options _options;
 
   void step();
-  float read();
-  float readWithoutRecordingMember();
-  float readFocusedMember();
+  float readAll();
+  float readEstablished();
 
   void setCircleToMember(unsigned int member_i);
   void skipToFocusedMember();
 
-  void next();
-  void forget();
   bool isRecording();
+  void forward();
+  void backward();
+  void forget();
 
-  void toggleTuneToGroupFrequency();
-  void prev();
+  void toggleTuneToFrequencyOfEstablished();
+
   void toggleMemberMode();
 
   int getMostRecentLoopLength();
 
   void nextSection();
-
-  void nextMember();
-  void prevMember();
-  void selectRange(unsigned int member_i_1, unsigned int member_i_2);
-  void soloSelectMember(unsigned int member_i);
-  bool isSelected(unsigned int member_i);
-  bool isSolo(unsigned int member_i);
-  void toggleSelectMember(unsigned int member_i);
-  void toggleSelectFocusedMember();
-  void soloOrSelectUpToFocusedMember();
   void deleteMember(unsigned int member_i);
   void nextGroup();
 

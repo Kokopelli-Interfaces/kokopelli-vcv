@@ -4,39 +4,28 @@
 
 #include <vector>
 
+// another way to say: ORDER, LIFE, CHAOS
+enum LoveDirection { ESTABLISHED, EMERGENCE, NEW };
+
 struct TimePosition {
   unsigned int beat = 0;
   double phase = 0.f;
 };
 
-struct RecordParams {
+struct Inputs {
+  static constexpr float love_emergence_threshold = 0.0001f;
+
   float in = 0.f;
-
   float love = 0.f;
-  bool tuned_to_group_frequency = true;
 
-  bool _active = false;
-  float _recordActiveThreshold = 0.0001f;
-
-  inline bool active() {
-    if (_active && love <= _recordActiveThreshold) {
-      _active = false;
-    } else if (!_active && _recordActiveThreshold < love) {
-      _active = true;
+  static inline LoveDirection getLoveDirection(float love) {
+    if (love < love_emergence_threshold) {
+      return LoveDirection::ESTABLISHED;
+    } else if (love < 1.f - love_emergence_threshold) {
+      return LoveDirection::EMERGENCE;
+    } else {
+      return LoveDirection::NEW;
     }
-
-    return _active;
-  }
-
-  inline float readIn() {
-    // avoids pops when engaging / disengaging love parameter
-    if (0.0001f <= love && love <= 0.033f) {
-      float engage_attenuation = -1.f * pow((30.f * love - _recordActiveThreshold), 3) + 1.f;
-      engage_attenuation = rack::clamp(engage_attenuation, 0.f, 1.f);
-      return in * (1.f - engage_attenuation);
-    }
-
-    return in;
   }
 };
 

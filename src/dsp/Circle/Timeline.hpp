@@ -15,15 +15,12 @@ namespace circle {
 struct Timeline {
   std::vector<Member*> members;
 
-  std::vector<float> _next_love;
-
-  float focused_member_out = 0.f;
-  unsigned int _n_loved_members = 0;
-
   /** read only */
 
   rack::dsp::ClockDivider _love_calculator_divider;
   float _love_resolution = 10000.f;
+  std::vector<float> _next_love;
+  unsigned int _n_loved_members = 0;
 
   Timeline() {
     _love_calculator_divider.setDivision(10000);
@@ -93,7 +90,7 @@ struct Timeline {
     }
   }
 
-  inline float read(TimePosition position, unsigned int focused_member_i) {
+  inline float read(TimePosition position) {
     updateMemberLove(position);
 
     // FIXME multiple recordings in member, have loop and array of types
@@ -109,9 +106,6 @@ struct Timeline {
       }
 
       float member_out = members[i]->readSignal(position) * members[i]->_love;
-      if (i == focused_member_i) {
-        focused_member_out = member_out;
-      }
 
       signal_out = kokopellivcv::dsp::sum(signal_out, member_out, signal_type);
     }

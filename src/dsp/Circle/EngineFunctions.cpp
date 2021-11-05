@@ -1,24 +1,62 @@
 #include "Engine.hpp"
 
 using namespace kokopellivcv::dsp::circle;
+using namespace kokopellivcv::dsp;
 
-bool Engine::isRecording() {
-  return _recording_member != nullptr;
+int Engine::getMostRecentLoopLength() {
+  for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
+    if (_timeline.members[member_i]->_loop) {
+      return _timeline.members[member_i]->_n_beats;
+    }
+  }
+
+  return -1;
 }
 
-void Engine::toggleTuneToGroupFrequency() {
-  if (!_fully_love_group && !_record_params.tuned_to_group_frequency) {
+void Engine::deleteMember(unsigned int member_i) {
+  if (member_i < _timeline.members.size()) {
+    _timeline.members.erase(_timeline.members.begin()+member_i);
+    if (_focused_member_i == member_i && _focused_member_i != 0) {
+      _focused_member_i--;
+    }
+  }
+
+  if (_timeline.members.size() == 0) {
+    _phase_oscillator.reset(0.f);
+  }
+}
+
+// TODO FIXME
+void Engine::nextGroup() {
+  for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
+    _timeline.members.erase(_timeline.members.begin()+member_i);
+  }
+
+  _phase_oscillator.reset(0.f);
+}
+
+bool Engine::isRecording() {
+  return _new_member != nullptr;
+}
+
+void Engine::toggleTuneToFrequencyOfEstablished() {
+  if (_love_direction != LoveDirection::ESTABLISHED &&
+    !_tune_to_frequency_of_established) {
     this->endRecording(true, true);
   }
 
-  _record_params.tuned_to_group_frequency = !_record_params.tuned_to_group_frequency;
+  _tune_to_frequency_of_established = !_tune_to_frequency_of_established;
 }
 
+void Engine::forward() {
+  if (_love_direction == LoveDirection::NEW) {
+    // TODO new group
+  }
 
-void Engine::next() {
-  if (_record_params.tuned_to_group_frequency) {
-    if (_fully_love_group) {
-      // I -> II.
+  if (_tune_to_frequency_of_established) {
+    if (_love_direction == LoveDirection::ESTABLISHED) {
+      // TODO next section via insertion
+      // AI -> AII.
       unsigned int circle_n_beats = _circle.second - _circle.first;
       _circle.first = _timeline_position.beat;
       _circle.second = _timeline_position.beat + circle_n_beats;
@@ -26,7 +64,7 @@ void Engine::next() {
       this->endRecording(true, false);
     }
   } else {
-    if (_fully_love_group) {
+    if (_love_direction == LoveDirection::ESTABLISHED) {
       // A -> B
       this->endRecording(false, false);
     } else {
@@ -35,6 +73,29 @@ void Engine::next() {
     }
   }
 }
+
+// TODO
+void Engine::backward() {
+  if (_love_direction == LoveDirection::ESTABLISHED) {
+    // enter REMEMBER mode -> change NEW to something
+    if (_tune_to_frequency_of_established) {
+      if (_member_mode) {
+        // ??? cycle focused_member (displays on NEW in purple)
+      } else {
+        // cycle focused_group (displays on NEW in purple)
+        // use to  enter
+      }
+    } else {
+      // backward one section, prevSection();
+    }
+  } else if (_love_direction == LoveDirection::EMERGENCE) {
+      this->endRecording(false, false);
+      this->forget();
+  } else {
+      // cycle focused_group, then, pressing next
+  }
+}
+
 
 void Engine::forget() {
   int last_i = _timeline.members.size()-1;
@@ -50,32 +111,27 @@ void Engine::forget() {
   }
 }
 
-void Engine::prev() {
-  // unsigned int start_beat = _recording_member->_start_beat;
-  this->endRecording(false, false);
-  this->forget();
-  // _timeline_position.beat = start_beat;
-}
-
+// FIXME
 void Engine::toggleMemberMode() {
-  unsigned int member_i = _focused_member_i;
+  // TODO set established to member, right shows layers
 
-  if (isRecording()) {
-    member_i = _timeline.members.size()-1;
-  }
+  // unsigned int member_i = _focused_member_i;
 
-  if (!_member_mode) {
-    _member_mode = true;
-    _selected_members_idx_before_member_mode = _selected_members_idx;
-    _circle_before_member_mode = _circle;
+  // if (isRecording()) {
+  //   member_i = _timeline.members.size()-1;
+  // }
 
-    setCircleToMember(member_i);
-    _timeline_position.beat = _circle.first;
-    _read_antipop_filter.trigger();
-    soloSelectMember(_focused_member_i);
-  } else {
-    _selected_members_idx = _selected_members_idx_before_member_mode;
-    _circle = _circle_before_member_mode;
-    _member_mode = false;
-  }
+  // if (!_member_mode) {
+  //   _member_mode = true;
+  //   _selected_members_idx_before_member_mode = _selected_members_idx;
+  //   _circle_before_member_mode = _circle;
+
+  //   setCircleToMember(member_i);
+  //   _timeline_position.beat = _circle.first;
+  //   _read_antipop_filter.trigger();
+  // } else {
+  //   _selected_members_idx = _selected_members_idx_before_member_mode;
+  //   _circle = _circle_before_member_mode;
+  //   _member_mode = false;
+  // }
 }

@@ -40,29 +40,29 @@ void Engine::fitMemberIntoCircle(Member* member) {
 
 void Engine::endRecording(bool loop, bool create_new_circle) {
   assert(isRecording());
-  assert(_recording_member->_n_beats != 0);
+  assert(_new_member->_n_beats != 0);
 
   if (!_phase_oscillator.isSet()) {
     if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
       _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
     } else {
-      float recording_time = _recording_member->_in->_samples_per_beat * _sample_time;
+      float recording_time = _new_member->_in->_samples_per_beat * _sample_time;
       _phase_oscillator.setFrequency(1 / recording_time);
     }
     // printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
   }
 
-  _recording_member->_loop = loop;
+  _new_member->_loop = loop;
   if (loop) {
     if (create_new_circle) {
-      unsigned int new_circle_n_beats = _recording_member->_n_beats;
+      unsigned int new_circle_n_beats = _new_member->_n_beats;
       _circle.second = _circle.first + new_circle_n_beats;
     } else {
-      fitMemberIntoCircle(_recording_member);
+      fitMemberIntoCircle(_new_member);
     }
   }
 
-  _timeline.members.push_back(_recording_member);
+  _timeline.members.push_back(_new_member);
   _timeline._next_love.resize(_timeline.members.size());
 
   unsigned int member_i = _timeline.members.size() - 1;
@@ -72,35 +72,34 @@ void Engine::endRecording(bool loop, bool create_new_circle) {
 
 
   // printf("- rec end\n");
-  // printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d member_i %d\n", _recording_member->_start_beat, _recording_member->_n_beats,  _recording_member->_loop, _recording_member->_in->_samples_per_beat, member_i);
-  _recording_member = nullptr;
+  // printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d member_i %d\n", _new_member->_start_beat, _new_member->_n_beats,  _new_member->_loop, _new_member->_in->_samples_per_beat, member_i);
+  _new_member = nullptr;
 }
 
 Member* Engine::newRecording() {
-  // assert(_record_params.active());
-  if (_recording_member) {
-    delete _recording_member;
-    _recording_member = nullptr;
+  if (_new_member) {
+    delete _new_member;
+    _new_member = nullptr;
   }
 
-  assert(_recording_member == nullptr);
+  assert(_new_member == nullptr);
 
   unsigned int start_beat = _timeline_position.beat;
   unsigned int n_beats = 1;
 
   unsigned int circle_n_beats = _circle.second - _circle.first;
-  if (this->_record_params.tuned_to_group_frequency) {
+  if (_tune_to_frequency_of_established) {
     start_beat = _circle.first;
     n_beats = circle_n_beats;
   }
 
-  bool shift_circle = !this->_record_params.tuned_to_group_frequency;
+  bool shift_circle = !_tune_to_frequency_of_established;
   if (shift_circle) {
     _circle.first = _timeline_position.beat;
     _circle.second = _timeline_position.beat + circle_n_beats;
   }
 
-  if (this->_record_params.tuned_to_group_frequency) {
+  if (_tune_to_frequency_of_established) {
     int recent_loop_length = getMostRecentLoopLength();
     if (recent_loop_length != -1) {
       n_beats = recent_loop_length;
@@ -139,7 +138,7 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   bool reached_circle_end = _timeline_position.beat == _circle.second;
 
   if (reached_circle_end) {
-    bool shift_circle = this->isRecording() && !_record_params.tuned_to_group_frequency;
+    bool shift_circle = this->isRecording() && !_tune_to_frequency_of_established;
     if (shift_circle) {
       unsigned int circle_shift = _circle.second - _circle.first;
       _circle.first = _circle.second;
@@ -152,9 +151,9 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
     }
   }
 
-  bool reached_recording_end = this->isRecording() && _recording_member->_start_beat + _recording_member->_n_beats <= _timeline_position.beat;
-  if (reached_recording_end && !(_record_params.tuned_to_group_frequency && _fully_love_group)) {
-    _recording_member->_n_beats++;
+  bool reached_recording_end = this->isRecording() && _new_member->_start_beat + _new_member->_n_beats <= _timeline_position.beat;
+  if (reached_recording_end && !(_tune_to_frequency_of_established && _love_direction == LoveDirection::ESTABLISHED)) {
+    _new_member->_n_beats++;
   }
 }
 
@@ -189,22 +188,20 @@ void Engine::step() {
   }
 
   if (!this->isRecording()) {
-    _recording_member = this->newRecording();
+    _new_member = this->newRecording();
     _write_antipop_filter.trigger();
   }
 
-  float in = _write_antipop_filter.process(_record_params.readIn());
-  _recording_member->write(_timeline_position, in, _record_params.love, this->phaseDefined());
+  float in = _write_antipop_filter.process(_inputs.in);
+  _new_member->write(_timeline_position, in, _inputs.love, this->phaseDefined());
 
-  // able to create new members with just pedal in tuned_to_group_frequency mode
-  if (_fully_love_group && _record_params.active()) {
-    _fully_love_group = false;
-    _recording_member = this->newRecording();
-  } else if (!_fully_love_group && !_record_params.active()) {
-    _fully_love_group = true;
-    // if (_record_params.tuned_to_group_frequency) {
+  LoveDirection new_direction = Inputs::getLoveDirection(_inputs.love);
+  if (_love_direction != new_direction) {
+    if (_love_direction == LoveDirection::ESTABLISHED) {
+      _new_member = this->newRecording();
+    } else if (new_direction == LoveDirection::ESTABLISHED) {
       this->endRecording(true, false);
-      // _recording_member = this->newRecording();
-    // }
+    }
+    _love_direction = new_direction;
   }
 }

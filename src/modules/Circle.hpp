@@ -23,7 +23,7 @@ struct Circle : KokopelliVcvModule {
 		NUM_PARAMS
   };
 	enum InputIds {
-		MEMBER_INPUT,
+		NEW_INPUT,
 		LOVE_INPUT,
 		PHASE_INPUT,
 		FOCUS_MODULATION_INPUT,
@@ -31,7 +31,7 @@ struct Circle : KokopelliVcvModule {
 	};
 	enum OutputIds {
 		CIRCLE_OUTPUT,
-		GROUP_OUTPUT,
+		ESTABLISHED_OUTPUT,
 		PHASE_OUTPUT,
 		NUM_OUTPUTS
 	};

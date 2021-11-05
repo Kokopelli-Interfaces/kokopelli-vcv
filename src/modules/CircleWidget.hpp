@@ -70,9 +70,9 @@ struct FocusedMemberDisplay : CircleValueDisplay {
 
       textColor = defaultTextColor;
       int focused_member_display = 0;
-      // bool show_recording_member = true;
-      bool show_recording_member = !(e->_fully_love_group && e->_record_params.tuned_to_group_frequency);
-      if (show_recording_member) {
+      // bool show_new_member = true;
+      bool show_new_member = !(e->_love_direction == LoveDirection::ESTABLISHED && e->_tune_to_frequency_of_established);
+      if (show_new_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
         // focused_member_display = e->_timeline.getNumberOfActiveMembers() + 1;
         focused_member_display = e->_timeline.members.size() + 1;
@@ -105,11 +105,11 @@ struct MemberBeatDisplay : CircleValueDisplay {
       int member_beat_display = 0;
 
       textColor = defaultTextColor;
-      // bool show_recording_member = true;
-      bool show_recording_member = !(e->_fully_love_group && e->_record_params.tuned_to_group_frequency);
-      if (e->isRecording() && show_recording_member) {
+      // bool show_new_member = true;
+      bool show_new_member = !(e->_love_direction == LoveDirection::ESTABLISHED && e->_tune_to_frequency_of_established);
+      if (e->isRecording() && show_new_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
-        member_beat_display = e->_recording_member->getMemberBeat(e->_timeline_position.beat);
+        member_beat_display = e->_new_member->getMemberBeat(e->_timeline_position.beat);
 
       } else if (e->_timeline.members.size() != 0) {
         // TODO how to show start position of loops?
@@ -137,12 +137,12 @@ struct TotalMemberBeatDisplay : CircleValueDisplay {
 
       int total_member_beats = 0;
       textColor = defaultTextColor;
-      // bool show_recording_member = true;
-      bool show_recording_member = !(e->_fully_love_group && e->_record_params.tuned_to_group_frequency);
-      if (show_recording_member) {
+      // bool show_new_member = true;
+      bool show_new_member = !(e->_love_direction == LoveDirection::ESTABLISHED && e->_tune_to_frequency_of_established);
+      if (show_new_member) {
         textColor = nvgRGB(0x9b, 0x44, 0x42); // red
-        if (e->_record_params.tuned_to_group_frequency) {
-          total_member_beats = e->_recording_member->_n_beats;
+        if (e->_tune_to_frequency_of_established) {
+          total_member_beats = e->_new_member->_n_beats;
         } else if (e->_timeline.members.size() != 0) {
           total_member_beats = e->getMostRecentLoopLength();
           textColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
@@ -201,7 +201,7 @@ struct CircleWidget : ModuleWidget {
 
   bool _use_antipop = false;
 
-  CircleValueDisplay *prev_group_display;
+  CircleValueDisplay *backward_group_display;
   CircleValueDisplay *current_group_display;
   CircleValueDisplay *next_group_display;
 
@@ -229,13 +229,13 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(25.733, 73.943)), module, Circle::FORWARD_PARAM));
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 78.64)), module, Circle::LOVE_PARAM));
 
-		addInput(createInput<KokopelliPort>(mm2px(Vec(24.279, 94.783)), module, Circle::MEMBER_INPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(24.279, 94.783)), module, Circle::NEW_INPUT));
 		addInput(createInput<KokopelliPort>(mm2px(Vec(13.65, 96.334)), module, Circle::LOVE_INPUT));
 		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 107.705)), module, Circle::PHASE_INPUT));
 		addInput(createInput<KokopelliPort>(mm2px(Vec(13.475, 109.166)), module, Circle::FOCUS_MODULATION_INPUT));
 
 		addOutput(createOutput<CircleOutputPort>(mm2px(Vec(13.65, 21.180)), module, Circle::CIRCLE_OUTPUT));
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.783)), module, Circle::GROUP_OUTPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.783)), module, Circle::ESTABLISHED_OUTPUT));
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Circle::PHASE_OUTPUT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 56.339)), module, Circle::TUNE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.178, 68.279)), module, Circle::EMERSIGN_LIGHT));
@@ -246,10 +246,10 @@ struct CircleWidget : ModuleWidget {
     // NOTE do the displays too
     auto group_display_size = mm2px(Vec(8.603, 4.327));
 
-		prev_group_display = new CircleValueDisplay(module);
-    prev_group_display->box.pos = mm2px(Vec(1.326, 46.042));
-    prev_group_display->box.size = group_display_size;
-    addChild(prev_group_display);
+		backward_group_display = new CircleValueDisplay(module);
+    backward_group_display->box.pos = mm2px(Vec(1.326, 46.042));
+    backward_group_display->box.size = group_display_size;
+    addChild(backward_group_display);
 
 		current_group_display = new CircleValueDisplay(module);
     current_group_display->box.pos = mm2px(Vec(13.47, 46.042));

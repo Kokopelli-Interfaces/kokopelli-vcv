@@ -188,7 +188,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   if (default_e->_tune_to_frequency_of_established) {
     updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->getPhaseOfEstablished());
   } else {
-    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, 0.6f);
+    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, 0.0f);
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {

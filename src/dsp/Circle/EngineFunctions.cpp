@@ -38,6 +38,7 @@ void Engine::nextGroup() {
   for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
     _timeline.members.erase(_timeline.members.begin()+member_i);
   }
+  _circle.second = _circle.first + 1;
 
   _phase_oscillator.reset(0.f);
 }
@@ -53,7 +54,8 @@ void Engine::toggleTuneToFrequencyOfEstablished() {
       this->endRecording(false, false);
       this->forget();
     } else {
-      this->endRecording(true, true);
+      // have this be under forward
+      // this->endRecording(true, true);
     }
   }
 
@@ -63,9 +65,9 @@ void Engine::toggleTuneToFrequencyOfEstablished() {
 void Engine::forward() {
   if (_love_direction == LoveDirection::NEW) {
     // TODO new group
-  }
-
-  if (_tune_to_frequency_of_established) {
+    this->endRecording(true, false);
+    this->nextGroup();
+  } else if (_tune_to_frequency_of_established) {
     if (_love_direction == LoveDirection::ESTABLISHED) {
       // TODO next section via insertion
       // AI -> AII.
@@ -100,11 +102,9 @@ void Engine::backward() {
     } else {
       // backward one section, prevSection();
     }
-  } else if (_love_direction == LoveDirection::EMERGENCE) {
-      this->endRecording(false, false);
-      this->forget();
   } else {
-      // cycle focused_group, then, pressing next
+    this->endRecording(false, false);
+    this->forget();
   }
 }
 

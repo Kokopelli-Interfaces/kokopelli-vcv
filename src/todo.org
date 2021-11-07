@@ -1,0 +1,23 @@
+* what are you doing with your life michael? - 'im making god in vcvrack'
+** have love pedal not end recordings ever
+** have default to progress timeline option
+** rename progress to 'period switch ?'
+** have backward in progress mode add to the group (l side).
+** have next in red mode create new section in A timeline - hold next to create group
+** 
+** have songs be made by simply acquiring them into groups. 
+- group have member start offsets and love envelopes. it works. and they have phase oscilliators to
+  playback.
+  - now all is a 'group' which is simply an abstraction in the emernet. a sattelite existing with
+    emernet emergence. all memebers are circles spinning on the sun. the group is tied to some of
+    them. 
+**  TODO hold TOP btn to enter select mode.
+- select mode has toggle select member (right led lights up) and select group (left led lights up),
+  press bttn to switch. use
+- use select member to add fx to single members, and next backward will move between members. the buffer
+  will autoshape to be the size of the member, clearing out each switch. must be way to extend as well.
+- use select group to change focused group in current ACTIVE TAG bank of /.emernet/ groups. the space
+  area changes. then use LOVE to bring the emernet circle nodes into existence, taking energy on the
+  plane of groups. it is an AB. if all the while the outer period records for a group, it will
+  record these movements onto the timeline of that group. in this way a song is created.
+  - in RED mode, maybe BACKWARD NEXT will skiparound in current groups timeline.

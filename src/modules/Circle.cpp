@@ -6,7 +6,7 @@ Circle::Circle() {
   configParam(TUNE_PARAM, 0.f, 1.f, 0.f, "Tune to Group Frequency");
   configParam(BACKWARD_PARAM, 0.f, 1.f, 0.f, "Backward");
   configParam(FORWARD_PARAM, 0.f, 1.f, 0.f, "Forward");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
@@ -78,7 +78,7 @@ void Circle::processButtons(const ProcessArgs &args) {
 
 void Circle::processAlways(const ProcessArgs &args) {
   outputs[PHASE_OUTPUT].setChannels(this->channels());
-  outputs[CIRCLE_OUTPUT].setChannels(this->channels());
+  outputs[SUN].setChannels(this->channels());
 
   if (_button_divider.process()) {
     processButtons(args);
@@ -107,7 +107,7 @@ void Circle::modulateChannel(int channel_i) {
 }
 
 int Circle::channels() {
-  int input_channels = inputs[NEW_INPUT].getChannels();
+  int input_channels = inputs[WOMB_INPUT].getChannels();
   if (_channels < input_channels) {
     return input_channels;
   }
@@ -131,16 +131,16 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     outputs[PHASE_OUTPUT].setVoltage(e->_timeline_position.phase * 10, channel_i);
   }
 
-  if (inputs[NEW_INPUT].isConnected()) {
-    e->_inputs.in = inputs[NEW_INPUT].getPolyVoltage(channel_i);
+  if (inputs[WOMB_INPUT].isConnected()) {
+    e->_inputs.in = inputs[WOMB_INPUT].getPolyVoltage(channel_i);
   } else {
     e->_inputs.in = 0.f;
   }
 
   e->step();
 
-  if (outputs[CIRCLE_OUTPUT].isConnected()) {
-    outputs[CIRCLE_OUTPUT].setVoltage(e->readAll(), channel_i);
+  if (outputs[SUN].isConnected()) {
+    outputs[SUN].setVoltage(e->readAll(), channel_i);
   }
 
   if (outputs[ESTABLISHED_OUTPUT].isConnected()) {
@@ -148,15 +148,26 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 }
 
-void Circle::updateLight(int light, float r, float g, float b) {
+// void Circle::updateLight(int light, float r, float g, float b) {
+//   if (_light_blinker->_op && _light_blinker->_light_i == light) {
+//     return;
+//   }
+
+//   lights[light + 0].value = r;
+//   lights[light + 1].value = g;
+//   lights[light + 2].value = b;
+// }
+
+void Circle::updateLight(int light, NVGcolor color, float strength) {
   if (_light_blinker->_op && _light_blinker->_light_i == light) {
     return;
   }
 
-  lights[light + 0].value = r / 2.f;
-  lights[light + 1].value = g / 2.f;
-  lights[light + 2].value = b / 2.f;
+  lights[light + 0].value = color.r * strength;
+  lights[light + 1].value = color.g * strength;
+  lights[light + 2].value = color.b * strength;
 }
+
 
 void Circle::updateLights(const ProcessArgs &args) {
   _light_blinker->step();
@@ -166,35 +177,29 @@ void Circle::updateLights(const ProcessArgs &args) {
   float new_sum = 0.f;
   float established_sum = 0.f;
   for (int c = 0; c < channels(); c++) {
-    new_sum += inputs[NEW_INPUT].getPolyVoltage(c);
+    new_sum += inputs[WOMB_INPUT].getPolyVoltage(c);
     established_sum += outputs[ESTABLISHED_OUTPUT].getPolyVoltage(c);
   }
   new_sum = rack::clamp(new_sum, 0.f, 1.f);
   established_sum = rack::clamp(established_sum, 0.f, 1.f);
   established_sum = established_sum * (1.f - default_e->_inputs.love);
 
-  lights[EMERSIGN_LIGHT + 0].setSmoothBrightness(new_sum, _sampleTime * _light_divider.getDivision());
-  lights[EMERSIGN_LIGHT + 1].setSmoothBrightness(established_sum, _sampleTime * _light_divider.getDivision());
-
   LoveDirection love_direction = default_e->_love_direction;
   if (default_e->_tune_to_frequency_of_established) {
-    // TODO set to establisehd phase
-    updateLight(TUNE_LIGHT, 0.0f, 0.8f, 0.0f);
-  } else if (love_direction != LoveDirection::ESTABLISHED) {
-    updateLight(TUNE_LIGHT, .1f, 0.8f, 0.f);
+    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->getPhaseOfEstablished());
   } else {
-    updateLight(TUNE_LIGHT, .8f, .0f, .0f);
+    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, 0.6f);
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {
-    updateLight(BACKWARD_LIGHT, 0.f, 0.8f, 0.f);
-    updateLight(FORWARD_LIGHT, 0.7f, 0.8f, 0.f);
+    updateLight(BACKWARD_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
+    updateLight(FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else if (love_direction == LoveDirection::EMERGENCE) {
-    updateLight(BACKWARD_LIGHT, 0.7f, 0.8f, 0.f);
-    updateLight(FORWARD_LIGHT, 0.7f, 0.8f, 0.f);
+    updateLight(BACKWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else { // LoveDirection::NEW
-    updateLight(BACKWARD_LIGHT, 0.7f, 0.8f, 0.f);
-    updateLight(FORWARD_LIGHT, 0.8f, .0f, 0.f);
+    updateLight(BACKWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(FORWARD_LIGHT, colors::WOMB_LIGHT, 0.6f);
   }
 
 }

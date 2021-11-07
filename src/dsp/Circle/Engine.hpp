@@ -74,6 +74,7 @@ struct Engine {
   void toggleMemberMode();
 
   int getMostRecentLoopLength();
+  float getPhaseOfEstablished();
 
   void nextSection();
   void deleteMember(unsigned int member_i);

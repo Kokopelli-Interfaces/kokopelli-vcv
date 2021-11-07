@@ -7,6 +7,7 @@
 #include "dsp/LongPressButton.hpp"
 #include "dsp/LightBlinker.hpp"
 #include "widgets.hpp"
+#include "util/colors.hpp"
 
 #include <math.h>
 
@@ -23,14 +24,14 @@ struct Circle : KokopelliVcvModule {
 		NUM_PARAMS
   };
 	enum InputIds {
-		NEW_INPUT,
+		WOMB_INPUT,
 		LOVE_INPUT,
 		PHASE_INPUT,
 		FOCUS_MODULATION_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {
-		CIRCLE_OUTPUT,
+		SUN,
 		ESTABLISHED_OUTPUT,
 		PHASE_OUTPUT,
 		NUM_OUTPUTS
@@ -38,7 +39,6 @@ struct Circle : KokopelliVcvModule {
 
   enum LightIds {
     ENUMS(TUNE_LIGHT, 3),
-    ENUMS(EMERSIGN_LIGHT, 3),
     ENUMS(BACKWARD_LIGHT, 3),
     ENUMS(FORWARD_LIGHT, 3),
     NUM_LIGHTS
@@ -73,7 +73,7 @@ struct Circle : KokopelliVcvModule {
   void processChannel(const ProcessArgs &args, int channel) override;
   void postProcessAlways(const ProcessArgs &args) override;
   void updateLights(const ProcessArgs &args);
-  void updateLight(int light, float r, float g, float b);
+  void updateLight(int light, NVGcolor color, float strength);
 
 private:
   void processButtons(const ProcessArgs &args);

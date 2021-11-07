@@ -14,8 +14,8 @@ struct MediumLEDButton : rack::app::SvgSwitch {
 
 struct LoveKnob : Rogan {
   LoveKnob() {
-		minAngle = -0.70 * M_PI;
-		maxAngle = 0.70 * M_PI;
+		minAngle = -0.25 * M_PI;
+		maxAngle = 0.25 * M_PI;
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/LoveKnob.svg")));
   }
 };
@@ -26,9 +26,9 @@ struct KokopelliPort : SvgPort {
   }
 };
 
-struct CircleOutputPort : SvgPort {
-	CircleOutputPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/CircleOutputPort.svg")));
+struct WombPort : SvgPort {
+	WombPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/WombPort.svg")));
   }
 };
 
@@ -85,10 +85,10 @@ struct TextBox : TransparentWidget {
     // defaultTextColor = nvgRGB(0xae, 0x28, 0x06); // cave orange
     // defaultTextColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
     // defaultTextColor = nvgRGB(0x9b, 0x44, 0x42); // red
-    defaultTextColor = nvgRGB(0x6e, 0xaf, 0x71); // emersign green
-#
+    // defaultTextColor = nvgRGB(0x6e, 0xaf, 0x71); // emersign green
+    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // established
     textColor = defaultTextColor;
-    backgroundColor = nvgRGB(0x2b, 0x16, 0x09); // cave #2b1609
+    backgroundColor = nvgRGB(0x19, 0x0d, 0x05);
     // size 20 with spacing -2 will fit 3 characters on a 30px box with Roboto
     // mono
     font_size = 20;

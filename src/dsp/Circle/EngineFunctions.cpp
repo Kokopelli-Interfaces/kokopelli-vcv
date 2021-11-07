@@ -3,6 +3,13 @@
 using namespace kokopellivcv::dsp::circle;
 using namespace kokopellivcv::dsp;
 
+// FIXME
+float Engine::getPhaseOfEstablished() {
+  float length = _circle.second - _circle.first;
+  float relative_position = _timeline_position.beat - _circle.first + _timeline_position.phase;
+  return rack::clamp(relative_position / length, 0.f, 1.f);
+}
+
 int Engine::getMostRecentLoopLength() {
   for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
     if (_timeline.members[member_i]->_loop) {
@@ -40,9 +47,14 @@ bool Engine::isRecording() {
 }
 
 void Engine::toggleTuneToFrequencyOfEstablished() {
-  if (_love_direction != LoveDirection::ESTABLISHED &&
-    !_tune_to_frequency_of_established) {
-    this->endRecording(true, true);
+  if (!_tune_to_frequency_of_established) {
+    if (_love_direction == LoveDirection::ESTABLISHED) {
+      // TODO trim to fit scene length
+      this->endRecording(false, false);
+      this->forget();
+    } else {
+      this->endRecording(true, true);
+    }
   }
 
   _tune_to_frequency_of_established = !_tune_to_frequency_of_established;

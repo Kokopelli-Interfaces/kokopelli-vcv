@@ -179,22 +179,22 @@ void Circle::updateLights(const ProcessArgs &args) {
   LoveDirection love_direction = default_e->_love_direction;
   if (default_e->_tune_to_frequency_of_established) {
     // TODO set to establisehd phase
-    updateLight(TUNE_LIGHT, 0.0f, 0.5f, 0.0f);
+    updateLight(TUNE_LIGHT, 0.0f, 0.8f, 0.0f);
   } else if (love_direction != LoveDirection::ESTABLISHED) {
-    updateLight(TUNE_LIGHT, .2f, 0.2f, 0.f);
+    updateLight(TUNE_LIGHT, .1f, 0.8f, 0.f);
   } else {
-    updateLight(TUNE_LIGHT, .02f, .02f, .02f);
+    updateLight(TUNE_LIGHT, .8f, .0f, .0f);
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {
-    updateLight(BACKWARD_LIGHT, 0.f, .5f, 0.f);
-    updateLight(FORWARD_LIGHT, 0.f, .5f, 0.f);
+    updateLight(BACKWARD_LIGHT, 0.f, 0.8f, 0.f);
+    updateLight(FORWARD_LIGHT, 0.7f, 0.8f, 0.f);
   } else if (love_direction == LoveDirection::EMERGENCE) {
-    updateLight(BACKWARD_LIGHT, .5f, .5f, 0.f);
-    updateLight(FORWARD_LIGHT, .5f, .5f, 0.f);
+    updateLight(BACKWARD_LIGHT, 0.7f, 0.8f, 0.f);
+    updateLight(FORWARD_LIGHT, 0.7f, 0.8f, 0.f);
   } else { // LoveDirection::NEW
-    updateLight(BACKWARD_LIGHT, .5f, .0f, 0.f);
-    updateLight(FORWARD_LIGHT, .5f, .0f, 0.f);
+    updateLight(BACKWARD_LIGHT, 0.7f, 0.8f, 0.f);
+    updateLight(FORWARD_LIGHT, 0.8f, .0f, 0.f);
   }
 
 }

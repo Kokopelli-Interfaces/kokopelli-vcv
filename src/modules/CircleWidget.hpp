@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "Circle.hpp"
 #include "util/colors.hpp"
 
@@ -22,6 +21,21 @@ struct CircleValueDisplay : TextBox {
     textAlign = NVG_ALIGN_CENTER | NVG_ALIGN_TOP;
   }
 
+  void step() override {
+    TextBox::step();
+		if(_module) {
+      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
+      if (e == NULL) {
+        return;
+      }
+      update(e);
+    }
+  }
+
+  virtual void update(kokopellivcv::dsp::circle::Engine* engine) {
+    return;
+  };
+
 	void setDisplayValue(int v) {
 		std::string s;
 		if(v != _previous_displayed_value) {
@@ -36,24 +50,14 @@ struct SongDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
   SongDisplay(Circle *m) : CircleValueDisplay(m) {
     // FIXME
-    // textOffset = Vec(box.size.x * 2.5f, 0.f);
+    // textOffset = Vec(box.size.x * 0.5f, 0.f);
   }
 
-  void step() override {
-    CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-
-      std::string s = e->song.name;
-      CircleValueDisplay::setText(s);
-    }
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    std::string s = e->song.name;
+    CircleValueDisplay::setText(s);
   }
 };
-
-
 
 struct PrevSectionDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
@@ -61,22 +65,14 @@ struct PrevSectionDisplay : CircleValueDisplay {
     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
   }
 
-  void step() override {
-    CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-
-      std::string s;
-      if (e->_current_section->prev) {
-        s = string::f("%c%d", e->_current_section->prev->group, e->_current_section->prev->group_section_n);
-      } else {
-        s = "--";
-      }
-      CircleValueDisplay::setText(s);
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    std::string s;
+    if (e->_current_section->prev) {
+      s = string::f("%c%d", e->_current_section->prev->group, e->_current_section->prev->group_section_n);
+    } else {
+      s = "--";
     }
+    CircleValueDisplay::setText(s);
   }
 };
 
@@ -87,17 +83,9 @@ struct CurrentSectionDisplay : CircleValueDisplay {
     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
   }
 
-  void step() override {
-    CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-
-      std::string s = string::f("%c%d", e->_current_section->group, e->_current_section->group_section_n);
-      CircleValueDisplay::setText(s);
-    }
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    std::string s = string::f("%c%d", e->_current_section->group, e->_current_section->group_section_n);
+    CircleValueDisplay::setText(s);
   }
 };
 
@@ -107,22 +95,14 @@ struct NextSectionDisplay : CircleValueDisplay {
     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
   }
 
-  void step() override {
-    CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-
-      std::string s;
-      if (e->_current_section->next) {
-        s = string::f("%c%d", e->_current_section->next->group, e->_current_section->next->group_section_n);
-      } else {
-        s = "--";
-      }
-      CircleValueDisplay::setText(s);
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    std::string s;
+    if (e->_current_section->next) {
+      s = string::f("%c%d", e->_current_section->next->group, e->_current_section->next->group_section_n);
+    } else {
+      s = "--";
     }
+    CircleValueDisplay::setText(s);
   }
 };
 
@@ -132,49 +112,27 @@ struct EstablishedDisplay : CircleValueDisplay {
     textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
   }
 
-  void step() override {
-    CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-
-      std::string s = string::f("%c", e->_current_section->group);
-      CircleValueDisplay::setText(s);
-    }
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    std::string s = string::f("%c", e->_current_section->group);
+    CircleValueDisplay::setText(s);
   }
 };
 
 struct EstablishedBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
 
-      int section_beat_display = e->song._position.beat - e->_current_section->start_beat + 1;
-
-      CircleValueDisplay::setDisplayValue(section_beat_display);
-		}
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    int section_beat_display = e->song._position.beat - e->_current_section->start_beat + 1;
+    CircleValueDisplay::setDisplayValue(section_beat_display);
 	}
 };
 
 struct TotalEstablishedBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-      unsigned int n_circle_beats = e->_current_section->end_beat - e->_current_section->start_beat;
-      CircleValueDisplay::setDisplayValue(n_circle_beats);
-		}
+
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    unsigned int n_circle_beats = e->_current_section->end_beat - e->_current_section->start_beat;
+    CircleValueDisplay::setDisplayValue(n_circle_beats);
 	}
 };
 
@@ -183,112 +141,49 @@ struct WombDisplay : CircleValueDisplay {
 
 	WombDisplay(Circle *m) : CircleValueDisplay(m) {
     textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.7f);
+    textColor = colors::WOMB;
   }
 
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
-
-      textColor = defaultTextColor;
-      int womb_display = 0;
-      // bool show_new_cycle = true;
-      // bool show_new_cycle = !(e->_love_direction == LoveDirection::ESTABLISHED && e->_tune_to_frequency_of_established);
-      // if (show_new_cycle) {
-        textColor = colors::WOMB;
-        // womb_display = e->song.getNumberOfActiveCycles() + 1;
-        womb_display = e->song.cycles.size() + 1;
-      // } else {
-      //   womb_display = e->_focused_cycle_i + 1;
-        // womb_display = e->song.getNumberOfActiveCycles();
-        // if (e->song.cycles.size() == 0) {
-        //   CircleValueDisplay::setText("--");
-        //   CircleValueDisplay::_previous_displayed_value = -1;
-        //   return;
-        // }
-      // }
-
-      std::string s = string::f("%d", womb_display);
-      CircleValueDisplay::setText(s);
-		}
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    int womb_display = e->song.cycles.size() + 1;
+    std::string s = string::f("%d", womb_display);
+    CircleValueDisplay::setText(s);
 	}
 };
 
 struct WombBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
 
-      int womb_beat_display = 0;
+	WombBeatDisplay(Circle *m) : CircleValueDisplay(m) {
+    textColor = colors::WOMB;
+  }
 
-      textColor = colors::WOMB;
-      // bool show_new_cycle = true;
-      // bool show_new_cycle = !(e->_love_direction == LoveDirection::ESTABLISHED && e->_tune_to_frequency_of_established);
-      // if (e->isRecording() && show_new_cycle) {
-      // textColor = nvgRGB(0x9b, 0x44, 0x42); // red
-
-      womb_beat_display = e->_new_cycle->_write_beat;
-
-      // } else if (e->song.cycles.size() != 0) {
-      //   // TODO how to show start position of loops?
-      //   womb_beat_display = e->song.cycles[e->_focused_cycle_i]->getCycleBeat(e->song._position.beat);
-      // } else {
-      //   CircleValueDisplay::setText("--");
-      //   CircleValueDisplay::_previous_displayed_value = -1;
-      //   return;
-      // }
-
-      CircleValueDisplay::setDisplayValue(womb_beat_display + 1);
-		}
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    CircleValueDisplay::setDisplayValue(e->_new_cycle->_write_beat + 1);
 	}
 };
 
 struct TotalWombBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
-	void step() override {
-		CircleValueDisplay::step();
-		if(_module) {
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
-        return;
-      }
 
-      int total_cycle_beats = 0;
-      textColor = colors::WOMB;
-      // bool show_new_cycle = true;
-      // bool show_new_cycle = !(e->_love_direction == LoveDirection::ESTABLISHED && e->_tune_to_frequency_of_established);
-      // if (show_new_cycle) {
-        // if (e->_tune_to_frequency_of_established) {
-        //   total_cycle_beats = e->_new_cycle->_n_beats;
-        if (e->song.cycles.size() != 0) {
-          total_cycle_beats = e->getMostRecentLoopLength();
-          textColor = colors::LOOK_BACK_LAYER;
-        } else {
-          CircleValueDisplay::setText("--");
-          CircleValueDisplay::_previous_displayed_value = -1;
-          return;
-        }
-      // } else if (e->song.cycles.size() != 0) {
-      //   total_cycle_beats = e->song.cycles[e->_focused_cycle_i]->_n_beats;
-      // } else {
-      //   CircleValueDisplay::setText("--");
-      //   CircleValueDisplay::_previous_displayed_value = -1;
-      //   return;
-      // }
+	TotalWombBeatDisplay(Circle *m) : CircleValueDisplay(m) {
+    textColor = colors::WOMB;
+  }
 
-      CircleValueDisplay::setDisplayValue(total_cycle_beats);
-		}
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    int total_cycle_beats = 0;
+    if (e->song.cycles.size() != 0) {
+      total_cycle_beats = e->getMostRecentLoopLength();
+      textColor = colors::LOOK_BACK_LAYER;
+    } else {
+      CircleValueDisplay::setText("--");
+      CircleValueDisplay::_previous_displayed_value = -1;
+      return;
+    }
+
+    CircleValueDisplay::setDisplayValue(total_cycle_beats);
 	}
 };
-
 
 struct CircleWidget : ModuleWidget {
   const int hp = 6;

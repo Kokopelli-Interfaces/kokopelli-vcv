@@ -5,145 +5,113 @@ using namespace kokopellivcv::dsp;
 
 // FIXME
 float Engine::getPhaseOfEstablished() {
-  float length = _circle.second - _circle.first;
-  float relative_position = _timeline_position.beat - _circle.first + _timeline_position.phase;
+  float length = _current_section->end_beat - _current_section->start_beat;
+  float relative_position = this->song._position.beat - _current_section->start_beat + this->song._position.phase;
   return rack::clamp(relative_position / length, 0.f, 1.f);
 }
 
 int Engine::getMostRecentLoopLength() {
-  for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
-    if (_timeline.members[member_i]->_loop) {
-      return _timeline.members[member_i]->_n_beats;
+  for (int cycle_i = this->song.cycles.size()-1; cycle_i >= 0; cycle_i--) {
+    if (this->song.cycles[cycle_i]->_loop) {
+      return this->song.cycles[cycle_i]->_n_beats;
     }
   }
 
   return -1;
 }
 
-void Engine::deleteMember(unsigned int member_i) {
-  if (member_i < _timeline.members.size()) {
-    _timeline.members.erase(_timeline.members.begin()+member_i);
-    if (_focused_member_i == member_i && _focused_member_i != 0) {
-      _focused_member_i--;
-    }
-  }
-
-  if (_timeline.members.size() == 0) {
-    _phase_oscillator.reset(0.f);
-  }
+void Engine::deleteCycle(unsigned int cycle_i) {
 }
 
 // TODO FIXME
 void Engine::nextGroup() {
-  for (int member_i = _timeline.members.size()-1; member_i >= 0; member_i--) {
-    _timeline.members.erase(_timeline.members.begin()+member_i);
-  }
-  _circle.second = _circle.first + 1;
-
-  _phase_oscillator.reset(0.f);
 }
 
 bool Engine::isRecording() {
-  return _new_member != nullptr;
+  return _new_cycle != nullptr;
 }
 
 void Engine::toggleTuneToFrequencyOfEstablished() {
-  if (!_tune_to_frequency_of_established) {
-    if (_love_direction == LoveDirection::ESTABLISHED) {
-      // TODO trim to fit scene length
-      this->endRecording(false, false);
-      this->forget();
+  switch(_love_direction) {
+  case LoveDirection::ESTABLISHED:
+    _tune_to_frequency_of_established = !_tune_to_frequency_of_established;
+    break;
+  case LoveDirection::EMERGENCE:
+    if (_tune_to_frequency_of_established) {
+      this->nextCycle(CycleEnd::SET_PERIOD_TO_SECTION_AND_EMERGE_WITH_SECTION);
     } else {
-      // have this be under forward
-      // this->endRecording(true, true);
+      _tune_to_frequency_of_established = true;
     }
+    break;
+  case LoveDirection::NEW:
+    // TODO
+    _tune_to_frequency_of_established = false;
+    break;
   }
-
-  _tune_to_frequency_of_established = !_tune_to_frequency_of_established;
 }
 
 void Engine::forward() {
-  if (_love_direction == LoveDirection::NEW) {
-    // TODO new group
-    this->endRecording(true, false);
-    this->nextGroup();
-  } else if (_tune_to_frequency_of_established) {
-    if (_love_direction == LoveDirection::ESTABLISHED) {
-      // TODO next section via insertion
-      // AI -> AII.
-      unsigned int circle_n_beats = _circle.second - _circle.first;
-      _circle.first = _timeline_position.beat;
-      _circle.second = _timeline_position.beat + circle_n_beats;
+  switch(_love_direction) {
+  case LoveDirection::ESTABLISHED:
+    if (_tune_to_frequency_of_established) {
+      this->nextCycle(CycleEnd::DISCARD_AND_NEXT_SECTION_IN_GROUP);
     } else {
-      this->endRecording(true, false);
-    }
-  } else {
-    if (_love_direction == LoveDirection::ESTABLISHED) {
+      this->nextCycle(CycleEnd::DISCARD_AND_NEXT_SECTION);
       // A -> B
-      this->endRecording(false, false);
-    } else {
-      // I -> II.
-      this->endRecording(false, false);
+      // TODO should it place the recording ?
+      // this->nextCycle(false);
     }
+    break;
+  case LoveDirection::EMERGENCE:
+    if (_tune_to_frequency_of_established) {
+      this->nextCycle(CycleEnd::EMERGE_WITH_SECTION_AND_CREATE_NEXT_SECTION);
+    } else {
+      this->nextCycle(CycleEnd::EMERGE_WITH_SONG_AND_NEXT_SECTION);;
+    }
+    break;
+  case LoveDirection::NEW:
+    // TODO
+    // this->nextCycle(EMERGE_WITH_SONG_AND_NEXT_GROUP);
+    break;
   }
 }
 
 // TODO
 void Engine::backward() {
-  if (_love_direction == LoveDirection::ESTABLISHED) {
-    // enter REMEMBER mode -> change NEW to something
-    if (_tune_to_frequency_of_established) {
-      if (_member_mode) {
-        // ??? cycle focused_member (displays on NEW in purple)
-      } else {
-        // cycle focused_group (displays on NEW in purple)
-        // use to  enter
-      }
-    } else {
-      // backward one section, prevSection();
-    }
-  } else {
-    this->endRecording(false, false);
-    this->forget();
-  }
+  this->nextCycle(CycleEnd::DISCARD);
+
+  // switch(_love_direction) {
+  // case LoveDirection::ESTABLISHED:
+  //   if (_tune_to_frequency_of_established) {
+  //     if (_cycle_mode) {
+  //       // ??? cycle focused_cycle (displays on NEW in purple)
+  //     } else {
+  //       // cycle focused_group (displays on NEW in purple)
+  //       // use to  enter
+  //     }
+  //   }
+  //   break;
+  // case LoveDirection::EMERGENCE:
+  //   if (_tune_to_frequency_of_established) {
+  //     // TODO CREATE WINDOW RECORDING WITH SIZE
+  //     // this->nextCycle(CycleEnd::)
+  //   } else {
+  //     this->nextCycle(CycleEnd::EMERGETHIS->SONG_AND_NEXT_SECTION);;
+  //   }
+  //   break;
+  // case LoveDirection::NEW:
+  //   // TODO
+  //   // this->nextCycle(CycleEnd::NEXT_GROUP);
+  //   break;
+  // }
 }
 
 
-void Engine::forget() {
-  int last_i = _timeline.members.size()-1;
-  if (0 <= last_i) {
-    _circle = _timeline.members[last_i]->_circle_before;
-    unsigned int circle_length = _circle.second - _circle.first;
-
-    while (_circle.second <= _timeline_position.beat) {
-      _timeline_position.beat -= circle_length;
-    }
-
-    this->deleteMember(last_i);
-  }
+void Engine::undo() {
+  this->song.undoCycle();
+  this->nextCycle(CycleEnd::DISCARD);
 }
 
 // FIXME
-void Engine::toggleMemberMode() {
-  // TODO set established to member, right shows layers
-
-  // unsigned int member_i = _focused_member_i;
-
-  // if (isRecording()) {
-  //   member_i = _timeline.members.size()-1;
-  // }
-
-  // if (!_member_mode) {
-  //   _member_mode = true;
-  //   _selected_members_idx_before_member_mode = _selected_members_idx;
-  //   _circle_before_member_mode = _circle;
-
-  //   setCircleToMember(member_i);
-  //   _timeline_position.beat = _circle.first;
-  //   _read_antipop_filter.trigger();
-  // } else {
-  //   _selected_members_idx = _selected_members_idx_before_member_mode;
-  //   _circle = _circle_before_member_mode;
-  //   _member_mode = false;
-  // }
+void Engine::toggleCycleMode() {
 }

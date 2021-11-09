@@ -6,16 +6,16 @@
 ** have next in red mode create new section in A timeline - hold next to create group
 ** 
 ** have songs be made by simply acquiring them into groups. 
-- group have member start offsets and love envelopes. it works. and they have phase oscilliators to
+- group have cycle start offsets and love envelopes. it works. and they have phase oscilliators to
   playback.
   - now all is a 'group' which is simply an abstraction in the emernet. a sattelite existing with
     emernet emergence. all memebers are circles spinning on the sun. the group is tied to some of
     them. 
 **  TODO hold TOP btn to enter select mode.
-- select mode has toggle select member (right led lights up) and select group (left led lights up),
+- select mode has toggle select cycle (right led lights up) and select group (left led lights up),
   press bttn to switch. use
-- use select member to add fx to single members, and next backward will move between members. the buffer
-  will autoshape to be the size of the member, clearing out each switch. must be way to extend as well.
+- use select cycle to add fx to single cycles, and next backward will move between cycles. the buffer
+  will autoshape to be the size of the cycle, clearing out each switch. must be way to extend as well.
 - use select group to change focused group in current ACTIVE TAG bank of /.emernet/ groups. the space
   area changes. then use LOVE to bring the emernet circle nodes into existence, taking energy on the
   plane of groups. it is an AB. if all the while the outer period records for a group, it will

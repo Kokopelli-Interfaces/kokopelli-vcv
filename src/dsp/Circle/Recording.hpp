@@ -46,6 +46,16 @@ struct Recording {
     }
   }
 
+  inline void updatePeriod(unsigned int n_beats) {
+    if (n_beats < _buffer.size()) {
+      _buffer.erase(_buffer.begin(), _buffer.end() - n_beats);
+    }
+  }
+
+  inline unsigned int getPeriod() {
+    return _buffer.size();
+  }
+
   inline void pushBack(float sample) {
     if (_buffer.size() == 0) {
       write_divider.reset();
@@ -128,7 +138,7 @@ struct Recording {
     unsigned int n_beats = _buffer.size();
     if (n_beats == 0) {
       _buffer.push_back(std::vector<float>(_samples_per_beat));
-      n_beats++;;
+      n_beats++;
     }
 
     while (n_beats <= t.beat) {

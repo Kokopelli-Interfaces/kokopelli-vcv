@@ -3,10 +3,6 @@
 using namespace kokopellivcv::dsp::circle;
 using namespace kokopellivcv::dsp;
 
-inline bool Engine::phaseDefined() {
-  return _use_ext_phase || _phase_oscillator.isSet();
-}
-
 inline int findNiceNumberAroundFirstThatFitsIntoSecond(int n1, int n2) {
   assert(n1 < n2);
 
@@ -20,188 +16,124 @@ inline int findNiceNumberAroundFirstThatFitsIntoSecond(int n1, int n2) {
   return n1;
 }
 
-void Engine::fitMemberIntoCircle(Member* member) {
-  unsigned int circle_n_beats = _circle.second - _circle.first;
-  if (member->_n_beats == circle_n_beats) {
+inline void fitCycleIntoSection(Cycle* cycle, Section* section) {
+  unsigned int n_section_beats = section->end_beat - section->start_beat;
+  if (cycle->_n_beats == n_section_beats) {
     return;
   }
 
-  if (member->_n_beats < circle_n_beats) {
-    member->_n_beats = findNiceNumberAroundFirstThatFitsIntoSecond(member->_n_beats, circle_n_beats);
+  bool grow_section = n_section_beats < cycle->_n_beats;
+  if (grow_section) {
+    unsigned int new_n_section_beats = n_section_beats;
+    while (new_n_section_beats < cycle->_n_beats) {
+      new_n_section_beats += n_section_beats;
+    }
+    cycle->_n_beats = new_n_section_beats;
+    section->end_beat = section->start_beat + new_n_section_beats;
   } else {
-    unsigned int new_circle_n_beats = circle_n_beats;
-    while (new_circle_n_beats < member->_n_beats) {
-      new_circle_n_beats += circle_n_beats;
-    }
-    member->_n_beats = new_circle_n_beats;
-    _circle.second = _circle.first + new_circle_n_beats;
+    cycle->_n_beats = findNiceNumberAroundFirstThatFitsIntoSecond(cycle->_n_beats, n_section_beats);
   }
 }
 
-void Engine::endRecording(bool loop, bool create_new_circle) {
-  assert(isRecording());
-  assert(_new_member->_n_beats != 0);
-
-  if (!_phase_oscillator.isSet()) {
-    if (_use_ext_phase && _phase_analyzer.getDivisionPeriod() != 0) {
-      _phase_oscillator.setFrequency(1 / _phase_analyzer.getDivisionPeriod());
-    } else {
-      float recording_time = _new_member->_in->_samples_per_beat * _sample_time;
-      _phase_oscillator.setFrequency(1 / recording_time);
+void Engine::nextCycle(CycleEnd cycle_end) {
+  switch (cycle_end) {
+  case CycleEnd::NO_CYCLE_ENDED:
+    // TODO check if song is
+    _current_section = new Section();
+    _current_section->group_start_section = _current_section;
+    song.start_section = _current_section;
+  case CycleEnd::DISCARD:
+    break;
+  case CycleEnd::DISCARD_AND_NEXT_SECTION_IN_GROUP:
+    _current_section = Section::findNextSectionWithSameGroup(_current_section);
+    break;
+  case CycleEnd::DISCARD_AND_NEXT_SECTION:
+    _current_section = Section::findNextSection(_current_section);
+    break;
+  case CycleEnd::EMERGE_WITH_SECTION:
+    _new_cycle->_loop = true;
+    fitCycleIntoSection(_new_cycle, _current_section);
+    this->song.addCycle(_new_cycle);
+    break;
+  case CycleEnd::SET_PERIOD_TO_SECTION_AND_EMERGE_WITH_SECTION:
+    _new_cycle->_loop = true;
+    _new_cycle->updateCyclePeriod(_new_cycle->_section->end_beat - _new_cycle->_section->start_beat);
+    this->song.addCycle(_new_cycle);
+    break;
+  case CycleEnd::EMERGE_WITH_SECTION_AND_CREATE_NEXT_SECTION:
+    _new_cycle->_loop = true;
+    fitCycleIntoSection(_new_cycle, _current_section);
+    this->song.addCycle(_new_cycle);
+    _current_section = Section::createNewSectionAfterSectionWithSameLength(_current_section);
+    break;
+  case CycleEnd::EMERGE_WITH_SONG_AND_NEXT_SECTION:
+    // section may have changed already, in which case, just leave it
+    _new_cycle->_loop = false;
+    this->song.addCycle(_new_cycle);
+    if (_new_cycle->_section->next == nullptr) {
+      _current_section = Section::createNewSectionAfterSectionWithSameLength(_current_section);
     }
-    // printf("-- phase oscillator set with frequency: %f, sample time is: %f\n", _phase_oscillator.getFrequency(), _sample_time);
+    break;
+  case CycleEnd::EMERGE_WITH_SONG_AND_NEXT_GROUP:
+    // TODO
+    // this->nextGroup();
+    this->song.addCycle(_new_cycle);
+    break;
   }
 
-  _new_member->_loop = loop;
-  if (loop) {
-    if (create_new_circle) {
-      unsigned int new_circle_n_beats = _new_member->_n_beats;
-      _circle.second = _circle.first + new_circle_n_beats;
-    } else {
-      fitMemberIntoCircle(_new_member);
-    }
-  }
-
-  _timeline.members.push_back(_new_member);
-  _timeline._next_love.resize(_timeline.members.size());
-
-  unsigned int member_i = _timeline.members.size() - 1;
-
-  _selected_members_idx.push_back(member_i);
-  _focused_member_i = member_i;
-
-
-  // printf("- rec end\n");
-  // printf("-- start_beat %d n_beats %d  loop %d samples_per_beat %d member_i %d\n", _new_member->_start_beat, _new_member->_n_beats,  _new_member->_loop, _new_member->_in->_samples_per_beat, member_i);
-  _new_member = nullptr;
-}
-
-Member* Engine::newRecording() {
-  if (_new_member) {
-    delete _new_member;
-    _new_member = nullptr;
-  }
-
-  assert(_new_member == nullptr);
-
-  unsigned int start_beat = _timeline_position.beat;
-  unsigned int n_beats = 1;
-
-  unsigned int circle_n_beats = _circle.second - _circle.first;
-  if (_tune_to_frequency_of_established) {
-    start_beat = _circle.first;
-    n_beats = circle_n_beats;
-  }
-
-  bool shift_circle = !_tune_to_frequency_of_established;
-  if (shift_circle) {
-    _circle.first = _timeline_position.beat;
-    _circle.second = _timeline_position.beat + circle_n_beats;
-  }
-
-  if (_tune_to_frequency_of_established) {
-    int recent_loop_length = getMostRecentLoopLength();
-    if (recent_loop_length != -1) {
-      n_beats = recent_loop_length;
-    } else {
-      n_beats = circle_n_beats;
-    }
-  }
-
-  // else {
-  //   n_beats = _timeline_position.beat - _circle.first + 1;
-  // }
-
-  int samples_per_beat = 0;
-  if (phaseDefined()) {
-    if (_use_ext_phase) {
-      samples_per_beat = _phase_analyzer.getSamplesPerBeat(_sample_time);
-    } else if (_phase_oscillator.isSet()) {
-      float beat_period = 1 / _phase_oscillator.getFrequency();
-      samples_per_beat = floor(beat_period / _sample_time);
-    }
-  }
-
-  Member* recording_member = new Member(start_beat, n_beats, _selected_members_idx, _signal_type, samples_per_beat);
-
-  recording_member->_circle_before = _circle;
-
-  // printf("Recording Activate:\n");
-  // printf("-- start_beat %d n_beats %d loop %d samples per beat %d focused member %d\n", recording_member->_start_beat, recording_member->_n_beats, recording_member->_loop, recording_member->_in->_samples_per_beat, _focused_member_i);
-
-  return recording_member;
+  int samples_per_beat = this->song.getSamplesPerBeat();
+  _new_cycle = new Cycle(_current_section, _signal_type, samples_per_beat);
 }
 
 inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
-  assert(phaseDefined());
+  assert(this->song.phaseDefined());
 
-  bool reached_circle_end = _timeline_position.beat == _circle.second;
-
-  if (reached_circle_end) {
-    bool shift_circle = this->isRecording() && !_tune_to_frequency_of_established;
-    if (shift_circle) {
-      unsigned int circle_shift = _circle.second - _circle.first;
-      _circle.first = _circle.second;
-      _circle.second += circle_shift;
+  // FIXME sections dont have ends, just beginnings
+  bool reached_section_end =  _current_section->end_beat <= this->song._position.beat;
+  if (reached_section_end) {
+    if (!_tune_to_frequency_of_established && _current_section->next) {
+      _current_section = _current_section->next;
     } else {
-      // _read_antipop_filter.trigger();
       // TODO doesnt work too well, use antipop trigger instead
-      _write_antipop_filter.trigger();
-      _timeline_position.beat = _circle.first;
+      _read_antipop_filter.trigger();
+      this->song._position.beat = _current_section->start_beat;
     }
   }
 
-  bool reached_recording_end = this->isRecording() && _new_member->_start_beat + _new_member->_n_beats <= _timeline_position.beat;
-  if (reached_recording_end && !(_tune_to_frequency_of_established && _love_direction == LoveDirection::ESTABLISHED)) {
-    _new_member->_n_beats++;
+  // TODO cycles should handle this
+  // TODO better way?
+  if (event == PhaseAnalyzer::PhaseEvent::FORWARD) {
+    _new_cycle->writeNextBeat();
+  } else if (event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
+    _new_cycle->writePrevBeat();
   }
-}
-
-inline PhaseAnalyzer::PhaseEvent Engine::advanceTimelinePosition() {
-  float internal_phase = _phase_oscillator.step(_sample_time);
-  _timeline_position.phase = _use_ext_phase ? _ext_phase : internal_phase;
-
-  PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(_timeline_position.phase, _sample_time);
-
-  unsigned int new_beat = _timeline_position.beat;
-  if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD && 1 <= _timeline_position.beat) {
-    new_beat = _timeline_position.beat - 1;
-  } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
-    new_beat = _timeline_position.beat + 1;
-  }
-
-  if (phase_event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && _options.use_antipop) {
-    _read_antipop_filter.trigger();
-  }
-
-  _timeline_position.beat = new_beat;
-
-  return phase_event;
 }
 
 void Engine::step() {
-  if (this->phaseDefined()) {
-    PhaseAnalyzer::PhaseEvent phase_event = this->advanceTimelinePosition();
+  if (this->song.phaseDefined()) {
+    PhaseAnalyzer::PhaseEvent phase_event = this->song.advanceSongPosition();
+    if (phase_event == PhaseAnalyzer::PhaseEvent::DISCONTINUITY && this->options.use_antipop) {
+      _read_antipop_filter.trigger();
+    }
+
     if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD || phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD) {
       this->handleBeatChange(phase_event);
     }
   }
 
-  if (!this->isRecording()) {
-    _new_member = this->newRecording();
-    _write_antipop_filter.trigger();
-  }
+  _new_cycle->write(this->song._position.phase, this->inputs.in, this->inputs.love, this->song.phaseDefined());
 
-  float in = _write_antipop_filter.process(_inputs.in);
-  _new_member->write(_timeline_position, in, _inputs.love, this->phaseDefined());
-
-  LoveDirection new_direction = Inputs::getLoveDirection(_inputs.love);
+  LoveDirection new_direction = Inputs::getLoveDirection(this->inputs.love);
   if (_love_direction != new_direction) {
-    if (_love_direction == LoveDirection::ESTABLISHED) {
-      _new_member = this->newRecording();
-    } else if (new_direction == LoveDirection::ESTABLISHED) {
-      this->endRecording(true, false);
+    if (new_direction == LoveDirection::ESTABLISHED) {
+      this->nextCycle(CycleEnd::EMERGE_WITH_SECTION);
+    } else if (_love_direction == LoveDirection::ESTABLISHED) {
+      this->nextCycle(CycleEnd::DISCARD);
     }
     _love_direction = new_direction;
   }
+}
+
+Engine::Engine() {
+  this->nextCycle(CycleEnd::NO_CYCLE_ENDED);
 }

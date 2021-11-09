@@ -44,7 +44,7 @@ void Circle::processButtons(const ProcessArgs &args) {
       _light_blinker->blinkLight(TUNE_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      // e->toggleMemberMode();
+      // e->toggleCycleMode();
       break;
     }
 
@@ -56,7 +56,7 @@ void Circle::processButtons(const ProcessArgs &args) {
       _light_blinker->blinkLight(BACKWARD_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->forget();
+      e->undo();
       break;
     }
 
@@ -68,9 +68,8 @@ void Circle::processButtons(const ProcessArgs &args) {
       _light_blinker->blinkLight(FORWARD_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      // e->skipToFocusedMember();
       e->nextGroup();
-      e->skipToFocusedMember();
+      // e->skipToFocusedCycle();
       break;
     }
   }
@@ -98,11 +97,12 @@ void Circle::modulateChannel(int channel_i) {
 
   // taking to the strength of 2 gives a more intuitive curve
   love = pow(love, 2);
-  e->_inputs.love = love;
+  e->inputs.love = love;
 
-  e->_use_ext_phase = inputs[PHASE_INPUT].isConnected();
-  e->_options = _options;
-  e->_timeline._love_resolution = _love_resolution;
+  e->song.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+  // FIXME ugh
+  e->options = _options;
+  e->song.love_resolution = _options.love_resolution;
   // e->_signal_type = _from_signal->signal_type;
 }
 
@@ -124,17 +124,17 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
       phase_in += 5.0f;
     }
 
-    e->_ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+    e->song.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    outputs[PHASE_OUTPUT].setVoltage(e->_timeline_position.phase * 10, channel_i);
+    outputs[PHASE_OUTPUT].setVoltage(e->song._position.phase * 10, channel_i);
   }
 
   if (inputs[WOMB_INPUT].isConnected()) {
-    e->_inputs.in = inputs[WOMB_INPUT].getPolyVoltage(channel_i);
+    e->inputs.in = inputs[WOMB_INPUT].getPolyVoltage(channel_i);
   } else {
-    e->_inputs.in = 0.f;
+    e->inputs.in = 0.f;
   }
 
   e->step();
@@ -182,7 +182,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   }
   new_sum = rack::clamp(new_sum, 0.f, 1.f);
   established_sum = rack::clamp(established_sum, 0.f, 1.f);
-  established_sum = established_sum * (1.f - default_e->_inputs.love);
+  established_sum = established_sum * (1.f - default_e->inputs.love);
 
   LoveDirection love_direction = default_e->_love_direction;
   if (default_e->_tune_to_frequency_of_established) {
@@ -212,7 +212,7 @@ void Circle::postProcessAlways(const ProcessArgs &args) {
 
 void Circle::addChannel(int channel_i) {
   _engines[channel_i] = new kokopellivcv::dsp::circle::Engine();
-  _engines[channel_i]->_sample_time = _sampleTime;
+  _engines[channel_i]->song.sample_time = _sampleTime;
 }
 
 void Circle::removeChannel(int channel_i) {

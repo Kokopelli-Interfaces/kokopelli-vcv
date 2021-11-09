@@ -57,7 +57,6 @@ struct Circle : KokopelliVcvModule {
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;
 
-  float _love_resolution = 10000.f;
   Options _options;
 
   Circle();

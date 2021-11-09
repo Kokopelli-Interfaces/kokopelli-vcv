@@ -4,6 +4,18 @@
 
 #include <vector>
 
+enum CycleEnd {
+  NO_CYCLE_ENDED,
+  DISCARD,
+  DISCARD_AND_NEXT_SECTION_IN_GROUP,
+  DISCARD_AND_NEXT_SECTION,
+  EMERGE_WITH_SECTION,
+  SET_PERIOD_TO_SECTION_AND_EMERGE_WITH_SECTION,
+  EMERGE_WITH_SECTION_AND_CREATE_NEXT_SECTION,
+  EMERGE_WITH_SONG_AND_NEXT_SECTION,
+  EMERGE_WITH_SONG_AND_NEXT_GROUP
+};
+
 // another way to say: ORDER, LIFE, CHAOS
 enum LoveDirection { ESTABLISHED, EMERGENCE, NEW };
 
@@ -30,6 +42,7 @@ struct Inputs {
 };
 
 struct Options {
+  float love_resolution = 1000.f;
   bool use_antipop = false;
   bool bipolar_phase_input = false;
 };

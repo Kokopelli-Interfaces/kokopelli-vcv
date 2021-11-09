@@ -4,8 +4,8 @@
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(TUNE_PARAM, 0.f, 1.f, 0.f, "Tune to Group Frequency");
-  configParam(BACKWARD_PARAM, 0.f, 1.f, 0.f, "Backward");
-  configParam(FORWARD_PARAM, 0.f, 1.f, 0.f, "Forward");
+  configParam(ASCEND_PARAM, 0.f, 1.f, 0.f, "Ascend");
+  configParam(PROGRESS_PARAM, 0.f, 1.f, 0.f, "Progress");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
   _light_divider.setDivision(512);
@@ -13,8 +13,8 @@ Circle::Circle() {
   _light_blinker = new kokopellivcv::dsp::LightBlinker(&lights);
 
   _tune_button.param = &params[TUNE_PARAM];
-  _forward_button.param = &params[FORWARD_PARAM];
-  _backward_button.param = &params[BACKWARD_PARAM];
+  _progress_button.param = &params[PROGRESS_PARAM];
+  _ascend_button.param = &params[ASCEND_PARAM];
 }
 
 Circle::~Circle() {
@@ -29,8 +29,8 @@ void Circle::processButtons(const ProcessArgs &args) {
   float sampleTime = _sampleTime * _button_divider.division;
 
   kokopellivcv::dsp::LongPressButton::Event _tune_event = _tune_button.process(sampleTime);
-  kokopellivcv::dsp::LongPressButton::Event _forward_event = _forward_button.process(sampleTime);
-  kokopellivcv::dsp::LongPressButton::Event _backward_event = _backward_button.process(sampleTime);
+  kokopellivcv::dsp::LongPressButton::Event _progress_event = _progress_button.process(sampleTime);
+  kokopellivcv::dsp::LongPressButton::Event _ascend_event = _ascend_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
@@ -48,28 +48,29 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     }
 
-    switch (_backward_event) {
+    switch (_ascend_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->backward();
-      _light_blinker->blinkLight(BACKWARD_LIGHT);
+      e->ascend();
+      _light_blinker->blinkLight(ASCEND_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->undo();
+      e->descend();
+      _light_blinker->blinkLight(ASCEND_LIGHT); // TODO extra
       break;
     }
 
-    switch (_forward_event) {
+    switch (_progress_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->forward();
-      _light_blinker->blinkLight(FORWARD_LIGHT);
+      e->progress();
+      _light_blinker->blinkLight(PROGRESS_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->nextGroup();
-      // e->skipToFocusedCycle();
+      e->regress();
+      _light_blinker->blinkLight(PROGRESS_LIGHT); // TODO blink extra extra
       break;
     }
   }
@@ -192,14 +193,14 @@ void Circle::updateLights(const ProcessArgs &args) {
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {
-    updateLight(BACKWARD_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
-    updateLight(FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(ASCEND_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
+    updateLight(PROGRESS_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else if (love_direction == LoveDirection::EMERGENCE) {
-    updateLight(BACKWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(ASCEND_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(PROGRESS_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else { // LoveDirection::NEW
-    updateLight(BACKWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(FORWARD_LIGHT, colors::WOMB_LIGHT, 0.6f);
+    updateLight(ASCEND_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(PROGRESS_LIGHT, colors::WOMB_LIGHT, 0.6f);
   }
 
 }

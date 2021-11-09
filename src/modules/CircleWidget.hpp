@@ -8,7 +8,7 @@ namespace kokopellivcv {
 
 struct CircleValueDisplay : TextBox {
 	Circle *_module;
-	int _backward_displayed_value = -1;
+	int _previous_displayed_value = -1;
 
 	CircleValueDisplay(Circle *m) : TextBox() {
     _module = m;
@@ -24,8 +24,8 @@ struct CircleValueDisplay : TextBox {
 
 	void setDisplayValue(int v) {
 		std::string s;
-		if(v != _backward_displayed_value) {
-			_backward_displayed_value = v;
+		if(v != _previous_displayed_value) {
+			_previous_displayed_value = v;
       s = string::f("%d", v);
       setText(s);
 		}
@@ -206,7 +206,7 @@ struct WombDisplay : CircleValueDisplay {
         // womb_display = e->song.getNumberOfActiveCycles();
         // if (e->song.cycles.size() == 0) {
         //   CircleValueDisplay::setText("--");
-        //   CircleValueDisplay::_backward_displayed_value = -1;
+        //   CircleValueDisplay::_previous_displayed_value = -1;
         //   return;
         // }
       // }
@@ -242,7 +242,7 @@ struct WombBeatDisplay : CircleValueDisplay {
       //   womb_beat_display = e->song.cycles[e->_focused_cycle_i]->getCycleBeat(e->song._position.beat);
       // } else {
       //   CircleValueDisplay::setText("--");
-      //   CircleValueDisplay::_backward_displayed_value = -1;
+      //   CircleValueDisplay::_previous_displayed_value = -1;
       //   return;
       // }
 
@@ -273,14 +273,14 @@ struct TotalWombBeatDisplay : CircleValueDisplay {
           textColor = colors::LOOK_BACK_LAYER;
         } else {
           CircleValueDisplay::setText("--");
-          CircleValueDisplay::_backward_displayed_value = -1;
+          CircleValueDisplay::_previous_displayed_value = -1;
           return;
         }
       // } else if (e->song.cycles.size() != 0) {
       //   total_cycle_beats = e->song.cycles[e->_focused_cycle_i]->_n_beats;
       // } else {
       //   CircleValueDisplay::setText("--");
-      //   CircleValueDisplay::_backward_displayed_value = -1;
+      //   CircleValueDisplay::_previous_displayed_value = -1;
       //   return;
       // }
 
@@ -322,8 +322,8 @@ struct CircleWidget : ModuleWidget {
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.259)), module, Circle::TUNE_PARAM));
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.580)), module, Circle::LOVE_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.177, 79.26)), module, Circle::BACKWARD_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.236, 79.26)), module, Circle::FORWARD_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.177, 79.26)), module, Circle::ASCEND_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.236, 79.26)), module, Circle::PROGRESS_PARAM));
 
 		addInput(createInput<WombPort>(mm2px(Vec(24.280, 94.323)), module, Circle::WOMB_INPUT));
 		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 107.705)), module, Circle::PHASE_INPUT));
@@ -335,8 +335,8 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Circle::PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 55.665)), module, Circle::TUNE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Circle::BACKWARD_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.701, 80.724)), module, Circle::FORWARD_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Circle::ASCEND_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.701, 80.724)), module, Circle::PROGRESS_LIGHT));
 
     // FIXME have ONE display pLEASe
 

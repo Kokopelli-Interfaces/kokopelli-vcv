@@ -18,8 +18,8 @@ namespace kokopellivcv {
 struct Circle : KokopelliVcvModule {
   enum ParamIds {
 		TUNE_PARAM,
-		FORWARD_PARAM,
-		BACKWARD_PARAM,
+		PROGRESS_PARAM,
+		ASCEND_PARAM,
 		LOVE_PARAM,
 		NUM_PARAMS
   };
@@ -39,16 +39,16 @@ struct Circle : KokopelliVcvModule {
 
   enum LightIds {
     ENUMS(TUNE_LIGHT, 3),
-    ENUMS(BACKWARD_LIGHT, 3),
-    ENUMS(FORWARD_LIGHT, 3),
+    ENUMS(ASCEND_LIGHT, 3),
+    ENUMS(PROGRESS_LIGHT, 3),
     NUM_LIGHTS
   };
 
   float _sampleTime = 1.0f;
 
   kokopellivcv::dsp::LongPressButton _tune_button;
-  kokopellivcv::dsp::LongPressButton _forward_button;
-  kokopellivcv::dsp::LongPressButton _backward_button;
+  kokopellivcv::dsp::LongPressButton _progress_button;
+  kokopellivcv::dsp::LongPressButton _ascend_button;
 
   kokopellivcv::dsp::LightBlinker *_light_blinker;
 

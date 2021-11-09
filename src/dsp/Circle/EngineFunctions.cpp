@@ -50,7 +50,7 @@ void Engine::toggleTuneToFrequencyOfEstablished() {
   }
 }
 
-void Engine::forward() {
+void Engine::progress() {
   switch(_love_direction) {
   case LoveDirection::ESTABLISHED:
     if (_tune_to_frequency_of_established) {
@@ -77,8 +77,9 @@ void Engine::forward() {
 }
 
 // TODO
-void Engine::backward() {
-  this->nextCycle(CycleEnd::DISCARD);
+void Engine::ascend() {
+  // this->nextCycle(CycleEnd::DISCARD);
+
 
   // switch(_love_direction) {
   // case LoveDirection::ESTABLISHED:
@@ -106,8 +107,13 @@ void Engine::backward() {
   // }
 }
 
+void Engine::descend() {
+  // TODO A  ( )  1   ->  1  ( )  I
+  // start recording in cycle that loves cycles that are also focused on cycle 1
+  // the cycle becomes the ESTABLISHED.
+}
 
-void Engine::undo() {
+void Engine::regress() {
   this->song.undoCycle();
   this->nextCycle(CycleEnd::DISCARD);
 }

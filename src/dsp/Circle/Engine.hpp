@@ -46,9 +46,10 @@ struct Engine {
   float readEstablished();
 
   bool isRecording();
-  void forward();
-  void backward();
-  void undo();
+  void ascend();
+  void descend();
+  void progress();
+  void regress();
 
   void toggleTuneToFrequencyOfEstablished();
   void toggleCycleMode();

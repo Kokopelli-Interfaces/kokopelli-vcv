@@ -260,7 +260,6 @@ struct CircleWidget : ModuleWidget {
     next_section_display->box.size = group_display_size;
     addChild(next_section_display);
 
-
     auto focused_display_size = mm2px(Vec(5.834, 9.571));
 
 		established_display = new EstablishedDisplay(module);

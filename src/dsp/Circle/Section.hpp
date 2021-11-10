@@ -32,6 +32,15 @@ struct Section {
     return end_beat - start_beat;
   }
 
+  inline static Section* createNextGroupSection(Section* section, unsigned int start_beat) {
+    Section* group_section = createNextSection(section, start_beat);
+    group_section->group++;
+    group_section->group_section_n = 1;
+    group_section->group_start_section = group_section;
+    group_section->end_beat = group_section->start_beat + 1;
+    return group_section;
+  }
+
   inline static Section* createNextSection(Section* section, unsigned int start_beat) {
     assert(section);
 

@@ -82,7 +82,7 @@ void Engine::nextCycle(CycleEnd cycle_end) {
     _new_cycle->_loop = false;
     this->song.addCycle(_new_cycle);
     if (_new_cycle->_section->next == nullptr) {
-      _current_section = Section::createNewSectionAfterSectionWithSameLength(_current_section);
+      _current_section = Section::createNextGroupSection(_current_section, this->song.position.beat);
     }
     break;
   }

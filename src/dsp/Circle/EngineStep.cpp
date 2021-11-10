@@ -46,38 +46,44 @@ void Engine::nextCycle(CycleEnd cycle_end) {
     break;
   case CycleEnd::DISCARD_AND_NEXT_SECTION_IN_GROUP:
     _current_section = Section::findNextSectionWithSameGroup(_current_section);
+    this->song.position.beat = _current_section->start_beat;
     break;
   case CycleEnd::DISCARD_AND_NEXT_SECTION:
     _current_section = Section::findNextSection(_current_section);
+    this->song.position.beat = _current_section->start_beat;
     break;
   case CycleEnd::EMERGE_WITH_SECTION:
     _new_cycle->_loop = true;
     fitCycleIntoSection(_new_cycle, _current_section);
     this->song.addCycle(_new_cycle);
     break;
-  case CycleEnd::SET_PERIOD_TO_SECTION_AND_EMERGE_WITH_SECTION:
-    _new_cycle->_loop = true;
-    _new_cycle->updateCyclePeriod(_new_cycle->_section->end_beat - _new_cycle->_section->start_beat);
-    this->song.addCycle(_new_cycle);
-    break;
+  // case CycleEnd::SET_PERIOD_TO_SECTION_AND_EMERGE_WITH_SECTION:
+  //   _new_cycle->_loop = true;
+  //   _new_cycle->updateCyclePeriod(_new_cycle->_section->end_beat - _new_cycle->_section->start_beat);
+  //   this->song.addCycle(_new_cycle);
+  //   break;
   case CycleEnd::EMERGE_WITH_SECTION_AND_CREATE_NEXT_SECTION:
     _new_cycle->_loop = true;
     fitCycleIntoSection(_new_cycle, _current_section);
     this->song.addCycle(_new_cycle);
     _current_section = Section::createNewSectionAfterSectionWithSameLength(_current_section);
+    this->song.position.beat += _current_section->getNBeats();
     break;
-  case CycleEnd::EMERGE_WITH_SONG_AND_NEXT_SECTION:
+  case CycleEnd::DO_NOT_LOOP_AND_NEXT_SECTION:
     // section may have changed already, in which case, just leave it
+    _new_cycle->_loop = false;
+    this->song.addCycle(_new_cycle);
+    if (_new_cycle->_section->next == nullptr) {
+      _current_section = Section::createNextSection(_current_section, this->song.position.beat);
+    }
+    break;
+  case CycleEnd::SET_TO_SONG_PERIOD_AND_NEXT_GROUP:
+    // TODO
     _new_cycle->_loop = false;
     this->song.addCycle(_new_cycle);
     if (_new_cycle->_section->next == nullptr) {
       _current_section = Section::createNewSectionAfterSectionWithSameLength(_current_section);
     }
-    break;
-  case CycleEnd::EMERGE_WITH_SONG_AND_NEXT_GROUP:
-    // TODO
-    // this->nextGroup();
-    this->song.addCycle(_new_cycle);
     break;
   }
 
@@ -89,14 +95,14 @@ inline void Engine::handleBeatChange(PhaseAnalyzer::PhaseEvent event) {
   assert(this->song.phaseDefined());
 
   // FIXME sections dont have ends, just beginnings
-  bool reached_section_end =  _current_section->end_beat <= this->song._position.beat;
+  bool reached_section_end =  _current_section->end_beat <= this->song.position.beat;
   if (reached_section_end) {
     if (!_tune_to_frequency_of_established && _current_section->next) {
       _current_section = _current_section->next;
     } else {
       // TODO doesnt work too well, use antipop trigger instead
       _read_antipop_filter.trigger();
-      this->song._position.beat = _current_section->start_beat;
+      this->song.position.beat = _current_section->start_beat;
     }
   }
 
@@ -121,15 +127,18 @@ void Engine::step() {
     }
   }
 
-  _new_cycle->write(this->song._position.phase, this->inputs.in, this->inputs.love, this->song.phaseDefined());
+  _new_cycle->write(this->song.position.phase, this->inputs.in, this->inputs.love, this->song.phaseDefined());
 
   LoveDirection new_direction = Inputs::getLoveDirection(this->inputs.love);
   if (_love_direction != new_direction) {
-    if (new_direction == LoveDirection::ESTABLISHED) {
-      this->nextCycle(CycleEnd::EMERGE_WITH_SECTION);
-    } else if (_love_direction == LoveDirection::ESTABLISHED) {
-      this->nextCycle(CycleEnd::DISCARD);
+    if (_tune_to_frequency_of_established) {
+      if (new_direction == LoveDirection::ESTABLISHED) {
+        this->nextCycle(CycleEnd::EMERGE_WITH_SECTION);
+      } else if (_love_direction == LoveDirection::ESTABLISHED) {
+        this->nextCycle(CycleEnd::DISCARD);
+      }
     }
+
     _love_direction = new_direction;
   }
 }

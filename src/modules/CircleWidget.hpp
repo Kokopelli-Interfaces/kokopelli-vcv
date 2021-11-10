@@ -122,7 +122,7 @@ struct EstablishedBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int section_beat_display = e->song._position.beat - e->_current_section->start_beat + 1;
+    int section_beat_display = e->song.position.beat - e->_current_section->start_beat + 1;
     CircleValueDisplay::setDisplayValue(section_beat_display);
 	}
 };
@@ -240,6 +240,7 @@ struct CircleWidget : ModuleWidget {
 		song_display = new SongDisplay(module);
     song_display->box.pos = mm2px(Vec(4.229, 36.138));
     song_display->box.size = song_display_size;
+    song_display->textOffset = Vec(song_display->box.size.x * 0.5f, 0.f);
     addChild(song_display);
 
     auto group_display_size = mm2px(Vec(8.603, 4.327));

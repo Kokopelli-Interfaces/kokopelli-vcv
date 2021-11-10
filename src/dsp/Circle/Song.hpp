@@ -26,9 +26,9 @@ struct Song {
 
   float love_resolution = 10000.f;
 
-  /** read only */
+  TimePosition position;
 
-  TimePosition _position;
+  /** read only */
 
   PhaseOscillator _phase_oscillator;
   PhaseAnalyzer _phase_analyzer;
@@ -47,18 +47,18 @@ struct Song {
 
   inline PhaseAnalyzer::PhaseEvent advanceSongPosition() {
     float internal_phase = _phase_oscillator.step(this->sample_time);
-    this->_position.phase = this->use_ext_phase ? this->ext_phase : internal_phase;
+    this->position.phase = this->use_ext_phase ? this->ext_phase : internal_phase;
 
-    PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(this->_position.phase, this->sample_time);
+    PhaseAnalyzer::PhaseEvent phase_event = _phase_analyzer.process(this->position.phase, this->sample_time);
 
-    unsigned int new_beat = this->_position.beat;
-    if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD && 1 <= this->_position.beat) {
-      new_beat = this->_position.beat - 1;
+    unsigned int new_beat = this->position.beat;
+    if (phase_event == PhaseAnalyzer::PhaseEvent::BACKWARD && 1 <= this->position.beat) {
+      new_beat = this->position.beat - 1;
     } else if (phase_event == PhaseAnalyzer::PhaseEvent::FORWARD) {
-      new_beat = this->_position.beat + 1;
+      new_beat = this->position.beat + 1;
     }
 
-    this->_position.beat = new_beat;
+    this->position.beat = new_beat;
 
     return phase_event;
   }
@@ -100,23 +100,23 @@ struct Song {
     return old + (current - old) * lambda;
   }
 
-  inline bool atEnd(TimePosition _position) {
+  inline bool atEnd(TimePosition position) {
     if (cycles.size() == 0) {
       return true;
     }
 
     unsigned int last_cycle_i = cycles.size()-1;
-    return cycles[last_cycle_i]->_section->start_beat + cycles[last_cycle_i]->_n_beats <= _position.beat + 1;
+    return cycles[last_cycle_i]->_section->start_beat + cycles[last_cycle_i]->_n_beats <= position.beat + 1;
   }
 
-  inline void updateCycleLove(TimePosition _position) {
+  inline void updateCycleLove(TimePosition position) {
     if (_love_calculator_divider.process()) {
       unsigned int n_loved = 0;
       for (unsigned int cycle_i = 0; cycle_i < cycles.size(); cycle_i++) {
 
         float cycle_i_love = 1.f;
         for (unsigned int j = cycle_i + 1; j < cycles.size(); j++) {
-          cycle_i_love -= cycles[j]->readLove(_position);
+          cycle_i_love -= cycles[j]->readLove(position);
           if (cycle_i_love <= 0.f)  {
             cycle_i_love = 0.f;
             break;
@@ -139,14 +139,14 @@ struct Song {
   }
 
   inline float read() {
-    updateCycleLove(_position);
+    updateCycleLove(position);
 
     // FIXME
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
     float signal_out = 0.f;
     for (unsigned int i = 0; i < cycles.size(); i++) {
-      float cycle_out = cycles[i]->listen(_position);
+      float cycle_out = cycles[i]->listen(position);
       signal_out = kokopellivcv::dsp::sum(signal_out, cycle_out, signal_type);
     }
 

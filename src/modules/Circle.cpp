@@ -129,7 +129,7 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    outputs[PHASE_OUTPUT].setVoltage(e->song._position.phase * 10, channel_i);
+    outputs[PHASE_OUTPUT].setVoltage(e->song.position.phase * 10, channel_i);
   }
 
   if (inputs[WOMB_INPUT].isConnected()) {

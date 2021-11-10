@@ -6,7 +6,7 @@ using namespace kokopellivcv::dsp;
 // FIXME
 float Engine::getPhaseOfEstablished() {
   float length = _current_section->end_beat - _current_section->start_beat;
-  float relative_position = this->song._position.beat - _current_section->start_beat + this->song._position.phase;
+  float relative_position = this->song.position.beat - _current_section->start_beat + this->song.position.phase;
   return rack::clamp(relative_position / length, 0.f, 1.f);
 }
 
@@ -32,22 +32,23 @@ bool Engine::isRecording() {
 }
 
 void Engine::toggleTuneToFrequencyOfEstablished() {
-  switch(_love_direction) {
-  case LoveDirection::ESTABLISHED:
-    _tune_to_frequency_of_established = !_tune_to_frequency_of_established;
-    break;
-  case LoveDirection::EMERGENCE:
-    if (_tune_to_frequency_of_established) {
-      this->nextCycle(CycleEnd::SET_PERIOD_TO_SECTION_AND_EMERGE_WITH_SECTION);
-    } else {
-      _tune_to_frequency_of_established = true;
-    }
-    break;
-  case LoveDirection::NEW:
-    // TODO
-    _tune_to_frequency_of_established = false;
-    break;
-  }
+  _tune_to_frequency_of_established = !_tune_to_frequency_of_established;
+  // switch(_love_direction) {
+  // case LoveDirection::ESTABLISHED:
+  //   _tune_to_frequency_of_established = !_tune_to_frequency_of_established;
+  //   break;
+  // case LoveDirection::EMERGENCE:
+  //   // if (_tune_to_frequency_of_established) {
+  //     // this->nextCycle(CycleEnd::EMERGE_WITH_SECTION);
+  //   // } else {
+  //     _tune_to_frequency_of_established = true;
+  //   // }
+  //   break;
+  // case LoveDirection::NEW:
+  //   // TODO
+  //   _tune_to_frequency_of_established = false;
+  //   break;
+  // }
 }
 
 void Engine::progress() {
@@ -66,12 +67,13 @@ void Engine::progress() {
     if (_tune_to_frequency_of_established) {
       this->nextCycle(CycleEnd::EMERGE_WITH_SECTION_AND_CREATE_NEXT_SECTION);
     } else {
-      this->nextCycle(CycleEnd::EMERGE_WITH_SONG_AND_NEXT_SECTION);;
+      this->nextCycle(CycleEnd::DO_NOT_LOOP_AND_NEXT_SECTION);
     }
     break;
   case LoveDirection::NEW:
+    // this->nextCycle(CycleEnd::DO_NOT_LOOP_AND_NEXT_SECTION);
     // TODO
-    // this->nextCycle(EMERGE_WITH_SONG_AND_NEXT_GROUP);
+    this->nextCycle(SET_TO_SONG_PERIOD_AND_NEXT_GROUP);
     break;
   }
 }

@@ -27,7 +27,12 @@ struct Section {
     return;
   }
 
-  inline static Section* createNextSection(Section* section) {
+  inline unsigned int getNBeats() {
+    assert(start_beat < end_beat);
+    return end_beat - start_beat;
+  }
+
+  inline static Section* createNextSection(Section* section, unsigned int start_beat) {
     assert(section);
 
     Section *new_section = new Section();
@@ -44,8 +49,8 @@ struct Section {
     }
 
     unsigned int n_beats = section->end_beat - section->start_beat;
-    new_section->start_beat += n_beats;
-    new_section->end_beat += n_beats;
+    new_section->start_beat = start_beat;
+    new_section->end_beat = start_beat + n_beats;
 
     section->next = new_section;
     new_section->prev = section;

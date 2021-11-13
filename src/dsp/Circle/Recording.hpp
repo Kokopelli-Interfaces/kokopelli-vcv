@@ -18,18 +18,17 @@ namespace dsp {
 namespace circle {
 
 struct Recording {
-
-  /* read only */
-
   kokopellivcv::dsp::SignalType _signal_type;
-  std::vector<std::vector<float>> _buffer;
-  int _samples_per_beat;
+  // std::vector<std::vector<float>> _buffer;
+
+  std::vector<float> _buffer;
+  std::vector<unsigned int> _tick_sample_i;
+  unsigned int _current_sample_i = 0;
 
   rack::dsp::ClockDivider write_divider;
 
-  Recording(kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
+  Recording(kokopellivcv::dsp::SignalType signal_type) {
     _signal_type = signal_type;
-    _samples_per_beat = samples_per_beat;
     switch (_signal_type) {
     case kokopellivcv::dsp::SignalType::AUDIO:
       write_divider.setDivision(1);
@@ -46,136 +45,46 @@ struct Recording {
     }
   }
 
-  inline void updatePeriod(unsigned int n_beats) {
-    if (n_beats < _buffer.size()) {
-      _buffer.erase(_buffer.begin(), _buffer.end() - n_beats);
-    }
-  }
-
-  inline unsigned int getPeriod() {
-    return _buffer.size();
-  }
-
-  inline void pushBack(float sample) {
-    if (_buffer.size() == 0) {
-      write_divider.reset();
-      _buffer.push_back(std::vector<float>(0));
-      _buffer[0].push_back(sample);
-    } else if (write_divider.process()) {
-      _buffer[0].push_back(sample);
-    }
-    _samples_per_beat++;
-  }
-
-  inline float interpolateBuffer(TimePosition t) {
-    if (_buffer.size() <= t.beat) {
-      return 0.f;
-    }
-
-    double beat_position = _samples_per_beat * t.phase;
-
-    int min_samples_for_interpolation = 4;
-    if (_samples_per_beat < min_samples_for_interpolation) {
-      return _buffer[t.beat][floor(beat_position)];
-    }
-
-    int x1 = (int)floor(beat_position);
-    if (x1 == _samples_per_beat) {
-      x1--;
-    }
-    float s1 = _buffer[t.beat][x1];
-
-    float s0;
-    if (x1 == 0) {
-      if (t.beat == 0) {
-        s0 = 0.f;
-      } else {
-        s0 = _buffer[t.beat - 1][_samples_per_beat - 1];
-      }
+  inline float interpolateBuffer(Time t) {
+    int current_tick_sample_i = _tick_sample_i[t.tick];
+    // FIXME
+    int next_tick_sample_i;
+    if (_tick_sample_i.size() == t.tick) {
+      int samples_per_tick = _tick_sample_i[1];
+      next_tick_sample_i = current_tick_sample_i + samples_per_tick;
     } else {
-      s0 = _buffer[t.beat][x1 - 1];
+      next_tick_sample_i = _tick_sample_i[t.tick+1];
     }
 
-    float s2;
-    float s3;
-    if (x1 == _samples_per_beat - 1) {
-      if (t.beat == _buffer.size() - 1) {
-        s2 = 0.f;
-        s3 = 0.f;
-      } else {
-        s2 = _buffer[t.beat + 1][0];
-        s3 = _buffer[t.beat + 1][1];
-      }
-    } else {
-      s2 = _buffer[t.beat][x1 + 1];
-      if (x1 + 1 == _samples_per_beat - 1) {
-        if (t.beat == _buffer.size() - 1) {
-          s3 = 0.f;
-        } else {
-          s3 = _buffer[t.beat + 1][0];
-        }
-      } else {
-        s3 = _buffer[t.beat][x1 + 2];
-      }
-    }
+    double phase_offset = (_tick_sample_i[t.tick+1] - _tick_sample_i[t.tick]) * t.phase;
+    double buffer_position = _tick_sample_i[t.tick] + phase_offset;
 
-    float sample_phase = rack::math::eucMod(beat_position, 1.0f);
     if (_signal_type == kokopellivcv::dsp::SignalType::AUDIO) {
-      return Hermite4pt3oX(s0, s1, s2, s3, sample_phase);
+      return kokopellivcv::dsp::warpInterpolateHermite(_buffer, buffer_position);
     } else if (_signal_type == kokopellivcv::dsp::SignalType::CV) {
-      return rack::crossfade(s1, s2, sample_phase);
+      return kokopellivcv::dsp::warpInterpolateLineard(_buffer, buffer_position);
     } else if (_signal_type == kokopellivcv::dsp::SignalType::PARAM) {
-      return rack::clamp(BSpline(s0, s1, s2, s3, sample_phase), 0.f, 10.f);
+      return kokopellivcv::dsp::warpInterpolateBSpline(_buffer, buffer_position);
     } else {
-      return s1;
+      return _buffer[floor(buffer_position)];
     }
   }
 
-  inline void write(TimePosition t, float sample) {
-    assert(0.f <= t.phase);
-    assert(t.phase <= 1.0f);
-
-    unsigned int n_beats = _buffer.size();
-    if (n_beats == 0) {
-      _buffer.push_back(std::vector<float>(_samples_per_beat));
-      n_beats++;
-    }
-
-    while (n_beats <= t.beat) {
-      _buffer.push_back(std::vector<float>(_samples_per_beat));
-      n_beats++;
-    }
-
-    double beat_position = _samples_per_beat * t.phase;
-    int x1 = (int)floor(beat_position);
-    if (x1 == _samples_per_beat) {
-      x1--;
-    }
-
-    if (_signal_type == kokopellivcv::dsp::SignalType::AUDIO)  {
-      double sample_phase = beat_position - floor(beat_position);
-      _buffer[t.beat][x1] = rack::crossfade(sample, _buffer[t.beat][x1], sample_phase);
-
-      int x2 = ceil(beat_position);
-      if (ceil(beat_position) == _samples_per_beat) {
-        if (t.beat != _buffer.size() - 1) {
-          _buffer[t.beat + 1][0] = rack::crossfade(_buffer[t.beat + 1][0], sample, sample_phase);
-        }
-      } else {
-        _buffer[t.beat][x2] = rack::crossfade(_buffer[t.beat][x2], sample, sample_phase);
-      }
-    } else {
-      _buffer[t.beat][x1] = sample;
-    }
-  }
-
-  inline float read(TimePosition t) {
-    int size = _buffer.size();
-    if (size == 0) {
-      return 0.f;
-    }
-
+  inline float read(Time t) {
     return interpolateBuffer(t);
+  }
+
+  inline void write(Time t, float sample) {
+    if (_tick_sample_i.size() == 0) {
+      assert(t.tick == 0);
+      _tick_sample_i.push_back(0);
+    } else if (_tick_sample_i.size() <= t.tick) {
+      _tick_sample_i.resize(t.tick+1);
+      _tick_sample_i[t.tick] = _current_sample_i;
+    }
+
+    _buffer.push_back(sample);
+    _current_sample_i++;
   }
 };
 

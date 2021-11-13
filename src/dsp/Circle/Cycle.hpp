@@ -2,7 +2,7 @@
 
 #include "definitions.hpp"
 #include "Recording.hpp"
-#include "Section.hpp"
+#include "Movement.hpp"
 #include "dsp/Signal.hpp"
 
 #include <numeric> // std::iota
@@ -12,109 +12,76 @@ namespace dsp {
 namespace circle {
 
 struct Cycle {
+  Time start;
+  Time period;
+
+  Time playhead;
+
   float love = 0.f;
 
-  Section _section_at_start;
-  Section* _section;
+  Movement movement_at_start;
+  Movement* movement;
 
-  Recording *_signal;
-  Recording *_love_capture;
+  Recording *signal_capture;
+  Recording *love_capture;
 
-  int _write_beat = 0;
-  bool _loop = true;
-  unsigned int _n_beats = 1;
+  bool loop = true;
 
-  inline Cycle(Section* section, kokopellivcv::dsp::SignalType signal_type, int samples_per_beat) {
-    _signal = new Recording(signal_type, samples_per_beat);
-    _love_capture = new Recording(kokopellivcv::dsp::SignalType::PARAM, samples_per_beat);
-
-    _section = section;
-    _section_at_start = *section;
+  inline Cycle(Time start, Movement* movement) {
+    this->start = start;
+    this->signal_capture = new Recording(kokopellivcv::dsp::SignalType::AUDIO);
+    this->love_capture = new Recording(kokopellivcv::dsp::SignalType::PARAM);
+    this->movement_at_start = *movement;
+    this->movement = movement;
   }
 
   inline ~Cycle() {
-    delete _signal;
-    delete _love_capture;
+    delete signal_capture;
+    delete love_capture;
   }
 
-  inline unsigned int getCycleBeat(unsigned int timeline_beat) {
-    int beat = timeline_beat - _section->start_beat;
-    if (_loop && 0 < beat) {
-      return beat % _n_beats;
+  inline Time getTimeRelativeToCycleStart(Time song_time) {
+    Time cycle_time = song_time;
+    cycle_time.tick = song_time.tick - this->movement->start.tick;
+    if (this->loop && 0 < cycle_time.tick) {
+      cycle_time.tick = cycle_time.tick % period.tick;
     }
 
-    return beat;
+    return cycle_time;
   }
 
-  inline void updateCyclePeriod(unsigned int n_beats) {
-    _signal->updatePeriod(n_beats);
-    _love_capture->updatePeriod(n_beats);
-    _n_beats = n_beats;
-  }
-
-  inline bool readableAtPosition(TimePosition song_position) {
-    int cycle_beat = getCycleBeat(song_position.beat);
-    return (0 <= cycle_beat && cycle_beat < (int)_n_beats);
-  }
-
-  // TODO FIXME allow reverse recording
-  inline bool writableAtPosition(TimePosition song_position) {
-    return _section->start_beat <= song_position.beat;
-  }
-
-  inline TimePosition getRecordingPosition(TimePosition song_position) {
-    TimePosition recording_position = song_position;
-    recording_position.beat = getCycleBeat(song_position.beat);
-    return recording_position;
-  }
-
-  inline float listen(TimePosition song_position) {
-    if (this->love == 0.f || !readableAtPosition(song_position)) {
+  inline float readSignal(Time song_position) {
+    if (this->love == 0.f) {
       return 0.f;
     }
 
-   return _signal->read(getRecordingPosition(song_position)) * this->love;
-  }
-
-  inline float readLove(TimePosition song_position) {
-    if (!readableAtPosition(song_position)) {
+    Time cycle_time = getTimeRelativeToCycleStart(song_position);
+    if (cycle_time.tick < 0) {
       return 0.f;
     }
 
-    return _love_capture->read(getRecordingPosition(song_position));
+   return signal_capture->read(cycle_time) * this->love;
   }
 
-  inline void writeNextBeat() {
-    _write_beat++;
-    _n_beats++;
-  }
-
-  inline void writePrevBeat() {
-    _write_beat--;
-    _n_beats--;
-  }
-
-  inline void write(float phase, float in, float love, bool phase_defined) {
-    // TODO why ??
-    // assert(_signal->_buffer.size() <= _n_beats);
-    // assert(_love_capture->_buffer.size() <= _n_beats);
-
-    if (_write_beat < 0) {
-      return;
+  inline float readLove(Time song_position) {
+    if (this->love == 0.f) {
+      return 0.f;
     }
 
-    TimePosition write_position;
-    write_position.beat = _write_beat;
-    write_position.phase = phase;
-
-    // FIXME case where recording starts and we go back behind
-    if (!phase_defined) {
-      _signal->pushBack(in);
-      _love_capture->pushBack(love);
-    } else {
-      _signal->write(write_position, in);
-      _love_capture->write(write_position, love);
+    Time cycle_time = getTimeRelativeToCycleStart(song_position);
+    if (cycle_time.tick < 0) {
+      return 0.f;
     }
+
+    return love_capture->read(cycle_time);
+  }
+
+  inline void write(float in, float love) {
+    signal_capture->write(playhead, in);
+    love_capture->write(playhead, love);
+  }
+
+  inline void finishWrite() {
   }
 };
 

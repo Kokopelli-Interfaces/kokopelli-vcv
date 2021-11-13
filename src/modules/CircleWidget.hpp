@@ -54,21 +54,21 @@ struct SongDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s = e->song.name;
+    std::string s = e->_song.name;
     CircleValueDisplay::setText(s);
   }
 };
 
-struct PrevSectionDisplay : CircleValueDisplay {
+struct PrevMovementDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
-  PrevSectionDisplay(Circle *m) : CircleValueDisplay(m) {
+  PrevMovementDisplay(Circle *m) : CircleValueDisplay(m) {
     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     std::string s;
-    if (e->_current_section->prev) {
-      s = string::f("%c%d", e->_current_section->prev->group, e->_current_section->prev->group_section_n);
+    if (e->_song.current_movement->prev) {
+      s = string::f("%c%d", e->_song.current_movement->prev->group, e->_song.current_movement->prev->group_movement_n);
     } else {
       s = "--";
     }
@@ -77,28 +77,28 @@ struct PrevSectionDisplay : CircleValueDisplay {
 };
 
 
-struct CurrentSectionDisplay : CircleValueDisplay {
+struct CurrentMovementDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
-  CurrentSectionDisplay(Circle *m) : CircleValueDisplay(m) {
+  CurrentMovementDisplay(Circle *m) : CircleValueDisplay(m) {
     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s = string::f("%c%d", e->_current_section->group, e->_current_section->group_section_n);
+    std::string s = string::f("%c%d", e->_song.current_movement->group, e->_song.current_movement->group_movement_n);
     CircleValueDisplay::setText(s);
   }
 };
 
-struct NextSectionDisplay : CircleValueDisplay {
+struct NextMovementDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
-  NextSectionDisplay(Circle *m) : CircleValueDisplay(m) {
+  NextMovementDisplay(Circle *m) : CircleValueDisplay(m) {
     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     std::string s;
-    if (e->_current_section->next) {
-      s = string::f("%c%d", e->_current_section->next->group, e->_current_section->next->group_section_n);
+    if (e->_song.current_movement->next) {
+      s = string::f("%c%d", e->_song.current_movement->next->group, e->_song.current_movement->next->group_movement_n);
     } else {
       s = "--";
     }
@@ -113,7 +113,7 @@ struct EstablishedDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s = string::f("%c", e->_current_section->group);
+    std::string s = string::f("%c", e->_song.current_movement->group);
     CircleValueDisplay::setText(s);
   }
 };
@@ -122,17 +122,19 @@ struct EstablishedBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int section_beat_display = e->song.position.beat - e->_current_section->start_beat + 1;
-    CircleValueDisplay::setDisplayValue(section_beat_display);
+    int movement_beat_display = e->_song.playhead.tick;
+    CircleValueDisplay::setDisplayValue(movement_beat_display);
 	}
 };
 
 struct TotalEstablishedBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 
+  // FIXME
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    unsigned int n_circle_beats = e->_current_section->end_beat - e->_current_section->start_beat;
-    CircleValueDisplay::setDisplayValue(n_circle_beats);
+    // unsigned int n_circle_beats = e->_song.current_movement->end_beat - e->_song.current_movement->start.tick;
+    // CircleValueDisplay::setDisplayValue(n_circle_beats);
+    CircleValueDisplay::setText("ERR");
 	}
 };
 
@@ -145,7 +147,7 @@ struct WombDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int womb_display = e->song.cycles.size() + 1;
+    int womb_display = e->_song.cycles.size() + 1;
     std::string s = string::f("%d", womb_display);
     CircleValueDisplay::setText(s);
 	}
@@ -159,7 +161,7 @@ struct WombBeatDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    CircleValueDisplay::setDisplayValue(e->_new_cycle->_write_beat + 1);
+    CircleValueDisplay::setDisplayValue(e->_song.new_cycle->playhead.tick + 1);
 	}
 };
 
@@ -172,8 +174,8 @@ struct TotalWombBeatDisplay : CircleValueDisplay {
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     int total_cycle_beats = 0;
-    if (e->song.cycles.size() != 0) {
-      total_cycle_beats = e->getMostRecentLoopLength();
+    if (e->_song.cycles.size() != 0) {
+      total_cycle_beats = e->getMostRecentCycleLength();
       textColor = colors::LOOK_BACK_LAYER;
     } else {
       CircleValueDisplay::setText("--");
@@ -192,9 +194,9 @@ struct CircleWidget : ModuleWidget {
 
   SongDisplay *song_display;
 
-  PrevSectionDisplay *prev_section_display;
-  CurrentSectionDisplay *current_section_display;
-  NextSectionDisplay *next_section_display;
+  PrevMovementDisplay *prev_movement_display;
+  CurrentMovementDisplay *current_movement_display;
+  NextMovementDisplay *next_movement_display;
 
   EstablishedDisplay *established_display;
   WombDisplay *womb_display;
@@ -218,7 +220,7 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.259)), module, Circle::TUNE_PARAM));
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.580)), module, Circle::LOVE_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.177, 79.26)), module, Circle::ASCEND_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.236, 79.26)), module, Circle::PROGRESS_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.236, 79.26)), module, Circle::CYCLE_FORWARD_PARAM));
 
 		addInput(createInput<WombPort>(mm2px(Vec(24.280, 94.323)), module, Circle::WOMB_INPUT));
 		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 107.705)), module, Circle::PHASE_INPUT));
@@ -231,7 +233,7 @@ struct CircleWidget : ModuleWidget {
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 55.665)), module, Circle::TUNE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Circle::ASCEND_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.701, 80.724)), module, Circle::PROGRESS_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.701, 80.724)), module, Circle::CYCLE_FORWARD_LIGHT));
 
     // FIXME have ONE display pLEASe
 
@@ -245,20 +247,20 @@ struct CircleWidget : ModuleWidget {
 
     auto group_display_size = mm2px(Vec(8.603, 4.327));
 
-		prev_section_display = new PrevSectionDisplay(module);
-    prev_section_display->box.pos = mm2px(Vec(1.649, 43.453));
-    prev_section_display->box.size = group_display_size;
-    addChild(prev_section_display);
+		prev_movement_display = new PrevMovementDisplay(module);
+    prev_movement_display->box.pos = mm2px(Vec(1.649, 43.453));
+    prev_movement_display->box.size = group_display_size;
+    addChild(prev_movement_display);
 
-		current_section_display = new CurrentSectionDisplay(module);
-    current_section_display->box.pos = mm2px(Vec(13.793, 41.924));
-    current_section_display->box.size = group_display_size;
-    addChild(current_section_display);
+		current_movement_display = new CurrentMovementDisplay(module);
+    current_movement_display->box.pos = mm2px(Vec(13.793, 41.924));
+    current_movement_display->box.size = group_display_size;
+    addChild(current_movement_display);
 
-		next_section_display = new NextSectionDisplay(module);
-    next_section_display->box.pos = mm2px(Vec(25.926, 43.453));
-    next_section_display->box.size = group_display_size;
-    addChild(next_section_display);
+		next_movement_display = new NextMovementDisplay(module);
+    next_movement_display->box.pos = mm2px(Vec(25.926, 43.453));
+    next_movement_display->box.size = group_display_size;
+    addChild(next_movement_display);
 
     auto focused_display_size = mm2px(Vec(5.834, 9.571));
 

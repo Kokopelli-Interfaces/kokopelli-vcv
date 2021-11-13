@@ -1,9 +1,9 @@
 * what are you doing with your life michael? - 'im making god in vcvrack'
 ** have love pedal not end recordings ever
-** have default to progress timeline option
-** rename progress to 'period switch ?'
-** have backward in progress mode add to the group (l side).
-** have next in red mode create new section in A timeline - hold next to create group
+** have default to cycle_forward timeline option
+** rename cycle_forward to 'period switch ?'
+** have backward in cycle_forward mode add to the group (l side).
+** have next in red mode create new movement in A timeline - hold next to create group
 ** 
 ** have songs be made by simply acquiring them into groups. 
 - group have cycle start offsets and love envelopes. it works. and they have phase oscilliators to

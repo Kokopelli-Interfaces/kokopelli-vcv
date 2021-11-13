@@ -5,7 +5,7 @@ Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(TUNE_PARAM, 0.f, 1.f, 0.f, "Tune to Group Frequency");
   configParam(ASCEND_PARAM, 0.f, 1.f, 0.f, "Ascend");
-  configParam(PROGRESS_PARAM, 0.f, 1.f, 0.f, "Progress");
+  configParam(CYCLE_FORWARD_PARAM, 0.f, 1.f, 0.f, "Cycle_Forward");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
   _light_divider.setDivision(512);
@@ -13,7 +13,7 @@ Circle::Circle() {
   _light_blinker = new kokopellivcv::dsp::LightBlinker(&lights);
 
   _tune_button.param = &params[TUNE_PARAM];
-  _progress_button.param = &params[PROGRESS_PARAM];
+  _cycle_forward_button.param = &params[CYCLE_FORWARD_PARAM];
   _ascend_button.param = &params[ASCEND_PARAM];
 }
 
@@ -21,6 +21,7 @@ Circle::~Circle() {
   delete _light_blinker;
 }
 
+// FIXME update gko phase oscillator
 void Circle::sampleRateChange() {
   _sampleTime = APP->engine->getSampleTime();
 }
@@ -29,7 +30,7 @@ void Circle::processButtons(const ProcessArgs &args) {
   float sampleTime = _sampleTime * _button_divider.division;
 
   kokopellivcv::dsp::LongPressButton::Event _tune_event = _tune_button.process(sampleTime);
-  kokopellivcv::dsp::LongPressButton::Event _progress_event = _progress_button.process(sampleTime);
+  kokopellivcv::dsp::LongPressButton::Event _cycle_forward_event = _cycle_forward_button.process(sampleTime);
   kokopellivcv::dsp::LongPressButton::Event _ascend_event = _ascend_button.process(sampleTime);
 
   for (int c = 0; c < channels(); c++) {
@@ -61,16 +62,16 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     }
 
-    switch (_progress_event) {
+    switch (_cycle_forward_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->progress();
-      _light_blinker->blinkLight(PROGRESS_LIGHT);
+      e->cycleForward();
+      _light_blinker->blinkLight(CYCLE_FORWARD_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->regress();
-      _light_blinker->blinkLight(PROGRESS_LIGHT); // TODO blink extra extra
+      e->undo();
+      _light_blinker->blinkLight(CYCLE_FORWARD_LIGHT); // TODO blink extra extra
       break;
     }
   }
@@ -100,10 +101,10 @@ void Circle::modulateChannel(int channel_i) {
   love = pow(love, 2);
   e->inputs.love = love;
 
-  e->song.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+  e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
   // FIXME ugh
   e->options = _options;
-  e->song.love_resolution = _options.love_resolution;
+  e->_gko.love_resolution = _options.love_resolution;
   // e->_signal_type = _from_signal->signal_type;
 }
 
@@ -125,11 +126,11 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
       phase_in += 5.0f;
     }
 
-    e->song.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+    e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    outputs[PHASE_OUTPUT].setVoltage(e->song.position.phase * 10, channel_i);
+    outputs[PHASE_OUTPUT].setVoltage(e->_song.playhead.phase * 10, channel_i);
   }
 
   if (inputs[WOMB_INPUT].isConnected()) {
@@ -185,22 +186,22 @@ void Circle::updateLights(const ProcessArgs &args) {
   established_sum = rack::clamp(established_sum, 0.f, 1.f);
   established_sum = established_sum * (1.f - default_e->inputs.love);
 
-  LoveDirection love_direction = default_e->_love_direction;
-  if (default_e->_tune_to_frequency_of_established) {
-    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->getPhaseOfEstablished());
+  LoveDirection love_direction = default_e->_gko._love_direction;
+  if (default_e->_gko.tune_to_frequency_of_established) {
+    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.current_movement->getMovementPhase(default_e->_song.playhead));
   } else {
     updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, 0.0f);
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {
     updateLight(ASCEND_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
-    updateLight(PROGRESS_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(CYCLE_FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else if (love_direction == LoveDirection::EMERGENCE) {
     updateLight(ASCEND_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(PROGRESS_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(CYCLE_FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else { // LoveDirection::NEW
     updateLight(ASCEND_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(PROGRESS_LIGHT, colors::WOMB_LIGHT, 0.6f);
+    updateLight(CYCLE_FORWARD_LIGHT, colors::WOMB_LIGHT, 0.6f);
   }
 
 }
@@ -213,7 +214,7 @@ void Circle::postProcessAlways(const ProcessArgs &args) {
 
 void Circle::addChannel(int channel_i) {
   _engines[channel_i] = new kokopellivcv::dsp::circle::Engine();
-  _engines[channel_i]->song.sample_time = _sampleTime;
+  _engines[channel_i]->_gko.sample_time = _sampleTime;
 }
 
 void Circle::removeChannel(int channel_i) {

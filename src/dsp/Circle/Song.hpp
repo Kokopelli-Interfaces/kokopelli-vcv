@@ -47,7 +47,7 @@ struct Song {
 
     float signal_out = 0.f;
     for (unsigned int i = 0; i < cycles.size(); i++) {
-      float cycle_out = cycles[i]->readSignal(playhead);
+      float cycle_out = cycles[i]->readSignal();
       signal_out = kokopellivcv::dsp::sum(signal_out, cycle_out, signal_type);
     }
 

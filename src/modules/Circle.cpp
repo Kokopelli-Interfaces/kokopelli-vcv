@@ -190,7 +190,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   if (default_e->_gko.tune_to_frequency_of_established) {
     updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.current_movement->getMovementPhase(default_e->_song.playhead));
   } else {
-    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, 0.0f);
+    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, default_e->_song.playhead.phase);
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {
@@ -215,6 +215,10 @@ void Circle::postProcessAlways(const ProcessArgs &args) {
 void Circle::addChannel(int channel_i) {
   _engines[channel_i] = new kokopellivcv::dsp::circle::Engine();
   _engines[channel_i]->_gko.sample_time = _sampleTime;
+
+  for (int c = 0; c < channels(); c++) {
+    _engines[c]->_gko.nextCycle(_engines[c]->_song, CycleEnd::DISCARD);
+  }
 }
 
 void Circle::removeChannel(int channel_i) {

@@ -30,8 +30,6 @@ struct Engine {
 
   // AntipopFilter _read_antipop_filter;
 
-  Engine();
-
   void step();
   float readAll();
   float readEstablished();

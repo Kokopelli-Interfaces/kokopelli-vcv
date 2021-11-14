@@ -1,7 +1,7 @@
 #pragma once
 
 #include "definitions.hpp"
-#include "Recording.hpp"
+#include "TimeCapture.hpp"
 #include "Movement.hpp"
 #include "dsp/Signal.hpp"
 
@@ -17,20 +17,20 @@ struct Cycle {
 
   Time playhead;
 
-  float love = 0.f;
+  float love = 1.f;
 
   Movement movement_at_start;
   Movement* movement;
 
-  Recording *signal_capture;
-  Recording *love_capture;
+  TimeCapture *signal_capture;
+  TimeCapture *love_capture;
 
-  bool loop = true;
+  bool loop = false;
 
   inline Cycle(Time start, Movement* movement) {
     this->start = start;
-    this->signal_capture = new Recording(kokopellivcv::dsp::SignalType::AUDIO);
-    this->love_capture = new Recording(kokopellivcv::dsp::SignalType::PARAM);
+    this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
+    this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
     this->movement = movement;
   }
@@ -40,40 +40,16 @@ struct Cycle {
     delete love_capture;
   }
 
-  inline Time getTimeRelativeToCycleStart(Time song_time) {
-    Time cycle_time = song_time;
-    cycle_time.tick = song_time.tick - this->movement->start.tick;
-    if (this->loop && 0 < cycle_time.tick) {
-      cycle_time.tick = cycle_time.tick % period.tick;
-    }
-
-    return cycle_time;
-  }
-
-  inline float readSignal(Time song_position) {
+  inline float readSignal() {
     if (this->love == 0.f) {
       return 0.f;
     }
 
-    Time cycle_time = getTimeRelativeToCycleStart(song_position);
-    if (cycle_time.tick < 0) {
-      return 0.f;
-    }
-
-   return signal_capture->read(cycle_time) * this->love;
+   return signal_capture->read(this->playhead) * this->love;
   }
 
-  inline float readLove(Time song_position) {
-    if (this->love == 0.f) {
-      return 0.f;
-    }
-
-    Time cycle_time = getTimeRelativeToCycleStart(song_position);
-    if (cycle_time.tick < 0) {
-      return 0.f;
-    }
-
-    return love_capture->read(cycle_time);
+  inline float readLove() {
+    return love_capture->read(this->playhead);
   }
 
   inline void write(float in, float love) {
@@ -82,6 +58,8 @@ struct Cycle {
   }
 
   inline void finishWrite() {
+    this->period = playhead;
+    printf("Cycle End with period %ld -- %f\n", playhead.tick, playhead.phase);
   }
 };
 

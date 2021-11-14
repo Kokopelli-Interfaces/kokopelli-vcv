@@ -3,6 +3,7 @@
 #include "rack.hpp"
 
 #include <vector>
+#include <cmath>
 
 enum TimeEvent {
   NONE,
@@ -34,8 +35,13 @@ struct Time {
   long int tick = 0;
   double phase = 0.f;
 
-  float operator/(const Time& other) const {
-    return ((double)tick + phase) / ((double)other.tick + other.phase);
+  inline void restart() {
+    this->tick = 0;
+    this->phase = 0.f;
+  }
+
+  long double operator/(const Time& other) const {
+    return ((long double)tick + phase) / ((long double)other.tick + other.phase);
   }
 
   Time operator-(const Time& other) const {

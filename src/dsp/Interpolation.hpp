@@ -28,7 +28,7 @@ inline float Hermite4pt3oX(float x0, float x1, float x2, float x3, float t) {
 /** Float precission index `x`.
 The array at `p` must be at least length `floor(x) + 2`.
 */
-inline float interpolateLinearD(std::vector<float> &data, float index) {
+inline float interpolateLinearD(std::vector<float> &data, long double index) {
   int x1 = floor(index);
   float t = index - x1;
   return rack::crossfade(data[x1], data[x1+1], t);
@@ -36,21 +36,21 @@ inline float interpolateLinearD(std::vector<float> &data, float index) {
 
 /** The array at `p` must be at least length `floor(x) + 3`.
  */
-  inline float InterpolateHermite(std::vector<float> &data, float index) {
+  inline float InterpolateHermite(std::vector<float> &data, long double index) {
     int x1 = floor(index);
     float t = index - x1;
     return Hermite4pt3oX(data[x1 - 1], data[x1], data[x1 + 1], data[x1 + 2], t);
 }
 
 /** The array at `p` must be at least length `floor(x) + 3`. */
-inline float interpolateBSpline(std::vector<float> &data, float index) {
+inline float interpolateBSpline(std::vector<float> &data, long double index) {
   int x1 = floor(index);
   float t = index - x1;
   return BSpline(data[x1 - 1], data[x1], data[x1 + 1], data[x1 + 2], t);
 }
 
 /** interpolates an array. Warps. */
-inline float warpInterpolateLineard(std::vector<float> &data, float index) {
+inline float warpInterpolateLineard(std::vector<float> &data, long double index) {
   int len = data.size();
   int x1 = floor(index);
   int x2 = (x1 + 1) % len;
@@ -59,7 +59,7 @@ inline float warpInterpolateLineard(std::vector<float> &data, float index) {
 }
 
 /** interpolates an array. Warps. */
-inline float warpInterpolateHermite(std::vector<float> &data, float index) {
+inline float warpInterpolateHermite(std::vector<float> &data, long double index) {
   int len = data.size();
   int x1 = (int)floor(index);
   int x0 = (x1 < 1) ? len - 1 : x1 - 1;
@@ -70,7 +70,7 @@ inline float warpInterpolateHermite(std::vector<float> &data, float index) {
 }
 
 /** interpolates an array. Warps. */
-inline float warpInterpolateBSpline(std::vector<float> &data, float index) {
+inline float warpInterpolateBSpline(std::vector<float> &data, long double index) {
   int len = data.size();
   int x1 = (int)floor(index);
   int x0 = (x1 < 1) ? len - 1 : x1 - 1;

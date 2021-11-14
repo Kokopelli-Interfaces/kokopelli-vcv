@@ -7,7 +7,7 @@
 #include "Cycle.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
-#include "Recording.hpp"
+#include "TimeCapture.hpp"
 #include "Movement.hpp"
 #include "TimeAdvancer.hpp"
 #include "util/math.hpp"
@@ -43,8 +43,8 @@ public:
 
 public:
   Gko() {
-    _song_time_advancer.setTickFrequency(0.01f);
-    _new_cycle_time_advancer.setTickFrequency(0.01f);
+    _song_time_advancer.setTickFrequency(1.0f);
+    _new_cycle_time_advancer.setTickFrequency(1.0f);
     _love_calculator_divider.setDivision(10000);
   }
 
@@ -131,6 +131,8 @@ public:
     //   break;
     }
 
+    song.new_cycle->finishWrite();
+
     // TODO
     Movement* cycle_movement;
     if (tune_to_frequency_of_established) {
@@ -190,7 +192,7 @@ private:
 
         float cycle_i_love = 1.f;
         for (unsigned int j = cycle_i + 1; j < song.cycles.size(); j++) {
-          cycle_i_love -= song.cycles[j]->readLove(song.playhead);
+          cycle_i_love -= song.cycles[j]->readLove();
           if (cycle_i_love <= 0.f)  {
             cycle_i_love = 0.f;
             break;
@@ -230,6 +232,13 @@ private:
   inline void advanceTime(Song &song) {
     _song_time_advancer.step(song.playhead, this->sample_time);
     _new_cycle_time_advancer.step(song.new_cycle->playhead, this->sample_time);
+
+    for (Cycle* cycle : song.cycles) {
+      _song_time_advancer.step(cycle->playhead, this->sample_time);
+      if (cycle->period < cycle->playhead) {
+        cycle->playhead.restart();
+      }
+    }
 
     // FIXME
     // TimeEvent last_event = _song_time_advancer.getLastTimeEvent();

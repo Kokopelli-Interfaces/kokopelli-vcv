@@ -2,6 +2,7 @@
 
 #include "definitions.hpp"
 #include "TimeCapture.hpp"
+#include "Group.hpp"
 #include "Movement.hpp"
 #include "dsp/Signal.hpp"
 
@@ -12,6 +13,8 @@ namespace dsp {
 namespace circle {
 
 struct Cycle {
+  Group *group;
+
   Time start;
   Time period;
 
@@ -27,12 +30,13 @@ struct Cycle {
 
   bool loop = false;
 
-  inline Cycle(Time start, Movement* movement) {
+  inline Cycle(Time start, Movement* movement, Group* group) {
     this->start = start;
     this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
     this->movement = movement;
+    this->group = group;
   }
 
   inline ~Cycle() {

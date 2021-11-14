@@ -44,7 +44,7 @@ struct Circle : KokopelliVcvModule {
     NUM_LIGHTS
   };
 
-  float _sampleTime = 1.0f;
+  float _sample_time = 1.0f;
 
   kokopellivcv::dsp::LongPressButton _tune_button;
   kokopellivcv::dsp::LongPressButton _cycle_forward_button;

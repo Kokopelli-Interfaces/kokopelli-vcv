@@ -23,15 +23,15 @@ Circle::~Circle() {
 
 // FIXME update gko phase oscillator
 void Circle::sampleRateChange() {
-  _sampleTime = APP->engine->getSampleTime();
+  _sample_time = APP->engine->getSampleTime();
 }
 
 void Circle::processButtons(const ProcessArgs &args) {
-  float sampleTime = _sampleTime * _button_divider.division;
+  float sample_time = _sample_time * _button_divider.division;
 
-  kokopellivcv::dsp::LongPressButton::Event _tune_event = _tune_button.process(sampleTime);
-  kokopellivcv::dsp::LongPressButton::Event _cycle_forward_event = _cycle_forward_button.process(sampleTime);
-  kokopellivcv::dsp::LongPressButton::Event _ascend_event = _ascend_button.process(sampleTime);
+  kokopellivcv::dsp::LongPressButton::Event _tune_event = _tune_button.process(sample_time);
+  kokopellivcv::dsp::LongPressButton::Event _cycle_forward_event = _cycle_forward_button.process(sample_time);
+  kokopellivcv::dsp::LongPressButton::Event _ascend_event = _ascend_button.process(sample_time);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
@@ -80,6 +80,7 @@ void Circle::processButtons(const ProcessArgs &args) {
 void Circle::processAlways(const ProcessArgs &args) {
   outputs[PHASE_OUTPUT].setChannels(this->channels());
   outputs[SUN].setChannels(this->channels());
+  outputs[ESTABLISHED_OUTPUT].setChannels(this->channels());
 
   if (_button_divider.process()) {
     processButtons(args);
@@ -111,6 +112,10 @@ void Circle::modulateChannel(int channel_i) {
 int Circle::channels() {
   int input_channels = inputs[WOMB_INPUT].getChannels();
   if (_channels < input_channels) {
+    for (int c = 0; c < _channels; c++) {
+      _engines[c]->_gko.nextCycle(_engines[c]->_song, CycleEnd::DISCARD);
+    }
+
     return input_channels;
   }
 
@@ -150,16 +155,6 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 }
 
-// void Circle::updateLight(int light, float r, float g, float b) {
-//   if (_light_blinker->_op && _light_blinker->_light_i == light) {
-//     return;
-//   }
-
-//   lights[light + 0].value = r;
-//   lights[light + 1].value = g;
-//   lights[light + 2].value = b;
-// }
-
 void Circle::updateLight(int light, NVGcolor color, float strength) {
   if (_light_blinker->_op && _light_blinker->_light_i == light) {
     return;
@@ -190,7 +185,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   if (default_e->_gko.tune_to_frequency_of_established) {
     updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.current_movement->getMovementPhase(default_e->_song.playhead));
   } else {
-    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, default_e->_song.playhead.phase);
+    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, default_e->_song.new_cycle->playhead.phase);
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {
@@ -214,11 +209,7 @@ void Circle::postProcessAlways(const ProcessArgs &args) {
 
 void Circle::addChannel(int channel_i) {
   _engines[channel_i] = new kokopellivcv::dsp::circle::Engine();
-  _engines[channel_i]->_gko.sample_time = _sampleTime;
-
-  for (int c = 0; c < channels(); c++) {
-    _engines[c]->_gko.nextCycle(_engines[c]->_song, CycleEnd::DISCARD);
-  }
+  _engines[channel_i]->_gko.sample_time = _sample_time;
 }
 
 void Circle::removeChannel(int channel_i) {

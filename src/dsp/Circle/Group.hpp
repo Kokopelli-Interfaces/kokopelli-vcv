@@ -2,9 +2,7 @@
 
 #include "Cycle.hpp"
 
-#include "Movement.hpp"
 #include "definitions.hpp"
-#include "util/math.hpp"
 #include <vector>
 
 namespace kokopellivcv {
@@ -12,6 +10,9 @@ namespace dsp {
 namespace circle {
 
 struct Group {
+  std::string name = "A";
+
+  Group *group;
   char letter = 'A';
 };
 

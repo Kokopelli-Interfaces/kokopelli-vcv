@@ -23,9 +23,11 @@ struct Song {
   // };
 
   std::string name = "my song";
-  std::vector<Cycle*> cycles;
 
-  Group *group;
+  std::vector<Group> groups;
+  Group* established_group;
+
+  std::vector<Cycle*> cycles;
 
   Cycle *new_cycle = nullptr;
 
@@ -39,7 +41,10 @@ struct Song {
     this->current_movement->group_start_movement = this->current_movement;
     this->start_movement = this->current_movement;
     Time start;
-    this->new_cycle = new Cycle(start, this->current_movement);
+    Group first_group;
+    this->groups.push_back(first_group);
+    this->established_group = &groups[0];
+    this->new_cycle = new Cycle(start, this->current_movement, this->established_group);
   }
 
   inline float read() {

@@ -144,7 +144,7 @@ public:
 
     Time start = song.playhead;
     // FIXME calculated samples_per_tick will suck
-    song.new_cycle = new Cycle(start, cycle_movement);
+    song.new_cycle = new Cycle(start, cycle_movement, song.established_group);
   }
 
   inline void undoCycle(std::vector<Cycle*> &cycles) {

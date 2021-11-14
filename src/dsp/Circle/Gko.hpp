@@ -25,7 +25,7 @@ public:
   bool use_ext_phase = false;
   float ext_phase = 0.f;
   float sample_time = 1.0f;
-  float love_resolution = 10000.f;
+  volatile float love_resolution = 10000.f;
   bool tune_to_frequency_of_established = true;
 
   /** read only */

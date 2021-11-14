@@ -303,17 +303,13 @@ struct CircleWidget : ModuleWidget {
 
     menu->addChild(new MenuLabel());
 
-    menu->addChild(new BoolOptionMenuItem("Use read antipop at phase discontuinity", [m]() {
-      return &m->_options.use_antipop;
-    }));
+    // menu->addChild(new BoolOptionMenuItem("Use read antipop at phase discontuinity", [m]() {
+    //   return &m->_options.use_antipop;
+    // }));
 
-    menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {
-      return &m->_options.bipolar_phase_input;
-    }));
-
-    menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {
-      return &m->_options.bipolar_phase_input;
-    }));
+    // menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {
+    //   return &m->_options.bipolar_phase_input;
+    // }));
 
 		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
 		love_resolution_slider->box.size.x = 190.f;

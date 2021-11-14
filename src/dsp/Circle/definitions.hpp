@@ -89,6 +89,4 @@ struct Inputs {
 
 struct Options {
   float love_resolution = 1000.f;
-  bool use_antipop = false;
-  bool bipolar_phase_input = false;
 };

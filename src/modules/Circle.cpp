@@ -122,9 +122,9 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
 
   if (inputs[PHASE_INPUT].isConnected()) {
     float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
-    if (_options.bipolar_phase_input) {
-      phase_in += 5.0f;
-    }
+    // if (_options.bipolar_phase_input) {
+    //   phase_in += 5.0f;
+    // }
 
     e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   }

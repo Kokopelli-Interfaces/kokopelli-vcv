@@ -40,6 +40,17 @@ struct Time {
     this->phase = 0.f;
   }
 
+  Time operator+(const Time& other) const {
+    Time result = *this;
+    result.tick += other.tick;
+    result.phase += other.phase;
+    if (1.f <= result.phase) {
+      result.tick++;
+      result.phase -= 1.f;
+    }
+    return result;
+  }
+
   long double operator/(const Time& other) const {
     return ((long double)tick + phase) / ((long double)other.tick + other.phase);
   }

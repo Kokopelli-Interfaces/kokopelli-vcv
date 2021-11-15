@@ -2,7 +2,6 @@
 
 #include "definitions.hpp"
 #include "TimeCapture.hpp"
-#include "Group.hpp"
 #include "Movement.hpp"
 #include "dsp/Signal.hpp"
 
@@ -13,10 +12,10 @@ namespace dsp {
 namespace circle {
 
 struct Cycle {
-  Group *group;
-
-  Time start;
   Time period;
+
+  Time capture_start;
+  Time capture_period;
 
   Time playhead;
 
@@ -31,13 +30,12 @@ struct Cycle {
 
   bool loop = false;
 
-  inline Cycle(Time start, Movement* movement, Group* group) {
-    this->start = start;
+  inline Cycle(Time start, Movement* movement ) {
+    this->capture_start = capture_start;
     this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
     this->movement = movement;
-    this->group = group;
   }
 
   inline ~Cycle() {
@@ -45,7 +43,16 @@ struct Cycle {
     delete love_capture;
   }
 
+  inline void updatePeriod(Time new_period) {
+    // FIXME
+    this->period = new_period;
+  }
+
   inline float readSignal() {
+    if (signal_capture->_period < this->playhead) {
+      return 0.f;
+    }
+
     if (this->love == 0.f || this->relative_love == 0.f) {
       return 0.f;
     }
@@ -54,6 +61,10 @@ struct Cycle {
   }
 
   inline float readLove() {
+    if (signal_capture->_period < this->playhead) {
+      return love_capture->read(love_capture->_period);
+    }
+
     return love_capture->read(this->playhead);
   }
 
@@ -64,6 +75,8 @@ struct Cycle {
 
   inline void finishWrite() {
     this->period = playhead;
+    this->signal_capture->finishWrite();
+    this->love_capture->finishWrite();
     printf("Cycle End with period %ld -- %f\n", playhead.tick, playhead.phase);
   }
 };

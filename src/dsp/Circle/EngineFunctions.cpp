@@ -31,6 +31,6 @@ void Engine::descend() {
 }
 
 void Engine::undo() {
-  _gko.undoCycle(_song.cycles);
+  _gko.undoCycle(_song);
   _gko.nextCycle(_song, CycleEnd::DISCARD);
 }

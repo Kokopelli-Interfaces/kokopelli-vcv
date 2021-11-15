@@ -44,7 +44,7 @@ struct Song {
     Group first_group;
     this->groups.push_back(first_group);
     this->established_group = &groups[0];
-    this->new_cycle = new Cycle(start, this->current_movement, this->established_group);
+    this->new_cycle = new Cycle(start, this->current_movement);
   }
 
   inline float read() {

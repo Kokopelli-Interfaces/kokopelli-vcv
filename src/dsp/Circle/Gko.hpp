@@ -50,22 +50,6 @@ public:
 
 private:
   static inline void fitCycleIntoGroup(Group* group, Cycle* cycle) {
-    // unsigned int n_movement_ticks = period.ticks;
-    // if (cycle->period.tick == n_movement_ticks) {
-    //   return;
-    // }
-
-    // bool grow_movement = n_movement_ticks < cycle->period.tick;
-    // if (grow_movement) {
-    //   unsigned int new_n_movement_ticks = n_movement_ticks;
-    //   while (new_n_movement_ticks < cycle->period.tick) {
-    //     new_n_movement_ticks += n_movement_ticks;
-    //   }
-    //   cycle->period.tick = new_n_movement_ticks;
-    //   movement->end_tick = movement->start_tick + new_n_movement_ticks;
-    // } else {
-    //   cycle->period.tick = kokopellivcv::util::findNumberAfterFirstThatFitsIntoSecond(cycle->period.tick, n_movement_ticks);
-    // }
   }
 
   inline void addCycle(std::vector<Cycle*> &cycles, Cycle* cycle) {
@@ -75,8 +59,10 @@ private:
 
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
+    bool discard = false;
     switch (cycle_end) {
     case CycleEnd::DISCARD:
+      discard = true;
       break;
     // case CycleEnd::DISCARD_AND_NEXT_MOVEMENT_IN_GROUP:
     //   song.current_movement = Movement::findNextMovementWithSameGroup(song.current_movement);
@@ -120,18 +106,15 @@ public:
       //   song.current_movement = Movement::createNextMovement(song.current_movement, song.current_movement->period);
       // }
       break;
-    // case CycleEnd::SET_TO_SONG_PERIOD_AND_NEXT_GROUP:
-    //   // TODO
-    //   song.new_cycle->loop = false;
-    //   addCycle(song.cycles, song.new_cycle);
-    //   if (song.new_cycle->movement->next == nullptr) {
-    //     song.current_movement = Movement::createNextGroupMovement(song.current_movement, 1);
-    //     song.playhead.tick = 0;
-    //   }
-    //   break;
     }
 
-    song.new_cycle->finishWrite();
+    if (!discard) {
+      song.new_cycle->finishWrite();
+      // resizes
+      song.established_group->addToGroup(song.new_cycle);
+    } else {
+      delete song.new_cycle;
+    }
 
     // TODO
     Movement* cycle_movement;
@@ -144,26 +127,25 @@ public:
 
     Time start = song.playhead;
     // FIXME calculated samples_per_tick will suck
-    song.new_cycle = new Cycle(start, cycle_movement, song.established_group);
+    song.new_cycle = new Cycle(start, cycle_movement);
   }
 
-  inline void undoCycle(std::vector<Cycle*> &cycles) {
-    if (0 < cycles.size()) {
-      cycles.erase(cycles.end()-1);
+  inline void undoCycle(Song &song) {
+    if (0 < song.cycles.size()) {
+      Cycle* last_cycle = song.cycles[song.cycles.size()-1];
+      for (Group group : song.groups) {
+        if (group.checkIfCycleIsInGroup(last_cycle)) {
+          group.undoLastCycle();
+        }
+      }
+
+      song.cycles.pop_back();
     }
   }
 
   inline void cycleForward(Song &song) {
     switch(_love_direction) {
     case LoveDirection::ESTABLISHED:
-      // if (this->tune_to_frequency_of_established) {
-      //   nextCycle(song, CycleEnd::DISCARD_AND_NEXT_MOVEMENT_IN_GROUP);
-      // } else {
-      //   nextCycle(song, CycleEnd::DISCARD_AND_NEXT_MOVEMENT);
-      //   // A -> B
-      //   // TODO should it place the recording ?
-      //   // nextCycle(song, false);
-      // }
       nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
       break;
     case LoveDirection::EMERGENCE:

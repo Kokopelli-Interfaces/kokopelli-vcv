@@ -72,27 +72,27 @@ struct Group {
   }
 
   inline void adjustPeriodsToFit(Cycle* cycle) {
-    Time adjusted_period = cycle->period;
-    // TODO option
-    float snap_back_window = this->beat_period / 2.f;
-    // float snap_back_window = this->beat_period / 4.f;
+    Time adjusted_period;
 
-    // TODO make option
+    double total_beats = period / beat_period;
+    Time div = cycle->period / beat_period;
+    float beat_phase = rack::math::eucMod(div, 1.0f);
+    // TODO option
+    float round_back_beat_phase = 0.5f;
+
     Time diff = cycle->period - period;
-    if (0.f < diff) {
+    if ((float)total_beats < div) {
       // snap_back_window = this->beat_period;
-      while (snap_back_window <= diff) {
-        // TODO allow odds option?
+      while (round_back_beat_phase <= diff) {
         this->period *= 2;
-        diff = cycle->period - this->period;
+        total_beats = period / beat_period;
+        diff = div - total_beats;
       }
 
       adjusted_period = this->period;
     } else {
-      Time div = cycle->period / beat_period;
       int snap_beat = (int) div;
-      float beat_phase = rack::math::eucMod(div, 1.0f);
-      if (snap_back_window < beat_phase || snap_beat == 0) {
+      if (round_back_beat_phase < beat_phase || snap_beat == 0) {
         snap_beat++;
       }
 

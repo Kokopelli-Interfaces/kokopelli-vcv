@@ -39,7 +39,6 @@ public:
   LoveDirection _love_direction = LoveDirection::ESTABLISHED;
 
   rack::dsp::ClockDivider _love_calculator_divider;
-  std::vector<float> _next_cycles_love;
 
 public:
   Gko() {
@@ -53,7 +52,6 @@ private:
     cycle->finishWrite();
     cycle->group->addToGroup(cycle);
     cycles.push_back(cycle);
-    _next_cycles_love.resize(cycles.size());
   }
 
 public:
@@ -116,32 +114,16 @@ public:
   }
 
 private:
-  // TODO cycle types (song or movement), depends on tuning and affects love
-  inline float smoothValue(float current, float old) {
-    float lambda = this->love_resolution / 44100;
-    return old + (current - old) * lambda;
-  }
-
-
-  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles) {
+  inline void updateSongCyclesLove(std::vector<Group> &groups) {
     if (_love_calculator_divider.process()) {
-      for (unsigned int cycle_i = 0; cycle_i < cycles.size(); cycle_i++) {
-
-        float cycle_i_love = 1.f;
-        for (unsigned int j = cycle_i + 1; j < cycles.size(); j++) {
-          cycle_i_love -= cycles[j]->readLove();
-          if (cycle_i_love <= 0.f)  {
-            cycle_i_love = 0.f;
-            break;
-          }
-        }
-
-        _next_cycles_love[cycle_i] = cycle_i_love;
+      for (Group group : groups) {
+        group.updateNextCyclesRelativeLove();
       }
     }
 
-    for (unsigned int i = 0; i < cycles.size(); i++) {
-      cycles[i]->relative_love = smoothValue(_next_cycles_love[i], cycles[i]->relative_love);
+    for (Group group : groups) {
+      float lambda = love_resolution / 44100;
+      group.smoothStepCyclesRelativeLove(lambda);
     }
   }
 
@@ -191,7 +173,7 @@ public:
 
     song.new_cycle->write(inputs.in, inputs.love);
 
-    updateSongCyclesLove(song.cycles);
+    updateSongCyclesLove(song.groups);
   }
 };
 

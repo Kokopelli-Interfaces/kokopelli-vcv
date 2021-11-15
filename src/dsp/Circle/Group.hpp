@@ -11,10 +11,14 @@ namespace circle {
 
 struct Group {
   Group *group;
+  float love = 1.f;
+  float relative_love = 1.f;
 
   char letter = 'A';
 
   std::vector<Cycle*> cycles_in_group;
+  std::vector<float> next_cycles_relative_love;
+
   std::vector<Time> period_history;
 
   Time period = 0.f;
@@ -27,6 +31,7 @@ struct Group {
     cycles_in_group.pop_back();
     period = period_history[last_i];
     period_history.pop_back();
+    next_cycles_relative_love.pop_back();
   }
 
   inline bool checkIfCycleIsInGroup(Cycle* cycle) {
@@ -75,7 +80,7 @@ struct Group {
     // TODO make option
     Time diff = cycle->period - period;
     if (0.f < diff) {
-      snap_back_window = this->beat_period;
+      // snap_back_window = this->beat_period;
       while (snap_back_window <= diff) {
         // TODO allow odds option?
         this->period *= 2;
@@ -109,6 +114,7 @@ struct Group {
 
   inline void addToGroup(Cycle* cycle) {
     this->cycles_in_group.push_back(cycle);
+    this->next_cycles_relative_love.push_back(1.f);
     this->period_history.push_back(period);
 
     if (cycle->loop) {
@@ -121,6 +127,50 @@ struct Group {
     }
 
     printf("-- added to group %c, n_beats->%d\n", letter, convertToBeat(cycle->period, false));
+  }
+
+  inline void updateNextCyclesRelativeLove() {
+    for (Cycle* cycle : this->cycles_in_group) {
+      cycle->relative_love = 1.f;
+    }
+
+    for (unsigned int i = 0; i < this->cycles_in_group.size(); i++) {
+      float cycle_i_relative_love = 1.f;
+      for (unsigned int j = i + 1; j < this->cycles_in_group.size(); j++) {
+        cycle_i_relative_love -= this->cycles_in_group[j]->readLove();
+        if (cycle_i_relative_love <= 0.f)  {
+          cycle_i_relative_love = 0.f;
+          break;
+        }
+      }
+
+      this->next_cycles_relative_love[i] = cycle_i_relative_love;
+    }
+  }
+
+  static inline float smoothValue(float current, float old, float lambda) {
+    return old + (current - old) * lambda;
+  }
+
+  inline void smoothStepCyclesRelativeLove(float lambda) {
+    for (unsigned int i = 0; i < cycles_in_group.size(); i++) {
+      cycles_in_group[i]->relative_love = smoothValue(next_cycles_relative_love[i], cycles_in_group[i]->relative_love, lambda);
+    }
+  }
+
+  inline float read() {
+    if (this->love == 0.f || this->relative_love == 0.f) {
+      return 0.f;
+    }
+
+    kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
+    float signal_out = 0.f;
+    for (unsigned int i = 0; i < cycles_in_group.size(); i++) {
+      float cycle_out = cycles_in_group[i]->readSignal();
+      signal_out = kokopellivcv::dsp::sum(signal_out, cycle_out, signal_type);
+    }
+
+    return signal_out * love * relative_love;
   }
 };
 

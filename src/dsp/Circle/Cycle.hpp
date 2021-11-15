@@ -56,7 +56,7 @@ struct Cycle {
       return 0.f;
     }
 
-   return signal_capture->read(this->playhead) * this->love * this->relative_love;
+    return signal_capture->read(this->playhead) * this->love * this->relative_love;
   }
 
   inline float readLove() {

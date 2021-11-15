@@ -51,9 +51,8 @@ struct Song {
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
     float signal_out = 0.f;
-    for (unsigned int i = 0; i < cycles.size(); i++) {
-      float cycle_out = cycles[i]->readSignal();
-      signal_out = kokopellivcv::dsp::sum(signal_out, cycle_out, signal_type);
+    for (Group group : groups) {
+      signal_out = kokopellivcv::dsp::sum(signal_out, group.read(), signal_type);
     }
 
     return signal_out;

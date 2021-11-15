@@ -4,7 +4,7 @@
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(TUNE_PARAM, 0.f, 1.f, 0.f, "Tune to Group Frequency");
-  configParam(ASCEND_PARAM, 0.f, 1.f, 0.f, "Ascend");
+  configParam(CYCLE_DIVINITY_PARAM, 0.f, 1.f, 0.f, "Cycle_Divinity");
   configParam(CYCLE_FORWARD_PARAM, 0.f, 1.f, 0.f, "Cycle_Forward");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
@@ -14,7 +14,7 @@ Circle::Circle() {
 
   _tune_button.param = &params[TUNE_PARAM];
   _cycle_forward_button.param = &params[CYCLE_FORWARD_PARAM];
-  _ascend_button.param = &params[ASCEND_PARAM];
+  _cycle_divinity_button.param = &params[CYCLE_DIVINITY_PARAM];
 }
 
 Circle::~Circle() {
@@ -31,7 +31,7 @@ void Circle::processButtons(const ProcessArgs &args) {
 
   kokopellivcv::dsp::LongPressButton::Event _tune_event = _tune_button.process(sample_time);
   kokopellivcv::dsp::LongPressButton::Event _cycle_forward_event = _cycle_forward_button.process(sample_time);
-  kokopellivcv::dsp::LongPressButton::Event _ascend_event = _ascend_button.process(sample_time);
+  kokopellivcv::dsp::LongPressButton::Event _cycle_divinity_event = _cycle_divinity_button.process(sample_time);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
@@ -49,16 +49,16 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     }
 
-    switch (_ascend_event) {
+    switch (_cycle_divinity_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->ascend();
-      _light_blinker->blinkLight(ASCEND_LIGHT);
+      e->cycleDivinity();
+      _light_blinker->blinkLight(CYCLE_DIVINITY_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->descend();
-      _light_blinker->blinkLight(ASCEND_LIGHT); // TODO extra
+      _light_blinker->blinkLight(CYCLE_DIVINITY_LIGHT); // TODO extra
       break;
     }
 
@@ -178,13 +178,13 @@ void Circle::updateLights(const ProcessArgs &args) {
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {
-    updateLight(ASCEND_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
+    updateLight(CYCLE_DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
     updateLight(CYCLE_FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else if (love_direction == LoveDirection::EMERGENCE) {
-    updateLight(ASCEND_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(CYCLE_DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
     updateLight(CYCLE_FORWARD_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
   } else { // LoveDirection::NEW
-    updateLight(ASCEND_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(CYCLE_DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
     updateLight(CYCLE_FORWARD_LIGHT, colors::WOMB_LIGHT, 0.6f);
   }
 

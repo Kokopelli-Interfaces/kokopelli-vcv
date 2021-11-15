@@ -34,7 +34,7 @@ struct Engine {
   float readAll();
   float readEstablished();
 
-  void ascend();
+  void cycleDivinity();
   void descend();
   void cycleForward();
   void undo();

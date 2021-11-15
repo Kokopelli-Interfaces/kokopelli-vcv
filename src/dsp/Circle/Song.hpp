@@ -12,23 +12,13 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
-/**
-   The Song is the top level structure for content.
-*/
 struct Song {
-  // struct Playhead {
-  //   Movement* movement;
-  //   unsigned int beat;
-  //   float phase;
-  // };
-
   std::string name = "my song";
 
   std::vector<Group> groups;
   Group* established_group;
 
   std::vector<Cycle*> cycles;
-
   Cycle *new_cycle = nullptr;
 
   Time playhead = 0.f;

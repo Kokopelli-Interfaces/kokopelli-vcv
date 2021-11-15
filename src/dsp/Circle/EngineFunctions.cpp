@@ -21,7 +21,8 @@ void Engine::cycleForward() {
 }
 
 // TODO
-void Engine::ascend() {
+void Engine::cycleDivinity() {
+
   // TODO make a group !
 }
 

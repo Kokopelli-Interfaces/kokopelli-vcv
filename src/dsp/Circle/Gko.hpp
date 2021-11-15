@@ -113,6 +113,9 @@ public:
     }
   }
 
+  inline void cycleDivinity() {
+  }
+
 private:
   inline void updateSongCyclesLove(std::vector<Group> &groups) {
     if (_love_calculator_divider.process()) {

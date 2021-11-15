@@ -219,7 +219,7 @@ struct CircleWidget : ModuleWidget {
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.259)), module, Circle::TUNE_PARAM));
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.580)), module, Circle::LOVE_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.177, 79.26)), module, Circle::ASCEND_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.177, 79.26)), module, Circle::CYCLE_DIVINITY_PARAM));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.236, 79.26)), module, Circle::CYCLE_FORWARD_PARAM));
 
 		addInput(createInput<WombPort>(mm2px(Vec(24.280, 94.323)), module, Circle::WOMB_INPUT));
@@ -232,7 +232,7 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Circle::PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 55.665)), module, Circle::TUNE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Circle::ASCEND_LIGHT));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Circle::CYCLE_DIVINITY_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.701, 80.724)), module, Circle::CYCLE_FORWARD_LIGHT));
 
     // FIXME have ONE display pLEASe

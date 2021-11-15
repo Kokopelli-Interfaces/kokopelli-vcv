@@ -17,15 +17,15 @@ struct Group {
   std::vector<Cycle*> cycles_in_group;
   std::vector<Time> period_history;
 
-  Time group_period;
-  Time group_beat;
+  Time period = 0.f;
+  Time beat_period = 0.f;
 
   inline void undoLastCycle() {
     assert(cycles_in_group.size() == period_history.size());
 
     int last_i = cycles_in_group.size() - 1;
     cycles_in_group.pop_back();
-    group_period = period_history[last_i];
+    period = period_history[last_i];
     period_history.pop_back();
   }
 
@@ -38,35 +38,55 @@ struct Group {
     return false;
   }
 
-  inline Time fitPeriodIntoGroup(Time period) {
-    Time diff = period - group_period;
+  inline int convertToBeat(Time time, bool mod) {
+    if (period != 0.f && beat_period != 0.f) {
+      float time_in_established = time;
+      if (mod && period < time) {
+        time_in_established = std::fmod((float)time, (float)period);
+      }
 
-    bool grow_group_and_period = 1 <= diff.tick;
+      return (int) (time_in_established / beat_period);
+    }
+    return 0.f;
+  }
+
+  inline int getTotalBeats() {
+    if (beat_period != 0.f) {
+      return (period / beat_period);
+    } else {
+      return 0;
+    }
+  }
+
+  inline void adjustPeriodsToFit(Cycle* cycle) {
+    Time diff = cycle->period - period;
+
+    float snap_back_window = 0.5f;
+    bool grow_group_and_period = snap_back_window <= diff;
     if (grow_group_and_period) {
-      while (1 <= diff.tick) {
-        // TODO optional
-        this->group_period = this->group_period + this->group_period;
-        diff = period - this->group_period;
+      while (snap_back_window <= diff) {
+        this->period *= 2;
+        diff = cycle->period - this->period;
       }
     }
 
-    // TODO check divisions of group
-    return this->group_period;
+    cycle->period = this->period;
   }
 
   inline void addToGroup(Cycle* cycle) {
     this->cycles_in_group.push_back(cycle);
-    this->period_history.push_back(group_period);
+    this->period_history.push_back(period);
 
     if (cycle->loop) {
       if (this->cycles_in_group.size() == 1) {
-        group_period = cycle->period;
-        group_beat = cycle->period;
+        period = cycle->period;
+        beat_period = cycle->period;
       } else {
-        Time new_cycle_period = fitPeriodIntoGroup(cycle->period);
-        cycle->updatePeriod(new_cycle_period);
+        adjustPeriodsToFit(cycle);
       }
     }
+
+    printf("-- added to group %c, n_beats->%d\n", letter, convertToBeat(cycle->period, false));
   }
 
 };

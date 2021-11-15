@@ -125,19 +125,6 @@ int Circle::channels() {
 void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
 
-  if (inputs[PHASE_INPUT].isConnected()) {
-    float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
-    // if (_options.bipolar_phase_input) {
-    //   phase_in += 5.0f;
-    // }
-
-    e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
-  }
-
-  if (outputs[PHASE_OUTPUT].isConnected()) {
-    outputs[PHASE_OUTPUT].setVoltage(e->_song.playhead.phase * 10, channel_i);
-  }
-
   if (inputs[WOMB_INPUT].isConnected()) {
     e->inputs.in = inputs[WOMB_INPUT].getPolyVoltage(channel_i);
   } else {
@@ -185,7 +172,9 @@ void Circle::updateLights(const ProcessArgs &args) {
   if (default_e->_gko.tune_to_frequency_of_established) {
     updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.current_movement->getMovementPhase(default_e->_song.playhead));
   } else {
-    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, default_e->_song.new_cycle->playhead.phase);
+    long double playhead = default_e->_song.new_cycle->playhead;
+    long double playhead_ms = rack::math::eucMod(playhead, 1.0f);
+    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, playhead_ms);
   }
 
   if (love_direction == LoveDirection::ESTABLISHED) {

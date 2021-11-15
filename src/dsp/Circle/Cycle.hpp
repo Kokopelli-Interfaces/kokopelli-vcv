@@ -11,13 +11,17 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
+struct Group;
+
 struct Cycle {
+  Group* group;
+
   Time period;
 
   Time capture_start;
   Time capture_period;
 
-  Time playhead;
+  Time playhead = 0.f;
 
   float love = 1.f;
   float relative_love = 1.f;
@@ -30,12 +34,13 @@ struct Cycle {
 
   bool loop = false;
 
-  inline Cycle(Time start, Movement* movement ) {
+  inline Cycle(Time start, Movement* movement, Group *group) {
     this->capture_start = capture_start;
     this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
     this->movement = movement;
+    this->group = group;
   }
 
   inline ~Cycle() {
@@ -77,7 +82,7 @@ struct Cycle {
     this->period = playhead;
     this->signal_capture->finishWrite();
     this->love_capture->finishWrite();
-    printf("Cycle End with period %ld -- %f\n", playhead.tick, playhead.phase);
+    printf("Cycle End with period %Lf\n", this->period);
   }
 };
 

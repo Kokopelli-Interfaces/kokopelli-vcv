@@ -25,7 +25,7 @@ public:
   bool use_ext_phase = false;
   float ext_phase = 0.f;
   float sample_time = 1.0f;
-  volatile float love_resolution = 10000.f;
+  float love_resolution = 10000.f;
   bool tune_to_frequency_of_established = true;
 
   /** read only */
@@ -64,54 +64,23 @@ public:
     case CycleEnd::DISCARD:
       discard = true;
       break;
-    // case CycleEnd::DISCARD_AND_NEXT_MOVEMENT_IN_GROUP:
-    //   song.current_movement = Movement::findNextMovementWithSameGroup(song.current_movement);
-    //   song.playhead.tick = song.playhead.tick % song.current_movement->period;
-    //   break;
-    // case CycleEnd::DISCARD_AND_NEXT_MOVEMENT:
-    //   song.current_movement = Movement::findNextMovement(song.current_movement);
-    //   song.playhead.tick = song.playhead.tick % song.current_movement->period;
-    //   break;
     case CycleEnd::JOIN_ESTABLISHED_LOOP:
       song.new_cycle->loop = true;
-      // FIXME
-      // fitCycleIntoGroup(song.current_movement, song.new_cycle);
       addCycle(song.cycles, song.new_cycle);
       break;
     case CycleEnd::JOIN_ESTABLISHED_NO_LOOP:
-      // movement may have changed already, in which case, just leave it
       song.new_cycle->loop = false;
       addCycle(song.cycles, song.new_cycle);
-      // if (song.new_cycle->movement->next == nullptr) {
-      //   song.current_movement = Movement::createNextMovement(song.current_movement, song.current_movement->period);
-      // }
-      break;
-    // case CycleEnd::SET_PERIOD_TO_ESTABLISHED_AND_EMERGE_WITH_MOVEMENT:
-    //   song.new_cycle->loop = true;
-    //   song.new_cycle->updateCyclePeriod(song.new_cycle->movement->end_tick - song.new_cycle->movement->start_tick);
-    //   addCycle(song.cycles, song.new_cycle);
-    //   break;
-    // case CycleEnd::JOIN_ESTABLISHED_AND_CREATE_NEXT_MOVEMENT:
-    //   song.new_cycle->loop = true;
-    //   fitCycleIntoGroup(song.current_movement, song.new_cycle);
-    //   addCycle(song.cycles, song.new_cycle);
-    //   song.current_movement = Movement::createNextMovement(song.current_movement, song.current_movement->period);
-      // song.playhead.tick = song.playhead.tick % song.current_movement->period;
       break;
     case CycleEnd::DO_NOT_LOOP_AND_NEXT_MOVEMENT:
-      // movement may have changed already, in which case, just leave it
       song.new_cycle->loop = false;
       addCycle(song.cycles, song.new_cycle);
-      // if (song.new_cycle->movement->next == nullptr) {
-      //   song.current_movement = Movement::createNextMovement(song.current_movement, song.current_movement->period);
-      // }
       break;
     }
 
     if (!discard) {
       song.new_cycle->finishWrite();
-      // resizes
-      song.established_group->addToGroup(song.new_cycle);
+      song.new_cycle->group->addToGroup(song.new_cycle);
     } else {
       delete song.new_cycle;
     }
@@ -127,18 +96,13 @@ public:
 
     Time start = song.playhead;
     // FIXME calculated samples_per_tick will suck
-    song.new_cycle = new Cycle(start, cycle_movement);
+    song.new_cycle = new Cycle(start, cycle_movement, song.established_group);
   }
 
   inline void undoCycle(Song &song) {
     if (0 < song.cycles.size()) {
       Cycle* last_cycle = song.cycles[song.cycles.size()-1];
-      for (Group group : song.groups) {
-        if (group.checkIfCycleIsInGroup(last_cycle)) {
-          group.undoLastCycle();
-        }
-      }
-
+      last_cycle->group->undoLastCycle();
       song.cycles.pop_back();
     }
   }
@@ -218,26 +182,11 @@ private:
     for (Cycle* cycle : song.cycles) {
       _song_time_advancer.step(cycle->playhead, this->sample_time);
       if (cycle->period < cycle->playhead) {
-        cycle->playhead.restart();
+        cycle->playhead = 0.f;
       }
     }
 
-    // FIXME
-    // TimeEvent last_event = _song_time_advancer.getLastTimeEvent();
-    // if (last_event == TimeEvent::NEXT_TICK) {
-    //   // FIXME
-    //   bool reached_movement_end = song.current_movement->period.tick <= song.playhead.tick;
-    //   if (reached_movement_end) {
-    //     bool next_movement = song.current_movement->next && !this->tune_to_frequency_of_established;
-    //     if (next_movement) {
-    //       song.current_movement = song.current_movement->next;
-    //     } else {
-    //       song.playhead = song.current_movement->start;
-    //     }
-    //   }
-
-      _song_time_advancer.clearTimeEvent();
-    // }
+    // TODO cycle back
   }
 
 public:

@@ -12,7 +12,6 @@ namespace circle {
 struct TimeAdvancer {
   float _freq = 0.f;
   bool _freq_set = false;
-  TimeEvent _last_event = TimeEvent::NONE;
 
   TimeAdvancer() {}
 
@@ -29,22 +28,8 @@ struct TimeAdvancer {
     return _freq;
   }
 
-  inline TimeEvent getLastTimeEvent() {
-    return _last_event;
-  }
-
-  inline void clearTimeEvent() {
-    _last_event = TimeEvent::NONE;
-  }
-
   inline void step(Time &time, float dt) {
-    float d_phase = _freq * dt;
-    float sum = time.phase + d_phase;
-    if (1.0f < sum) {
-      _last_event = TimeEvent::NEXT_TICK;
-      time.tick++;
-    }
-    time.phase = rack::math::eucMod(sum, 1.0f);
+    time += _freq * dt;
   }
 };
 

@@ -53,6 +53,8 @@ struct TimeCapture {
   }
 
   inline float read(Time t) {
+    assert(t <= _period);
+
     long double buffer_position = (t / _period) * _buffer.size();
 
     if (_signal_type == kokopellivcv::dsp::SignalType::AUDIO) {

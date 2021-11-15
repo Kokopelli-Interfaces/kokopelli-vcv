@@ -8,7 +8,8 @@ void Engine::step() {
 }
 
 int Engine::getMostRecentCycleLength() {
-  return _song.cycles[_song.cycles.size()-1]->period.tick;
+  Cycle* recent_cycle = _song.cycles[_song.cycles.size()-1];
+  return recent_cycle->group->convertToBeat(recent_cycle->period, false);
 }
 
 void Engine::toggleTuneToFrequencyOfEstablished() {

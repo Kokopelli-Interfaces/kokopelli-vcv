@@ -122,8 +122,8 @@ struct EstablishedBeatDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int movement_beat_display = e->_song.playhead.tick;
-    CircleValueDisplay::setDisplayValue(movement_beat_display);
+    int beat_in_established = e->_song.established_group->convertToBeat(e->_song.playhead, true);
+    CircleValueDisplay::setDisplayValue(beat_in_established + 1);
 	}
 };
 
@@ -132,9 +132,7 @@ struct TotalEstablishedBeatDisplay : CircleValueDisplay {
 
   // FIXME
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    // unsigned int n_circle_beats = e->_song.current_movement->end_beat - e->_song.current_movement->start.tick;
-    // CircleValueDisplay::setDisplayValue(n_circle_beats);
-    CircleValueDisplay::setText("ERR");
+    CircleValueDisplay::setDisplayValue(e->_song.established_group->getTotalBeats());
 	}
 };
 
@@ -161,7 +159,12 @@ struct WombBeatDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    CircleValueDisplay::setDisplayValue(e->_song.new_cycle->playhead.tick + 1);
+    if (e->_gko.tune_to_frequency_of_established) {
+    int beat_in_established = e->_song.established_group->convertToBeat(e->_song.new_cycle->playhead, false);
+      CircleValueDisplay::setDisplayValue(beat_in_established + 1);
+    } else {
+      CircleValueDisplay::setDisplayValue((int)e->_song.new_cycle->playhead);
+    }
 	}
 };
 
@@ -173,17 +176,14 @@ struct TotalWombBeatDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int total_cycle_beats = 0;
-    if (e->_song.cycles.size() != 0) {
-      total_cycle_beats = e->getMostRecentCycleLength();
-      textColor = colors::LOOK_BACK_LAYER;
-    } else {
+    if (e->_song.cycles.size() == 0) {
       CircleValueDisplay::setText("--");
       CircleValueDisplay::_previous_displayed_value = -1;
       return;
     }
 
-    CircleValueDisplay::setDisplayValue(total_cycle_beats);
+    textColor = colors::LOOK_BACK_LAYER;
+    CircleValueDisplay::setDisplayValue(e->getMostRecentCycleLength());
 	}
 };
 

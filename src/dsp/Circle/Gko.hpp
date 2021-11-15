@@ -49,20 +49,18 @@ public:
   }
 
 private:
-  static inline void fitCycleIntoGroup(Group* group, Cycle* cycle) {
-  }
-
   inline void addCycle(std::vector<Cycle*> &cycles, Cycle* cycle) {
+    cycle->finishWrite();
+    cycle->group->addToGroup(cycle);
     cycles.push_back(cycle);
     _next_cycles_love.resize(cycles.size());
   }
 
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
-    bool discard = false;
     switch (cycle_end) {
     case CycleEnd::DISCARD:
-      discard = true;
+      delete song.new_cycle;
       break;
     case CycleEnd::JOIN_ESTABLISHED_LOOP:
       song.new_cycle->loop = true;
@@ -76,13 +74,6 @@ public:
       song.new_cycle->loop = false;
       addCycle(song.cycles, song.new_cycle);
       break;
-    }
-
-    if (!discard) {
-      song.new_cycle->finishWrite();
-      song.new_cycle->group->addToGroup(song.new_cycle);
-    } else {
-      delete song.new_cycle;
     }
 
     // TODO
@@ -202,7 +193,6 @@ public:
 
     updateSongCyclesLove(song.cycles);
   }
-
 };
 
 } // namespace circle

@@ -47,7 +47,7 @@ struct Group {
 
       return (int) (time_in_established / beat_period);
     }
-    return 0.f;
+    return 0;
   }
 
   inline int getTotalBeats() {
@@ -61,6 +61,7 @@ struct Group {
   inline void adjustPeriodsToFit(Cycle* cycle) {
     Time diff = cycle->period - period;
 
+    // TODO make option
     float snap_back_window = 0.5f;
     bool grow_group_and_period = snap_back_window <= diff;
     if (grow_group_and_period) {
@@ -70,6 +71,10 @@ struct Group {
       }
     }
 
+    // preserve cycle offset
+    if (0.f < diff) {
+      cycle->playhead = diff;
+    }
     cycle->period = this->period;
   }
 
@@ -88,7 +93,6 @@ struct Group {
 
     printf("-- added to group %c, n_beats->%d\n", letter, convertToBeat(cycle->period, false));
   }
-
 };
 
 } // namespace circle

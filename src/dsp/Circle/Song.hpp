@@ -40,7 +40,7 @@ struct Song {
     this->current_movement = new Movement();
     this->current_movement->group_start_movement = this->current_movement;
     this->start_movement = this->current_movement;
-    Time start;
+    Time start = 0.f;
     Group first_group;
     this->groups.push_back(first_group);
     this->established_group = &groups[0];

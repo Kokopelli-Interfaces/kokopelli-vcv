@@ -18,7 +18,7 @@ namespace dsp {
 namespace circle {
 
 struct TimeCapture {
-  Time _period;
+  Time _period = 0.f;
 
   kokopellivcv::dsp::SignalType _signal_type;
   // std::vector<std::vector<float>> _buffer;
@@ -53,7 +53,9 @@ struct TimeCapture {
   }
 
   inline float read(Time t) {
-    assert(t <= _period);
+    if (_period <= t) {
+      return 0.f;
+    }
 
     long double buffer_position = (t / _period) * _buffer.size();
 

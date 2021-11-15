@@ -19,7 +19,6 @@ struct Cycle {
   Time period;
 
   Time capture_start;
-  Time capture_period;
 
   Time playhead = 0.f;
 
@@ -35,7 +34,7 @@ struct Cycle {
   bool loop = false;
 
   inline Cycle(Time start, Movement* movement, Group *group) {
-    this->capture_start = capture_start;
+    this->capture_start = start;
     this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
@@ -46,11 +45,6 @@ struct Cycle {
   inline ~Cycle() {
     delete signal_capture;
     delete love_capture;
-  }
-
-  inline void updatePeriod(Time new_period) {
-    // FIXME
-    this->period = new_period;
   }
 
   inline float readSignal() {

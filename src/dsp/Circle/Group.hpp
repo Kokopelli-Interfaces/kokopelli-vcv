@@ -89,9 +89,10 @@ struct Group {
 
       adjusted_period = this->period;
     } else {
-      int snap_beat = convertToBeat(cycle->period, false);
-      float phase = rack::math::eucMod(cycle->period, 1.0f);
-      if (snap_back_window < phase || snap_beat == 0) {
+      Time div = cycle->period / beat_period;
+      int snap_beat = (int) div;
+      float beat_phase = rack::math::eucMod(div, 1.0f);
+      if (snap_back_window < beat_phase || snap_beat == 0) {
         snap_beat++;
       }
 

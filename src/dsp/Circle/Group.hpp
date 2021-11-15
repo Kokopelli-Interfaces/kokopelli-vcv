@@ -69,12 +69,13 @@ struct Group {
   inline void adjustPeriodsToFit(Cycle* cycle) {
     Time adjusted_period = cycle->period;
     // TODO option
-    // float snap_back_window = this->beat_period / 2.f;
-    float snap_back_window = this->beat_period / 4.f;
+    float snap_back_window = this->beat_period / 2.f;
+    // float snap_back_window = this->beat_period / 4.f;
 
     // TODO make option
     Time diff = cycle->period - period;
     if (0.f < diff) {
+      snap_back_window = this->beat_period;
       while (snap_back_window <= diff) {
         // TODO allow odds option?
         this->period *= 2;

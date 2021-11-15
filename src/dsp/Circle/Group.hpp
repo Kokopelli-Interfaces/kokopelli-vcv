@@ -14,6 +14,11 @@ struct Group {
 
   Group *group;
   char letter = 'A';
+
+  std::vector<Cycle*> cycles_in_group;
+
+  inline Time alterPeriodToFitIntoGroup(Time period) {
+  }
 };
 
 } // namespace circle

@@ -18,8 +18,8 @@ namespace dsp {
 namespace circle {
 
 /**
-   The advancer of the song
-   */
+   The advancer of the song. Gko - 'the one that emanates the universe'.
+*/
 class Gko {
 public:
   bool use_ext_phase = false;
@@ -186,13 +186,13 @@ private:
   }
 
 
-  inline void updateSongCyclesLove(Song &song) {
+  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles) {
     if (_love_calculator_divider.process()) {
-      for (unsigned int cycle_i = 0; cycle_i < song.cycles.size(); cycle_i++) {
+      for (unsigned int cycle_i = 0; cycle_i < cycles.size(); cycle_i++) {
 
         float cycle_i_love = 1.f;
-        for (unsigned int j = cycle_i + 1; j < song.cycles.size(); j++) {
-          cycle_i_love -= song.cycles[j]->readLove();
+        for (unsigned int j = cycle_i + 1; j < cycles.size(); j++) {
+          cycle_i_love -= cycles[j]->readLove();
           if (cycle_i_love <= 0.f)  {
             cycle_i_love = 0.f;
             break;
@@ -203,8 +203,8 @@ private:
       }
     }
 
-    for (unsigned int i = 0; i < song.cycles.size(); i++) {
-      song.cycles[i]->love = smoothValue(_next_cycles_love[i], song.cycles[i]->love);
+    for (unsigned int i = 0; i < cycles.size(); i++) {
+      cycles[i]->relative_love = smoothValue(_next_cycles_love[i], cycles[i]->relative_love);
     }
   }
 
@@ -269,7 +269,7 @@ public:
 
     song.new_cycle->write(inputs.in, inputs.love);
 
-    updateSongCyclesLove(song);
+    updateSongCyclesLove(song.cycles);
   }
 
 };

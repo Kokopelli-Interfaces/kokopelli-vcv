@@ -170,7 +170,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   LoveDirection love_direction = default_e->_gko._love_direction;
   if (default_e->_gko.tune_to_frequency_of_established) {
-    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.current_movement->getMovementPhase(default_e->_song.playhead));
+    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.established_group->getPhase(default_e->_song.playhead));
   } else {
     long double playhead = default_e->_song.new_cycle->playhead;
     long double playhead_ms = rack::math::eucMod(playhead, 1.0f);

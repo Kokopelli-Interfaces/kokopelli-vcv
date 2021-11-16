@@ -22,7 +22,7 @@ void Engine::cycleForward() {
 
 // TODO
 void Engine::cycleDivinity() {
-
+  _gko.cycleDivinity(_song);
   // TODO make a group !
 }
 

@@ -17,13 +17,11 @@ struct Cycle {
   Group* group;
 
   Time period;
-
   Time capture_start;
 
   Time playhead = 0.f;
 
   float love = 1.f;
-  float relative_love = 1.f;
 
   Movement movement_at_start;
   Movement* movement;
@@ -52,11 +50,11 @@ struct Cycle {
       return 0.f;
     }
 
-    if (this->love == 0.f || this->relative_love == 0.f) {
+    if (this->love == 0.f) {
       return 0.f;
     }
 
-    return signal_capture->read(this->playhead) * this->love * this->relative_love;
+    return signal_capture->read(this->playhead) * this->love;
   }
 
   inline float readLove() {

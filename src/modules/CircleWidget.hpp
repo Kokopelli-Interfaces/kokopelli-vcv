@@ -113,8 +113,7 @@ struct EstablishedDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s = string::f("%c", e->_song.current_movement->group);
-    CircleValueDisplay::setText(s);
+    CircleValueDisplay::setText(e->_song.established_group->id);
   }
 };
 
@@ -145,7 +144,7 @@ struct WombDisplay : CircleValueDisplay {
   }
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int womb_display = e->_song.cycles.size() + 1;
+    int womb_display = e->_song.established_group->cycles_in_group.size() + 1;
     std::string s = string::f("%d", womb_display);
     CircleValueDisplay::setText(s);
 	}

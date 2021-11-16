@@ -10,11 +10,9 @@ namespace dsp {
 namespace circle {
 
 struct Group {
-  Group *group;
-  float love = 1.f;
-  float relative_love = 1.f;
+  Group *parent_group = nullptr;
 
-  char letter = 'A';
+  std::string id = "A";
 
   std::vector<Cycle*> cycles_in_group;
   std::vector<float> next_cycles_relative_love;
@@ -32,6 +30,10 @@ struct Group {
     period = period_history[last_i];
     period_history.pop_back();
     next_cycles_relative_love.pop_back();
+
+    if (parent_group) {
+      parent_group->undoLastCycle();
+    }
   }
 
   inline bool checkIfCycleIsInGroup(Cycle* cycle) {
@@ -74,25 +76,25 @@ struct Group {
   inline void adjustPeriodsToFit(Cycle* cycle) {
     Time adjusted_period;
 
-    double total_beats = period / beat_period;
     Time div = cycle->period / beat_period;
     float beat_phase = rack::math::eucMod(div, 1.0f);
     // TODO option
-    float round_back_beat_phase = 0.5f;
 
     Time diff = cycle->period - period;
-    if ((float)total_beats < div) {
+    if (0.f < diff) {
       // snap_back_window = this->beat_period;
-      while (round_back_beat_phase <= diff) {
+      float period_round_back_phase = 0.5f;
+      while (period_round_back_phase <= (diff / period)) {
+        // TODO find lcms later
         this->period *= 2;
-        total_beats = period / beat_period;
-        diff = div - total_beats;
+        diff = cycle->period - period;
       }
 
       adjusted_period = this->period;
     } else {
+      float beat_round_back_phase = 0.5f;
       int snap_beat = (int) div;
-      if (round_back_beat_phase < beat_phase || snap_beat == 0) {
+      if (beat_round_back_phase < beat_phase || snap_beat == 0) {
         snap_beat++;
       }
 
@@ -114,6 +116,10 @@ struct Group {
   }
 
   inline void addToGroup(Cycle* cycle) {
+    if (parent_group) {
+      parent_group->addToGroup(cycle);
+    }
+
     this->cycles_in_group.push_back(cycle);
     this->next_cycles_relative_love.push_back(1.f);
     this->period_history.push_back(period);
@@ -127,51 +133,7 @@ struct Group {
       }
     }
 
-    printf("-- added to group %c, n_beats->%d\n", letter, convertToBeat(cycle->period, false));
-  }
-
-  inline void updateNextCyclesRelativeLove() {
-    for (Cycle* cycle : this->cycles_in_group) {
-      cycle->relative_love = 1.f;
-    }
-
-    for (unsigned int i = 0; i < this->cycles_in_group.size(); i++) {
-      float cycle_i_relative_love = 1.f;
-      for (unsigned int j = i + 1; j < this->cycles_in_group.size(); j++) {
-        cycle_i_relative_love -= this->cycles_in_group[j]->readLove();
-        if (cycle_i_relative_love <= 0.f)  {
-          cycle_i_relative_love = 0.f;
-          break;
-        }
-      }
-
-      this->next_cycles_relative_love[i] = cycle_i_relative_love;
-    }
-  }
-
-  static inline float smoothValue(float current, float old, float lambda) {
-    return old + (current - old) * lambda;
-  }
-
-  inline void smoothStepCyclesRelativeLove(float lambda) {
-    for (unsigned int i = 0; i < cycles_in_group.size(); i++) {
-      cycles_in_group[i]->relative_love = smoothValue(next_cycles_relative_love[i], cycles_in_group[i]->relative_love, lambda);
-    }
-  }
-
-  inline float read() {
-    if (this->love == 0.f || this->relative_love == 0.f) {
-      return 0.f;
-    }
-
-    kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
-    float signal_out = 0.f;
-    for (unsigned int i = 0; i < cycles_in_group.size(); i++) {
-      float cycle_out = cycles_in_group[i]->readSignal();
-      signal_out = kokopellivcv::dsp::sum(signal_out, cycle_out, signal_type);
-    }
-
-    return signal_out * love * relative_love;
+    printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
   }
 };
 

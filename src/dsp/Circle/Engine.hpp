@@ -31,7 +31,7 @@ struct Engine {
   // AntipopFilter _read_antipop_filter;
 
   void step();
-  float readAll();
+  float readSun();
   float readEstablished();
 
   void cycleDivinity();

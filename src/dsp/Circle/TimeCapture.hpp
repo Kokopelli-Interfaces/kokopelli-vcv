@@ -10,7 +10,6 @@
 #include "rack.hpp"
 #include "util/math.hpp"
 
-using namespace std;
 using namespace kokopellivcv::util;
 
 namespace kokopellivcv {

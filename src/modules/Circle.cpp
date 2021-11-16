@@ -134,7 +134,7 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   e->step();
 
   if (outputs[SUN].isConnected()) {
-    outputs[SUN].setVoltage(e->readAll(), channel_i);
+    outputs[SUN].setVoltage(e->readSun(), channel_i);
   }
 
   if (outputs[ESTABLISHED_OUTPUT].isConnected()) {

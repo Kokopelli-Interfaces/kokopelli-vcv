@@ -9,7 +9,7 @@ enum CycleEnd {
   DISCARD,
   JOIN_ESTABLISHED_LOOP,
   JOIN_ESTABLISHED_NO_LOOP,
-  DO_NOT_LOOP_AND_NEXT_MOVEMENT
+  JOIN_ESTABLISHED_AND_CREATE_SUBGROUP
 };
 
 // another way to say: ORDER, LIFE, CHAOS
@@ -32,6 +32,11 @@ struct Inputs {
       return LoveDirection::NEW;
     }
   }
+};
+
+struct Outputs {
+  float sun = 0.f;
+  float established = 0.f;
 };
 
 struct Options {

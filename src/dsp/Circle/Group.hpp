@@ -76,22 +76,24 @@ struct Group {
   inline void adjustPeriodsToFit(Cycle* cycle) {
     Time adjusted_period;
 
-    Time div = cycle->period / beat_period;
-    float beat_phase = rack::math::eucMod(div, 1.0f);
     // TODO option
 
     Time diff = cycle->period - period;
     if (0.f < diff) {
       // snap_back_window = this->beat_period;
-      float period_round_back_phase = 0.5f;
-      while (period_round_back_phase <= (diff / period)) {
+      Time percent_cycle = cycle->period / period;
+      float period_round_back_phase = 1.5f;
+      while (period_round_back_phase <= percent_cycle) {
         // TODO find lcms later
         this->period *= 2;
         diff = cycle->period - period;
+        percent_cycle = cycle->period / period;
       }
 
       adjusted_period = this->period;
     } else {
+      Time div = cycle->period / beat_period;
+      float beat_phase = rack::math::eucMod(div, 1.0f);
       float beat_round_back_phase = 0.5f;
       int snap_beat = (int) div;
       if (beat_round_back_phase < beat_phase || snap_beat == 0) {

@@ -73,8 +73,21 @@ struct Group {
     }
   }
 
-  // inline std::vector<int> getSnapBeats() {
-  // }
+  inline std::vector<int> getSnapBeats() {
+    assert(beat_period != 0.f);
+
+    std::vector<int> snap_beats;
+    int beat = 0;
+    int total_beats = period / beat_period;
+    while(beat < total_beats) {
+      beat++;
+      if (total_beats % beat == 0) {
+        snap_beats.push_back(beat);
+      }
+    }
+
+    return snap_beats;
+  }
 
   inline void adjustPeriodsToFit(Cycle* cycle) {
     Time adjusted_period;
@@ -85,29 +98,34 @@ struct Group {
     Time diff = cycle->period - period;
     if (0.f < diff) {
       // snap_back_window = this->beat_period;
+      Time start_period = period;
       Time percent_cycle = cycle->period / period;
       while (period_round_back_phase <= percent_cycle) {
         // TODO find lcms later
-        this->period *= 2;
+        this->period += start_period;
         diff = cycle->period - period;
         percent_cycle = cycle->period / period;
       }
 
       adjusted_period = this->period;
     } else {
-      Time div = cycle->period / beat_period;
-      float beat_phase = rack::math::eucMod(div, 1.0f);
-      float beat_round_back_phase = 0.5f;
-      int snap_beat = (int) div;
-      if (beat_round_back_phase < beat_phase || snap_beat == 0) {
-        snap_beat++;
-      }
+      Time cycle_time_in_beats = cycle->period / beat_period;
+      std::vector<int> snap_beats = getSnapBeats();
+      int snap_beat = 1;
+      for (unsigned int i = 1; i < snap_beats.size(); i++) {
+        bool cycle_is_between_beats = (float)snap_beats[i-1] <= cycle_time_in_beats && cycle_time_in_beats <= (float)snap_beats[i];
+        if (cycle_is_between_beats) {
+          Time time_between_snap_beats = beat_period * (snap_beats[i] - snap_beats[i-1]);
+          Time cycle_position_in_between_snap_beats_area = cycle->period - (beat_period * snap_beats[i-1]);
+          Time percent_position_in_snap_beats_area = cycle_position_in_between_snap_beats_area / time_between_snap_beats;
 
-      std::vector<int> snap_beats
-
-      int total_beats = getTotalBeats();
-      while (total_beats % snap_beat != 0) {
-        snap_beat++;
+          if (percent_position_in_snap_beats_area <= 0.5f) {
+            snap_beat = snap_beats[i-1];
+          } else {
+            snap_beat = snap_beats[i];
+          }
+          break;
+        }
       }
 
       Time snap_beat_time = (long double)snap_beat * beat_period;

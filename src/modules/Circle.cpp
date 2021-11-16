@@ -98,7 +98,7 @@ void Circle::modulateChannel(int channel_i) {
     love *= rack::clamp(inputs[LOVE_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
   }
 
-  // taking to the strength of 2 gives a more intuitive curve
+  // more intuitive curve
   love = pow(love, 2);
   e->inputs.love = love;
 

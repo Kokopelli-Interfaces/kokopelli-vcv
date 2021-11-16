@@ -19,6 +19,9 @@ struct Song {
   Group* established_group;
 
   std::vector<Cycle*> cycles;
+  // TODO move to inactive if pre-entrance movement
+  // std::vector<Cycle*> inactive_cycles;
+
   Cycle *new_cycle = nullptr;
 
   Time playhead = 0.f;

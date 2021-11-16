@@ -40,5 +40,5 @@ struct Outputs {
 };
 
 struct Options {
-  float love_resolution = 1000.f;
+  float love_resolution = 10000.f;
 };

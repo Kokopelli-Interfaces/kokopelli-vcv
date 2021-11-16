@@ -73,16 +73,19 @@ struct Group {
     }
   }
 
+  // inline std::vector<int> getSnapBeats() {
+  // }
+
   inline void adjustPeriodsToFit(Cycle* cycle) {
     Time adjusted_period;
 
     // TODO option
+    float period_round_back_phase = 1.5f;
 
     Time diff = cycle->period - period;
     if (0.f < diff) {
       // snap_back_window = this->beat_period;
       Time percent_cycle = cycle->period / period;
-      float period_round_back_phase = 1.5f;
       while (period_round_back_phase <= percent_cycle) {
         // TODO find lcms later
         this->period *= 2;
@@ -99,6 +102,8 @@ struct Group {
       if (beat_round_back_phase < beat_phase || snap_beat == 0) {
         snap_beat++;
       }
+
+      std::vector<int> snap_beats
 
       int total_beats = getTotalBeats();
       while (total_beats % snap_beat != 0) {

@@ -89,6 +89,8 @@ public:
       song.established_group = subgroup;
       subgroup->addToGroup(ended_cycle);
       break;
+    // case CycleEnd::NEW:
+    //   break;
     }
 
     // TODO
@@ -174,8 +176,8 @@ private:
         float cycle_i_love = 1.f;
         for (unsigned int j = i + 1; j < cycles.size(); j++) {
           if (checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->group, cycles[j]->group)) {
-            cycle_i_love -= cycles[j]->readLove();
-            if (cycle_i_love <= 0.f) {
+            cycle_i_love *= (1.f - cycles[j]->readLove());
+            if (cycle_i_love <= 0.001f) {
               cycle_i_love = 0.f;
               break;
             }

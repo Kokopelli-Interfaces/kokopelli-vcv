@@ -31,6 +31,9 @@ struct Cycle {
 
   bool loop = false;
 
+  // TODO option
+  Time crossfade_time = 0.5f;
+
   inline Cycle(Time start, Movement* movement, Group *group) {
     this->capture_start = start;
     this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
@@ -54,7 +57,21 @@ struct Cycle {
       return 0.f;
     }
 
-    return signal_capture->read(this->playhead) * this->love;
+    float signal = signal_capture->read(this->playhead);
+
+    if (this->playhead <= crossfade_time) {
+      float crossfade_left_sample;
+      if (this->playhead + this->period <= signal_capture->_period) {
+        crossfade_left_sample = signal_capture->read(this->playhead + this->period);
+      } else {
+        crossfade_left_sample = signal_capture->last_sample;
+      }
+
+      float fade = this->playhead / crossfade_time;
+      signal = rack::crossfade(crossfade_left_sample, signal, fade);
+    }
+
+    return signal * this->love;
   }
 
   inline float readLove() {

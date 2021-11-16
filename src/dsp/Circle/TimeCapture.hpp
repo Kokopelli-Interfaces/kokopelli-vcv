@@ -17,6 +17,7 @@ namespace dsp {
 namespace circle {
 
 struct TimeCapture {
+  float last_sample = 0.f;
   Time _period = 0.f;
 
   kokopellivcv::dsp::SignalType _signal_type;
@@ -52,7 +53,7 @@ struct TimeCapture {
   }
 
   inline float read(Time t) {
-    if (_period <= t) {
+    if (_period < t) {
       return 0.f;
     }
 
@@ -76,6 +77,7 @@ struct TimeCapture {
   inline void write(Time t, float sample) {
     if (_period < t) {
       _period = t;
+      last_sample = sample;
     }
 
     // FIXME click upon internal resize

@@ -114,6 +114,7 @@ int Circle::channels() {
   if (_channels < input_channels) {
     for (int c = 0; c < _channels; c++) {
       _engines[c]->_gko.nextCycle(_engines[c]->_song, CycleEnd::DISCARD);
+      _engines[c]->_gko._love_calculator_divider.reset();
     }
 
     return input_channels;

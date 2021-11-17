@@ -27,7 +27,7 @@ public:
   bool use_ext_phase = false;
   float ext_phase = 0.f;
   float sample_time = 1.0f;
-  float love_resolution = 10000.f;
+  float love_resolution = 1000.f;
   bool tune_to_frequency_of_established = true;
 
   /** read only */
@@ -47,7 +47,8 @@ public:
   Gko() {
     _song_time_advancer.setTickFrequency(1.0f);
     _new_cycle_time_advancer.setTickFrequency(1.0f);
-    _love_calculator_divider.setDivision(10000);
+    // TODO set me when loop is established for consistent loops
+    _love_calculator_divider.setDivision(5000);
   }
 
 private:

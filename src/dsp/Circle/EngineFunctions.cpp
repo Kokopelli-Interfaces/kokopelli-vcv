@@ -9,7 +9,7 @@ void Engine::step() {
 
 int Engine::getMostRecentCycleLength() {
   Cycle* recent_cycle = _song.cycles[_song.cycles.size()-1];
-  return recent_cycle->group->convertToBeat(recent_cycle->period, false);
+  return recent_cycle->immediate_group->convertToBeat(recent_cycle->period, false);
 }
 
 void Engine::toggleTuneToFrequencyOfEstablished() {
@@ -26,10 +26,8 @@ void Engine::cycleDivinity() {
   // TODO make a group !
 }
 
-void Engine::descend() {
-  // TODO A  ( )  1   ->  1  ( )  I
-  // start recording in cycle that loves cycles that are also focused on cycle 1
-  // the cycle becomes the ESTABLISHED.
+void Engine::ascend() {
+  _gko.ascend(_song);
 }
 
 void Engine::undo() {

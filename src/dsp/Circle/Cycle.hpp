@@ -14,7 +14,7 @@ namespace circle {
 struct Group;
 
 struct Cycle {
-  Group* group;
+  Group* immediate_group;
 
   Time period;
   Time capture_start;
@@ -36,13 +36,13 @@ struct Cycle {
   Time fade_in_time = 0.02f;
   Time fade_out_time = 0.15f;
 
-  inline Cycle(Time start, Movement* movement, Group *group) {
+  inline Cycle(Time start, Movement* movement, Group *immediate_group) {
     this->capture_start = start;
     this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
     this->movement = movement;
-    this->group = group;
+    this->immediate_group = immediate_group;
   }
 
   inline ~Cycle() {

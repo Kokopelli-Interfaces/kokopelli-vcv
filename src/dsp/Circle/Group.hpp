@@ -12,6 +12,7 @@ namespace circle {
 struct Group {
   Group *parent_group = nullptr;
 
+  char letter = 'A';
   std::string id = "A";
 
   std::vector<Cycle*> cycles_in_group;
@@ -138,7 +139,7 @@ struct Group {
   }
 
   inline void addToGroup(Cycle* cycle) {
-    if (parent_group) {
+    if (parent_group && cycle->immediate_group != parent_group) {
       parent_group->addToGroup(cycle);
     }
 

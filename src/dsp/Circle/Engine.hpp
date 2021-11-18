@@ -31,7 +31,7 @@ struct Engine {
   float readEstablished();
 
   void cycleDivinity();
-  void descend();
+  void ascend();
   void cycleForward();
   void undo();
 

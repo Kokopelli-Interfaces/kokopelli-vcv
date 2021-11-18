@@ -57,7 +57,7 @@ void Circle::processButtons(const ProcessArgs &args) {
       _light_blinker->blinkLight(DIVINITY_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->descend();
+      e->ascend();
       _light_blinker->blinkLight(DIVINITY_LIGHT); // TODO extra
       break;
     }

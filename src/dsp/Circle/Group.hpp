@@ -103,6 +103,7 @@ struct Group {
         percent_over = percent_over - 1.f;
       }
 
+      diff = cycle->period - period;
       adjusted_period = this->period;
     } else {
       Time cycle_time_in_beats = cycle->period / beat_period;

@@ -26,10 +26,6 @@ struct Engine {
   // FIXME not set
   kokopellivcv::dsp::SignalType _signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
-  /* read only */
-
-  // AntipopFilter _read_antipop_filter;
-
   void step();
   float readSun();
   float readEstablished();

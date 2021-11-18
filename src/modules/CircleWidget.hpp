@@ -236,30 +236,31 @@ struct CircleWidget : ModuleWidget {
 
     // FIXME have ONE display pLEASe
 
-    // NOTE do the displays too
-    auto song_display_size = mm2px(Vec(28.126, 4.327));
-		song_display = new SongDisplay(module);
-    song_display->box.pos = mm2px(Vec(4.229, 36.138));
-    song_display->box.size = song_display_size;
-    song_display->textOffset = Vec(song_display->box.size.x * 0.5f, 0.f);
-    addChild(song_display);
+    // FIXME
+    // // NOTE do the displays too
+    // auto song_display_size = mm2px(Vec(28.126, 4.327));
+		// song_display = new SongDisplay(module);
+    // song_display->box.pos = mm2px(Vec(4.229, 36.138));
+    // song_display->box.size = song_display_size;
+    // song_display->textOffset = Vec(song_display->box.size.x * 0.5f, 0.f);
+    // addChild(song_display);
 
-    auto group_display_size = mm2px(Vec(8.603, 4.327));
+    // auto group_display_size = mm2px(Vec(8.603, 4.327));
 
-		prev_movement_display = new PrevMovementDisplay(module);
-    prev_movement_display->box.pos = mm2px(Vec(1.649, 43.453));
-    prev_movement_display->box.size = group_display_size;
-    addChild(prev_movement_display);
+		// prev_movement_display = new PrevMovementDisplay(module);
+    // prev_movement_display->box.pos = mm2px(Vec(1.649, 43.453));
+    // prev_movement_display->box.size = group_display_size;
+    // addChild(prev_movement_display);
 
-		current_movement_display = new CurrentMovementDisplay(module);
-    current_movement_display->box.pos = mm2px(Vec(13.793, 41.924));
-    current_movement_display->box.size = group_display_size;
-    addChild(current_movement_display);
+		// current_movement_display = new CurrentMovementDisplay(module);
+    // current_movement_display->box.pos = mm2px(Vec(13.793, 41.924));
+    // current_movement_display->box.size = group_display_size;
+    // addChild(current_movement_display);
 
-		next_movement_display = new NextMovementDisplay(module);
-    next_movement_display->box.pos = mm2px(Vec(25.926, 43.453));
-    next_movement_display->box.size = group_display_size;
-    addChild(next_movement_display);
+		// next_movement_display = new NextMovementDisplay(module);
+    // next_movement_display->box.pos = mm2px(Vec(25.926, 43.453));
+    // next_movement_display->box.size = group_display_size;
+    // addChild(next_movement_display);
 
     auto focused_display_size = mm2px(Vec(5.834, 9.571));
 

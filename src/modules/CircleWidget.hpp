@@ -152,9 +152,9 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(13.65, 15.005)), module, Circle::SUN));
 		addInput(createInput<WombPort>(mm2px(Vec(24.280, 16.557)), module, Circle::WOMB_INPUT));
 
-		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 29.847)), module, Circle::PHASE_INPUT));
-		addInput(createInput<KokopelliPort>(mm2px(Vec(13.475, 27.635)), module, Circle::FOCUS_MODULATION_INPUT));
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 29.847)), module, Circle::PHASE_OUTPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 30.125)), module, Circle::PHASE_INPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(13.65, 27.913)), module, Circle::FOCUS_MODULATION_INPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.280, 30.125)), module, Circle::PHASE_OUTPUT));
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 43.454)), module, Circle::TUNE_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 44.860)), module, Circle::TUNE_LIGHT));

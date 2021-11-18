@@ -72,9 +72,26 @@ public:
       ended_cycle->group->addToGroup(ended_cycle);
       break;
     case CycleEnd::JOIN_ESTABLISHED_NO_LOOP:
-      ended_cycle->loop = false;
-      addCycle(song.cycles, ended_cycle);
-      ended_cycle->group->addToGroup(ended_cycle);
+      // FIXME
+      delete ended_cycle;
+      // ended_cycle->loop = false;
+      // addCycle(song.cycles, ended_cycle);
+      // ended_cycle->group->addToGroup(ended_cycle);
+      break;
+    case CycleEnd::FLOOD:
+      for (int i = song.cycles.size()-1; 0 <= i; i--) {
+        if (checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(song.cycles[i]->group, ended_cycle->group)) {
+          song.cycles[i]->group->undoLastCycle();
+          song.cycles.erase(song.cycles.begin() + i);
+        }
+      }
+
+      // FIXME add non-loop
+      delete ended_cycle;
+      // ended_cycle->loop = false;
+      // addCycle(song.cycles, ended_cycle);
+      // ended_cycle->group->addToGroup(ended_cycle);
+
       break;
     case CycleEnd::JOIN_ESTABLISHED_AND_CREATE_SUBGROUP:
       ended_cycle->loop = true;
@@ -125,7 +142,7 @@ public:
       nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
       break;
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      nextCycle(song, CycleEnd::FLOOD);
       // nextCycle(song, CycleEnd::DO_NOT_LOOP_AND_NEXT_MOVEMENT);
       // TODO
       // nextCycle(song, CycleEnd::SET_TO_SONG_PERIOD_AND_NEXT_GROUP);

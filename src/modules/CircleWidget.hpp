@@ -46,66 +46,6 @@ struct CircleValueDisplay : TextBox {
 	}
 };
 
-struct SongDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-  SongDisplay(Circle *m) : CircleValueDisplay(m) {
-    // FIXME
-    // textOffset = Vec(box.size.x * 0.5f, 0.f);
-  }
-
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s = e->_song.name;
-    CircleValueDisplay::setText(s);
-  }
-};
-
-struct PrevMovementDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-  PrevMovementDisplay(Circle *m) : CircleValueDisplay(m) {
-    // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
-  }
-
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s;
-    if (e->_song.current_movement->prev) {
-      s = string::f("%c%d", e->_song.current_movement->prev->group, e->_song.current_movement->prev->group_movement_n);
-    } else {
-      s = "--";
-    }
-    CircleValueDisplay::setText(s);
-  }
-};
-
-
-struct CurrentMovementDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-  CurrentMovementDisplay(Circle *m) : CircleValueDisplay(m) {
-    // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
-  }
-
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s = string::f("%c%d", e->_song.current_movement->group, e->_song.current_movement->group_movement_n);
-    CircleValueDisplay::setText(s);
-  }
-};
-
-struct NextMovementDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-  NextMovementDisplay(Circle *m) : CircleValueDisplay(m) {
-    // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
-  }
-
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s;
-    if (e->_song.current_movement->next) {
-      s = string::f("%c%d", e->_song.current_movement->next->group, e->_song.current_movement->next->group_movement_n);
-    } else {
-      s = "--";
-    }
-    CircleValueDisplay::setText(s);
-  }
-};
-
 struct EstablishedDisplay : CircleValueDisplay {
   using CircleValueDisplay::CircleValueDisplay;
   EstablishedDisplay(Circle *m) : CircleValueDisplay(m) {
@@ -189,14 +129,6 @@ struct TotalWombBeatDisplay : CircleValueDisplay {
 struct CircleWidget : ModuleWidget {
   const int hp = 6;
 
-  bool _use_antipop = false;
-
-  SongDisplay *song_display;
-
-  PrevMovementDisplay *prev_movement_display;
-  CurrentMovementDisplay *current_movement_display;
-  NextMovementDisplay *next_movement_display;
-
   EstablishedDisplay *established_display;
   WombDisplay *womb_display;
 
@@ -216,83 +148,56 @@ struct CircleWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.259)), module, Circle::TUNE_PARAM));
-		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.580)), module, Circle::LOVE_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.177, 79.26)), module, Circle::CYCLE_DIVINITY_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.236, 79.26)), module, Circle::CYCLE_FORWARD_PARAM));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 16.557)), module, Circle::ESTABLISHED_OUTPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(13.65, 15.005)), module, Circle::SUN));
+		addInput(createInput<WombPort>(mm2px(Vec(24.280, 16.557)), module, Circle::WOMB_INPUT));
 
-		addInput(createInput<WombPort>(mm2px(Vec(24.280, 94.323)), module, Circle::WOMB_INPUT));
-		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 107.705)), module, Circle::PHASE_INPUT));
-		addInput(createInput<KokopelliPort>(mm2px(Vec(13.475, 109.166)), module, Circle::FOCUS_MODULATION_INPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 29.847)), module, Circle::PHASE_INPUT));
+		addInput(createInput<KokopelliPort>(mm2px(Vec(13.475, 27.635)), module, Circle::FOCUS_MODULATION_INPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 29.847)), module, Circle::PHASE_OUTPUT));
 
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.323)), module, Circle::ESTABLISHED_OUTPUT));
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(13.65, 95.875)), module, Circle::SUN));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 43.454)), module, Circle::TUNE_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 44.860)), module, Circle::TUNE_LIGHT));
 
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Circle::PHASE_OUTPUT));
+		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));
 
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 55.665)), module, Circle::TUNE_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Circle::CYCLE_DIVINITY_LIGHT));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(27.701, 80.724)), module, Circle::CYCLE_FORWARD_LIGHT));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.127, 80.017)), module, Circle::CYCLE_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 81.481)), module, Circle::CYCLE_LIGHT));
 
-    // FIXME have ONE display pLEASe
-
-    // FIXME
-    // // NOTE do the displays too
-    // auto song_display_size = mm2px(Vec(28.126, 4.327));
-		// song_display = new SongDisplay(module);
-    // song_display->box.pos = mm2px(Vec(4.229, 36.138));
-    // song_display->box.size = song_display_size;
-    // song_display->textOffset = Vec(song_display->box.size.x * 0.5f, 0.f);
-    // addChild(song_display);
-
-    // auto group_display_size = mm2px(Vec(8.603, 4.327));
-
-		// prev_movement_display = new PrevMovementDisplay(module);
-    // prev_movement_display->box.pos = mm2px(Vec(1.649, 43.453));
-    // prev_movement_display->box.size = group_display_size;
-    // addChild(prev_movement_display);
-
-		// current_movement_display = new CurrentMovementDisplay(module);
-    // current_movement_display->box.pos = mm2px(Vec(13.793, 41.924));
-    // current_movement_display->box.size = group_display_size;
-    // addChild(current_movement_display);
-
-		// next_movement_display = new NextMovementDisplay(module);
-    // next_movement_display->box.pos = mm2px(Vec(25.926, 43.453));
-    // next_movement_display->box.size = group_display_size;
-    // addChild(next_movement_display);
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 80.017)), module, Circle::DIVINITY_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Circle::DIVINITY_LIGHT));
 
     auto focused_display_size = mm2px(Vec(5.834, 9.571));
 
 		established_display = new EstablishedDisplay(module);
-    established_display->box.pos = mm2px(Vec(1.388, 51.671));
+    established_display->box.pos = mm2px(Vec(1.388, 40.865));
     established_display->box.size = focused_display_size;
     addChild(established_display);
 
 		womb_display = new WombDisplay(module);
-    womb_display->box.pos = mm2px(Vec(28.412, 51.671));
+    womb_display->box.pos = mm2px(Vec(28.412, 40.865));
     womb_display->box.size = focused_display_size;
     addChild(womb_display);
 
     auto beat_display_size = mm2px(Vec(6.385, 4.327));
 
     group_beat_display = new EstablishedBeatDisplay(module);
-    group_beat_display->box.pos = mm2px(Vec(7.75, 51.671));
+    group_beat_display->box.pos = mm2px(Vec(7.75, 40.865));
     group_beat_display->box.size = beat_display_size;
     addChild(group_beat_display);
 
     womb_beat_display = new WombBeatDisplay(module);
-    womb_beat_display->box.pos = mm2px(Vec(21.549, 51.671));
+    womb_beat_display->box.pos = mm2px(Vec(21.549, 40.865));
     womb_beat_display->box.size = beat_display_size;
     addChild(womb_beat_display);
 
     total_established_beats_display = new TotalEstablishedBeatDisplay(module);
-    total_established_beats_display->box.pos = mm2px(Vec(7.75, 56.773));
+    total_established_beats_display->box.pos = mm2px(Vec(7.75, 45.968));
     total_established_beats_display->box.size = beat_display_size;
     addChild(total_established_beats_display);
 
     total_womb_beats_display = new TotalWombBeatDisplay(module);
-    total_womb_beats_display->box.pos = mm2px(Vec(21.549, 56.773));
+    total_womb_beats_display->box.pos = mm2px(Vec(21.549, 45.968));
     total_womb_beats_display->box.size = beat_display_size;
     addChild(total_womb_beats_display);
   }

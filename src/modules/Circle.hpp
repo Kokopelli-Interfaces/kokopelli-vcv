@@ -18,8 +18,8 @@ namespace kokopellivcv {
 struct Circle : KokopelliVcvModule {
   enum ParamIds {
 		TUNE_PARAM,
-		CYCLE_FORWARD_PARAM,
-		CYCLE_DIVINITY_PARAM,
+		CYCLE_PARAM,
+		DIVINITY_PARAM,
 		LOVE_PARAM,
 		NUM_PARAMS
   };
@@ -39,8 +39,8 @@ struct Circle : KokopelliVcvModule {
 
   enum LightIds {
     ENUMS(TUNE_LIGHT, 3),
-    ENUMS(CYCLE_DIVINITY_LIGHT, 3),
-    ENUMS(CYCLE_FORWARD_LIGHT, 3),
+    ENUMS(DIVINITY_LIGHT, 3),
+    ENUMS(CYCLE_LIGHT, 3),
     NUM_LIGHTS
   };
 

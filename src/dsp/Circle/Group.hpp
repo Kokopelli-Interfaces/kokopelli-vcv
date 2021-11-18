@@ -92,19 +92,15 @@ struct Group {
   inline void adjustPeriodsToFit(Cycle* cycle) {
     Time adjusted_period;
 
-    // TODO option
-    float period_round_back_phase = 1.5f;
-
     Time diff = cycle->period - period;
     if (0.f < diff) {
-      // snap_back_window = this->beat_period;
       Time start_period = period;
-      Time percent_cycle = cycle->period / period;
-      while (period_round_back_phase <= percent_cycle) {
-        // TODO find lcms later
-        this->period += start_period;
-        diff = cycle->period - period;
-        percent_cycle = cycle->period / period;
+      Time percent_over = cycle->period / period;
+
+      float period_round_back_percent = 1.5f;
+      while (period_round_back_percent <= percent_over) {
+        period += start_period;
+        percent_over = percent_over - 1.f;
       }
 
       adjusted_period = this->period;

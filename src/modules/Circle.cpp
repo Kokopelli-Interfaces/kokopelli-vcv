@@ -3,10 +3,10 @@
 
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(TUNE_PARAM, 0.f, 1.f, 0.f, "Toggle Tune to Established Frequency");
-  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Set Divinity");
+  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Solo Established / Solo Creation");
+  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Set Creative Force Divinity");
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Cycle");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established or Creative Force)");
 
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
@@ -53,7 +53,7 @@ void Circle::processButtons(const ProcessArgs &args) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->cycleDivinity();
+      e->cycleObservation();
       _light_blinker->blinkLight(DIVINITY_LIGHT);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
@@ -87,7 +87,14 @@ void Circle::processAlways(const ProcessArgs &args) {
   }
 }
 
+
+static inline float smoothValue(float current, float old) {
+  float lambda = .1;
+  return old + (current - old) * lambda;
+}
+
 void Circle::modulate() {
+  _audition_position = smoothValue(params[AUDITION_PARAM].getValue(), _audition_position);
   return;
 }
 
@@ -105,7 +112,7 @@ void Circle::modulateChannel(int channel_i) {
   e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
   // FIXME ugh
   e->options = _options;
-  e->_gko.love_resolution = _options.love_resolution;
+  e->_gko.love_updater.love_resolution = _options.love_resolution;
   // e->_signal_type = _from_signal->signal_type;
 }
 
@@ -113,8 +120,7 @@ int Circle::channels() {
   int input_channels = inputs[WOMB_INPUT].getChannels();
   if (_channels < input_channels) {
     for (int c = 0; c < _channels; c++) {
-      _engines[c]->_gko.nextCycle(_engines[c]->_song, CycleEnd::DISCARD);
-      _engines[c]->_gko._love_calculator_divider.reset();
+      _engines[c]->channelStateReset();
     }
 
     return input_channels;
@@ -134,12 +140,23 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
 
   e->step();
 
+  Outputs out = e->_song.out;
   if (outputs[SUN].isConnected()) {
-    outputs[SUN].setVoltage(e->readSun(), channel_i);
+    float sun_out = 0.f;
+    if (1.f == _audition_position) {
+      sun_out = out.sun;
+    } else if (1.f < _audition_position) {
+      sun_out = rack::crossfade(out.sun, e->inputs.in, _audition_position - 1.f);
+    } else {
+      float established_and_input = kokopellivcv::dsp::sum(out.attenuated_established, e->inputs.in, e->_signal_type);
+      sun_out = rack::crossfade(established_and_input, out.sun, _audition_position);
+    }
+
+    outputs[SUN].setVoltage(sun_out, channel_i);
   }
 
   if (outputs[ESTABLISHED_OUTPUT].isConnected()) {
-    outputs[ESTABLISHED_OUTPUT].setVoltage(e->readEstablished(), channel_i);
+    outputs[ESTABLISHED_OUTPUT].setVoltage(out.established, channel_i);
   }
 }
 
@@ -152,7 +169,6 @@ void Circle::updateLight(int light, NVGcolor color, float strength) {
   lights[light + 1].value = color.g * strength;
   lights[light + 2].value = color.b * strength;
 }
-
 
 void Circle::updateLights(const ProcessArgs &args) {
   _light_blinker->step();
@@ -171,7 +187,7 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   LoveDirection love_direction = default_e->_gko._love_direction;
   if (default_e->_gko.tune_to_frequency_of_established) {
-    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.established_group->getPhase(default_e->_song.playhead));
+    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.established->getPhase(default_e->_song.playhead));
   } else {
     long double playhead = default_e->_song.new_cycle->playhead;
     long double playhead_ms = rack::math::eucMod(playhead, 1.0f);
@@ -180,7 +196,11 @@ void Circle::updateLights(const ProcessArgs &args) {
 
   if (love_direction == LoveDirection::ESTABLISHED) {
     updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
-    updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    if (default_e->_gko.observer.checkIfInSubgroupMode()) {
+      updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, 0.6);
+    } else {
+      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    }
   } else if (love_direction == LoveDirection::EMERGENCE) {
     updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
     updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, 0.6);

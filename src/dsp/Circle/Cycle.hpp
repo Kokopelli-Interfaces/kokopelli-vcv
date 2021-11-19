@@ -32,9 +32,9 @@ struct Cycle {
   bool loop = false;
 
   // TODO option
-  Time crossfade_time = 0.2f;
+  Time max_crossfade_time = 0.2f;
   Time fade_in_time = 0.02f;
-  Time fade_out_time = 0.15f;
+  Time fade_out_time = 0.07f;
 
   inline Cycle(Time start, Movement* movement, Group *immediate_group) {
     this->capture_start = start;
@@ -53,14 +53,14 @@ struct Cycle {
   inline float niceFade(float signal) {
     bool loop_fade = this->period <= signal_capture->_period;
     if (loop_fade) {
-      if (this->playhead <= crossfade_time) {
-        float crossfade_left_sample;
-        if (this->playhead + this->period <= signal_capture->_period) {
-          crossfade_left_sample = signal_capture->read(this->playhead + this->period);
-        } else {
-          crossfade_left_sample = signal_capture->last_sample;
-        }
+      // return signal;
+      Time crossfade_time = signal_capture->_period - this->period;
+      if (max_crossfade_time < crossfade_time) {
+        crossfade_time = max_crossfade_time;
+      }
 
+      if (this->playhead <= crossfade_time) {
+        float crossfade_left_sample = signal_capture->read(this->playhead + this->period);
         float fade = this->playhead / crossfade_time;
         return rack::crossfade(crossfade_left_sample, signal, fade);
       }
@@ -77,7 +77,6 @@ struct Cycle {
 
     return signal;
   }
-
 
   inline float readSignal() {
     if (signal_capture->_period < this->playhead) {
@@ -105,11 +104,27 @@ struct Cycle {
     love_capture->write(playhead, love);
   }
 
+  inline void finishWindowCaptureWrite(Time window) {
+    if (this->period < window) {
+      this->period = window;
+    } else {
+      // look back
+      this->signal_capture->fitToWindow(window);
+      this->love_capture->fitToWindow(window);
+    }
+
+    this->signal_capture->finishWrite();
+    this->love_capture->finishWrite();
+
+    this->period = window;
+    printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
+  }
+
   inline void finishWrite() {
     this->period = playhead;
     this->signal_capture->finishWrite();
     this->love_capture->finishWrite();
-    printf("Cycle End with period %Lf\n", this->period);
+    printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
 };
 

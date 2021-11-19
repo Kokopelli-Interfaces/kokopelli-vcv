@@ -7,10 +7,10 @@
 
 enum CycleEnd {
   DISCARD,
+  SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP,
   JOIN_ESTABLISHED_LOOP,
   JOIN_ESTABLISHED_NO_LOOP,
-  FLOOD,
-  JOIN_ESTABLISHED_AND_CREATE_SUBGROUP
+  FLOOD
 };
 
 // another way to say: ORDER, LIFE, CHAOS
@@ -38,6 +38,7 @@ struct Inputs {
 struct Outputs {
   float sun = 0.f;
   float established = 0.f;
+  float attenuated_established = 0.f;
 };
 
 struct Options {

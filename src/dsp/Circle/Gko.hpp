@@ -5,11 +5,13 @@
 
 #include "rack.hpp"
 
+#include "Observer.hpp"
+#include "LoveUpdater.hpp"
+#include "OutputUpdater.hpp"
 #include "Song.hpp"
 #include "Cycle.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
-#include "TimeCapture.hpp"
 #include "Movement.hpp"
 #include "TimeAdvancer.hpp"
 #include "util/math.hpp"
@@ -32,34 +34,20 @@ public:
 
   /** read only */
 
-  bool _select_mode = false;
-  Group* _pivot_parent = nullptr;
-  int _focused_cycle_i_in_group = 0;
+  Observer observer;
+  LoveUpdater love_updater;
+  OutputUpdater output_updater;
 
   TimeAdvancer _song_time_advancer;
   TimeAdvancer _new_cycle_time_advancer;
 
-  // PhaseOscillator _song_time_advancer;
-  // PhaseAnalyzer _global_phase_analyzer;
-
   LoveDirection _love_direction = LoveDirection::ESTABLISHED;
-
-  rack::dsp::ClockDivider _love_calculator_divider;
-  std::vector<float> _next_cycles_love;
 
 public:
   Gko() {
     _song_time_advancer.setTickFrequency(1.0f);
     _new_cycle_time_advancer.setTickFrequency(1.0f);
     // TODO set me when loop is established for consistent loops
-    _love_calculator_divider.setDivision(5000);
-  }
-
-private:
-  inline void addCycle(std::vector<Cycle*> &cycles, Cycle* cycle) {
-    cycle->finishWrite();
-    cycles.push_back(cycle);
-    _next_cycles_love.push_back(0.f);
   }
 
 public:
@@ -68,61 +56,40 @@ public:
 
     switch (cycle_end) {
     case CycleEnd::DISCARD:
-      if (ended_cycle->immediate_group->parent_group && ended_cycle->immediate_group->cycles_in_group.size()== 0) {
-        for (unsigned int i = 0; i < song.groups.size(); i++) {
-          if (song.groups[i] == ended_cycle->immediate_group) {
-            Group *delete_group = song.groups[i];
-            song.groups.erase(song.groups.begin()+i);
-            delete delete_group;
-          }
-        }
-      }
-
+      song.clearEmptyGroups();
       delete ended_cycle;
       break;
     case CycleEnd::JOIN_ESTABLISHED_LOOP:
       ended_cycle->loop = true;
-      addCycle(song.cycles, ended_cycle);
+      ended_cycle->finishWrite();
+      song.cycles.push_back(ended_cycle);
+      ended_cycle->immediate_group->addToGroup(ended_cycle);
+      break;
+    case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP:
+      ended_cycle->loop = true;
+
+      ended_cycle->finishWindowCaptureWrite(ended_cycle->immediate_group->period);
+      song.cycles.push_back(ended_cycle);
       ended_cycle->immediate_group->addToGroup(ended_cycle);
       break;
     case CycleEnd::JOIN_ESTABLISHED_NO_LOOP:
       // FIXME
       delete ended_cycle;
       // ended_cycle->loop = false;
-      // addCycle(song.cycles, ended_cycle);
+      // song.cycles.push_back(ended_cycle);
       // ended_cycle->immediate_group->addToGroup(ended_cycle);
       break;
     case CycleEnd::FLOOD:
       for (int i = song.cycles.size()-1; 0 <= i; i--) {
-        if (checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(song.cycles[i]->immediate_group, ended_cycle->immediate_group)) {
+        if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(song.cycles[i]->immediate_group, ended_cycle->immediate_group)) {
           song.cycles[i]->immediate_group->undoLastCycle();
           song.cycles.erase(song.cycles.begin() + i);
         }
       }
 
-      // FIXME add non-loop
+      song.clearEmptyGroups();
       delete ended_cycle;
-      // ended_cycle->loop = false;
-      // addCycle(song.cycles, ended_cycle);
-      // ended_cycle->immediate_group->addToGroup(ended_cycle);
-
       break;
-    case CycleEnd::JOIN_ESTABLISHED_AND_CREATE_SUBGROUP:
-      ended_cycle->loop = true;
-
-      Group* parent_group = ended_cycle->immediate_group;
-      Group* subgroup = new Group();
-      song.groups.push_back(subgroup);
-      subgroup->parent_group = parent_group;
-      subgroup->id = rack::string::f("%s.%d", parent_group->id.c_str(), parent_group->cycles_in_group.size());
-
-      ended_cycle->immediate_group = subgroup;
-      addCycle(song.cycles, ended_cycle);
-      song.established_group = subgroup;
-      subgroup->addToGroup(ended_cycle);
-      break;
-    // case CycleEnd::NEW:
-    //   break;
     }
 
     // TODO
@@ -136,10 +103,14 @@ public:
 
     Time start = song.playhead;
     // FIXME calculated samples_per_tick will suck
-    song.new_cycle = new Cycle(start, cycle_movement, song.established_group);
+    song.new_cycle = new Cycle(start, cycle_movement, song.established);
   }
 
   inline void undoCycle(Song &song) {
+    if (observer.checkIfInSubgroupMode()) {
+      observer.exitSubgroupMode(song);
+    }
+
     if (0 < song.cycles.size()) {
       Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
       most_recent_cycle->immediate_group->undoLastCycle();
@@ -150,13 +121,26 @@ public:
   inline void cycleForward(Song &song) {
     switch(_love_direction) {
     case LoveDirection::ESTABLISHED:
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      if (observer.checkIfInSubgroupMode()) {
+        observer.exitSubgroupModeByMakingSubgroupTheEstablishedGroup(song);
+        nextCycle(song, CycleEnd::DISCARD);
+      } else {
+        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      }
       break;
     case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      if (observer.checkIfInSubgroupMode()) {
+        nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP);
+      } else {
+        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      }
       break;
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::FLOOD);
+      if (observer.checkIfInSubgroupMode()) {
+        nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP);
+      } else {
+        nextCycle(song, CycleEnd::FLOOD);
+      }
       // nextCycle(song, CycleEnd::DO_NOT_LOOP_AND_NEXT_MOVEMENT);
       // TODO
       // nextCycle(song, CycleEnd::SET_TO_SONG_PERIOD_AND_NEXT_GROUP);
@@ -164,143 +148,43 @@ public:
     }
   }
 
-  inline void ascend(Song &song) {
-    if (song.established_group->parent_group) {
-      nextCycle(song, CycleEnd::DISCARD);
-      song.established_group = song.established_group->parent_group;
-    } else {
-      Group* new_group = new Group();
-      song.groups.push_back(new_group);
-      new_group->parent_group = song.established_group->parent_group;
-      new_group->letter = song.established_group->letter++;
-      new_group->id = rack::string::f("%c", new_group->letter);
-      song.established_group = new_group;
-      nextCycle(song, CycleEnd::DISCARD);
-    }
-  }
-
-  inline void cycleDivinity(Song &song) {
+  inline void cycleObservation(Song &song) {
     switch(_love_direction) {
     case LoveDirection::ESTABLISHED:
-      Group* next_focus_group;
-      if (!_select_mode) {
-        if (song.new_cycle->immediate_group->cycles_in_group.empty()) {
-          return;
-        }
-
-        _select_mode = true;
-        _pivot_parent = song.new_cycle->immediate_group;
-        _focused_cycle_i_in_group = _pivot_parent->cycles_in_group.size();
+      if (!observer.checkIfInSubgroupMode()) {
+        observer.enterSubgroupMode(song);
+      } else {
+        observer.cycleObservedSubestablishment(song);
       }
-
-      if (_select_mode) {
-        if (_focused_cycle_i_in_group == 0) {
-          _focused_cycle_i_in_group = _pivot_parent->cycles_in_group.size()-1;
-        } else {
-          _focused_cycle_i_in_group--;
-        }
-
-        Cycle* focus_cycle = _pivot_parent->cycles_in_group[_focused_cycle_i_in_group];
-
-        if (focus_cycle->immediate_group->parent_group && focus_cycle->immediate_group->parent_group == _pivot_parent) {
-          next_focus_group = focus_cycle->immediate_group;
-        } else {
-          next_focus_group = new Group();
-          song.groups.push_back(next_focus_group);
-          next_focus_group->parent_group = _pivot_parent;
-
-          next_focus_group->id = rack::string::f("%s.%d", _pivot_parent->id.c_str(), _focused_cycle_i_in_group);
-
-          next_focus_group->addToGroup(focus_cycle);
-          focus_cycle->immediate_group = next_focus_group;
-        }
-
-        song.established_group = next_focus_group;
-        nextCycle(song, CycleEnd::DISCARD);
-      }
+      nextCycle(song, CycleEnd::DISCARD);
       break;
     case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_AND_CREATE_SUBGROUP);
+      // TODO
+      // if (!observer.checkIfInSubgroupMode()) {
+      //   observer.enterSubgroupMode(song.new_cycle.immediate_group);
+      // } else {
+      //   observer.observePreviousCycleInEstablished(song);
+      // }
       break;
     case LoveDirection::NEW:
       // TODO next group?
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      // nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
       break;
     }
-  }
-
-private:
-  // TODO cycle types (song or movement), depends on tuning and affects love
-  inline float smoothValue(float current, float old) {
-    float lambda = this->love_resolution / 44100;
-    return old + (current - old) * lambda;
-  }
-
-  inline bool checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(Group *one, Group *two) {
-    if (!one) {
-      return false;
-    }
-
-    if (one == two) {
-      return true;
-    }
-
-    return checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(one->parent_group, two);
-  }
-
-  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles) {
-    if (_love_calculator_divider.process()) {
-      for (unsigned int i = 0; i < cycles.size(); i++) {
-        float cycle_i_love = 1.f;
-        for (unsigned int j = i + 1; j < cycles.size(); j++) {
-          if (checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, cycles[j]->immediate_group)) {
-            cycle_i_love *= (1.f - cycles[j]->readLove());
-            if (cycle_i_love <= 0.001f) {
-              cycle_i_love = 0.f;
-              break;
-            }
-          }
-        }
-
-        _next_cycles_love[i] = cycle_i_love;
-      }
-    }
-
-    for (unsigned int i = 0; i < cycles.size(); i++) {
-      cycles[i]->love = smoothValue(_next_cycles_love[i], cycles[i]->love);
-    }
-  }
-
-  inline void updateSongOut(Outputs &out, std::vector<Cycle*> cycles, Group* new_cycle_group, Inputs inputs) {
-    // TODO get rid of me
-    kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
-
-    out.sun = 0.f;
-    out.established = 0.f;
-
-    for (unsigned int i = 0; i < cycles.size(); i++) {
-      float cycle_out = cycles[i]->readSignal();
-      if (checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
-        out.established = kokopellivcv::dsp::sum(out.established, cycle_out, signal_type);
-        cycle_out *= (1.f - inputs.love);
-      }
-
-      out.sun = kokopellivcv::dsp::sum(out.sun, cycle_out, signal_type);
-    }
-
-    out.sun = kokopellivcv::dsp::sum(out.sun, inputs.in, signal_type);
   }
 
   inline void handleLoveDirectionChange(Song &song, LoveDirection new_love_direction) {
     assert(new_love_direction != _love_direction);
 
     if (new_love_direction == LoveDirection::ESTABLISHED) {
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_LOOP);
+      if (observer.checkIfInSubgroupMode()) {
+        observer.exitSubgroupMode(song);
+        nextCycle(song, CycleEnd::DISCARD);
+      } else {
+        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_LOOP);
+      }
     } else if (_love_direction == LoveDirection::ESTABLISHED && new_love_direction == LoveDirection::EMERGENCE) {
       nextCycle(song, CycleEnd::DISCARD);
-      if (_select_mode) {
-        _select_mode = false;
-      }
     }
 
     _love_direction = new_love_direction;
@@ -316,23 +200,20 @@ private:
         cycle->playhead = 0.f;
       }
     }
-
-    // TODO cycle back
   }
 
 public:
   inline void advance(Song &song, Inputs inputs) {
     advanceTime(song);
+    song.new_cycle->write(inputs.in, inputs.love);
 
     LoveDirection new_love_direction = Inputs::getLoveDirection(inputs.love);
     if (_love_direction != new_love_direction) {
       handleLoveDirectionChange(song, new_love_direction);
     }
 
-    song.new_cycle->write(inputs.in, inputs.love);
-
-    updateSongCyclesLove(song.cycles);
-    updateSongOut(song.out, song.cycles, song.new_cycle->immediate_group, inputs);
+    love_updater.updateSongCyclesLove(song.cycles);
+    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs);
   }
 };
 

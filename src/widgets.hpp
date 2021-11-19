@@ -12,6 +12,14 @@ struct MediumLEDButton : rack::app::SvgSwitch {
   }
 };
 
+struct AuditionKnob : Rogan {
+  AuditionKnob() {
+		minAngle = -0.25 * M_PI;
+		maxAngle = 0.25 * M_PI;
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/AuditionKnob.svg")));
+  }
+};
+
 struct LoveKnob : Rogan {
   LoveKnob() {
 		minAngle = -0.25 * M_PI;
@@ -23,6 +31,25 @@ struct LoveKnob : Rogan {
 struct KokopelliPort : SvgPort {
 	KokopelliPort() {
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/KokopelliPort.svg")));
+  }
+};
+
+struct EstablishedPort : SvgPort {
+	EstablishedPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/EstablishedPort.svg")));
+  }
+};
+
+
+struct SunPort : SvgPort {
+	SunPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/SunPort.svg")));
+  }
+};
+
+struct PhasePort : SvgPort {
+	PhasePort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/PhasePort.svg")));
   }
 };
 

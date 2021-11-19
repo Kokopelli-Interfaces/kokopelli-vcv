@@ -22,15 +22,15 @@ struct Engine {
 
   Song _song;
   Gko _gko;
+  Observer _observer;
 
   // FIXME not set
   kokopellivcv::dsp::SignalType _signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
   void step();
-  float readSun();
-  float readEstablished();
 
-  void cycleDivinity();
+  void channelStateReset();
+  void cycleObservation();
   void ascend();
   void cycleForward();
   void undo();

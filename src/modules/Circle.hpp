@@ -21,6 +21,7 @@ struct Circle : KokopelliVcvModule {
 		CYCLE_PARAM,
 		DIVINITY_PARAM,
 		LOVE_PARAM,
+		AUDITION_PARAM,
 		NUM_PARAMS
   };
 	enum InputIds {
@@ -43,6 +44,8 @@ struct Circle : KokopelliVcvModule {
     ENUMS(CYCLE_LIGHT, 3),
     NUM_LIGHTS
   };
+
+  float _audition_position = 1.f;
 
   float _sample_time = 1.0f;
 

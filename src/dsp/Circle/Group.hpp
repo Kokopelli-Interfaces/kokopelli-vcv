@@ -23,7 +23,7 @@ struct Group {
   Time period = 0.f;
   Time beat_period = 0.f;
 
-  inline void undoLastCycle() {
+  inline void undoLastCycleWithoutUndoingParent() {
     assert(cycles_in_group.size() == period_history.size());
 
     int last_i = cycles_in_group.size() - 1;
@@ -31,6 +31,10 @@ struct Group {
     period = period_history[last_i];
     period_history.pop_back();
     next_cycles_relative_love.pop_back();
+  }
+
+  inline void undoLastCycle() {
+    undoLastCycleWithoutUndoingParent();
 
     if (parent_group) {
       parent_group->undoLastCycle();
@@ -138,25 +142,32 @@ struct Group {
     cycle->period = adjusted_period;
   }
 
-  inline void addToGroup(Cycle* cycle) {
-    if (parent_group && cycle->immediate_group != parent_group) {
-      parent_group->addToGroup(cycle);
-    }
-
+  inline void addToGroupWithoutAddingToParents(Cycle* cycle) {
     this->cycles_in_group.push_back(cycle);
     this->next_cycles_relative_love.push_back(1.f);
     this->period_history.push_back(period);
 
     if (cycle->loop) {
       if (this->cycles_in_group.size() == 1) {
+        Time crossfade_time = .02;
+        cycle->period -= crossfade_time;
         period = cycle->period;
         beat_period = cycle->period;
+        cycle->playhead = crossfade_time;
       } else {
         adjustPeriodsToFit(cycle);
       }
     }
 
     printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
+  }
+
+  inline void addToGroup(Cycle* cycle) {
+    if (parent_group && cycle->immediate_group != parent_group) {
+      parent_group->addToGroup(cycle);
+    }
+
+    addToGroupWithoutAddingToParents(cycle);
   }
 };
 

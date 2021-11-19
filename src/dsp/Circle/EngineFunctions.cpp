@@ -21,16 +21,21 @@ void Engine::cycleForward() {
 }
 
 // TODO
-void Engine::cycleDivinity() {
-  _gko.cycleDivinity(_song);
-  // TODO make a group !
+void Engine::cycleObservation() {
+  _gko.cycleObservation(_song);
 }
 
 void Engine::ascend() {
-  _gko.ascend(_song);
+  _gko.observer.ascend(_song);
+  _gko.nextCycle(_song, CycleEnd::DISCARD);
 }
 
 void Engine::undo() {
   _gko.undoCycle(_song);
   _gko.nextCycle(_song, CycleEnd::DISCARD);
+}
+
+void Engine::channelStateReset() {
+  _gko.nextCycle(_song, CycleEnd::DISCARD);
+  _gko.love_updater._love_calculator_divider.reset();
 }

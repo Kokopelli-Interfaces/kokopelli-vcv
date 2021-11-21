@@ -53,6 +53,14 @@ public:
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
     Cycle* ended_cycle = song.new_cycle;
+    ended_cycle->finishWrite();
+
+    // may happen when reverse recording
+    if (ended_cycle->period == 0.f) {
+      delete ended_cycle;
+      song.new_cycle = new Cycle(song.playhead, song.current_movement, song.established);
+      return;
+    }
 
     switch (cycle_end) {
     case CycleEnd::DISCARD:
@@ -61,7 +69,6 @@ public:
       break;
     case CycleEnd::JOIN_ESTABLISHED_LOOP:
       ended_cycle->loop = true;
-      ended_cycle->finishWrite();
       song.cycles.push_back(ended_cycle);
       ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
@@ -105,9 +112,7 @@ public:
       cycle_movement = song.current_movement;
     }
 
-    Time start = song.playhead;
-    // FIXME calculated samples_per_tick will suck
-    song.new_cycle = new Cycle(start, cycle_movement, song.established);
+    song.new_cycle = new Cycle(song.playhead, cycle_movement, song.established);
   }
 
   inline void undoCycle(Song &song) {

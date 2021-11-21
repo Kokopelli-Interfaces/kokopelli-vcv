@@ -16,7 +16,7 @@ struct Group;
 struct Cycle {
   Group* immediate_group;
 
-  Time period;
+  Time period = 0.f;
   Time capture_start;
 
   Time playhead = 0.f;

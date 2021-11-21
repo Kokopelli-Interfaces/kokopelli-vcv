@@ -17,7 +17,6 @@ namespace kokopellivcv {
 
 struct Circle : KokopelliVcvModule {
   enum ParamIds {
-		TUNE_PARAM,
 		CYCLE_PARAM,
 		DIVINITY_PARAM,
 		LOVE_PARAM,
@@ -39,7 +38,6 @@ struct Circle : KokopelliVcvModule {
 	};
 
   enum LightIds {
-    ENUMS(TUNE_LIGHT, 3),
     ENUMS(DIVINITY_LIGHT, 3),
     ENUMS(CYCLE_LIGHT, 3),
     NUM_LIGHTS
@@ -49,7 +47,6 @@ struct Circle : KokopelliVcvModule {
 
   float _sample_time = 1.0f;
 
-  kokopellivcv::dsp::LongPressButton _tune_button;
   kokopellivcv::dsp::LongPressButton _cycle_forward_button;
   kokopellivcv::dsp::LongPressButton _cycle_divinity_button;
 

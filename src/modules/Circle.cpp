@@ -12,7 +12,6 @@ Circle::Circle() {
   _button_divider.setDivision(4);
   _light_blinker = new kokopellivcv::dsp::LightBlinker(&lights);
 
-  _tune_button.param = &params[TUNE_PARAM];
   _cycle_forward_button.param = &params[CYCLE_PARAM];
   _cycle_divinity_button.param = &params[DIVINITY_PARAM];
 }
@@ -29,25 +28,11 @@ void Circle::sampleRateChange() {
 void Circle::processButtons(const ProcessArgs &args) {
   float sample_time = _sample_time * _button_divider.division;
 
-  kokopellivcv::dsp::LongPressButton::Event _tune_event = _tune_button.process(sample_time);
   kokopellivcv::dsp::LongPressButton::Event _cycle_forward_event = _cycle_forward_button.process(sample_time);
   kokopellivcv::dsp::LongPressButton::Event _cycle_divinity_event = _cycle_divinity_button.process(sample_time);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
-
-    switch (_tune_event) {
-    case kokopellivcv::dsp::LongPressButton::NO_PRESS:
-      break;
-    case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->toggleTuneToFrequencyOfEstablished();
-      updateLights(args);
-      _light_blinker->blinkLight(TUNE_LIGHT);
-      break;
-    case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      // e->toggleCycleMode();
-      break;
-    }
 
     switch (_cycle_divinity_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
@@ -110,6 +95,7 @@ void Circle::modulateChannel(int channel_i) {
   e->inputs.love = love;
 
   e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+
   // FIXME ugh
   e->options = _options;
   e->_gko.love_updater.love_resolution = _options.love_resolution;
@@ -136,6 +122,16 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     e->inputs.in = inputs[WOMB_INPUT].getPolyVoltage(channel_i);
   } else {
     e->inputs.in = 0.f;
+  }
+
+  if (inputs[PHASE_INPUT].isConnected()) {
+    float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
+    e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+  }
+
+  if (outputs[PHASE_OUTPUT].isConnected()) {
+    float phase = e->_song.established->getPhase(e->_song.playhead);
+    outputs[PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   e->step();
@@ -186,14 +182,6 @@ void Circle::updateLights(const ProcessArgs &args) {
   established_sum = established_sum * (1.f - default_e->inputs.love);
 
   LoveDirection love_direction = default_e->_gko._love_direction;
-  if (default_e->_gko.tune_to_frequency_of_established) {
-    updateLight(TUNE_LIGHT, colors::ESTABLISHED_LIGHT, default_e->_song.established->getPhase(default_e->_song.playhead));
-  } else {
-    long double playhead = default_e->_song.new_cycle->playhead;
-    long double playhead_ms = rack::math::eucMod(playhead, 1.0f);
-    updateLight(TUNE_LIGHT, colors::WOMB_LIGHT, playhead_ms);
-  }
-
   if (love_direction == LoveDirection::ESTABLISHED) {
     updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
     if (default_e->_gko.observer.checkIfInSubgroupMode()) {

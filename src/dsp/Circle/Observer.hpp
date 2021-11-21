@@ -15,10 +15,39 @@ namespace circle {
 
 class Observer {
 public:
+  bool subgroup_addition = false;
+
   /* read only */
   bool _subgroup_mode = false;
   Group* _pivot_parent = nullptr;
-  int _focused_cycle_i_in_group = 0;
+  std::vector<Group*> _subgroups;
+  int _focused_subgroup_i = -1;
+
+  static inline std::vector<Group*> breakIntoSubgroups(Group* parent) {
+    std::vector<Group*> subgroups;
+
+    for (unsigned int i = 0; i < parent->cycles_in_group.size(); i++) {
+      Cycle* cycle = parent->cycles_in_group[i];
+      bool create_subgroup = cycle->immediate_group == parent;
+      if (create_subgroup) {
+        Group* subgroup = new Group();
+        subgroups.push_back(subgroup);
+        subgroup->parent_group = parent;
+        subgroup->id = rack::string::f("%s-%d", parent->id.c_str(), i+1);
+        subgroup->addToGroupWithoutAddingToParents(cycle);
+        cycle->immediate_group = subgroup;
+      } else {
+        if (cycle->immediate_group->parent_group == parent) {
+          bool already_accounted_for = std::find(subgroups.begin(), subgroups.end(), cycle->immediate_group) != subgroups.end();
+          if (!already_accounted_for) {
+            subgroups.push_back(cycle->immediate_group);
+          }
+        }
+      }
+    }
+
+    return subgroups;
+  }
 
   static inline bool checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(Group *one, Group *two) {
     if (!one) {
@@ -36,73 +65,59 @@ public:
     return _subgroup_mode;
   }
 
-  inline Group* observeCycleInPivotParent(Cycle* cycle, std::vector<Group*> &groups) {
-    Group* next_focus_group;
-    if (cycle->immediate_group != _pivot_parent) {
-      next_focus_group = cycle->immediate_group;
-      printf("set to cycle immediate group %s\n", cycle->immediate_group->id.c_str());
-    } else {
-      printf("create new group with cycle\n");
-      next_focus_group = new Group();
-      groups.push_back(next_focus_group);
-      next_focus_group->parent_group = _pivot_parent;
-      next_focus_group->id = rack::string::f("%s.%d", _pivot_parent->id.c_str(), _focused_cycle_i_in_group+1);
-      next_focus_group->addToGroupWithoutAddingToParents(cycle);
-      cycle->immediate_group = next_focus_group;
-    }
-
-    return next_focus_group;
-  }
-
-  inline void enterSubgroupMode(Song &song) {
+  inline void tryEnterSubgroupMode(Song &song) {
     assert(!_subgroup_mode);
     assert(song.established);
 
-    _subgroup_mode = true;
     _pivot_parent = song.established;
-    _focused_cycle_i_in_group = -1;
-
-    if (song.established->cycles_in_group.empty()) {
+    _subgroups = breakIntoSubgroups(_pivot_parent);
+    if (_subgroups.empty()) {
       return;
     }
 
-    _focused_cycle_i_in_group = _pivot_parent->cycles_in_group.size()-1;
-    Cycle* focus_cycle = _pivot_parent->cycles_in_group[_focused_cycle_i_in_group];
-
-    song.established = observeCycleInPivotParent(focus_cycle, song.groups);
-  }
-
-  inline void exitSubgroupModeByMakingSubgroupTheEstablishedGroup(Song &song) {
-    song.established = song.new_cycle->immediate_group;
+    _subgroup_mode = true;
+    _focused_subgroup_i = _subgroups.size() - 1;
+    song.established = _subgroups[_focused_subgroup_i];
   }
 
   inline void exitSubgroupMode(Song &song) {
-    assert(_subgroup_mode);
+    this->subgroup_addition = false;
+
+    Group* subgroup = _subgroups[_focused_subgroup_i];
+    bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), subgroup) != song.groups.end();
+    if (!subgroup_in_song) {
+      song.groups.push_back(subgroup);
+    }
+
+    song.established = subgroup;
+
+    for (Group* group: _subgroups) {
+      bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), group) != song.groups.end();
+      if (!subgroup_in_song) {
+        for (auto cycle: song.cycles) {
+          if (cycle->immediate_group == group) {
+            cycle->immediate_group = _pivot_parent;
+          }
+        }
+
+        delete group;
+      }
+    }
+
     _subgroup_mode = false;
-    song.established = _pivot_parent;
   }
 
-  inline void cycleObservedSubestablishment(Song &song) {
+  inline void cycleSubgroup(Song &song) {
     assert(_subgroup_mode);
 
-    int last_focused_cycle_i_in_group = _focused_cycle_i_in_group;
-    Cycle* last_focus_cycle = _pivot_parent->cycles_in_group[last_focused_cycle_i_in_group];
-
-    if (last_focus_cycle->immediate_group->cycles_in_group.size() == 1) {
-      printf("Clearing last made group\n");
-      last_focus_cycle->immediate_group->undoLastCycleWithoutUndoingParent();
-      last_focus_cycle->immediate_group = _pivot_parent;
-      song.clearEmptyGroups();
-    }
-
-    if (_focused_cycle_i_in_group == 0) {
-      _focused_cycle_i_in_group = _pivot_parent->cycles_in_group.size()-1;
+    if (_focused_subgroup_i == 0) {
+      _focused_subgroup_i = _subgroups.size()-1;
     } else {
-      _focused_cycle_i_in_group--;
+      _focused_subgroup_i--;
     }
 
-    Cycle* focus_cycle = _pivot_parent->cycles_in_group[_focused_cycle_i_in_group];
-    song.established = observeCycleInPivotParent(focus_cycle, song.groups);
+    Group* subgroup = _subgroups[_focused_subgroup_i];
+    song.established = subgroup;
   }
 
   inline void ascend(Song &song) {
@@ -112,16 +127,7 @@ public:
 
     if (song.established->parent_group) {
       song.established = song.established->parent_group;
-    } else {
-      Group* new_group = new Group();
-      song.groups.push_back(new_group);
-      new_group->parent_group = song.established->parent_group;
-      new_group->letter = song.established->letter++;
-      new_group->id = rack::string::f("%c", new_group->letter);
-      song.established = new_group;
     }
-
-    // nextCycle(song, CycleEnd::DISCARD);
   }
 };
 

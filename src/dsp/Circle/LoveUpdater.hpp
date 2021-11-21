@@ -41,6 +41,13 @@ private:
 
 public:
   inline void updateSongCyclesLove(std::vector<Cycle*> &cycles) {
+    // TODO maybe put in function so to not call every step
+    if (_next_cycles_love.size() < cycles.size()) {
+      while (_next_cycles_love.size() < cycles.size()) {
+        _next_cycles_love.push_back(0.f);
+      }
+    }
+
     if (_love_calculator_divider.process()) {
       for (unsigned int i = 0; i < cycles.size(); i++) {
         float cycle_i_love = 1.f;
@@ -54,9 +61,6 @@ public:
           }
         }
 
-        while (_next_cycles_love.size() <= i) {
-          _next_cycles_love.push_back(0.f);
-        }
         _next_cycles_love[i] = cycle_i_love;
       }
     }

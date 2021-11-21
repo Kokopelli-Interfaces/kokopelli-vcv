@@ -53,6 +53,18 @@ struct PhasePort : SvgPort {
   }
 };
 
+struct PhaseOutPort : SvgPort {
+	PhaseOutPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/PhaseOutPort.svg")));
+  }
+};
+
+struct PhaseInPort : SvgPort {
+	PhaseInPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/PhaseInPort.svg")));
+  }
+};
+
 struct WombPort : SvgPort {
 	WombPort() {
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/WombPort.svg")));

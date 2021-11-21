@@ -5,18 +5,19 @@
 
 namespace kokopellivcv {
 
-struct CircleValueDisplay : TextBox {
+struct CircleTextBox : TextBox {
 	Circle *_module;
 	int _previous_displayed_value = -1;
 
-	CircleValueDisplay(Circle *m) : TextBox() {
+	CircleTextBox(Circle *m, NVGcolor background_color, NVGcolor text_color, rack::math::Vec pos, rack::math::Vec size) : TextBox() {
     _module = m;
     font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Nunito-Bold.ttf"));
     font_size = 12;
     letter_spacing = 0.f;
-    backgroundColor = colors::BOX_BG;
-    textColor = colors::ESTABLISHED;
-    box.size = mm2px(Vec(6.902, 3.283));
+    backgroundColor = background_color;
+    textColor = text_color;
+    box.pos = pos;
+    box.size = size;
     textOffset = Vec(box.size.x * 0.5f, 0.f);
     textAlign = NVG_ALIGN_CENTER | NVG_ALIGN_TOP;
   }
@@ -46,106 +47,110 @@ struct CircleValueDisplay : TextBox {
 	}
 };
 
-struct EstablishedDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-  EstablishedDisplay(Circle *m) : CircleValueDisplay(m) {
-    textOffset = Vec(box.size.x * 0.5f, box.size.y * 0.70f);
-  }
+struct EstablishedDisplay : CircleTextBox {
+  using CircleTextBox::CircleTextBox;
 
-  // race condition
   void update(kokopellivcv::dsp::circle::Engine* e) override {
+    float phase = e->_song.established->getPhase(e->_song.playhead);
+    backgroundColor.a = phase;
+
     if (e->_gko.observer.checkIfInSubgroupMode()) {
       // textColor = colors::LOOK_BACK_LAYER;
       textColor = colors::ESTABLISHED;
       int pivot_id_len = e->_gko.observer._pivot_parent->id.size();
-      std::string top_text = e->_gko.observer._pivot_parent->id.substr(0, pivot_id_len);
+      std::string left_text = e->_gko.observer._pivot_parent->id.substr(0, pivot_id_len);
 
-      std::string bottom_text;
+      std::string right_text;
       // this is an invariant that does not hold sometimes due to race condition as this is widget thread
       if ((unsigned int)pivot_id_len < e->_song.established->id.size()) {
-        bottom_text = e->_song.established->id.substr(pivot_id_len+1);
+        right_text = e->_song.established->id.substr(pivot_id_len+1);
       } else {
-        bottom_text = e->_song.established->id.substr(pivot_id_len);
+        right_text = e->_song.established->id.substr(pivot_id_len);
       }
 
-      std::string s = string::f("%s|%s", top_text.c_str(), bottom_text.c_str());
-      CircleValueDisplay::setText(s);
-      // CircleValueDisplay::setText(e->_song.established->id);
+      std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
+      CircleTextBox::setText(s);
+      // CircleTextBox::setText(e->_song.established->id);
     } else {
       textColor = colors::ESTABLISHED;
       // std::string s = string::f("%s", e->_song.established->id);
-      // CircleValueDisplay::setText(s);
-      CircleValueDisplay::setText(e->_song.established->id);
+      // CircleTextBox::setText(s);
+      CircleTextBox::setText(e->_song.established->id);
     }
   }
 };
 
-struct EstablishedBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
+struct EstablishedBeatDisplay : CircleTextBox {
+  using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     int beat_in_established = e->_song.established->convertToBeat(e->_song.playhead, true);
-    CircleValueDisplay::setDisplayValue(beat_in_established + 1);
+    CircleTextBox::setDisplayValue(beat_in_established + 1);
 	}
 };
 
-struct TotalEstablishedBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
+struct TotalEstablishedBeatDisplay : CircleTextBox {
+  using CircleTextBox::CircleTextBox;
 
   // FIXME
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    CircleValueDisplay::setDisplayValue(e->_song.established->getTotalBeats());
+    CircleTextBox::setDisplayValue(e->_song.established->getTotalBeats());
 	}
 };
 
-struct WombDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-
-	WombDisplay(Circle *m) : CircleValueDisplay(m) {
-    textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.7f);
-    textColor = colors::WOMB;
-  }
+struct WombDisplay : CircleTextBox {
+  using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
+    float phase = 0.f;
+    if (e->_gko.observer.checkIfInSubgroupMode()) {
+      phase = e->_song.established->getBeatPhase(e->_song.playhead);
+    }
+
+    backgroundColor.a = phase;
+
     int womb_display = e->_song.established->cycles_in_group.size() + 1;
     std::string s = string::f("%d", womb_display);
-    CircleValueDisplay::setText(s);
+    CircleTextBox::setText(s);
 	}
 };
 
-struct WombBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-
-	WombBeatDisplay(Circle *m) : CircleValueDisplay(m) {
-    textColor = colors::WOMB;
-  }
+struct WombBeatDisplay : CircleTextBox {
+  using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e->_gko.tune_to_frequency_of_established) {
-    int beat_in_established = e->_song.established->convertToBeat(e->_song.new_cycle->playhead, false);
-      CircleValueDisplay::setDisplayValue(beat_in_established + 1);
+      int beat_in_established;
+      if (e->_gko.observer.checkIfInSubgroupMode()) {
+        beat_in_established = e->_song.established->convertToBeat(e->_song.new_cycle->playhead, true);
+      } else {
+        beat_in_established = e->_song.established->convertToBeat(e->_song.new_cycle->playhead, false);
+      }
+
+      CircleTextBox::setDisplayValue(beat_in_established + 1);
     } else {
-      CircleValueDisplay::setDisplayValue((int)e->_song.new_cycle->playhead);
+      CircleTextBox::setDisplayValue((int)e->_song.new_cycle->playhead);
     }
 	}
 };
 
-struct TotalWombBeatDisplay : CircleValueDisplay {
-  using CircleValueDisplay::CircleValueDisplay;
-
-	TotalWombBeatDisplay(Circle *m) : CircleValueDisplay(m) {
-    textColor = colors::WOMB;
-  }
+struct TotalWombBeatDisplay : CircleTextBox {
+  using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e->_song.cycles.size() == 0) {
-      CircleValueDisplay::setText("--");
-      CircleValueDisplay::_previous_displayed_value = -1;
+      textColor = colors::WOMB;
+      CircleTextBox::setText("--");
+      CircleTextBox::_previous_displayed_value = -1;
       return;
     }
 
     textColor = colors::LOOK_BACK_LAYER;
-    CircleValueDisplay::setDisplayValue(e->getMostRecentCycleLength());
+    if (e->_gko.observer.checkIfInSubgroupMode()) {
+      CircleTextBox::setDisplayValue(e->_song.established->getTotalBeats());
+    } else {
+      CircleTextBox::setDisplayValue(e->getMostRecentCycleLength());
+    }
 	}
 };
 
@@ -175,9 +180,9 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<SunPort>(mm2px(Vec(13.65, 15.365)), module, Circle::SUN));
 		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Circle::WOMB_INPUT));
 
-		addInput(createInput<PhasePort>(mm2px(Vec(2.276, 29.961)), module, Circle::PHASE_INPUT));
+		addInput(createInput<PhaseInPort>(mm2px(Vec(2.276, 29.961)), module, Circle::PHASE_INPUT));
 		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.558)), module, Circle::AUDITION_PARAM));
-		addOutput(createOutput<PhasePort>(mm2px(Vec(24.925, 29.961)), module, Circle::PHASE_OUTPUT));
+		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Circle::PHASE_OUTPUT));
 
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));
 
@@ -187,39 +192,21 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 80.017)), module, Circle::CYCLE_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Circle::CYCLE_LIGHT));
 
-    auto focused_display_size = mm2px(Vec(8.48, 9.571));
+    auto focused_display_size = mm2px(Vec(15.736, 4.312));
+		established_display = new EstablishedDisplay(module, colors::BOX_BG_LIGHT, colors::ESTABLISHED, mm2px(Vec(1.236, 40.865)), focused_display_size);
+		womb_display = new WombDisplay(module, colors::BOX_BG_LIGHT, colors::WOMB, mm2px(Vec(18.644, 40.865)), focused_display_size);
 
-		established_display = new EstablishedDisplay(module);
-    established_display->box.pos = mm2px(Vec(1.388, 40.865));
-    established_display->box.size = focused_display_size;
+    auto beat_display_size = mm2px(Vec(7.527, 4.327));
+    group_beat_display = new EstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(1.268, 45.968)), beat_display_size);
+    total_established_beats_display = new TotalEstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(9.321, 45.968)), beat_display_size);
+    womb_beat_display = new WombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(18.675, 45.968)), beat_display_size);
+    total_womb_beats_display = new TotalWombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(26.729, 45.968)), beat_display_size);
+
     addChild(established_display);
-
-		womb_display = new WombDisplay(module);
-    womb_display->box.pos = mm2px(Vec(25.828, 40.865));
-    womb_display->box.size = focused_display_size;
     addChild(womb_display);
-
-    auto beat_display_size = mm2px(Vec(6.385, 4.327));
-
-    group_beat_display = new EstablishedBeatDisplay(module);
-    group_beat_display->box.pos = mm2px(Vec(10.298, 40.865));
-    group_beat_display->box.size = beat_display_size;
     addChild(group_beat_display);
-
-    total_established_beats_display = new TotalEstablishedBeatDisplay(module);
-    total_established_beats_display->box.pos = mm2px(Vec(10.298, 45.968));
-    total_established_beats_display->box.size = beat_display_size;
     addChild(total_established_beats_display);
-
-
-    womb_beat_display = new WombBeatDisplay(module);
-    womb_beat_display->box.pos = mm2px(Vec(18.881, 40.865));
-    womb_beat_display->box.size = beat_display_size;
     addChild(womb_beat_display);
-
-    total_womb_beats_display = new TotalWombBeatDisplay(module);
-    total_womb_beats_display->box.pos = mm2px(Vec(18.881, 45.968));
-    total_womb_beats_display->box.size = beat_display_size;
     addChild(total_womb_beats_display);
   }
 

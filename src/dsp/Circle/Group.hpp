@@ -50,6 +50,14 @@ struct Group {
     return false;
   }
 
+  inline float getBeatPhase(Time time) {
+    if (period != 0.f && beat_period != 0.f) {
+      Time time_in_beat = std::fmod((float)time, (float)beat_period);
+      return rack::clamp(time_in_beat / beat_period , 0.f, 1.f);
+    }
+    return 0.f;
+  }
+
   inline float getPhase(Time time) {
     if (period != 0.f && beat_period != 0.f) {
       Time time_in_established = std::fmod((float)time, (float)period);

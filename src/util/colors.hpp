@@ -18,7 +18,10 @@ static const NVGcolor SOFT_SUNLIGHT = nvgRGB(0xff, 0xad, 0x88);
 static const NVGcolor SOFT_SUNLIGHT_BRIGHT = nvgRGB(0xff, 0xad, 0x88);
 
 static const NVGcolor STRONG_SUNLIGHT = nvgRGB(0xff, 0x99, 0x55);
+static const NVGcolor NIGHT_SKY = nvgRGB(0x0f, 0x09, 0x0a);
 static const NVGcolor DARK_BROWN = nvgRGB(0x19, 0x0d, 0x05);
+static const NVGcolor TAN_BROWN = nvgRGB(0x2d, 0x1d, 0x1a);
+
 static const NVGcolor CYAN = nvgRGB(0x71, 0x99, 0x74);
 static const NVGcolor CYAN_BRIGHT = nvgRGB(0x2c, 0xd7, 0x37);
 
@@ -37,7 +40,8 @@ static const NVGcolor ESTABLISHED = SOFT_SUNLIGHT;
 static const NVGcolor SUN = STRONG_SUNLIGHT;
 static const NVGcolor EMERGENCE = CYAN;
 static const NVGcolor WOMB = WOMB_RED;
-static const NVGcolor BOX_BG = DARK_BROWN;
+static const NVGcolor BOX_BG_DARK = NIGHT_SKY;
+static const NVGcolor BOX_BG_LIGHT = TAN_BROWN;
 static const NVGcolor LOOK_BACK_LAYER = YELLOWY;
 
 static const NVGcolor ESTABLISHED_LIGHT = SOFT_SUNLIGHT_BRIGHT;

@@ -32,7 +32,7 @@ struct Cycle {
   bool loop = false;
 
   // TODO option
-  Time max_crossfade_time = 0.2f;
+  Time max_crossfade_time = 0.1f;
   Time fade_in_time = 0.02f;
   Time fade_out_time = 0.07f;
 
@@ -108,9 +108,12 @@ struct Cycle {
     if (this->period < window) {
       this->period = window;
     } else {
-      // look back
-      this->signal_capture->fitToWindow(window);
-      this->love_capture->fitToWindow(window);
+      Time crossfade_time = this->signal_capture->_period - window;
+      if (max_crossfade_time < crossfade_time) {
+        crossfade_time = max_crossfade_time;
+      }
+      this->signal_capture->fitToWindow(window + crossfade_time);
+      this->love_capture->fitToWindow(window + crossfade_time);
     }
 
     this->signal_capture->finishWrite();

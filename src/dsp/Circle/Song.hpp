@@ -16,7 +16,7 @@ struct Song {
   std::string name = "my song";
 
   std::vector<Group*> groups;
-  Group* established;
+  Group* established = nullptr;
 
   std::vector<Cycle*> cycles;
   // TODO move to inactive if pre-entrance movement

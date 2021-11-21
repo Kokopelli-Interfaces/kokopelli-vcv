@@ -14,14 +14,16 @@ struct MediumLEDButton : rack::app::SvgSwitch {
 
 struct AuditionKnob : Rogan {
   AuditionKnob() {
-		minAngle = -0.25 * M_PI;
-		maxAngle = 0.25 * M_PI;
+    speed = 2.0f;
+		minAngle = .75 * M_PI;
+		maxAngle = 1.25 * M_PI;
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/AuditionKnob.svg")));
   }
 };
 
 struct LoveKnob : Rogan {
   LoveKnob() {
+    speed = 1.5f;
 		minAngle = -0.25 * M_PI;
 		maxAngle = 0.25 * M_PI;
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/LoveKnob.svg")));

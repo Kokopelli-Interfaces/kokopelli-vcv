@@ -63,21 +63,21 @@ public:
       ended_cycle->loop = true;
       ended_cycle->finishWrite();
       song.cycles.push_back(ended_cycle);
-      ended_cycle->immediate_group->addToGroup(ended_cycle);
+      ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
     case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP:
       ended_cycle->loop = true;
       observer.subgroup_addition = true;
       ended_cycle->finishWindowCaptureWrite(ended_cycle->immediate_group->period);
       song.cycles.push_back(ended_cycle);
-      ended_cycle->immediate_group->addToGroup(ended_cycle);
+      ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
     case CycleEnd::JOIN_ESTABLISHED_NO_LOOP:
       // FIXME
       delete ended_cycle;
       // ended_cycle->loop = false;
       // song.cycles.push_back(ended_cycle);
-      // ended_cycle->immediate_group->addToGroup(ended_cycle);
+      // ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
     case CycleEnd::FLOOD:
       for (int i = song.cycles.size()-1; 0 <= i; i--) {
@@ -87,7 +87,11 @@ public:
         }
       }
 
+      if (observer.checkIfInSubgroupMode()) {
+        observer.exitSubgroupMode(song);
+      }
       song.clearEmptyGroups();
+
       delete ended_cycle;
       break;
     }
@@ -107,6 +111,10 @@ public:
   }
 
   inline void undoCycle(Song &song) {
+    if (observer.checkIfInSubgroupMode()) {
+      observer.exitSubgroupMode(song);
+    }
+
     if (0 < song.cycles.size()) {
       Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
       most_recent_cycle->immediate_group->undoLastCycle();
@@ -145,12 +153,7 @@ public:
       break;
     case LoveDirection::EMERGENCE:
     case LoveDirection::NEW:
-      if (!observer.checkIfInSubgroupMode()) {
-        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_LOOP);
-        observer.tryEnterSubgroupMode(song);
-      } else {
-        nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP);
-      }
+      nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP);
 
       break;
     }
@@ -191,6 +194,14 @@ public:
 
     _time_advancer.step(song.playhead, step);
     _time_advancer.step(song.new_cycle->playhead, step);
+    if (use_ext_phase) {
+      if (song.playhead < 0.f) {
+        song.playhead = 0.f;
+      }
+      if (song.new_cycle->playhead < 0.f) {
+        song.new_cycle->playhead = 0.f;
+      }
+    }
 
     for (Cycle* cycle : song.cycles) {
       _time_advancer.step(cycle->playhead, step);

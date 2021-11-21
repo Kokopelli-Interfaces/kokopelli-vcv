@@ -26,7 +26,7 @@ struct CircleTextBox : TextBox {
     TextBox::step();
 		if(_module) {
       kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
-      if (e == NULL) {
+      if (!e) {
         return;
       }
       update(e);
@@ -51,8 +51,10 @@ struct EstablishedDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    float phase = e->_song.established->getPhase(e->_song.playhead);
-    backgroundColor.a = phase;
+    if (e) {
+      float phase = e->_song.established->getPhase(e->_song.playhead);
+      backgroundColor.a = phase;
+    }
 
     if (e->_gko.observer.checkIfInSubgroupMode()) {
       // textColor = colors::LOOK_BACK_LAYER;
@@ -180,9 +182,9 @@ struct CircleWidget : ModuleWidget {
 		addOutput(createOutput<SunPort>(mm2px(Vec(13.65, 15.365)), module, Circle::SUN));
 		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Circle::WOMB_INPUT));
 
-		addInput(createInput<PhaseInPort>(mm2px(Vec(2.276, 29.961)), module, Circle::PHASE_INPUT));
+		addInput(createInput<PhaseInPort>(mm2px(Vec(24.925, 29.961)), module, Circle::PHASE_INPUT));
 		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.558)), module, Circle::AUDITION_PARAM));
-		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Circle::PHASE_OUTPUT));
+		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Circle::PHASE_OUTPUT));
 
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));
 

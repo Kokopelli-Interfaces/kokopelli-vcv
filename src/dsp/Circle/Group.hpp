@@ -103,6 +103,8 @@ struct Group {
   }
 
   inline void adjustPeriodsToFit(Cycle* cycle) {
+    assert(!cycles_in_group.empty());
+
     Time adjusted_period;
 
     Time diff = cycle->period - period;
@@ -150,7 +152,11 @@ struct Group {
     cycle->period = adjusted_period;
   }
 
-  inline void addToGroupWithoutAddingToParents(Cycle* cycle) {
+  inline void addNewCycle(Cycle* cycle) {
+    if (parent_group != nullptr && cycle->immediate_group != parent_group) {
+      parent_group->addNewCycle(cycle);
+    }
+
     this->cycles_in_group.push_back(cycle);
     this->next_cycles_relative_love.push_back(1.f);
     this->period_history.push_back(period);
@@ -170,12 +176,23 @@ struct Group {
     printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
   }
 
-  inline void addToGroup(Cycle* cycle) {
-    if (parent_group && cycle->immediate_group != parent_group) {
-      parent_group->addToGroup(cycle);
-    }
+  inline void addExistingCycle(Cycle* cycle) {
+    this->cycles_in_group.push_back(cycle);
+    this->next_cycles_relative_love.push_back(1.f);
+    this->period_history.push_back(period);
 
-    addToGroupWithoutAddingToParents(cycle);
+    Time period_before = cycle->period;
+    if (cycle->loop) {
+      if (this->cycles_in_group.size() == 1) {
+        period = cycle->period;
+        beat_period = cycle->period;
+      } else {
+        adjustPeriodsToFit(cycle);
+      }
+    }
+    assert(cycle->period == period_before);
+
+    printf("-- add existing cycle to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
   }
 };
 

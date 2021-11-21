@@ -142,10 +142,10 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     if (1.f == _audition_position) {
       sun_out = out.sun;
     } else if (1.f < _audition_position) {
-      sun_out = rack::crossfade(out.sun, e->inputs.in, _audition_position - 1.f);
-    } else {
       float established_and_input = kokopellivcv::dsp::sum(out.attenuated_established, e->inputs.in, e->_signal_type);
-      sun_out = rack::crossfade(established_and_input, out.sun, _audition_position);
+      sun_out = rack::crossfade(out.sun, established_and_input, _audition_position - 1.f);
+    } else {
+      sun_out = rack::crossfade( e->inputs.in, out.sun, _audition_position);
     }
 
     outputs[SUN].setVoltage(sun_out, channel_i);

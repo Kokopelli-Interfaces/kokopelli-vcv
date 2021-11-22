@@ -3,10 +3,10 @@
 
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Solo Established / Solo Creation");
-  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Set Creative Force Divinity");
-  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Cycle");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established or Creative Force)");
+  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Solo Audio (Established or Creation)");
+  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Select");
+  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established or Creation)");
 
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);

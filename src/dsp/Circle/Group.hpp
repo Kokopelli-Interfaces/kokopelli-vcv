@@ -102,33 +102,33 @@ struct Group {
     return snap_beats;
   }
 
-  inline void adjustPeriodsToFit(Cycle* cycle) {
+  inline Time getAdjustedPeriod(Time cycle_period) {
     assert(!cycles_in_group.empty());
 
     Time adjusted_period;
 
-    Time diff = cycle->period - period;
+    Time diff = cycle_period - period;
     if (0.f < diff) {
       Time start_period = period;
-      Time percent_over = cycle->period / period;
+      Time new_period = start_period;
+      Time percent_over = cycle_period / period;
 
       float period_round_back_percent = 1.5f;
       while (period_round_back_percent <= percent_over) {
-        period += start_period;
+        new_period += start_period;
         percent_over = percent_over - 1.f;
       }
 
-      diff = cycle->period - period;
-      adjusted_period = this->period;
+      adjusted_period = new_period;
     } else {
-      Time cycle_time_in_beats = cycle->period / beat_period;
+      Time cycle_time_in_beats = cycle_period / beat_period;
       std::vector<int> snap_beats = getSnapBeats();
       int snap_beat = 1;
       for (unsigned int i = 1; i < snap_beats.size(); i++) {
         bool cycle_is_between_beats = (float)snap_beats[i-1] <= cycle_time_in_beats && cycle_time_in_beats <= (float)snap_beats[i];
         if (cycle_is_between_beats) {
           Time time_between_snap_beats = beat_period * (snap_beats[i] - snap_beats[i-1]);
-          Time cycle_position_in_between_snap_beats_area = cycle->period - (beat_period * snap_beats[i-1]);
+          Time cycle_position_in_between_snap_beats_area = cycle_period - (beat_period * snap_beats[i-1]);
           Time percent_position_in_snap_beats_area = cycle_position_in_between_snap_beats_area / time_between_snap_beats;
 
           if (percent_position_in_snap_beats_area <= 0.5f) {
@@ -141,8 +141,20 @@ struct Group {
       }
 
       Time snap_beat_time = (long double)snap_beat * beat_period;
-      diff = cycle->period - snap_beat_time;
       adjusted_period = snap_beat_time;
+    }
+
+    return adjusted_period;
+  }
+
+  inline void adjustPeriodsToFit(Cycle* cycle) {
+    assert(!cycles_in_group.empty());
+
+    Time adjusted_period = getAdjustedPeriod(cycle->period);
+    Time diff = cycle->period - adjusted_period;
+
+    if (period < adjusted_period) {
+      period = adjusted_period;
     }
 
     // preserve offset

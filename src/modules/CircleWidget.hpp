@@ -147,11 +147,19 @@ struct TotalWombBeatDisplay : CircleTextBox {
       return;
     }
 
-    textColor = colors::LOOK_BACK_LAYER;
+    // option
     if (e->_gko.observer.checkIfInSubgroupMode()) {
       CircleTextBox::setDisplayValue(e->_song.established->getTotalBeats());
     } else {
+      textColor = colors::LOOK_BACK_LAYER;
       CircleTextBox::setDisplayValue(e->getMostRecentCycleLength());
+      // if (e->_song.established->cycles_in_group.size() == 0) {
+      //   CircleTextBox::setDisplayValue(1);
+      // } else {
+      //   Time adjusted_period = e->_song.established->getAdjustedPeriod(e->_song.new_cycle->playhead);
+      //   int n_beats = e->_song.established->convertToBeat(adjusted_period, false);
+      //   CircleTextBox::setDisplayValue(n_beats);
+      // }
     }
 	}
 };

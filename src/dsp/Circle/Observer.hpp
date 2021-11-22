@@ -15,7 +15,6 @@ namespace circle {
 
 class Observer {
 public:
-  bool subgroup_addition = false;
 
   /* read only */
   bool _subgroup_mode = false;
@@ -88,11 +87,11 @@ public:
       song.groups.push_back(subgroup);
     }
 
-  this->subgroup_addition = false;
 }
 
 inline void exitSubgroupMode(Song &song) {
   Group* subgroup = _subgroups[_focused_subgroup_i];
+
   if (!subgroup->cycles_in_group.empty()) {
     bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), subgroup) != song.groups.end();
     if (!subgroup_in_song) {

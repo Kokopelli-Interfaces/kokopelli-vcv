@@ -105,9 +105,9 @@ struct WombDisplay : CircleTextBox {
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     float phase = 0.f;
-    if (e->_gko.observer.checkIfInSubgroupMode()) {
-      phase = e->_song.established->getBeatPhase(e->_song.playhead);
-    }
+    // if (e->_gko.observer.checkIfInSubgroupMode()) {
+    phase = e->_song.established->getBeatPhase(e->_song.new_cycle->playhead);
+    // }
 
     backgroundColor.a = phase;
 
@@ -123,11 +123,7 @@ struct WombBeatDisplay : CircleTextBox {
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e->_gko.tune_to_frequency_of_established) {
       int beat_in_established;
-      if (e->_gko.observer.checkIfInSubgroupMode()) {
-        beat_in_established = e->_song.established->convertToBeat(e->_song.new_cycle->playhead, true);
-      } else {
-        beat_in_established = e->_song.established->convertToBeat(e->_song.new_cycle->playhead, false);
-      }
+      beat_in_established = e->_song.established->convertToBeat(e->_song.new_cycle->playhead, false);
 
       CircleTextBox::setDisplayValue(beat_in_established + 1);
     } else {

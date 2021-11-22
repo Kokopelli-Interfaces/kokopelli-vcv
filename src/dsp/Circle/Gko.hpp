@@ -39,6 +39,8 @@ public:
   LoveUpdater love_updater;
   OutputUpdater output_updater;
 
+  bool _equal_period_addition = false;
+
   float _last_ext_phase = 0.f;
   TimeAdvancer _time_advancer;
 
@@ -74,7 +76,7 @@ public:
       break;
     case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP:
       ended_cycle->loop = true;
-      observer.subgroup_addition = true;
+      _equal_period_addition = true;
       ended_cycle->finishWindowCaptureWrite(ended_cycle->immediate_group->period);
       song.cycles.push_back(ended_cycle);
       ended_cycle->immediate_group->addNewCycle(ended_cycle);
@@ -131,7 +133,11 @@ public:
     switch(_love_direction) {
     case LoveDirection::ESTABLISHED:
       if (observer.checkIfInSubgroupMode()) {
-        observer.exitSubgroupMode(song);
+        Group* focused_subgroup = observer._subgroups[observer._focused_subgroup_i];
+        bool move_into_subgroup =  1 < focused_subgroup->cycles_in_group.size();
+        if (move_into_subgroup) {
+          observer.exitSubgroupMode(song);
+        }
         nextCycle(song, CycleEnd::DISCARD);
       } else {
         nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
@@ -159,7 +165,6 @@ public:
     case LoveDirection::EMERGENCE:
     case LoveDirection::NEW:
       nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP);
-
       break;
     }
   }
@@ -168,16 +173,13 @@ public:
     assert(new_love_direction != _love_direction);
 
     if (new_love_direction == LoveDirection::ESTABLISHED) {
-      if (observer.checkIfInSubgroupMode()) {
-        observer.exitSubgroupMode(song);
-        if (observer.subgroup_addition) {
-          nextCycle(song, CycleEnd::DISCARD);
-        } else {
-          nextCycle(song, CycleEnd::JOIN_ESTABLISHED_LOOP);
-        }
+      if (_equal_period_addition) {
+        nextCycle(song, CycleEnd::DISCARD);
       } else {
         nextCycle(song, CycleEnd::JOIN_ESTABLISHED_LOOP);
       }
+
+      _equal_period_addition = false;
     } else if (_love_direction == LoveDirection::ESTABLISHED && new_love_direction == LoveDirection::EMERGENCE) {
       nextCycle(song, CycleEnd::DISCARD);
     }

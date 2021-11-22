@@ -105,15 +105,14 @@ struct Cycle {
   }
 
   inline void finishWindowCaptureWrite(Time window) {
-    if (this->period < window) {
-      this->period = window;
-    } else {
+    if (window < this->signal_capture->_period) {
       Time crossfade_time = this->signal_capture->_period - window;
       if (max_crossfade_time < crossfade_time) {
         crossfade_time = max_crossfade_time;
       }
       this->signal_capture->fitToWindow(window + crossfade_time);
       this->love_capture->fitToWindow(window + crossfade_time);
+      this->playhead = crossfade_time;
     }
 
     this->signal_capture->finishWrite();

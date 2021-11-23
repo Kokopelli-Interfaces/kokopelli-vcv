@@ -55,9 +55,9 @@ public:
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
     Cycle* ended_cycle = song.new_cycle;
-    ended_cycle->finishWrite();
 
     // may happen when reverse recording
+    ended_cycle->finishWrite();
     if (ended_cycle->period == 0.f) {
       delete ended_cycle;
       song.new_cycle = new Cycle(song.playhead, song.current_movement, song.established);
@@ -77,7 +77,7 @@ public:
     case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP:
       ended_cycle->loop = true;
       _equal_period_addition = true;
-      ended_cycle->finishWindowCaptureWrite(ended_cycle->immediate_group->period);
+      ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
       song.cycles.push_back(ended_cycle);
       ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;

@@ -104,7 +104,7 @@ struct Cycle {
     love_capture->write(playhead, love);
   }
 
-  inline void finishWindowCaptureWrite(Time window) {
+  inline void setPeriodToCaptureWindow(Time window) {
     if (window < this->signal_capture->_period) {
       Time crossfade_time = this->signal_capture->_period - window;
       if (max_crossfade_time < crossfade_time) {
@@ -115,9 +115,6 @@ struct Cycle {
       this->playhead = crossfade_time;
     }
 
-    this->signal_capture->finishWrite();
-    this->love_capture->finishWrite();
-
     this->period = window;
     printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
@@ -126,6 +123,7 @@ struct Cycle {
     this->period = playhead;
     this->signal_capture->finishWrite();
     this->love_capture->finishWrite();
+
     printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
 };

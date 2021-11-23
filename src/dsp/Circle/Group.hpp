@@ -151,15 +151,15 @@ struct Group {
     assert(!cycles_in_group.empty());
 
     Time adjusted_period = getAdjustedPeriod(cycle->period);
-    Time diff = cycle->period - adjusted_period;
-
     if (period < adjusted_period) {
       period = adjusted_period;
     }
 
     // preserve offset
+    Time diff = cycle->period - adjusted_period;
     if (0.f < diff) {
       cycle->playhead = diff;
+      printf("-- move playhead to %Lf (%Lf - %Lf)\n", diff, cycle->period, adjusted_period);
     }
     cycle->period = adjusted_period;
   }

@@ -175,11 +175,12 @@ struct Group {
 
     if (cycle->loop) {
       if (this->cycles_in_group.size() == 1) {
-        Time crossfade_time = .02;
-        cycle->period -= crossfade_time;
+        // TODO get crossfade from prev cycle
+        // Time crossfade_time = .01;
+        // cycle->period -= crossfade_time;
         period = cycle->period;
         beat_period = cycle->period;
-        cycle->playhead = crossfade_time;
+        // cycle->playhead = crossfade_time;
       } else {
         adjustPeriodsToFit(cycle);
       }

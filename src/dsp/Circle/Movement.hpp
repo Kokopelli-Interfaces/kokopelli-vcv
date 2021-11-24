@@ -9,17 +9,19 @@ namespace circle {
 
 // TODO renam eto grup???
 struct Movement {
-  Time start; // FIXME
+  Time start = 0.f; // FIXME
 
   char group = 'A';
   int group_movement_n = 1;
 
-  // TODO
-  // float freq;
+  std::vector<Cycles*> cycles_in_movement;
 
   Movement *group_start_movement = nullptr;
   Movement *prev = nullptr;
   Movement *next = nullptr;
+
+  // TODO
+  // float freq;
 
   Movement() {
     return;

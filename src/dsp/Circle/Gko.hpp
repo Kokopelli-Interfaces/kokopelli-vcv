@@ -6,6 +6,7 @@
 #include "rack.hpp"
 
 #include "Observer.hpp"
+#include "Conductor.hpp"
 #include "LoveUpdater.hpp"
 #include "OutputUpdater.hpp"
 #include "Song.hpp"
@@ -35,6 +36,7 @@ public:
 
   /** read only */
 
+  Conductor conductor;
   Observer observer;
   LoveUpdater love_updater;
   OutputUpdater output_updater;
@@ -51,6 +53,9 @@ public:
     _time_advancer.setTickFrequency(1.0f);
     // TODO set me when loop is established for consistent loops
   }
+
+
+private:
 
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {

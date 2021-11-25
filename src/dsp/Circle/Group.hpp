@@ -147,24 +147,19 @@ struct Group {
     return adjusted_period;
   }
 
-  inline void adjustPeriodsToFit(Cycle* cycle) {
+  inline void adjustPeriodsToFit(Time &cycle_period) {
     assert(!cycles_in_group.empty());
 
-    Time adjusted_period = getAdjustedPeriod(cycle->period);
+    Time adjusted_period = getAdjustedPeriod(cycle_period);
     if (period < adjusted_period) {
       period = adjusted_period;
     }
 
-    // preserve offset
-    Time diff = cycle->period - adjusted_period;
-    if (0.f < diff) {
-      cycle->playhead = diff;
-      printf("-- move playhead to %Lf (%Lf - %Lf)\n", diff, cycle->period, adjusted_period);
-    }
-    cycle->period = adjusted_period;
+    cycle_period = adjusted_period;
   }
 
   inline void addNewCycle(Cycle* cycle) {
+    Time original_playhead = cycle->playhead;
     if (parent_group != nullptr && cycle->immediate_group != parent_group) {
       parent_group->addNewCycle(cycle);
     }
@@ -176,13 +171,20 @@ struct Group {
     if (cycle->loop) {
       if (this->cycles_in_group.size() == 1) {
         // TODO get crossfade from prev cycle
-        // Time crossfade_time = .01;
-        // cycle->period -= crossfade_time;
         period = cycle->period;
         beat_period = cycle->period;
-        // cycle->playhead = crossfade_time;
       } else {
-        adjustPeriodsToFit(cycle);
+        Time original_period = cycle->period;
+        adjustPeriodsToFit(cycle->period);
+        Time diff = original_period - cycle->period;
+        // preserve offset
+        if (0.f < diff) {
+          cycle->playhead = diff;
+          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", diff, original_period, cycle->period);
+        } else {
+          cycle->playhead = original_playhead;
+          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, original_period, cycle->period);
+        }
       }
     }
 
@@ -200,7 +202,7 @@ struct Group {
         period = cycle->period;
         beat_period = cycle->period;
       } else {
-        adjustPeriodsToFit(cycle);
+        adjustPeriodsToFit(cycle->period);
       }
     }
     assert(cycle->period == period_before);

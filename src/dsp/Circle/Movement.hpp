@@ -7,6 +7,8 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
+struct Cycle;
+
 // TODO renam eto grup???
 struct Movement {
   Time start = 0.f; // FIXME
@@ -14,7 +16,7 @@ struct Movement {
   char group = 'A';
   int group_movement_n = 1;
 
-  std::vector<Cycles*> cycles_in_movement;
+  std::vector<Cycle*> cycles_in_movement;
 
   Movement *group_start_movement = nullptr;
   Movement *prev = nullptr;

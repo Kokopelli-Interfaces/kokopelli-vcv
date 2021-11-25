@@ -20,6 +20,13 @@ Circle::~Circle() {
   delete _light_blinker;
 }
 
+void Circle::updateLoveResolution() {
+  for (int c = 0; c < channels(); c++) {
+    kokopellivcv::dsp::circle::Engine *e = _engines[c];
+    e->_gko.love_updater.updateLoveResolution(_options.love_resolution);
+  }
+}
+
 // FIXME update gko phase oscillator
 void Circle::sampleRateChange() {
   _sample_time = APP->engine->getSampleTime();
@@ -130,7 +137,12 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   if (outputs[PHASE_OUTPUT].isConnected()) {
-    float phase = e->_song.established->getPhase(e->_song.playhead);
+    float phase;
+    if (_options.output_beat_phase) {
+      phase = e->_song.established->getBeatPhase(e->_song.playhead);
+    } else {
+      phase = e->_song.established->getPhase(e->_song.playhead);
+    }
     outputs[PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 

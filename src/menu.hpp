@@ -38,7 +38,7 @@ struct BoolOptionMenuItem : OptionMenuItem {
 
 struct SpacerOptionMenuItem : OptionMenuItem {
 	SpacerOptionMenuItem()
-	: OptionMenuItem("<spacer>", []() { return false; }, []() {})
+	: OptionMenuItem("", []() { return false; }, []() {})
 	{}
 };
 

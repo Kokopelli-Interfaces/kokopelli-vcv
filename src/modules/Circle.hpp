@@ -74,6 +74,8 @@ struct Circle : KokopelliVcvModule {
   void updateLights(const ProcessArgs &args);
   void updateLight(int light, NVGcolor color, float strength);
 
+  void updateLoveResolution();
+
 private:
   void processButtons(const ProcessArgs &args);
 };

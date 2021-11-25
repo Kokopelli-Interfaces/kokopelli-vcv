@@ -29,13 +29,19 @@ public:
   std::vector<float> _next_cycles_love;
 
   LoveUpdater() {
-    _love_calculator_divider.setDivision(5000);
+    _love_calculator_divider.setDivision(love_resolution);
+  }
+
+  inline void updateLoveResolution(float resolution) {
+    love_resolution = resolution;
+    _love_calculator_divider.reset();
+    _love_calculator_divider.setDivision(resolution);
   }
 
 private:
   // TODO cycle types (song or movement), depends on tuning and affects love
   inline float smoothValue(float current, float old) {
-    float lambda = this->love_resolution / 44100;
+    float lambda = 1 / love_resolution;
     return old + (current - old) * lambda;
   }
 

@@ -222,17 +222,27 @@ struct CircleWidget : ModuleWidget {
 
     menu->addChild(new MenuLabel());
 
-    // menu->addChild(new BoolOptionMenuItem("Use read antipop at phase discontuinity", [m]() {
-    //   return &m->_options.use_antipop;
-    // }));
+    // menu->addChild(new MenuLabel("Phase Output"));
+    // menu->addChild(new SpacerOptionMenuItem());
 
-    // menu->addChild(new BoolOptionMenuItem("Bipolar Phase Input (-5V to 5V)", [m]() {
-    //   return &m->_options.bipolar_phase_input;
-    // }));
+    OptionsMenuItem* phase_selection = new OptionsMenuItem("Output Phase Selection");
+    phase_selection->addItem(OptionMenuItem("Established Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
+    phase_selection->addItem(OptionMenuItem("Established Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
+    OptionsMenuItem::addToMenu(phase_selection, menu);
+
+    // menu->addChild(new MenuLabel("Love Resolution"));
+
+    menu->addChild(new SpacerOptionMenuItem());
 
 		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
+
+    // OptionsMenuItem* love_resolution = new OptionsMenuItem("Love Resolution");
+    menu->addChild(new OptionMenuItem("Set Love Resolution", [m]() { return false; }, [m]() { m->updateLoveResolution(); }));
+
+    // OptionsMenuItem::addToMenu(love_resolution, menu);
+
 
     // TODO
     // menu->addChild(new Slider());

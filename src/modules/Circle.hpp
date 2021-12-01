@@ -1,7 +1,6 @@
 #pragma once
 
 #include "kokopellivcv.hpp"
-#include "Circle.hpp"
 #include "menu.hpp"
 #include "dsp/Circle/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
@@ -25,9 +24,7 @@ struct Circle : KokopelliVcvModule {
   };
 	enum InputIds {
 		WOMB_INPUT,
-		LOVE_INPUT,
 		PHASE_INPUT,
-		FOCUS_MODULATION_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {

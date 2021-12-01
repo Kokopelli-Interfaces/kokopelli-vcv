@@ -6,7 +6,7 @@
 namespace kokopellivcv {
 
 struct CircleTextBox : TextBox {
-	Circle *_module;
+	Circle *_module = nullptr;
 	int _previous_displayed_value = -1;
 
 	CircleTextBox(Circle *m, NVGcolor background_color, NVGcolor text_color, rack::math::Vec pos, rack::math::Vec size) : TextBox() {
@@ -193,27 +193,27 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.127, 80.017)), module, Circle::DIVINITY_PARAM));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 81.481)), module, Circle::DIVINITY_LIGHT));
-
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 80.017)), module, Circle::CYCLE_PARAM));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Circle::CYCLE_LIGHT));
 
-    auto focused_display_size = mm2px(Vec(15.736, 4.312));
-		established_display = new EstablishedDisplay(module, colors::BOX_BG_LIGHT, colors::ESTABLISHED, mm2px(Vec(1.236, 40.865)), focused_display_size);
-		womb_display = new WombDisplay(module, colors::BOX_BG_LIGHT, colors::WOMB, mm2px(Vec(18.644, 40.865)), focused_display_size);
+    // addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 81.481)), module, Circle::DIVINITY_LIGHT));
+    // addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Circle::CYCLE_LIGHT));
 
-    auto beat_display_size = mm2px(Vec(7.527, 4.327));
-    group_beat_display = new EstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(1.268, 45.968)), beat_display_size);
-    total_established_beats_display = new TotalEstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(9.321, 45.968)), beat_display_size);
-    womb_beat_display = new WombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(18.675, 45.968)), beat_display_size);
-    total_womb_beats_display = new TotalWombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(26.729, 45.968)), beat_display_size);
+    // auto focused_display_size = mm2px(Vec(15.736, 4.312));
+    // established_display = new EstablishedDisplay(module, colors::BOX_BG_LIGHT, colors::ESTABLISHED, mm2px(Vec(1.236, 40.865)), focused_display_size);
+    // womb_display = new WombDisplay(module, colors::BOX_BG_LIGHT, colors::WOMB, mm2px(Vec(18.644, 40.865)), focused_display_size);
 
-    addChild(established_display);
-    addChild(womb_display);
-    addChild(group_beat_display);
-    addChild(total_established_beats_display);
-    addChild(womb_beat_display);
-    addChild(total_womb_beats_display);
+    // auto beat_display_size = mm2px(Vec(7.527, 4.327));
+    // group_beat_display = new EstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(1.268, 45.968)), beat_display_size);
+    // total_established_beats_display = new TotalEstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(9.321, 45.968)), beat_display_size);
+    // womb_beat_display = new WombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(18.675, 45.968)), beat_display_size);
+    // total_womb_beats_display = new TotalWombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(26.729, 45.968)), beat_display_size);
+
+    // addChild(established_display);
+    // addChild(womb_display);
+    // addChild(group_beat_display);
+    // addChild(total_established_beats_display);
+    // addChild(womb_beat_display);
+    // addChild(total_womb_beats_display);
   }
 
 	void appendContextMenu(rack::Menu* menu) override {

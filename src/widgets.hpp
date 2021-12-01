@@ -8,7 +8,8 @@ extern Plugin *pluginInstance;
 
 struct MediumLEDButton : rack::app::SvgSwitch {
   MediumLEDButton() {
-		momentary = true; addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/MediumLEDButton.svg")));
+		momentary = true;
+    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/MediumLEDButton.svg")));
   }
 };
 
@@ -91,16 +92,6 @@ struct KokopelliScrew : FramebufferWidget {
     transform_widget->translate( transl );
     transform_widget->rotate(angle);
     transform_widget->translate( transl.neg() );
-  }
-};
-
-struct ToggleLEDButton : SVGSwitch {
-  BNDwidgetState state = BND_DEFAULT;
-  NVGcolor defaultColor;
-  NVGcolor hoverColor;
-
-  ToggleLEDButton() {
-    addFrame(APP->window->loadSvg(asset::plugin(pluginInstance, "/LEDButton.svg")));
   }
 };
 
@@ -202,37 +193,4 @@ struct FadeSliderItem : ui::Slider {
 	~FadeSliderItem() {
 		delete quantity;
 	}
-};
-
-struct BlinkableRedGreenBlueLight : RedGreenBlueLight {
-  std::chrono::time_point<std::chrono::system_clock> blink;
-  bool op = true;
-
-  BlinkableRedGreenBlueLight() {
-    blink = std::chrono::system_clock::now();
-  }
-
-  void blinkLight() {
-    op = true;
-  }
-
-  void step() override {
-    if (module) {
-      auto now = std::chrono::system_clock::now();
-      if (now - blink > std::chrono::milliseconds{300}) {
-        op = false;
-        blink = now;
-      }
-
-      std::vector<float> brightnesses(baseColors.size());
-      for (size_t i = 0; i < baseColors.size(); i++) {
-        float b = module->lights[firstLightId + i].getBrightness();
-        if (b > 0.f) {
-          b = op ? 1.f : 0.6f;
-        }
-        brightnesses[i] = b;
-      }
-      setBrightnesses(brightnesses);
-    }
-  }
 };

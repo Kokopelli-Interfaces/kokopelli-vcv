@@ -1,7 +1,7 @@
 {
   "slug": "kokopelli-vcv",
   "name": "Kokopelli Vcv",
-  "version": "1.0",
+  "version": "2.0",
   "license": "MIT",
   "author": "Michael Muszynski",
   "brand": "Kokopelli Interfaces",
@@ -15,7 +15,7 @@
     {
       "slug": "KokopelliInterfaces-Circle",
       "name": "Circle",
-      "description": "Music circle facillitator for body energies. A more human alternative to the DAW.",
+      "description": "It's a looper, it's a timeline - it's the heart of a new composition workflow based in live-creation.\n Made with care to reflect that which emanates the universe.",
       "tags": [
         "Poly",
         "Recording",

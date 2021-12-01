@@ -8,6 +8,14 @@ Circle::Circle() {
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established or Creation)");
 
+  configInput(WOMB_INPUT, "Creation Input");
+  configInput(PHASE_INPUT, "Phase Input");
+  configOutput(PHASE_OUTPUT, "Phase Output");
+  configOutput(ESTABLISHED_OUTPUT, "Established Output");
+  configOutput(SUN, "Sun");
+
+  configBypass(WOMB_INPUT, SUN);
+
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
   _light_blinker = new kokopellivcv::dsp::LightBlinker(&lights);
@@ -93,9 +101,6 @@ void Circle::modulate() {
 void Circle::modulateChannel(int channel_i) {
   kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
   float love = params[LOVE_PARAM].getValue();
-  if (inputs[LOVE_INPUT].isConnected()) {
-    love *= rack::clamp(inputs[LOVE_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
-  }
 
   // more intuitive curve
   love = pow(love, 2);

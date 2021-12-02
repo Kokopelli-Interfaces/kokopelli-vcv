@@ -27,7 +27,7 @@ void Circle::updateLoveResolution() {
   }
 }
 
-// FIXME update gko phase oscillator
+// FIXME update gko phase oscillato
 void Circle::sampleRateChange() {
   _sample_time = APP->engine->getSampleTime();
 }
@@ -93,9 +93,6 @@ void Circle::modulate() {
 void Circle::modulateChannel(int channel_i) {
   kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
   float love = params[LOVE_PARAM].getValue();
-  if (inputs[LOVE_INPUT].isConnected()) {
-    love *= rack::clamp(inputs[LOVE_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.0f);
-  }
 
   // more intuitive curve
   love = pow(love, 2);

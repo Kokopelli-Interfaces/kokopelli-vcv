@@ -15,8 +15,8 @@ struct MediumLEDButton : rack::app::SvgSwitch {
 struct AuditionKnob : Rogan {
   AuditionKnob() {
     speed = 2.0f;
-		minAngle = .75 * M_PI;
-		maxAngle = 1.25 * M_PI;
+		minAngle = -0.25 * M_PI;
+		maxAngle = 0.25 * M_PI;
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/AuditionKnob.svg")));
   }
 };

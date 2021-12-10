@@ -187,7 +187,7 @@ struct CircleWidget : ModuleWidget {
 		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Circle::WOMB_INPUT));
 
 		addInput(createInput<PhaseInPort>(mm2px(Vec(24.925, 29.961)), module, Circle::PHASE_INPUT));
-		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.558)), module, Circle::AUDITION_PARAM));
+		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.719)), module, Circle::AUDITION_PARAM));
 		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Circle::PHASE_OUTPUT));
 
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));

@@ -1,9 +1,7 @@
 * what are you doing with your life michael? - 'im making god in vcvrack'
 ** TODO make 'set' buttons in option menu for ~love_resolution~ as well as fade params (global and group).
 ** TODO add option for outputting group phase or group beat phase
-** DONE create initial Circle with no sequencing, just real-time
-CLOSED: [2021-11-24 Wed 12:59]
-** create mini-circle
+** create C
 ** create circle member add-ons
-** create timeline add-on
+** create AION add-on
 ** get movements done

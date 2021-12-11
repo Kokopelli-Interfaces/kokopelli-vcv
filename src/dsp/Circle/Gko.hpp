@@ -82,7 +82,9 @@ public:
     case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP:
       ended_cycle->loop = true;
       _equal_period_addition = true;
-      ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
+      if (ended_cycle->immediate_group->period != 0.f) {
+        ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
+      }
       song.cycles.push_back(ended_cycle);
       ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
@@ -123,15 +125,19 @@ public:
   }
 
   inline void undoCycle(Song &song) {
-    if (observer.checkIfInSubgroupMode()) {
-      observer.exitSubgroupMode(song);
+    if (_love_direction == LoveDirection::ESTABLISHED) {
+      if (observer.checkIfInSubgroupMode()) {
+        observer.exitSubgroupMode(song);
+      }
+
+      if (0 < song.cycles.size()) {
+        Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
+        most_recent_cycle->immediate_group->undoLastCycle();
+        song.cycles.pop_back();
+      }
     }
 
-    if (0 < song.cycles.size()) {
-      Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
-      most_recent_cycle->immediate_group->undoLastCycle();
-      song.cycles.pop_back();
-    }
+    nextCycle(song, CycleEnd::DISCARD);
   }
 
   inline void cycleForward(Song &song) {
@@ -185,6 +191,10 @@ public:
       }
 
       _equal_period_addition = false;
+
+      if (observer.checkIfInSubgroupMode()) {
+        observer.exitSubgroupMode(song);
+      }
     } else if (_love_direction == LoveDirection::ESTABLISHED && new_love_direction == LoveDirection::EMERGENCE) {
       nextCycle(song, CycleEnd::DISCARD);
     }

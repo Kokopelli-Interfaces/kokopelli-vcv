@@ -1,5 +1,9 @@
 # If RACK_DIR is not defined when calling the Makefile, default to two directories above
-RACK_DIR ?= ../..
+# RACK_DIR = ../..
+RACK_DIR = /home/michael/Soft/forks/Rack
+ 
+# RACK_DIR ?= ../..
+
 
 # FLAGS will be passed to both the C and C++ compiler
 FLAGS +=

@@ -141,7 +141,7 @@ struct SeasonsWidget : ModuleWidget {
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.323)), module, Seasons::ESTABLISHED_OUTPUT));
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(13.65, 95.875)), module, Seasons::SUN));
 
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Seasons::PHASE_OUTPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Seasons::ESTABLISHED_PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 55.665)), module, Seasons::TUNE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Seasons::CYCLE_DIVINITY_LIGHT));

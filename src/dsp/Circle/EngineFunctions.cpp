@@ -32,7 +32,6 @@ void Engine::ascend() {
 
 void Engine::undo() {
   _gko.undoCycle(_song);
-  _gko.nextCycle(_song, CycleEnd::DISCARD);
 }
 
 void Engine::channelStateReset() {

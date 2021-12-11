@@ -70,7 +70,7 @@ void Circle::processButtons(const ProcessArgs &args) {
 }
 
 void Circle::processAlways(const ProcessArgs &args) {
-  outputs[PHASE_OUTPUT].setChannels(this->channels());
+  outputs[ESTABLISHED_PHASE_OUTPUT].setChannels(this->channels());
   outputs[SUN].setChannels(this->channels());
   outputs[ESTABLISHED_OUTPUT].setChannels(this->channels());
 
@@ -78,7 +78,6 @@ void Circle::processAlways(const ProcessArgs &args) {
     processButtons(args);
   }
 }
-
 
 static inline float smoothValue(float current, float old) {
   float lambda = .1;
@@ -98,9 +97,9 @@ void Circle::modulateChannel(int channel_i) {
   love = pow(love, 2);
   e->inputs.love = love;
 
-  e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+  // TODO AION
+  // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
-  // FIXME ugh
   e->options = _options;
   e->_gko.love_updater.love_resolution = _options.love_resolution;
   // e->_signal_type = _from_signal->signal_type;
@@ -128,19 +127,20 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     e->inputs.in = 0.f;
   }
 
-  if (inputs[PHASE_INPUT].isConnected()) {
-    float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
-    e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+  // TODO get from AION
+  // if (inputs[PHASE_INPUT].isConnected()) {
+  //   float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
+  //   e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+  // }
+
+  if (outputs[ESTABLISHED_PHASE_OUTPUT].isConnected()) {
+    float phase = e->_song.established->getPhase(e->_song.playhead);
+    outputs[ESTABLISHED_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
-  if (outputs[PHASE_OUTPUT].isConnected()) {
-    float phase;
-    if (_options.output_beat_phase) {
-      phase = e->_song.established->getBeatPhase(e->_song.playhead);
-    } else {
-      phase = e->_song.established->getPhase(e->_song.playhead);
-    }
-    outputs[PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
+  if (outputs[BEAT_PHASE_OUTPUT].isConnected()) {
+    float phase = e->_song.established->getBeatPhase(e->_song.playhead);
+    outputs[BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   e->step();
@@ -190,22 +190,22 @@ void Circle::updateLights(const ProcessArgs &args) {
   established_sum = rack::clamp(established_sum, 0.f, 1.f);
   established_sum = established_sum * (1.f - default_e->inputs.love);
 
+  float light_strength = .5f;
   LoveDirection love_direction = default_e->_gko._love_direction;
   if (love_direction == LoveDirection::ESTABLISHED) {
-    updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
+    updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
     if (default_e->_gko.observer.checkIfInSubgroupMode()) {
-      updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, 0.6);
+      updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
     } else {
-      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
     }
   } else if (love_direction == LoveDirection::EMERGENCE) {
-    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+    updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
   } else { // LoveDirection::NEW
-    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(CYCLE_LIGHT, colors::WOMB_LIGHT, 0.6f);
+    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+    updateLight(CYCLE_LIGHT, colors::WOMB_LIGHT, light_strength);
   }
-
 }
 
 void Circle::postProcessAlways(const ProcessArgs &args) {

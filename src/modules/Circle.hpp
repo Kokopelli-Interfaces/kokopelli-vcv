@@ -25,13 +25,14 @@ struct Circle : KokopelliVcvModule {
   };
 	enum InputIds {
 		WOMB_INPUT,
-		PHASE_INPUT,
+		// PHASE_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {
 		SUN,
 		ESTABLISHED_OUTPUT,
-		PHASE_OUTPUT,
+		ESTABLISHED_PHASE_OUTPUT,
+		BEAT_PHASE_OUTPUT,
 		NUM_OUTPUTS
 	};
 

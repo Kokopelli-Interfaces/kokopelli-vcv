@@ -107,8 +107,8 @@ struct Group {
 
     Time adjusted_period;
 
-    Time diff = cycle_period - period;
-    if (0.f < diff) {
+    Time period_diff = cycle_period - period;
+    if (0.f < period_diff) {
       Time start_period = period;
       Time new_period = start_period;
       Time percent_over = cycle_period / period;
@@ -176,11 +176,11 @@ struct Group {
       } else {
         Time original_period = cycle->period;
         adjustPeriodsToFit(cycle->period);
-        Time diff = original_period - cycle->period;
-        // preserve offset
-        if (0.f < diff) {
-          cycle->playhead = diff;
-          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", diff, original_period, cycle->period);
+        Time period_diff = original_period - cycle->period;
+        bool period_roundback = 0.f < period_diff;
+        if (period_roundback) {
+          cycle->playhead = period_diff;
+          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, original_period, cycle->period);
         } else {
           cycle->playhead = original_playhead;
           printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, original_period, cycle->period);

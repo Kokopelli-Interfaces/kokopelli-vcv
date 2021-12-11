@@ -47,7 +47,7 @@ namespace colors {
   static const NVGcolor WOMB = WOMB_RED;
   static const NVGcolor BOX_BG_DARK = NIGHT_SKY;
   static const NVGcolor BOX_BG_LIGHT = TAN_BROWN;
-  static const NVGcolor LOOK_BACK_LAYER = YELLOWY;
+  static const NVGcolor LOOK_BACK_LAYER = STRONG_SUNLIGHT;
 
   static const NVGcolor ESTABLISHED_LIGHT = SUNLIGHT;
   static const NVGcolor EMERGENCE_LIGHT = WOMB_RED_BRIGHT;

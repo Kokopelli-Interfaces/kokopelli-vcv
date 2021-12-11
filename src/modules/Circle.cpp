@@ -20,6 +20,7 @@ Circle::~Circle() {
   delete _light_blinker;
 }
 
+
 void Circle::updateLoveResolution() {
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
@@ -195,7 +196,11 @@ void Circle::updateLights(const ProcessArgs &args) {
   if (love_direction == LoveDirection::ESTABLISHED) {
     updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
     if (default_e->_gko.observer.checkIfInSubgroupMode()) {
-      updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
+      if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
+        updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
+      } else {
+        updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, 0.f);
+      }
     } else {
       updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
     }

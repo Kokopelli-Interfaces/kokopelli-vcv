@@ -64,6 +64,13 @@ public:
     return _subgroup_mode;
   }
 
+  inline bool checkIfCanEnterFocusedSubgroup() {
+    assert(_subgroup_mode);
+    Group* focused_subgroup = _subgroups[_focused_subgroup_i];
+    bool can_enter =  1 < focused_subgroup->cycles_in_group.size();
+    return can_enter;
+  }
+
   inline void tryEnterSubgroupMode(Song &song) {
     assert(!_subgroup_mode);
     assert(song.established);

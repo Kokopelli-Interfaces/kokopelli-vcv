@@ -144,9 +144,7 @@ public:
     switch(_love_direction) {
     case LoveDirection::ESTABLISHED:
       if (observer.checkIfInSubgroupMode()) {
-        Group* focused_subgroup = observer._subgroups[observer._focused_subgroup_i];
-        bool move_into_subgroup =  1 < focused_subgroup->cycles_in_group.size();
-        if (move_into_subgroup) {
+        if (observer.checkIfCanEnterFocusedSubgroup()) {
           observer.exitSubgroupMode(song);
         }
         nextCycle(song, CycleEnd::DISCARD);

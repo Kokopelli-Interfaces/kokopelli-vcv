@@ -24,7 +24,7 @@ struct LightBlinker {
     }
   }
 
-  void blinkLight(int light_i) {
+  void blinkLight(int light_i, float mult) {
     if (_op) {
       finishBlinkLight();
     }
@@ -37,9 +37,9 @@ struct LightBlinker {
       _saved_light_brightness[i] = _lights->operator[](light_i + i).value;
     }
 
-    _lights->operator[](_light_i + 0).value = _lights->operator[](_light_i + 0).value * 2.f;
-    _lights->operator[](_light_i + 1).value = _lights->operator[](_light_i + 1).value * 2.f;
-    _lights->operator[](_light_i + 2).value = _lights->operator[](_light_i + 2).value * 2.f;
+    _lights->operator[](_light_i + 0).value = _lights->operator[](_light_i + 0).value * mult;
+    _lights->operator[](_light_i + 1).value = _lights->operator[](_light_i + 1).value * mult;
+    _lights->operator[](_light_i + 2).value = _lights->operator[](_light_i + 2).value * mult;
   }
 
   void step() {

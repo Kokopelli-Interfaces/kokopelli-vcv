@@ -47,11 +47,11 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       e->cycleObservation();
-      _light_blinker->blinkLight(DIVINITY_LIGHT);
+      _light_blinker->blinkLight(DIVINITY_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->ascend();
-      _light_blinker->blinkLight(DIVINITY_LIGHT); // TODO extra
+      _light_blinker->blinkLight(DIVINITY_LIGHT, 0.f); // TODO extra
       break;
     }
 
@@ -60,11 +60,11 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       e->cycleForward();
-      _light_blinker->blinkLight(CYCLE_LIGHT);
+      _light_blinker->blinkLight(CYCLE_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->undo();
-      _light_blinker->blinkLight(CYCLE_LIGHT); // TODO blink extra extra
+      _light_blinker->blinkLight(CYCLE_LIGHT, 0.f); // TODO blink extra extra
       break;
     }
   }
@@ -191,10 +191,15 @@ void Circle::updateLights(const ProcessArgs &args) {
   established_sum = rack::clamp(established_sum, 0.f, 1.f);
   established_sum = established_sum * (1.f - default_e->inputs.love);
 
-  float light_strength = .5f;
+  float light_strength = .3f;
   LoveDirection love_direction = default_e->_gko._love_direction;
   if (love_direction == LoveDirection::ESTABLISHED) {
-    updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
+    if (!default_e->_song.cycles.empty()) {
+      updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
+    } else {
+      updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, 0.f);
+    }
+
     if (default_e->_gko.observer.checkIfInSubgroupMode()) {
       if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
         updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);

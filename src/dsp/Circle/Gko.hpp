@@ -55,8 +55,6 @@ public:
   }
 
 
-private:
-
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
     Cycle* ended_cycle = song.new_cycle;

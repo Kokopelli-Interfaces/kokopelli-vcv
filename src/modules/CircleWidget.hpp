@@ -224,14 +224,14 @@ struct CircleWidget : ModuleWidget {
     // menu->addChild(new MenuLabel("Phase Output"));
     // menu->addChild(new SpacerOptionMenuItem());
 
-    OptionsMenuItem* phase_selection = new OptionsMenuItem("Output Phase Selection");
-    phase_selection->addItem(OptionMenuItem("Established Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
-    phase_selection->addItem(OptionMenuItem("Established Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
-    OptionsMenuItem::addToMenu(phase_selection, menu);
+    // OptionsMenuItem* phase_selection = new OptionsMenuItem("Output Phase Selection");
+    // phase_selection->addItem(OptionMenuItem("Established Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
+    // phase_selection->addItem(OptionMenuItem("Established Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
+    // OptionsMenuItem::addToMenu(phase_selection, menu);
 
     // menu->addChild(new MenuLabel("Love Resolution"));
 
-    menu->addChild(new SpacerOptionMenuItem());
+    // menu->addChild(new SpacerOptionMenuItem());
 
 		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
 		love_resolution_slider->box.size.x = 190.f;

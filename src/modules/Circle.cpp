@@ -3,10 +3,10 @@
 
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Solo Audio (Established or Creation)");
+  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Select");
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established or Creation)");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
@@ -149,13 +149,13 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   Outputs out = e->_song.out;
   if (outputs[SUN].isConnected()) {
     float sun_out = 0.f;
-    if (1.f == _audition_position) {
+    if (_audition_position < 1.f) {
+      float established_and_input = kokopellivcv::dsp::sum(out.attenuated_established, e->inputs.in, e->_signal_type);
+      sun_out = rack::crossfade( out.sun, established_and_input, _audition_position);
+    } else if (1.f == _audition_position) {
       sun_out = out.sun;
     } else if (1.f < _audition_position) {
-      float established_and_input = kokopellivcv::dsp::sum(out.attenuated_established, e->inputs.in, e->_signal_type);
-      sun_out = rack::crossfade(out.sun, established_and_input, _audition_position - 1.f);
-    } else {
-      sun_out = rack::crossfade( e->inputs.in, out.sun, _audition_position);
+      sun_out = rack::crossfade(out.sun, e->inputs.in, _audition_position - 1.f);
     }
 
     outputs[SUN].setVoltage(sun_out, channel_i);

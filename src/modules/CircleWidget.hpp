@@ -233,11 +233,10 @@ struct CircleWidget : ModuleWidget {
 
     // menu->addChild(new SpacerOptionMenuItem());
 
+    // FIXME
 		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
-
-    // OptionsMenuItem* love_resolution = new OptionsMenuItem("Love Resolution");
     menu->addChild(new OptionMenuItem("Set Love Resolution", [m]() { return false; }, [m]() { m->updateLoveResolution(); }));
 
     // OptionsMenuItem::addToMenu(love_resolution, menu);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "definitions.hpp"
-#include "TimeCapture.hpp"
+#include "SignalCapture.hpp"
 #include "Movement.hpp"
 #include "dsp/Signal.hpp"
 
@@ -26,8 +26,8 @@ struct Cycle {
   Movement movement_at_start;
   Movement* movement;
 
-  TimeCapture *signal_capture;
-  TimeCapture *love_capture;
+  SignalCapture *signal_capture;
+  SignalCapture *love_capture;
 
   bool loop = false;
 
@@ -38,8 +38,8 @@ struct Cycle {
 
   inline Cycle(Time start, Movement* movement, Group *immediate_group) {
     this->capture_start = start;
-    this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
-    this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
+    this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
+    this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
     this->movement = movement;
     this->immediate_group = immediate_group;

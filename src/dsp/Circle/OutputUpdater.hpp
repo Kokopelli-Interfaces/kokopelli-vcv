@@ -11,7 +11,7 @@
 #include "Observer.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
-#include "TimeCapture.hpp"
+#include "SignalCapture.hpp"
 #include "Movement.hpp"
 #include "TimeAdvancer.hpp"
 #include "util/math.hpp"

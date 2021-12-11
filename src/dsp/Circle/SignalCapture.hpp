@@ -16,7 +16,7 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
-struct TimeCapture {
+struct SignalCapture {
   float last_sample = 0.f;
   Time _period = 0.f;
 
@@ -27,7 +27,7 @@ struct TimeCapture {
 
   rack::dsp::ClockDivider write_divider;
 
-  TimeCapture(kokopellivcv::dsp::SignalType signal_type) {
+  SignalCapture(kokopellivcv::dsp::SignalType signal_type) {
     _signal_type = signal_type;
     switch (_signal_type) {
     case kokopellivcv::dsp::SignalType::AUDIO:

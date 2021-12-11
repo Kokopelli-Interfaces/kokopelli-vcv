@@ -12,8 +12,8 @@ int Engine::getMostRecentCycleLength() {
   return recent_cycle->immediate_group->convertToBeat(recent_cycle->period, false);
 }
 
-void Engine::toggleTuneToFrequencyOfEstablished() {
-  _gko.tune_to_frequency_of_established = !_gko.tune_to_frequency_of_established;
+void Engine::toggleTuneToFrequencyOfObservedSun() {
+  _gko.tune_to_frequency_of_observed_sun = !_gko.tune_to_frequency_of_observed_sun;
 }
 
 void Engine::cycleForward() {

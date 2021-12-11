@@ -32,7 +32,7 @@ public:
 
   float sample_time = 1.0f;
   float love_resolution = 1000.f;
-  bool tune_to_frequency_of_established = true;
+  bool tune_to_frequency_of_observed_sun = true;
 
   /** read only */
 
@@ -51,7 +51,7 @@ public:
 public:
   Gko() {
     _time_advancer.setTickFrequency(1.0f);
-    // TODO set me when loop is established for consistent loops
+    // TODO set me when loop is observed_sun for consistent loops
   }
 
 
@@ -63,7 +63,7 @@ public:
     ended_cycle->finishWrite();
     if (ended_cycle->period == 0.f) {
       delete ended_cycle;
-      song.new_cycle = new Cycle(song.playhead, song.current_movement, song.established);
+      song.new_cycle = new Cycle(song.playhead, song.current_movement, song.observed_sun);
       return;
     }
 
@@ -72,12 +72,12 @@ public:
       song.clearEmptyGroups();
       delete ended_cycle;
       break;
-    case CycleEnd::JOIN_ESTABLISHED_LOOP:
+    case CycleEnd::JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
       song.cycles.push_back(ended_cycle);
       ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
-    case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP:
+    case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
       _equal_period_addition = true;
       if (ended_cycle->immediate_group->period != 0.f) {
@@ -86,7 +86,7 @@ public:
       song.cycles.push_back(ended_cycle);
       ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
-    case CycleEnd::JOIN_ESTABLISHED_NO_LOOP:
+    case CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP:
       // FIXME
       delete ended_cycle;
       // ended_cycle->loop = false;
@@ -112,18 +112,18 @@ public:
 
     // TODO
     Movement* cycle_movement;
-    if (tune_to_frequency_of_established) {
+    if (tune_to_frequency_of_observed_sun) {
       cycle_movement = song.current_movement;
     } else {
       // FIXME next movement
       cycle_movement = song.current_movement;
     }
 
-    song.new_cycle = new Cycle(song.playhead, cycle_movement, song.established);
+    song.new_cycle = new Cycle(song.playhead, cycle_movement, song.observed_sun);
   }
 
   inline void undoCycle(Song &song) {
-    if (_love_direction == LoveDirection::ESTABLISHED) {
+    if (_love_direction == LoveDirection::OBSERVED_SUN) {
       if (observer.checkIfInSubgroupMode()) {
         observer.exitSubgroupMode(song);
       }
@@ -140,18 +140,18 @@ public:
 
   inline void cycleForward(Song &song) {
     switch(_love_direction) {
-    case LoveDirection::ESTABLISHED:
+    case LoveDirection::OBSERVED_SUN:
       if (observer.checkIfInSubgroupMode()) {
         if (observer.checkIfCanEnterFocusedSubgroup()) {
           observer.exitSubgroupMode(song);
         }
         nextCycle(song, CycleEnd::DISCARD);
       } else {
-        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+        nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP);
       }
       break;
     case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP);
       break;
     case LoveDirection::NEW:
       nextCycle(song, CycleEnd::FLOOD);
@@ -161,7 +161,7 @@ public:
 
   inline void cycleObservation(Song &song) {
     switch(_love_direction) {
-    case LoveDirection::ESTABLISHED:
+    case LoveDirection::OBSERVED_SUN:
       if (!observer.checkIfInSubgroupMode()) {
         observer.tryEnterSubgroupMode(song);
       } else {
@@ -171,7 +171,7 @@ public:
       break;
     case LoveDirection::EMERGENCE:
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP);
+      nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP);
       break;
     }
   }
@@ -179,11 +179,11 @@ public:
   inline void handleLoveDirectionChange(Song &song, LoveDirection new_love_direction) {
     assert(new_love_direction != _love_direction);
 
-    if (new_love_direction == LoveDirection::ESTABLISHED) {
+    if (new_love_direction == LoveDirection::OBSERVED_SUN) {
       if (_equal_period_addition) {
         nextCycle(song, CycleEnd::DISCARD);
       } else {
-        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_LOOP);
+        nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_LOOP);
       }
 
       _equal_period_addition = false;
@@ -191,7 +191,7 @@ public:
       if (observer.checkIfInSubgroupMode()) {
         observer.exitSubgroupMode(song);
       }
-    } else if (_love_direction == LoveDirection::ESTABLISHED && new_love_direction == LoveDirection::EMERGENCE) {
+    } else if (_love_direction == LoveDirection::OBSERVED_SUN && new_love_direction == LoveDirection::EMERGENCE) {
       nextCycle(song, CycleEnd::DISCARD);
     }
 

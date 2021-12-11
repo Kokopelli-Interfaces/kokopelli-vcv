@@ -35,7 +35,7 @@ struct Engine {
   void cycleForward();
   void undo();
 
-  void toggleTuneToFrequencyOfEstablished();
+  void toggleTuneToFrequencyOfObservedSun();
 
   int getMostRecentCycleLength();
 

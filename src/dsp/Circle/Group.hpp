@@ -60,20 +60,20 @@ struct Group {
 
   inline float getPhase(Time time) {
     if (period != 0.f && beat_period != 0.f) {
-      Time time_in_established = std::fmod((float)time, (float)period);
-      return rack::clamp(time_in_established / period , 0.f, 1.f);
+      Time time_in_observed_sun = std::fmod((float)time, (float)period);
+      return rack::clamp(time_in_observed_sun / period , 0.f, 1.f);
     }
     return 0.f;
   }
 
   inline int convertToBeat(Time time, bool mod) {
     if (period != 0.f && beat_period != 0.f) {
-      float time_in_established = time;
+      float time_in_observed_sun = time;
       if (mod && period < time) {
-        time_in_established = std::fmod((float)time, (float)period);
+        time_in_observed_sun = std::fmod((float)time, (float)period);
       }
 
-      return (int) (time_in_established / beat_period);
+      return (int) (time_in_observed_sun / beat_period);
     }
     return 0;
   }

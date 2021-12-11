@@ -41,7 +41,7 @@ namespace colors {
 
   // default theme colors
 
-  static const NVGcolor ESTABLISHED = SOFT_SUNLIGHT;
+  static const NVGcolor OBSERVED_SUN = SOFT_SUNLIGHT;
   static const NVGcolor SUN = STRONG_SUNLIGHT;
   static const NVGcolor EMERGENCE = CYAN;
   static const NVGcolor WOMB = WOMB_RED;
@@ -49,7 +49,7 @@ namespace colors {
   static const NVGcolor BOX_BG_LIGHT = TAN_BROWN;
   static const NVGcolor LOOK_BACK_LAYER = STRONG_SUNLIGHT;
 
-  static const NVGcolor ESTABLISHED_LIGHT = SUNLIGHT;
+  static const NVGcolor OBSERVED_SUN_LIGHT = SUNLIGHT;
   static const NVGcolor EMERGENCE_LIGHT = WOMB_RED_BRIGHT;
   static const NVGcolor WOMB_LIGHT = WOMB_RED_HARD;
 

@@ -17,7 +17,7 @@ struct SeasonsValueDisplay : TextBox {
     font_size = 12;
     letter_spacing = 0.f;
     backgroundColor = colors::BOX_BG;
-    textColor = colors::ESTABLISHED;
+    textColor = colors::OBSERVED_SUN;
     box.size = mm2px(Vec(6.902, 3.283));
     textOffset = Vec(box.size.x * 0.5f, 0.f);
     textAlign = NVG_ALIGN_CENTER | NVG_ALIGN_TOP;
@@ -138,10 +138,10 @@ struct SeasonsWidget : ModuleWidget {
 		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 107.705)), module, Seasons::PHASE_INPUT));
 		addInput(createInput<KokopelliPort>(mm2px(Vec(13.475, 109.166)), module, Seasons::FOCUS_MODULATION_INPUT));
 
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.323)), module, Seasons::ESTABLISHED_OUTPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(2.986, 94.323)), module, Seasons::OBSERVED_SUN_OUTPUT));
 		addOutput(createOutput<KokopelliPort>(mm2px(Vec(13.65, 95.875)), module, Seasons::SUN));
 
-		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Seasons::ESTABLISHED_PHASE_OUTPUT));
+		addOutput(createOutput<KokopelliPort>(mm2px(Vec(24.216, 107.705)), module, Seasons::OBSERVED_SUN_PHASE_OUTPUT));
 
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.214, 55.665)), module, Seasons::TUNE_LIGHT));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.641, 80.724)), module, Seasons::CYCLE_DIVINITY_LIGHT));

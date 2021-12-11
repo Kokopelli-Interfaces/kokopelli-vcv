@@ -16,7 +16,7 @@ struct Song {
   std::string name = "my song";
 
   std::vector<Group*> groups;
-  Group* established = nullptr;
+  Group* observed_sun = nullptr;
 
   std::vector<Cycle*> cycles;
   // TODO move to inactive if pre-entrance movement
@@ -37,8 +37,8 @@ struct Song {
     this->start_movement = this->current_movement;
     Time start = 0.f;
     this->groups.push_back(new Group());
-    this->established = groups[0];
-    this->new_cycle = new Cycle(start, this->current_movement, this->established);
+    this->observed_sun = groups[0];
+    this->new_cycle = new Cycle(start, this->current_movement, this->observed_sun);
   }
 
   void clearEmptyGroups() {
@@ -48,8 +48,8 @@ struct Song {
           continue;
         }
 
-        if (groups[i] == established && groups[i]->parent_group) {
-          established = groups[i]->parent_group;
+        if (groups[i] == observed_sun && groups[i]->parent_group) {
+          observed_sun = groups[i]->parent_group;
         }
 
         Group* delete_group = groups[i];

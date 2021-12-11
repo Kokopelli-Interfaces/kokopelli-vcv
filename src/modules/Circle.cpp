@@ -71,9 +71,9 @@ void Circle::processButtons(const ProcessArgs &args) {
 }
 
 void Circle::processAlways(const ProcessArgs &args) {
-  outputs[ESTABLISHED_PHASE_OUTPUT].setChannels(this->channels());
+  outputs[OBSERVED_SUN_PHASE_OUTPUT].setChannels(this->channels());
   outputs[SUN].setChannels(this->channels());
-  outputs[ESTABLISHED_OUTPUT].setChannels(this->channels());
+  outputs[OBSERVED_SUN_OUTPUT].setChannels(this->channels());
 
   if (_button_divider.process()) {
     processButtons(args);
@@ -134,13 +134,13 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   //   e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   // }
 
-  if (outputs[ESTABLISHED_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_song.established->getPhase(e->_song.playhead);
-    outputs[ESTABLISHED_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
+  if (outputs[OBSERVED_SUN_PHASE_OUTPUT].isConnected()) {
+    float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+    outputs[OBSERVED_SUN_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   if (outputs[BEAT_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_song.established->getBeatPhase(e->_song.playhead);
+    float phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
     outputs[BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
@@ -150,8 +150,8 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   if (outputs[SUN].isConnected()) {
     float sun_out = 0.f;
     if (_audition_position < 1.f) {
-      float established_and_input = kokopellivcv::dsp::sum(out.attenuated_established, e->inputs.in, e->_signal_type);
-      sun_out = rack::crossfade( out.sun, established_and_input, _audition_position);
+      float observed_sun_and_input = kokopellivcv::dsp::sum(out.attenuated_observed_sun, e->inputs.in, e->_signal_type);
+      sun_out = rack::crossfade(observed_sun_and_input, out.sun, _audition_position);
     } else if (1.f == _audition_position) {
       sun_out = out.sun;
     } else if (1.f < _audition_position) {
@@ -161,8 +161,8 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     outputs[SUN].setVoltage(sun_out, channel_i);
   }
 
-  if (outputs[ESTABLISHED_OUTPUT].isConnected()) {
-    outputs[ESTABLISHED_OUTPUT].setVoltage(out.established, channel_i);
+  if (outputs[OBSERVED_SUN_OUTPUT].isConnected()) {
+    outputs[OBSERVED_SUN_OUTPUT].setVoltage(out.observed_sun, channel_i);
   }
 }
 
@@ -182,29 +182,29 @@ void Circle::updateLights(const ProcessArgs &args) {
   kokopellivcv::dsp::circle::Engine *default_e = _engines[0];
 
   float new_sum = 0.f;
-  float established_sum = 0.f;
+  float observed_sun_sum = 0.f;
   for (int c = 0; c < channels(); c++) {
     new_sum += inputs[WOMB_INPUT].getPolyVoltage(c);
-    established_sum += outputs[ESTABLISHED_OUTPUT].getPolyVoltage(c);
+    observed_sun_sum += outputs[OBSERVED_SUN_OUTPUT].getPolyVoltage(c);
   }
   new_sum = rack::clamp(new_sum, 0.f, 1.f);
-  established_sum = rack::clamp(established_sum, 0.f, 1.f);
-  established_sum = established_sum * (1.f - default_e->inputs.love);
+  observed_sun_sum = rack::clamp(observed_sun_sum, 0.f, 1.f);
+  observed_sun_sum = observed_sun_sum * (1.f - default_e->inputs.love);
 
   float light_strength = .3f;
   LoveDirection love_direction = default_e->_gko._love_direction;
-  if (love_direction == LoveDirection::ESTABLISHED) {
+  if (love_direction == LoveDirection::OBSERVED_SUN) {
     if (!default_e->_song.cycles.empty()) {
-      updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
+      updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
     } else {
-      updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, 0.f);
+      updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
     }
 
     if (default_e->_gko.observer.checkIfInSubgroupMode()) {
       if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
-        updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, light_strength);
+        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
       } else {
-        updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, 0.f);
+        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
       }
     } else {
       updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);

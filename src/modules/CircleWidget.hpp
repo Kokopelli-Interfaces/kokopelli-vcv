@@ -47,56 +47,56 @@ struct CircleTextBox : TextBox {
 	}
 };
 
-struct EstablishedDisplay : CircleTextBox {
+struct ObservedSunDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e) {
-      float phase = e->_song.established->getPhase(e->_song.playhead);
+      float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
       backgroundColor.a = phase;
     }
 
     if (e->_gko.observer.checkIfInSubgroupMode()) {
       // textColor = colors::LOOK_BACK_LAYER;
-      textColor = colors::ESTABLISHED;
+      textColor = colors::OBSERVED_SUN;
       int pivot_id_len = e->_gko.observer._pivot_parent->id.size();
       std::string left_text = e->_gko.observer._pivot_parent->id.substr(0, pivot_id_len);
 
       std::string right_text;
       // this is an invariant that does not hold sometimes due to race condition as this is widget thread
-      if ((unsigned int)pivot_id_len < e->_song.established->id.size()) {
-        right_text = e->_song.established->id.substr(pivot_id_len+1);
+      if ((unsigned int)pivot_id_len < e->_song.observed_sun->id.size()) {
+        right_text = e->_song.observed_sun->id.substr(pivot_id_len+1);
       } else {
-        right_text = e->_song.established->id.substr(pivot_id_len);
+        right_text = e->_song.observed_sun->id.substr(pivot_id_len);
       }
 
       std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
       CircleTextBox::setText(s);
-      // CircleTextBox::setText(e->_song.established->id);
+      // CircleTextBox::setText(e->_song.observed_sun->id);
     } else {
-      textColor = colors::ESTABLISHED;
-      // std::string s = string::f("%s", e->_song.established->id);
+      textColor = colors::OBSERVED_SUN;
+      // std::string s = string::f("%s", e->_song.observed_sun->id);
       // CircleTextBox::setText(s);
-      CircleTextBox::setText(e->_song.established->id);
+      CircleTextBox::setText(e->_song.observed_sun->id);
     }
   }
 };
 
-struct EstablishedBeatDisplay : CircleTextBox {
+struct ObservedSunBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int beat_in_established = e->_song.established->convertToBeat(e->_song.playhead, true);
-    CircleTextBox::setDisplayValue(beat_in_established + 1);
+    int beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.playhead, true);
+    CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
 	}
 };
 
-struct TotalEstablishedBeatDisplay : CircleTextBox {
+struct TotalObservedSunBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   // FIXME
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    CircleTextBox::setDisplayValue(e->_song.established->getTotalBeats());
+    CircleTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
 	}
 };
 
@@ -105,12 +105,12 @@ struct WombDisplay : CircleTextBox {
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     float phase = 0.f;
-    // phase = e->_song.established->getBeatPhase(e->_song.new_cycle->playhead);
-    phase = e->_song.established->getBeatPhase(e->_song.playhead);
+    // phase = e->_song.observed_sun->getBeatPhase(e->_song.new_cycle->playhead);
+    phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
 
     backgroundColor.a = phase;
 
-    int womb_display = e->_song.established->cycles_in_group.size() + 1;
+    int womb_display = e->_song.observed_sun->cycles_in_group.size() + 1;
     std::string s = string::f("%d", womb_display);
     CircleTextBox::setText(s);
 	}
@@ -120,11 +120,11 @@ struct WombBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    if (e->_gko.tune_to_frequency_of_established) {
-      int beat_in_established;
-      beat_in_established = e->_song.established->convertToBeat(e->_song.new_cycle->playhead, false);
+    if (e->_gko.tune_to_frequency_of_observed_sun) {
+      int beat_in_observed_sun;
+      beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
 
-      CircleTextBox::setDisplayValue(beat_in_established + 1);
+      CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
     } else {
       CircleTextBox::setDisplayValue((int)e->_song.new_cycle->playhead);
     }
@@ -144,15 +144,15 @@ struct TotalWombBeatDisplay : CircleTextBox {
 
     // option
     if (e->_gko.observer.checkIfInSubgroupMode()) {
-      CircleTextBox::setDisplayValue(e->_song.established->getTotalBeats());
+      CircleTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;
       CircleTextBox::setDisplayValue(e->getMostRecentCycleLength());
-      // if (e->_song.established->cycles_in_group.size() == 0) {
+      // if (e->_song.observed_sun->cycles_in_group.size() == 0) {
       //   CircleTextBox::setDisplayValue(1);
       // } else {
-      //   Time adjusted_period = e->_song.established->getAdjustedPeriod(e->_song.new_cycle->playhead);
-      //   int n_beats = e->_song.established->convertToBeat(adjusted_period, false);
+      //   Time adjusted_period = e->_song.observed_sun->getAdjustedPeriod(e->_song.new_cycle->playhead);
+      //   int n_beats = e->_song.observed_sun->convertToBeat(adjusted_period, false);
       //   CircleTextBox::setDisplayValue(n_beats);
       // }
     }
@@ -162,14 +162,14 @@ struct TotalWombBeatDisplay : CircleTextBox {
 struct CircleWidget : ModuleWidget {
   const int hp = 6;
 
-  EstablishedDisplay *established_display;
+  ObservedSunDisplay *observed_sun_display;
   WombDisplay *womb_display;
 
   WombBeatDisplay *womb_beat_display;
   TotalWombBeatDisplay *total_womb_beats_display;
 
-  EstablishedBeatDisplay *group_beat_display;
-  TotalEstablishedBeatDisplay *total_established_beats_display;
+  ObservedSunBeatDisplay *group_beat_display;
+  TotalObservedSunBeatDisplay *total_observed_sun_beats_display;
 
   CircleWidget(Circle *module) {
     setModule(module);
@@ -181,13 +181,13 @@ struct CircleWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addOutput(createOutput<EstablishedPort>(mm2px(Vec(2.276, 16.435)), module, Circle::ESTABLISHED_OUTPUT));
+		addOutput(createOutput<ObservedSunPort>(mm2px(Vec(2.276, 16.435)), module, Circle::OBSERVED_SUN_OUTPUT));
 		addOutput(createOutput<SunPort>(mm2px(Vec(13.65, 15.365)), module, Circle::SUN));
 		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Circle::WOMB_INPUT));
 
 		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Circle::BEAT_PHASE_OUTPUT));
 		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.719)), module, Circle::AUDITION_PARAM));
-		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Circle::ESTABLISHED_PHASE_OUTPUT));
+		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Circle::OBSERVED_SUN_PHASE_OUTPUT));
 
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));
 
@@ -198,19 +198,19 @@ struct CircleWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Circle::CYCLE_LIGHT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
-		established_display = new EstablishedDisplay(module, colors::BOX_BG_LIGHT, colors::ESTABLISHED, mm2px(Vec(1.236, 40.865)), focused_display_size);
+		observed_sun_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_SUN, mm2px(Vec(1.236, 40.865)), focused_display_size);
 		womb_display = new WombDisplay(module, colors::BOX_BG_LIGHT, colors::WOMB, mm2px(Vec(18.644, 40.865)), focused_display_size);
 
     auto beat_display_size = mm2px(Vec(7.527, 4.327));
-    group_beat_display = new EstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(1.268, 45.968)), beat_display_size);
-    total_established_beats_display = new TotalEstablishedBeatDisplay(module, colors::BOX_BG_DARK, colors::ESTABLISHED, mm2px(Vec(9.321, 45.968)), beat_display_size);
+    group_beat_display = new ObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(1.268, 45.968)), beat_display_size);
+    total_observed_sun_beats_display = new TotalObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.321, 45.968)), beat_display_size);
     womb_beat_display = new WombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(18.675, 45.968)), beat_display_size);
     total_womb_beats_display = new TotalWombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(26.729, 45.968)), beat_display_size);
 
-    addChild(established_display);
+    addChild(observed_sun_display);
     addChild(womb_display);
     addChild(group_beat_display);
-    addChild(total_established_beats_display);
+    addChild(total_observed_sun_beats_display);
     addChild(womb_beat_display);
     addChild(total_womb_beats_display);
   }
@@ -225,8 +225,8 @@ struct CircleWidget : ModuleWidget {
     // menu->addChild(new SpacerOptionMenuItem());
 
     // OptionsMenuItem* phase_selection = new OptionsMenuItem("Output Phase Selection");
-    // phase_selection->addItem(OptionMenuItem("Established Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
-    // phase_selection->addItem(OptionMenuItem("Established Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
+    // phase_selection->addItem(OptionMenuItem("ObservedSun Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
+    // phase_selection->addItem(OptionMenuItem("ObservedSun Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
     // OptionsMenuItem::addToMenu(phase_selection, menu);
 
     // menu->addChild(new MenuLabel("Love Resolution"));

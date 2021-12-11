@@ -36,9 +36,9 @@ struct KokopelliPort : SvgPort {
   }
 };
 
-struct EstablishedPort : SvgPort {
-	EstablishedPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/EstablishedPort.svg")));
+struct ObservedSunPort : SvgPort {
+	ObservedSunPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/ObservedSunPort.svg")));
   }
 };
 
@@ -127,7 +127,7 @@ struct TextBox : TransparentWidget {
     // defaultTextColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
     // defaultTextColor = nvgRGB(0x9b, 0x44, 0x42); // red
     // defaultTextColor = nvgRGB(0x6e, 0xaf, 0x71); // emersign green
-    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // established
+    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // observed_sun
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0x19, 0x0d, 0x05);
     // size 20 with spacing -2 will fit 3 characters on a 30px box with Roboto

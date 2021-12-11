@@ -101,8 +101,9 @@ void Circle::modulateChannel(int channel_i) {
   // TODO AION
   // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
-  e->options = _options;
   e->_gko.love_updater.love_resolution = _options.love_resolution;
+  e->_gko.monitor_input = _options.monitor_input;
+
   // e->_signal_type = _from_signal->signal_type;
 }
 

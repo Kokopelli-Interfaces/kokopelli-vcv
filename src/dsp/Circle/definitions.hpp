@@ -43,5 +43,5 @@ struct Outputs {
 
 struct Options {
   float love_resolution = 1000.f;
-  bool output_beat_phase = true;
+  bool monitor_input = true;
 };

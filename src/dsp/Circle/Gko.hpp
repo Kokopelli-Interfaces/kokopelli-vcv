@@ -28,6 +28,7 @@ namespace circle {
 class Gko {
 public:
   bool use_ext_phase = false;
+  bool monitor_input = true;
   float ext_phase = 0.f;
 
   float sample_time = 1.0f;
@@ -53,7 +54,6 @@ public:
     _time_advancer.setTickFrequency(1.0f);
     // TODO set me when loop is observed_sun for consistent loops
   }
-
 
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
@@ -242,7 +242,7 @@ public:
     }
 
     love_updater.updateSongCyclesLove(song.cycles);
-    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs);
+    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs, monitor_input);
   }
 };
 

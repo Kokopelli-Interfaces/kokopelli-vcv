@@ -18,7 +18,6 @@ namespace circle {
 
 struct Engine {
   Inputs inputs;
-  Options options;
 
   Song _song;
   Gko _gko;

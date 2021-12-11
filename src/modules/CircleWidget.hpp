@@ -239,6 +239,16 @@ struct CircleWidget : ModuleWidget {
 		menu->addChild(love_resolution_slider);
     menu->addChild(new OptionMenuItem("Set Love Resolution", [m]() { return false; }, [m]() { m->updateLoveResolution(); }));
 
+
+		FadeSliderItem *delay_shiftback_slider = new FadeSliderItem(&m->_options.love_resolution, "Delay Shiftback");
+		delay_shiftback_slider->box.size.x = 190.f;
+		menu->addChild(delay_shiftback_slider);
+    menu->addChild(new OptionMenuItem("Set Delay Shiftback", [m]() { return false; }, [m]() { m->updateLoveResolution(); }));
+
+    menu->addChild(new BoolOptionMenuItem("Monitor Input", [m]() {
+      return &m->_options.monitor_input;
+    }));
+
     // OptionsMenuItem::addToMenu(love_resolution, menu);
 
 

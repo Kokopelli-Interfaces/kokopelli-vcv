@@ -32,7 +32,7 @@ public:
   float ext_phase = 0.f;
 
   float sample_time = 1.0f;
-  float love_resolution = 1000.f;
+  Time delay_shiftback = 0.f;
   bool tune_to_frequency_of_observed_sun = true;
 
   /** read only */
@@ -55,6 +55,15 @@ public:
     // TODO set me when loop is observed_sun for consistent loops
   }
 
+private:
+  inline void addCycle(Song &song, Cycle* ended_cycle) {
+    song.cycles.push_back(ended_cycle);
+    ended_cycle->immediate_group->addNewCycle(ended_cycle);
+    if (delay_shiftback < ended_cycle->period) {
+      ended_cycle->playhead += delay_shiftback;
+    }
+  }
+
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
     Cycle* ended_cycle = song.new_cycle;
@@ -74,8 +83,7 @@ public:
       break;
     case CycleEnd::JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
-      song.cycles.push_back(ended_cycle);
-      ended_cycle->immediate_group->addNewCycle(ended_cycle);
+      addCycle(song, ended_cycle);
       break;
     case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
@@ -83,8 +91,7 @@ public:
       if (ended_cycle->immediate_group->period != 0.f) {
         ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
       }
-      song.cycles.push_back(ended_cycle);
-      ended_cycle->immediate_group->addNewCycle(ended_cycle);
+      addCycle(song, ended_cycle);
       break;
     case CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP:
       // FIXME
@@ -123,16 +130,14 @@ public:
   }
 
   inline void undoCycle(Song &song) {
-    if (_love_direction == LoveDirection::OBSERVED_SUN) {
-      if (observer.checkIfInSubgroupMode()) {
-        observer.exitSubgroupMode(song);
-      }
+    if (observer.checkIfInSubgroupMode()) {
+      observer.exitSubgroupMode(song);
+    }
 
-      if (0 < song.cycles.size()) {
-        Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
-        most_recent_cycle->immediate_group->undoLastCycle();
-        song.cycles.pop_back();
-      }
+    if (0 < song.cycles.size()) {
+      Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
+      most_recent_cycle->immediate_group->undoLastCycle();
+      song.cycles.pop_back();
     }
 
     nextCycle(song, CycleEnd::DISCARD);
@@ -210,7 +215,12 @@ public:
       _last_ext_phase = ext_phase;
     }
 
-    _time_advancer.step(song.playhead, step);
+    if (!song.cycles.empty()) {
+      _time_advancer.step(song.playhead, step);
+    } else {
+      song.playhead = 0.f;
+    }
+
     _time_advancer.step(song.new_cycle->playhead, step);
     if (use_ext_phase) {
       if (song.playhead < 0.f) {
@@ -224,7 +234,9 @@ public:
     for (Cycle* cycle : song.cycles) {
       _time_advancer.step(cycle->playhead, step);
       if (cycle->period < cycle->playhead) {
+        // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
         cycle->playhead -= cycle->period;
+        assert(cycle->playhead < cycle->period);
       } else if (cycle->playhead < 0.f) {
         cycle->playhead += cycle->period;
       }

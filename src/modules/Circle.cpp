@@ -20,14 +20,6 @@ Circle::~Circle() {
   delete _light_blinker;
 }
 
-
-void Circle::updateLoveResolution() {
-  for (int c = 0; c < channels(); c++) {
-    kokopellivcv::dsp::circle::Engine *e = _engines[c];
-    e->_gko.love_updater.updateLoveResolution(_options.love_resolution);
-  }
-}
-
 // FIXME update gko phase oscillato
 void Circle::sampleRateChange() {
   _sample_time = APP->engine->getSampleTime();
@@ -87,6 +79,24 @@ static inline float smoothValue(float current, float old) {
 
 void Circle::modulate() {
   _audition_position = smoothValue(params[AUDITION_PARAM].getValue(), _audition_position);
+
+  if (_love_resolution != _options.love_resolution) {
+    _love_resolution = _options.love_resolution;
+    for (int c = 0; c < channels(); c++) {
+      kokopellivcv::dsp::circle::Engine *e = _engines[c];
+      e->_gko.love_updater.updateLoveResolution(_love_resolution);
+    }
+  }
+
+  if (_delay_shiftback != _options.delay_shiftback) {
+    _delay_shiftback = _options.delay_shiftback;
+    for (int c = 0; c < channels(); c++) {
+      kokopellivcv::dsp::circle::Engine *e = _engines[c];
+      Time delay_shiftback_time = _delay_shiftback * _sample_time;
+      e->_gko.delay_shiftback = delay_shiftback_time;
+    }
+  }
+
   return;
 }
 
@@ -101,7 +111,6 @@ void Circle::modulateChannel(int channel_i) {
   // TODO AION
   // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
-  e->_gko.love_updater.love_resolution = _options.love_resolution;
   e->_gko.monitor_input = _options.monitor_input;
 
   // e->_signal_type = _from_signal->signal_type;

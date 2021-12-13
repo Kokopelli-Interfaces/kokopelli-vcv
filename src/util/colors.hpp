@@ -11,7 +11,7 @@
 
 namespace colors {
 
-  static const NVGcolor SUNLIGHT = nvgRGB(0xe6, 0xa5, 0x68);
+  // static const NVGcolor SUNLIGHT = nvgRGB(0xe6, 0xa5, 0x68);
   // static const NVGcolor SOFT_SUNLIGHT = nvgRGB(0xd6, 0x91, 0x72); // v != 1
   static const NVGcolor SOFT_SUNLIGHT = nvgRGB(0xff, 0xad, 0x88);
 
@@ -38,7 +38,6 @@ namespace colors {
 
   static const NVGcolor MOONLIGHT = nvgRGB(0xff, 0xc3, 0xc3);
 
-
   // default theme colors
 
   static const NVGcolor OBSERVED_SUN = SOFT_SUNLIGHT;
@@ -49,7 +48,7 @@ namespace colors {
   static const NVGcolor BOX_BG_LIGHT = TAN_BROWN;
   static const NVGcolor LOOK_BACK_LAYER = STRONG_SUNLIGHT;
 
-  static const NVGcolor OBSERVED_SUN_LIGHT = SUNLIGHT;
+  static const NVGcolor OBSERVED_SUN_LIGHT = STRONG_SUNLIGHT;
   static const NVGcolor EMERGENCE_LIGHT = WOMB_RED_BRIGHT;
   static const NVGcolor WOMB_LIGHT = WOMB_RED_HARD;
 

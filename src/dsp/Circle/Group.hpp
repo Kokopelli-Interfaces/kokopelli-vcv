@@ -158,8 +158,10 @@ struct Group {
     cycle_period = adjusted_period;
   }
 
+  // TODO cycle invariatn
   inline void addNewCycle(Cycle* cycle) {
     Time original_playhead = cycle->playhead;
+    Time original_period = cycle->period;
     if (parent_group != nullptr && cycle->immediate_group != parent_group) {
       parent_group->addNewCycle(cycle);
     }
@@ -174,21 +176,23 @@ struct Group {
         period = cycle->period;
         beat_period = cycle->period;
       } else {
-        Time original_period = cycle->period;
+        Time period_before = cycle->period;
         adjustPeriodsToFit(cycle->period);
-        Time period_diff = original_period - cycle->period;
+        printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->period, original_period);
+        Time period_diff = period_before - cycle->period;
         bool period_roundback = 0.f < period_diff;
         if (period_roundback) {
           cycle->playhead = period_diff;
-          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, original_period, cycle->period);
+          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->period);
         } else {
           cycle->playhead = original_playhead;
-          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, original_period, cycle->period);
+          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, cycle->period);
         }
       }
     }
 
     printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
+    printf("-- cycle period %Lf, cycle playhead %Lf\n", cycle->period, cycle->playhead);
   }
 
   inline void addExistingCycle(Cycle* cycle) {

@@ -233,17 +233,14 @@ struct CircleWidget : ModuleWidget {
 
     // menu->addChild(new SpacerOptionMenuItem());
 
-    // FIXME
 		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
-    menu->addChild(new OptionMenuItem("Set Love Resolution", [m]() { return false; }, [m]() { m->updateLoveResolution(); }));
 
-
-		FadeSliderItem *delay_shiftback_slider = new FadeSliderItem(&m->_options.love_resolution, "Delay Shiftback");
-		delay_shiftback_slider->box.size.x = 190.f;
-		menu->addChild(delay_shiftback_slider);
-    menu->addChild(new OptionMenuItem("Set Delay Shiftback", [m]() { return false; }, [m]() { m->updateLoveResolution(); }));
+    // FIXME
+		// DelayShiftbackSlider *delay_shiftback_slider = new DelayShiftbackSlider(&m->_options.delay_shiftback, "Input Delay Shiftback");
+		// delay_shiftback_slider->box.size.x = 190.f;
+		// menu->addChild(delay_shiftback_slider);
 
     menu->addChild(new BoolOptionMenuItem("Monitor Input", [m]() {
       return &m->_options.monitor_input;

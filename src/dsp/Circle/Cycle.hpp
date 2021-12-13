@@ -32,7 +32,7 @@ struct Cycle {
   bool loop = false;
 
   // TODO option
-  Time max_crossfade_time = 0.1f;
+  Time max_crossfade_time = 0.05f;
   Time fade_in_time = 0.02f;
   Time fade_out_time = 0.07f;
 

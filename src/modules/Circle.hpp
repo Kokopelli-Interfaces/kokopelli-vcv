@@ -57,6 +57,8 @@ struct Circle : KokopelliVcvModule {
   rack::dsp::ClockDivider _button_divider;
 
   Options _options;
+  float _love_resolution = 1000.f;
+  float _delay_shiftback = 0.f;
 
   Circle();
   ~Circle();
@@ -72,8 +74,6 @@ struct Circle : KokopelliVcvModule {
   void postProcessAlways(const ProcessArgs &args) override;
   void updateLights(const ProcessArgs &args);
   void updateLight(int light, NVGcolor color, float strength);
-
-  void updateLoveResolution();
 
 private:
   void processButtons(const ProcessArgs &args);

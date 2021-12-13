@@ -166,40 +166,76 @@ struct TextBox : TransparentWidget {
 
 // fade duration for fade slider menu item
 struct FadeDuration : Quantity {
-	float *srcFadeRate = NULL;
+	float *src = NULL;
 	std::string label = "";
 
-	FadeDuration(float *_srcFadeRate, std::string fade_label) {
-		srcFadeRate = _srcFadeRate;
+	FadeDuration(float *_src, std::string fade_label) {
+		src = _src;
 		label = fade_label;
 	}
 	void setValue(float value) override {
-		*srcFadeRate = math::clamp(value, getMinValue(), getMaxValue());
+		*src = math::clamp(value, getMinValue(), getMaxValue());
 	}
 	float getValue() override {
-		return *srcFadeRate;
+		return *src;
 	}
 	float getMinValue() override {return 26.0f;}
 	float getMaxValue() override {return 44100.0f * 2;}
 	float getDefaultValue() override {return 10000.0f;}
-	float getDisplayValue() override {return getValue() / 44100;}
+	float getDisplayValue() override {return getValue() / (44100 / 100);}
 	std::string getDisplayValueString() override {
 		float value = getDisplayValue();
-		return string::f("%.2f", value);
+		return string::f("%.0f", value);
 	}
 	void setDisplayValue(float displayValue) override {setValue(displayValue);}
 	std::string getLabel() override {return label;}
-	std::string getUnit() override {return " sec";}
+	std::string getUnit() override {return " ms";}
 };
 
-
-// fade automation sliders
 struct FadeSliderItem : ui::Slider {
 	FadeSliderItem(float *fade_rate, std::string fade_label) {
 		quantity = new FadeDuration(fade_rate, fade_label);
 	}
 
 	~FadeSliderItem() {
+		delete quantity;
+	}
+};
+
+// fade duration for fade slider menu item
+struct DelayShiftback : Quantity {
+	float *src = NULL;
+	std::string label = "";
+
+	DelayShiftback(float *_src, std::string fade_label) {
+		src = _src;
+		label = fade_label;
+	}
+	void setValue(float value) override {
+		*src = math::clamp(value, getMinValue(), getMaxValue());
+	}
+	float getValue() override {
+		return *src;
+	}
+	float getMinValue() override {return 0.f;}
+	float getMaxValue() override {return 44100.0f;}
+	float getDefaultValue() override {return 0.0f;}
+	float getDisplayValue() override {return getValue() / (44100 / 100);}
+	std::string getDisplayValueString() override {
+		float value = getDisplayValue();
+		return string::f("%.0f", value);
+	}
+	void setDisplayValue(float displayValue) override {setValue(displayValue);}
+	std::string getLabel() override {return label;}
+	std::string getUnit() override {return " ms";}
+};
+
+struct DelayShiftbackSlider : ui::Slider {
+	DelayShiftbackSlider(float *shiftback, std::string label) {
+		quantity = new DelayShiftback(shiftback, label);
+	}
+
+	~DelayShiftbackSlider() {
 		delete quantity;
 	}
 };

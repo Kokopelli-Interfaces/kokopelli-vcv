@@ -60,7 +60,7 @@ public:
         for (unsigned int j = i + 1; j < cycles.size(); j++) {
           if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, cycles[j]->immediate_group)) {
             cycle_i_love *= (1.f - cycles[j]->readLove());
-            if (cycle_i_love <= 0.001f) {
+            if (cycle_i_love <= 0.0001f) {
               cycle_i_love = 0.f;
               break;
             }

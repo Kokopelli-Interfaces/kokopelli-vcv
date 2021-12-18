@@ -64,12 +64,21 @@ struct Cycle {
         float fade = this->playhead / crossfade_time;
         return rack::crossfade(crossfade_left_sample, signal, fade);
       }
-    } else if (this->period - fade_out_time <= this->playhead) { // fade out
+
+      return signal;
+    }
+
+    // assert(signal_capture->_period < this->period);
+    bool fade_out = this->period - fade_out_time <= this->playhead;
+    if (fade_out) {
       Time crossfade_start_time = this->period - fade_out_time;
       float crossfade_right_sample = 0.f;
       float fade = (this->playhead - crossfade_start_time) / fade_out_time;
       return rack::crossfade(signal, crossfade_right_sample, fade);
-    } else if (this->playhead <= fade_in_time) { // fade in
+    }
+
+    bool fade_in = this->playhead <= fade_in_time;
+    if (fade_in) { // fade in
       float crossfade_left_sample = 0.f;
       float fade = this->playhead / fade_in_time;
       return rack::crossfade(crossfade_left_sample, signal, fade);
@@ -96,7 +105,11 @@ struct Cycle {
       return love_capture->read(love_capture->_period);
     }
 
-    return love_capture->read(this->playhead);
+    float love = love_capture->read(this->playhead);
+    if (1.f < love) {
+      return 1.f;
+    }
+    return love;
   }
 
   inline void write(float in, float love) {

@@ -108,10 +108,12 @@ public:
         }
       }
 
-      if (observer.checkIfInSubgroupMode()) {
-        observer.exitSubgroupMode(song);
-      }
-      song.clearEmptyGroups();
+      // works better without
+
+      // if (observer.checkIfInSubgroupMode()) {
+      //   observer.exitSubgroupMode(song);
+      // }
+      // song.clearEmptyGroups();
 
       delete ended_cycle;
       break;

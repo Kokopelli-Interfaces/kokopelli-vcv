@@ -168,6 +168,8 @@ inline void exitSubgroupMode(Song &song) {
     if (song.observed_sun->parent_group) {
       song.observed_sun = song.observed_sun->parent_group;
     }
+
+    song.clearEmptyGroups();
   }
 };
 

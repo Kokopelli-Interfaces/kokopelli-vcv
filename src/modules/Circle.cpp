@@ -4,15 +4,15 @@
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
-  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Select");
-  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next");
+  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observer Direction");
+  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
-  configInput(WOMB_INPUT, "Creation Input");
-  configOutput(OBSERVER_OUTPUT, "Observer Output");
+  configInput(WOMB_INPUT, "Moon (Creative Background/Yin/Orchestra/Feminine)");
+  configOutput(OBSERVER_OUTPUT, "Observer (Soul/Consciousness/Experience)");
   configOutput(OBSERVER_PHASE_OUTPUT, "Observer Phase");
   configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Observer Beat Phase");
-  configOutput(SUN, "Sun");
+  configOutput(SUN, "Sun (Emernet/Yang/Song/Masculine)");
 
   configBypass(WOMB_INPUT, SUN);
 

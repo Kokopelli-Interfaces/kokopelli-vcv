@@ -11,7 +11,7 @@ struct CircleTextBox : TextBox {
 
 	CircleTextBox(Circle *m, NVGcolor background_color, NVGcolor text_color, rack::math::Vec pos, rack::math::Vec size) : TextBox() {
     _module = m;
-    font = APP->window->loadFont(asset::plugin(pluginInstance, "/res/fonts/Nunito-Bold.ttf"));
+    fontPath = "res/fonts/Nunito-Bold.ttf";
     font_size = 12;
     letter_spacing = 0.f;
     backgroundColor = background_color;
@@ -19,7 +19,7 @@ struct CircleTextBox : TextBox {
     box.pos = pos;
     box.size = size;
     textOffset = Vec(box.size.x * 0.5f, 0.f);
-    textAlign = NVG_ALIGN_CENTER | NVG_ALIGN_TOP;
+    // textAlign = NVG_ALIGN_CENTER | NVG_ALIGN_TOP;
   }
 
   void step() override {
@@ -192,7 +192,10 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));
 
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.127, 80.017)), module, Circle::DIVINITY_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 81.481)), module, Circle::DIVINITY_LIGHT));
+
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 80.017)), module, Circle::CYCLE_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Circle::CYCLE_LIGHT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
 		observed_sun_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_SUN, mm2px(Vec(1.236, 40.865)), focused_display_size);

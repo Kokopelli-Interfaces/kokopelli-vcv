@@ -129,10 +129,10 @@ struct SeasonsWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.746, 54.259)), module, Seasons::TUNE_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(14.746, 54.259)), module, Seasons::TUNE_PARAM));
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.580)), module, Seasons::LOVE_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.177, 79.26)), module, Seasons::CYCLE_DIVINITY_PARAM));
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.236, 79.26)), module, Seasons::CYCLE_FORWARD_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(3.177, 79.26)), module, Seasons::CYCLE_DIVINITY_PARAM));
+		addParam(createParam<LEDButton>(mm2px(Vec(26.236, 79.26)), module, Seasons::CYCLE_FORWARD_PARAM));
 
 		addInput(createInput<WombPort>(mm2px(Vec(24.280, 94.323)), module, Seasons::WOMB_INPUT));
 		addInput(createInput<KokopelliPort>(mm2px(Vec(2.986, 107.705)), module, Seasons::PHASE_INPUT));

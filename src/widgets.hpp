@@ -15,7 +15,7 @@ struct MediumLEDButton : rack::app::SvgSwitch {
 
 struct AuditionKnob : Rogan {
   AuditionKnob() {
-    speed = 2.0f;
+    speed = 0.75f;
 		minAngle = -0.25 * M_PI;
 		maxAngle = 0.25 * M_PI;
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/AuditionKnob.svg")));
@@ -24,7 +24,7 @@ struct AuditionKnob : Rogan {
 
 struct LoveKnob : Rogan {
   LoveKnob() {
-    speed = 1.5f;
+    speed = 0.5f;
 		minAngle = -0.25 * M_PI;
 		maxAngle = 0.25 * M_PI;
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/LoveKnob.svg")));
@@ -101,6 +101,7 @@ struct TextBox : TransparentWidget {
   // numbers look okay.
   // based on LedDisplayChoice
   std::string text;
+  std::string fontPath;
   std::shared_ptr<Font> font;
   float font_size;
   float letter_spacing;
@@ -108,37 +109,30 @@ struct TextBox : TransparentWidget {
   NVGcolor defaultTextColor;
   NVGcolor textColor; // This can be used to temporarily override text color
   NVGcolor backgroundColor;
-  int textAlign;
+  // int textAlign;
 
   TextBox() {
-    // FIXME
-    // font = APP->window->loadFont(asset::plugin(pluginInstance, "res/fonts/RobotoMono-Bold.ttf")); // TODO: fix paths...
-
-    // defaultTextColor = nvgRGB(0xae, 0x28, 0x06); // cave orange
-    // defaultTextColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
-    // defaultTextColor = nvgRGB(0x9b, 0x44, 0x42); // red
-    // defaultTextColor = nvgRGB(0x6e, 0xaf, 0x71); // emersign green
     defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // observed_sun
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0x19, 0x0d, 0x05);
-    // size 20 with spacing -2 will fit 3 characters on a 30px box with Roboto
-    // mono
     font_size = 20;
     letter_spacing = 0.f;
     textOffset = Vec(box.size.x * 0.5f, 0.f);
-    textAlign = NVG_ALIGN_CENTER | NVG_ALIGN_TOP;
   }
 
   virtual void setText(std::string s) { text = s; }
 
   virtual void draw(const DrawArgs &args) override {
     // based on LedDisplayChoice::draw() in Rack/src/app/LedDisplay.cpp
-    const auto vg = args.vg;
+    auto vg = args.vg;
     nvgScissor(vg, 0, 0, box.size.x, box.size.y);
+
     nvgBeginPath(vg);
     nvgRoundedRect(vg, 0, 0, box.size.x, box.size.y, 3.0);
     nvgFillColor(vg, backgroundColor);
     nvgFill(vg);
+
+    font = APP->window->loadFont(asset::plugin(pluginInstance, fontPath));
 
     if (font->handle >= 0) {
 
@@ -147,7 +141,7 @@ struct TextBox : TransparentWidget {
 
       nvgFontSize(vg, font_size);
       nvgTextLetterSpacing(vg, letter_spacing);
-      nvgTextAlign(vg, textAlign);
+      nvgTextAlign(vg, NVG_ALIGN_CENTER | NVG_ALIGN_TOP);
       nvgText(vg, textOffset.x, textOffset.y, text.c_str(), NULL);
     }
 

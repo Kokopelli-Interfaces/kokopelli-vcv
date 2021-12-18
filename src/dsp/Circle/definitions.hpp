@@ -44,5 +44,6 @@ struct Outputs {
 struct Options {
   float love_resolution = 1000.f;
   float delay_shiftback = 0.f;
-  bool monitor_input = true;
+  bool include_moon_in_sun_output = true;
+  bool include_moon_in_observer_output = false;
 };

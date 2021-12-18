@@ -23,7 +23,7 @@ namespace circle {
 
 class OutputUpdater {
 public:
-  inline void updateOutput(Outputs &out, std::vector<Cycle*> cycles, Group* new_cycle_group, Inputs inputs, bool monitor_input) {
+  inline void updateOutput(Outputs &out, std::vector<Cycle*> cycles, Group* new_cycle_group, Inputs inputs, bool include_moon_in_sun_output, bool include_moon_in_observer_output) {
     // FIXME get rid of me
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
@@ -42,8 +42,12 @@ public:
 
     out.attenuated_observed_sun = out.observed_sun * (1.f - inputs.love);
 
-    if (monitor_input) {
+    if (include_moon_in_sun_output) {
       out.sun = kokopellivcv::dsp::sum(out.sun, inputs.in, signal_type);
+    }
+
+    if (include_moon_in_observer_output) {
+      out.observed_sun = kokopellivcv::dsp::sum(out.sun, inputs.in, signal_type);
     }
   }
 };

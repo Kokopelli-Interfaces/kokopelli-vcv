@@ -4,15 +4,15 @@
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
-  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observer Direction");
+  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Rotate Observer");
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Sun <-(emergence)-> Moon)");
 
-  configInput(WOMB_INPUT, "Moon (Creative Background/Yin/Orchestra/Feminine)");
-  configOutput(OBSERVER_OUTPUT, "Observer (Soul/Consciousness/Experience)");
+  configInput(WOMB_INPUT, "Moon (Creative Background/Yin/Orchestra/Feminine/Womb of Universe)");
+  configOutput(OBSERVER_OUTPUT, "Observer (Soul/Consciousness)");
   configOutput(OBSERVER_PHASE_OUTPUT, "Observer Phase");
-  configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Observer Beat Phase");
-  configOutput(SUN, "Sun (Emernet/Yang/Song/Masculine)");
+  configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Beat Phase");
+  configOutput(SUN, "Sun (Emernet/Yang/Song/Masculine/Universe)");
 
   configBypass(WOMB_INPUT, SUN);
 
@@ -96,6 +96,7 @@ void Circle::modulate() {
     }
   }
 
+  // TODO FIXME
   if (_delay_shiftback != _options.delay_shiftback) {
     _delay_shiftback = _options.delay_shiftback;
     for (int c = 0; c < channels(); c++) {
@@ -119,7 +120,8 @@ void Circle::modulateChannel(int channel_i) {
   // TODO AION
   // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
-  e->_gko.monitor_input = _options.monitor_input;
+  e->_gko.include_moon_in_sun_output = _options.include_moon_in_sun_output;
+  e->_gko.include_moon_in_observer_output = _options.include_moon_in_observer_output;
 
   // e->_signal_type = _from_signal->signal_type;
 }

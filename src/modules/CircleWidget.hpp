@@ -242,8 +242,13 @@ struct CircleWidget : ModuleWidget {
 		// delay_shiftback_slider->box.size.x = 190.f;
 		// menu->addChild(delay_shiftback_slider);
 
-    menu->addChild(new BoolOptionMenuItem("Monitor Input", [m]() {
-      return &m->_options.monitor_input;
+    menu->addChild(new BoolOptionMenuItem("Include Moon in Sun output", [m]() {
+      return &m->_options.include_moon_in_sun_output;
+    }));
+
+
+    menu->addChild(new BoolOptionMenuItem("Include Moon in Observer output", [m]() {
+      return &m->_options.include_moon_in_observer_output;
     }));
 
     // OptionsMenuItem::addToMenu(love_resolution, menu);

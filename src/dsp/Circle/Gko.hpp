@@ -28,7 +28,8 @@ namespace circle {
 class Gko {
 public:
   bool use_ext_phase = false;
-  bool monitor_input = true;
+  bool include_moon_in_sun_output = true;
+  bool include_moon_in_observer_output = true;
   float ext_phase = 0.f;
 
   float sample_time = 1.0f;
@@ -256,7 +257,7 @@ public:
     }
 
     love_updater.updateSongCyclesLove(song.cycles);
-    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs, monitor_input);
+    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs, include_moon_in_sun_output, include_moon_in_observer_output);
   }
 };
 

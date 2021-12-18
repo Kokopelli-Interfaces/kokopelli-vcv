@@ -3,15 +3,15 @@
 
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Solo Audio (Established or Creation)");
+  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Select");
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established or Creation)");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
   configInput(WOMB_INPUT, "Creation Input");
-  configInput(PHASE_INPUT, "Phase Input");
-  configOutput(PHASE_OUTPUT, "Phase Output");
-  configOutput(ESTABLISHED_OUTPUT, "Established Output");
+  configOutput(OBSERVER_OUTPUT, "Observer Output");
+  configOutput(OBSERVER_PHASE_OUTPUT, "Observer Phase");
+  configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Observer Beat Phase");
   configOutput(SUN, "Sun");
 
   configBypass(WOMB_INPUT, SUN);
@@ -28,14 +28,7 @@ Circle::~Circle() {
   delete _light_blinker;
 }
 
-void Circle::updateLoveResolution() {
-  for (int c = 0; c < channels(); c++) {
-    kokopellivcv::dsp::circle::Engine *e = _engines[c];
-    e->_gko.love_updater.updateLoveResolution(_options.love_resolution);
-  }
-}
-
-// FIXME update gko phase oscillator
+// FIXME update gko phase oscillato
 void Circle::sampleRateChange() {
   _sample_time = APP->engine->getSampleTime();
 }
@@ -54,11 +47,11 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       e->cycleObservation();
-      _light_blinker->blinkLight(DIVINITY_LIGHT);
+      _light_blinker->blinkLight(DIVINITY_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->ascend();
-      _light_blinker->blinkLight(DIVINITY_LIGHT); // TODO extra
+      _light_blinker->blinkLight(DIVINITY_LIGHT, 0.f); // TODO extra
       break;
     }
 
@@ -67,26 +60,25 @@ void Circle::processButtons(const ProcessArgs &args) {
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       e->cycleForward();
-      _light_blinker->blinkLight(CYCLE_LIGHT);
+      _light_blinker->blinkLight(CYCLE_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->undo();
-      _light_blinker->blinkLight(CYCLE_LIGHT); // TODO blink extra extra
+      _light_blinker->blinkLight(CYCLE_LIGHT, 0.f); // TODO blink extra extra
       break;
     }
   }
 }
 
 void Circle::processAlways(const ProcessArgs &args) {
-  outputs[PHASE_OUTPUT].setChannels(this->channels());
+  outputs[OBSERVER_PHASE_OUTPUT].setChannels(this->channels());
   outputs[SUN].setChannels(this->channels());
-  outputs[ESTABLISHED_OUTPUT].setChannels(this->channels());
+  outputs[OBSERVER_OUTPUT].setChannels(this->channels());
 
   if (_button_divider.process()) {
     processButtons(args);
   }
 }
-
 
 static inline float smoothValue(float current, float old) {
   float lambda = .1;
@@ -95,6 +87,24 @@ static inline float smoothValue(float current, float old) {
 
 void Circle::modulate() {
   _audition_position = smoothValue(params[AUDITION_PARAM].getValue(), _audition_position);
+
+  if (_love_resolution != _options.love_resolution) {
+    _love_resolution = _options.love_resolution;
+    for (int c = 0; c < channels(); c++) {
+      kokopellivcv::dsp::circle::Engine *e = _engines[c];
+      e->_gko.love_updater.updateLoveResolution(_love_resolution);
+    }
+  }
+
+  if (_delay_shiftback != _options.delay_shiftback) {
+    _delay_shiftback = _options.delay_shiftback;
+    for (int c = 0; c < channels(); c++) {
+      kokopellivcv::dsp::circle::Engine *e = _engines[c];
+      Time delay_shiftback_time = _delay_shiftback * _sample_time;
+      e->_gko.delay_shiftback = delay_shiftback_time;
+    }
+  }
+
   return;
 }
 
@@ -106,11 +116,11 @@ void Circle::modulateChannel(int channel_i) {
   love = pow(love, 2);
   e->inputs.love = love;
 
-  e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+  // TODO AION
+  // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 
-  // FIXME ugh
-  e->options = _options;
-  e->_gko.love_updater.love_resolution = _options.love_resolution;
+  e->_gko.monitor_input = _options.monitor_input;
+
   // e->_signal_type = _from_signal->signal_type;
 }
 
@@ -136,19 +146,20 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     e->inputs.in = 0.f;
   }
 
-  if (inputs[PHASE_INPUT].isConnected()) {
-    float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
-    e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+  // TODO get from AION
+  // if (inputs[PHASE_INPUT].isConnected()) {
+  //   float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
+  //   e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+  // }
+
+  if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {
+    float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+    outputs[OBSERVER_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
-  if (outputs[PHASE_OUTPUT].isConnected()) {
-    float phase;
-    if (_options.output_beat_phase) {
-      phase = e->_song.established->getBeatPhase(e->_song.playhead);
-    } else {
-      phase = e->_song.established->getPhase(e->_song.playhead);
-    }
-    outputs[PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
+  if (outputs[OBSERVER_BEAT_PHASE_OUTPUT].isConnected()) {
+    float phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
+    outputs[OBSERVER_BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   e->step();
@@ -156,20 +167,20 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   Outputs out = e->_song.out;
   if (outputs[SUN].isConnected()) {
     float sun_out = 0.f;
-    if (1.f == _audition_position) {
+    if (_audition_position < 1.f) {
+      float observed_sun_and_input = kokopellivcv::dsp::sum(out.attenuated_observed_sun, e->inputs.in, e->_signal_type);
+      sun_out = rack::crossfade(observed_sun_and_input, out.sun, _audition_position);
+    } else if (1.f == _audition_position) {
       sun_out = out.sun;
     } else if (1.f < _audition_position) {
-      float established_and_input = kokopellivcv::dsp::sum(out.attenuated_established, e->inputs.in, e->_signal_type);
-      sun_out = rack::crossfade(out.sun, established_and_input, _audition_position - 1.f);
-    } else {
-      sun_out = rack::crossfade( e->inputs.in, out.sun, _audition_position);
+      sun_out = rack::crossfade(out.sun, e->inputs.in, _audition_position - 1.f);
     }
 
     outputs[SUN].setVoltage(sun_out, channel_i);
   }
 
-  if (outputs[ESTABLISHED_OUTPUT].isConnected()) {
-    outputs[ESTABLISHED_OUTPUT].setVoltage(out.established, channel_i);
+  if (outputs[OBSERVER_OUTPUT].isConnected()) {
+    outputs[OBSERVER_OUTPUT].setVoltage(out.observed_sun, channel_i);
   }
 }
 
@@ -189,31 +200,40 @@ void Circle::updateLights(const ProcessArgs &args) {
   kokopellivcv::dsp::circle::Engine *default_e = _engines[0];
 
   float new_sum = 0.f;
-  float established_sum = 0.f;
+  float observed_sun_sum = 0.f;
   for (int c = 0; c < channels(); c++) {
     new_sum += inputs[WOMB_INPUT].getPolyVoltage(c);
-    established_sum += outputs[ESTABLISHED_OUTPUT].getPolyVoltage(c);
+    observed_sun_sum += outputs[OBSERVER_OUTPUT].getPolyVoltage(c);
   }
   new_sum = rack::clamp(new_sum, 0.f, 1.f);
-  established_sum = rack::clamp(established_sum, 0.f, 1.f);
-  established_sum = established_sum * (1.f - default_e->inputs.love);
+  observed_sun_sum = rack::clamp(observed_sun_sum, 0.f, 1.f);
+  observed_sun_sum = observed_sun_sum * (1.f - default_e->inputs.love);
 
+  float light_strength = .3f;
   LoveDirection love_direction = default_e->_gko._love_direction;
-  if (love_direction == LoveDirection::ESTABLISHED) {
-    updateLight(DIVINITY_LIGHT, colors::ESTABLISHED_LIGHT, 0.6f);
-    if (default_e->_gko.observer.checkIfInSubgroupMode()) {
-      updateLight(CYCLE_LIGHT, colors::ESTABLISHED_LIGHT, 0.6);
+  if (love_direction == LoveDirection::OBSERVED_SUN) {
+    if (!default_e->_song.cycles.empty()) {
+      updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
     } else {
-      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+      updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
+    }
+
+    if (default_e->_gko.observer.checkIfInSubgroupMode()) {
+      if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
+        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+      } else {
+        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
+      }
+    } else {
+      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
     }
   } else if (love_direction == LoveDirection::EMERGENCE) {
-    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
+    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+    updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
   } else { // LoveDirection::NEW
-    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, 0.6);
-    updateLight(CYCLE_LIGHT, colors::WOMB_LIGHT, 0.6f);
+    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+    updateLight(CYCLE_LIGHT, colors::WOMB_LIGHT, light_strength);
   }
-
 }
 
 void Circle::postProcessAlways(const ProcessArgs &args) {

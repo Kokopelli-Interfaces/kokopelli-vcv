@@ -18,7 +18,6 @@ namespace circle {
 
 struct Engine {
   Inputs inputs;
-  Options options;
 
   Song _song;
   Gko _gko;
@@ -35,7 +34,7 @@ struct Engine {
   void cycleForward();
   void undo();
 
-  void toggleTuneToFrequencyOfEstablished();
+  void toggleTuneToFrequencyOfObservedSun();
 
   int getMostRecentCycleLength();
 

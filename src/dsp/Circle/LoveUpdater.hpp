@@ -11,7 +11,7 @@
 #include "Observer.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
-#include "TimeCapture.hpp"
+#include "SignalCapture.hpp"
 #include "Movement.hpp"
 #include "TimeAdvancer.hpp"
 #include "util/math.hpp"
@@ -60,7 +60,7 @@ public:
         for (unsigned int j = i + 1; j < cycles.size(); j++) {
           if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, cycles[j]->immediate_group)) {
             cycle_i_love *= (1.f - cycles[j]->readLove());
-            if (cycle_i_love <= 0.001f) {
+            if (cycle_i_love <= 0.0001f) {
               cycle_i_love = 0.f;
               break;
             }

@@ -7,14 +7,14 @@
 
 enum CycleEnd {
   DISCARD,
-  SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP,
-  JOIN_ESTABLISHED_LOOP,
-  JOIN_ESTABLISHED_NO_LOOP,
+  SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP,
+  JOIN_OBSERVED_SUN_LOOP,
+  JOIN_OBSERVED_SUN_NO_LOOP,
   FLOOD
 };
 
 // another way to say: ORDER, LIFE, CHAOS
-enum LoveDirection { ESTABLISHED, EMERGENCE, NEW };
+enum LoveDirection { OBSERVED_SUN, EMERGENCE, NEW };
 
 typedef long double Time;
 
@@ -26,7 +26,7 @@ struct Inputs {
 
   static inline LoveDirection getLoveDirection(float love) {
     if (love < love_emergence_threshold) {
-      return LoveDirection::ESTABLISHED;
+      return LoveDirection::OBSERVED_SUN;
     } else if (love < 1.f - love_emergence_threshold) {
       return LoveDirection::EMERGENCE;
     } else {
@@ -37,11 +37,12 @@ struct Inputs {
 
 struct Outputs {
   float sun = 0.f;
-  float established = 0.f;
-  float attenuated_established = 0.f;
+  float observed_sun = 0.f;
+  float attenuated_observed_sun = 0.f;
 };
 
 struct Options {
   float love_resolution = 1000.f;
-  bool output_beat_phase = true;
+  float delay_shiftback = 0.f;
+  bool monitor_input = true;
 };

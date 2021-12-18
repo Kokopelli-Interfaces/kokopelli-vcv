@@ -16,8 +16,8 @@ struct MediumLEDButton : rack::app::SvgSwitch {
 struct AuditionKnob : Rogan {
   AuditionKnob() {
     speed = 2.0f;
-		minAngle = .75 * M_PI;
-		maxAngle = 1.25 * M_PI;
+		minAngle = -0.25 * M_PI;
+		maxAngle = 0.25 * M_PI;
     setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/AuditionKnob.svg")));
   }
 };
@@ -37,9 +37,9 @@ struct KokopelliPort : SvgPort {
   }
 };
 
-struct EstablishedPort : SvgPort {
-	EstablishedPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/EstablishedPort.svg")));
+struct ObservedSunPort : SvgPort {
+	ObservedSunPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/ObservedSunPort.svg")));
   }
 };
 
@@ -118,7 +118,7 @@ struct TextBox : TransparentWidget {
     // defaultTextColor = nvgRGB(0xe6, 0xa6, 0x0e); // yellowy
     // defaultTextColor = nvgRGB(0x9b, 0x44, 0x42); // red
     // defaultTextColor = nvgRGB(0x6e, 0xaf, 0x71); // emersign green
-    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // established
+    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // observed_sun
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0x19, 0x0d, 0x05);
     // size 20 with spacing -2 will fit 3 characters on a 30px box with Roboto
@@ -157,34 +157,32 @@ struct TextBox : TransparentWidget {
 
 // fade duration for fade slider menu item
 struct FadeDuration : Quantity {
-	float *srcFadeRate = NULL;
+	float *src = NULL;
 	std::string label = "";
 
-	FadeDuration(float *_srcFadeRate, std::string fade_label) {
-		srcFadeRate = _srcFadeRate;
+	FadeDuration(float *_src, std::string fade_label) {
+		src = _src;
 		label = fade_label;
 	}
 	void setValue(float value) override {
-		*srcFadeRate = math::clamp(value, getMinValue(), getMaxValue());
+		*src = math::clamp(value, getMinValue(), getMaxValue());
 	}
 	float getValue() override {
-		return *srcFadeRate;
+		return *src;
 	}
 	float getMinValue() override {return 26.0f;}
 	float getMaxValue() override {return 44100.0f * 2;}
 	float getDefaultValue() override {return 10000.0f;}
-	float getDisplayValue() override {return getValue() / 44100;}
+	float getDisplayValue() override {return getValue() / (44100 / 100);}
 	std::string getDisplayValueString() override {
 		float value = getDisplayValue();
-		return string::f("%.2f", value);
+		return string::f("%.0f", value);
 	}
 	void setDisplayValue(float displayValue) override {setValue(displayValue);}
 	std::string getLabel() override {return label;}
-	std::string getUnit() override {return " sec";}
+	std::string getUnit() override {return " ms";}
 };
 
-
-// fade automation sliders
 struct FadeSliderItem : ui::Slider {
 	FadeSliderItem(float *fade_rate, std::string fade_label) {
 		quantity = new FadeDuration(fade_rate, fade_label);
@@ -193,4 +191,75 @@ struct FadeSliderItem : ui::Slider {
 	~FadeSliderItem() {
 		delete quantity;
 	}
+};
+
+// fade duration for fade slider menu item
+struct DelayShiftback : Quantity {
+	float *src = NULL;
+	std::string label = "";
+
+	DelayShiftback(float *_src, std::string fade_label) {
+		src = _src;
+		label = fade_label;
+	}
+	void setValue(float value) override {
+		*src = math::clamp(value, getMinValue(), getMaxValue());
+	}
+	float getValue() override {
+		return *src;
+	}
+	float getMinValue() override {return 0.f;}
+	float getMaxValue() override {return 44100.0f;}
+	float getDefaultValue() override {return 0.0f;}
+	float getDisplayValue() override {return getValue() / (44100 / 100);}
+	std::string getDisplayValueString() override {
+		float value = getDisplayValue();
+		return string::f("%.0f", value);
+	}
+	void setDisplayValue(float displayValue) override {setValue(displayValue);}
+	std::string getLabel() override {return label;}
+	std::string getUnit() override {return " ms";}
+};
+
+struct DelayShiftbackSlider : ui::Slider {
+	DelayShiftbackSlider(float *shiftback, std::string label) {
+		quantity = new DelayShiftback(shiftback, label);
+	}
+
+	~DelayShiftbackSlider() {
+		delete quantity;
+	}
+};
+
+struct BlinkableRedGreenBlueLight : RedGreenBlueLight {
+  std::chrono::time_point<std::chrono::system_clock> blink;
+  bool op = true;
+
+  BlinkableRedGreenBlueLight() {
+    blink = std::chrono::system_clock::now();
+  }
+
+  void blinkLight() {
+    op = true;
+  }
+
+  void step() override {
+    if (module) {
+      auto now = std::chrono::system_clock::now();
+      if (now - blink > std::chrono::milliseconds{300}) {
+        op = false;
+        blink = now;
+      }
+
+      std::vector<float> brightnesses(baseColors.size());
+      for (size_t i = 0; i < baseColors.size(); i++) {
+        float b = module->lights[firstLightId + i].getBrightness();
+        if (b > 0.f) {
+          b = op ? 1.f : 0.6f;
+        }
+        brightnesses[i] = b;
+      }
+      setBrightnesses(brightnesses);
+    }
+  }
 };

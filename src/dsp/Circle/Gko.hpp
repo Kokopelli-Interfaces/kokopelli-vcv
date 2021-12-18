@@ -28,11 +28,12 @@ namespace circle {
 class Gko {
 public:
   bool use_ext_phase = false;
+  bool monitor_input = true;
   float ext_phase = 0.f;
 
   float sample_time = 1.0f;
-  float love_resolution = 1000.f;
-  bool tune_to_frequency_of_established = true;
+  Time delay_shiftback = 0.f;
+  bool tune_to_frequency_of_observed_sun = true;
 
   /** read only */
 
@@ -51,11 +52,17 @@ public:
 public:
   Gko() {
     _time_advancer.setTickFrequency(1.0f);
-    // TODO set me when loop is established for consistent loops
+    // TODO set me when loop is observed_sun for consistent loops
   }
 
-
 private:
+  inline void addCycle(Song &song, Cycle* ended_cycle) {
+    song.cycles.push_back(ended_cycle);
+    ended_cycle->immediate_group->addNewCycle(ended_cycle);
+    if (delay_shiftback < ended_cycle->period) {
+      ended_cycle->playhead += delay_shiftback;
+    }
+  }
 
 public:
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
@@ -65,7 +72,7 @@ public:
     ended_cycle->finishWrite();
     if (ended_cycle->period == 0.f) {
       delete ended_cycle;
-      song.new_cycle = new Cycle(song.playhead, song.current_movement, song.established);
+      song.new_cycle = new Cycle(song.playhead, song.current_movement, song.observed_sun);
       return;
     }
 
@@ -74,19 +81,19 @@ public:
       song.clearEmptyGroups();
       delete ended_cycle;
       break;
-    case CycleEnd::JOIN_ESTABLISHED_LOOP:
+    case CycleEnd::JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
-      song.cycles.push_back(ended_cycle);
-      ended_cycle->immediate_group->addNewCycle(ended_cycle);
+      addCycle(song, ended_cycle);
       break;
-    case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP:
+    case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
       _equal_period_addition = true;
-      ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
-      song.cycles.push_back(ended_cycle);
-      ended_cycle->immediate_group->addNewCycle(ended_cycle);
+      if (ended_cycle->immediate_group->period != 0.f) {
+        ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
+      }
+      addCycle(song, ended_cycle);
       break;
-    case CycleEnd::JOIN_ESTABLISHED_NO_LOOP:
+    case CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP:
       // FIXME
       delete ended_cycle;
       // ended_cycle->loop = false;
@@ -101,10 +108,12 @@ public:
         }
       }
 
-      if (observer.checkIfInSubgroupMode()) {
-        observer.exitSubgroupMode(song);
-      }
-      song.clearEmptyGroups();
+      // works better without
+
+      // if (observer.checkIfInSubgroupMode()) {
+      //   observer.exitSubgroupMode(song);
+      // }
+      // song.clearEmptyGroups();
 
       delete ended_cycle;
       break;
@@ -112,14 +121,14 @@ public:
 
     // TODO
     Movement* cycle_movement;
-    if (tune_to_frequency_of_established) {
+    if (tune_to_frequency_of_observed_sun) {
       cycle_movement = song.current_movement;
     } else {
       // FIXME next movement
       cycle_movement = song.current_movement;
     }
 
-    song.new_cycle = new Cycle(song.playhead, cycle_movement, song.established);
+    song.new_cycle = new Cycle(song.playhead, cycle_movement, song.observed_sun);
   }
 
   inline void undoCycle(Song &song) {
@@ -132,24 +141,24 @@ public:
       most_recent_cycle->immediate_group->undoLastCycle();
       song.cycles.pop_back();
     }
+
+    nextCycle(song, CycleEnd::DISCARD);
   }
 
   inline void cycleForward(Song &song) {
     switch(_love_direction) {
-    case LoveDirection::ESTABLISHED:
+    case LoveDirection::OBSERVED_SUN:
       if (observer.checkIfInSubgroupMode()) {
-        Group* focused_subgroup = observer._subgroups[observer._focused_subgroup_i];
-        bool move_into_subgroup =  1 < focused_subgroup->cycles_in_group.size();
-        if (move_into_subgroup) {
+        if (observer.checkIfCanEnterFocusedSubgroup()) {
           observer.exitSubgroupMode(song);
         }
         nextCycle(song, CycleEnd::DISCARD);
       } else {
-        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+        nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP);
       }
       break;
     case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::JOIN_ESTABLISHED_NO_LOOP);
+      nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP);
       break;
     case LoveDirection::NEW:
       nextCycle(song, CycleEnd::FLOOD);
@@ -159,7 +168,7 @@ public:
 
   inline void cycleObservation(Song &song) {
     switch(_love_direction) {
-    case LoveDirection::ESTABLISHED:
+    case LoveDirection::OBSERVED_SUN:
       if (!observer.checkIfInSubgroupMode()) {
         observer.tryEnterSubgroupMode(song);
       } else {
@@ -169,7 +178,7 @@ public:
       break;
     case LoveDirection::EMERGENCE:
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_ESTABLISHED_LOOP);
+      nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP);
       break;
     }
   }
@@ -177,15 +186,19 @@ public:
   inline void handleLoveDirectionChange(Song &song, LoveDirection new_love_direction) {
     assert(new_love_direction != _love_direction);
 
-    if (new_love_direction == LoveDirection::ESTABLISHED) {
+    if (new_love_direction == LoveDirection::OBSERVED_SUN) {
       if (_equal_period_addition) {
         nextCycle(song, CycleEnd::DISCARD);
       } else {
-        nextCycle(song, CycleEnd::JOIN_ESTABLISHED_LOOP);
+        nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_LOOP);
       }
 
       _equal_period_addition = false;
-    } else if (_love_direction == LoveDirection::ESTABLISHED && new_love_direction == LoveDirection::EMERGENCE) {
+
+      if (observer.checkIfInSubgroupMode()) {
+        observer.exitSubgroupMode(song);
+      }
+    } else if (_love_direction == LoveDirection::OBSERVED_SUN && new_love_direction == LoveDirection::EMERGENCE) {
       nextCycle(song, CycleEnd::DISCARD);
     }
 
@@ -204,7 +217,12 @@ public:
       _last_ext_phase = ext_phase;
     }
 
-    _time_advancer.step(song.playhead, step);
+    if (!song.cycles.empty()) {
+      _time_advancer.step(song.playhead, step);
+    } else {
+      song.playhead = 0.f;
+    }
+
     _time_advancer.step(song.new_cycle->playhead, step);
     if (use_ext_phase) {
       if (song.playhead < 0.f) {
@@ -218,7 +236,9 @@ public:
     for (Cycle* cycle : song.cycles) {
       _time_advancer.step(cycle->playhead, step);
       if (cycle->period < cycle->playhead) {
+        // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
         cycle->playhead -= cycle->period;
+        assert(cycle->playhead < cycle->period);
       } else if (cycle->playhead < 0.f) {
         cycle->playhead += cycle->period;
       }
@@ -236,7 +256,7 @@ public:
     }
 
     love_updater.updateSongCyclesLove(song.cycles);
-    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs);
+    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs, monitor_input);
   }
 };
 

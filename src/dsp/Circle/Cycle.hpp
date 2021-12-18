@@ -1,7 +1,7 @@
 #pragma once
 
 #include "definitions.hpp"
-#include "TimeCapture.hpp"
+#include "SignalCapture.hpp"
 #include "Movement.hpp"
 #include "dsp/Signal.hpp"
 
@@ -26,20 +26,20 @@ struct Cycle {
   Movement movement_at_start;
   Movement* movement;
 
-  TimeCapture *signal_capture;
-  TimeCapture *love_capture;
+  SignalCapture *signal_capture;
+  SignalCapture *love_capture;
 
   bool loop = false;
 
   // TODO option
-  Time max_crossfade_time = 0.1f;
+  Time max_crossfade_time = 0.05f;
   Time fade_in_time = 0.02f;
   Time fade_out_time = 0.07f;
 
   inline Cycle(Time start, Movement* movement, Group *immediate_group) {
     this->capture_start = start;
-    this->signal_capture = new TimeCapture(kokopellivcv::dsp::SignalType::AUDIO);
-    this->love_capture = new TimeCapture(kokopellivcv::dsp::SignalType::PARAM);
+    this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
+    this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->movement_at_start = *movement;
     this->movement = movement;
     this->immediate_group = immediate_group;
@@ -64,12 +64,21 @@ struct Cycle {
         float fade = this->playhead / crossfade_time;
         return rack::crossfade(crossfade_left_sample, signal, fade);
       }
-    } else if (this->period - fade_out_time <= this->playhead) { // fade out
+
+      return signal;
+    }
+
+    // assert(signal_capture->_period < this->period);
+    bool fade_out = this->period - fade_out_time <= this->playhead;
+    if (fade_out) {
       Time crossfade_start_time = this->period - fade_out_time;
       float crossfade_right_sample = 0.f;
       float fade = (this->playhead - crossfade_start_time) / fade_out_time;
       return rack::crossfade(signal, crossfade_right_sample, fade);
-    } else if (this->playhead <= fade_in_time) { // fade in
+    }
+
+    bool fade_in = this->playhead <= fade_in_time;
+    if (fade_in) { // fade in
       float crossfade_left_sample = 0.f;
       float fade = this->playhead / fade_in_time;
       return rack::crossfade(crossfade_left_sample, signal, fade);
@@ -96,7 +105,11 @@ struct Cycle {
       return love_capture->read(love_capture->_period);
     }
 
-    return love_capture->read(this->playhead);
+    float love = love_capture->read(this->playhead);
+    if (1.f < love) {
+      return 1.f;
+    }
+    return love;
   }
 
   inline void write(float in, float love) {

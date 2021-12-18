@@ -60,20 +60,20 @@ struct Group {
 
   inline float getPhase(Time time) {
     if (period != 0.f && beat_period != 0.f) {
-      Time time_in_established = std::fmod((float)time, (float)period);
-      return rack::clamp(time_in_established / period , 0.f, 1.f);
+      Time time_in_observed_sun = std::fmod((float)time, (float)period);
+      return rack::clamp(time_in_observed_sun / period , 0.f, 1.f);
     }
     return 0.f;
   }
 
   inline int convertToBeat(Time time, bool mod) {
     if (period != 0.f && beat_period != 0.f) {
-      float time_in_established = time;
+      float time_in_observed_sun = time;
       if (mod && period < time) {
-        time_in_established = std::fmod((float)time, (float)period);
+        time_in_observed_sun = std::fmod((float)time, (float)period);
       }
 
-      return (int) (time_in_established / beat_period);
+      return (int) (time_in_observed_sun / beat_period);
     }
     return 0;
   }
@@ -107,8 +107,8 @@ struct Group {
 
     Time adjusted_period;
 
-    Time diff = cycle_period - period;
-    if (0.f < diff) {
+    Time period_diff = cycle_period - period;
+    if (0.f < period_diff) {
       Time start_period = period;
       Time new_period = start_period;
       Time percent_over = cycle_period / period;
@@ -158,8 +158,10 @@ struct Group {
     cycle_period = adjusted_period;
   }
 
+  // TODO cycle invariatn
   inline void addNewCycle(Cycle* cycle) {
     Time original_playhead = cycle->playhead;
+    Time original_period = cycle->period;
     if (parent_group != nullptr && cycle->immediate_group != parent_group) {
       parent_group->addNewCycle(cycle);
     }
@@ -174,21 +176,23 @@ struct Group {
         period = cycle->period;
         beat_period = cycle->period;
       } else {
-        Time original_period = cycle->period;
+        Time period_before = cycle->period;
         adjustPeriodsToFit(cycle->period);
-        Time diff = original_period - cycle->period;
-        // preserve offset
-        if (0.f < diff) {
-          cycle->playhead = diff;
-          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", diff, original_period, cycle->period);
+        printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->period, original_period);
+        Time period_diff = period_before - cycle->period;
+        bool period_roundback = 0.f < period_diff;
+        if (period_roundback) {
+          cycle->playhead = period_diff;
+          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->period);
         } else {
           cycle->playhead = original_playhead;
-          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, original_period, cycle->period);
+          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, cycle->period);
         }
       }
     }
 
     printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
+    printf("-- cycle period %Lf, cycle playhead %Lf\n", cycle->period, cycle->playhead);
   }
 
   inline void addExistingCycle(Cycle* cycle) {

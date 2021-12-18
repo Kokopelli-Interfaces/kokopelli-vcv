@@ -64,11 +64,18 @@ public:
     return _subgroup_mode;
   }
 
+  inline bool checkIfCanEnterFocusedSubgroup() {
+    assert(_subgroup_mode);
+    Group* focused_subgroup = _subgroups[_focused_subgroup_i];
+    bool can_enter =  1 < focused_subgroup->cycles_in_group.size();
+    return can_enter;
+  }
+
   inline void tryEnterSubgroupMode(Song &song) {
     assert(!_subgroup_mode);
-    assert(song.established);
+    assert(song.observed_sun);
 
-    _pivot_parent = song.established;
+    _pivot_parent = song.observed_sun;
     if (_pivot_parent->cycles_in_group.empty()) {
       return;
     }
@@ -76,7 +83,7 @@ public:
     _subgroups = breakIntoSubgroups(_pivot_parent);
     _subgroup_mode = true;
     _focused_subgroup_i = _subgroups.size() - 1;
-    song.established = _subgroups[_focused_subgroup_i];
+    song.observed_sun = _subgroups[_focused_subgroup_i];
 
     Group* subgroup = _subgroups[_focused_subgroup_i];
     bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), subgroup) != song.groups.end();
@@ -100,9 +107,9 @@ inline void exitSubgroupMode(Song &song) {
       // TODO is it right?
       subgroup->cycles_in_group[0]->immediate_group = subgroup;
     }
-    song.established = subgroup;
+    song.observed_sun = subgroup;
   } else {
-    song.established = _pivot_parent;
+    song.observed_sun = _pivot_parent;
   }
 
   for (Group* group: _subgroups) {
@@ -150,7 +157,7 @@ inline void exitSubgroupMode(Song &song) {
       song.groups.push_back(subgroup);
     }
 
-    song.established = subgroup;
+    song.observed_sun = subgroup;
   }
 
   inline void ascend(Song &song) {
@@ -158,9 +165,11 @@ inline void exitSubgroupMode(Song &song) {
       exitSubgroupMode(song);
     }
 
-    if (song.established->parent_group) {
-      song.established = song.established->parent_group;
+    if (song.observed_sun->parent_group) {
+      song.observed_sun = song.observed_sun->parent_group;
     }
+
+    song.clearEmptyGroups();
   }
 };
 

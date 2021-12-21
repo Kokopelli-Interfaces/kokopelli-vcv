@@ -18,10 +18,10 @@ namespace circle {
 
 struct Engine {
   Inputs inputs;
+  Options options;
 
   Song _song;
   Gko _gko;
-  Observer _observer;
 
   // FIXME not set
   kokopellivcv::dsp::SignalType _signal_type = kokopellivcv::dsp::SignalType::AUDIO;

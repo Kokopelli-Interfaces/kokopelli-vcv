@@ -4,16 +4,12 @@ using namespace kokopellivcv::dsp::circle;
 using namespace kokopellivcv::dsp;
 
 void Engine::step() {
-  _gko.advance(_song, inputs);
+  _gko.advance(_song, inputs, options);
 }
 
 int Engine::getMostRecentCycleLength() {
   Cycle* recent_cycle = _song.cycles[_song.cycles.size()-1];
   return recent_cycle->immediate_group->convertToBeat(recent_cycle->period, false);
-}
-
-void Engine::toggleTuneToFrequencyOfObservedSun() {
-  _gko.tune_to_frequency_of_observed_sun = !_gko.tune_to_frequency_of_observed_sun;
 }
 
 void Engine::cycleForward() {

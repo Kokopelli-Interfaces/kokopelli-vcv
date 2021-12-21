@@ -6,7 +6,7 @@ Circle::Circle() {
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Rotate Observer");
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Sun <-(emergence)-> Moon)");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
   configInput(WOMB_INPUT, "Moon (Creative Background/Yin/Orchestra/Feminine/Womb of Universe)");
   configOutput(OBSERVER_OUTPUT, "Observer (Soul/Consciousness)");
@@ -117,13 +117,10 @@ void Circle::modulateChannel(int channel_i) {
   love = pow(love, 2);
   e->inputs.love = love;
 
+  e->options = _options;
+
   // TODO AION
   // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
-
-  e->_gko.include_moon_in_sun_output = _options.include_moon_in_sun_output;
-  e->_gko.include_moon_in_observer_output = _options.include_moon_in_observer_output;
-
-  // e->_signal_type = _from_signal->signal_type;
 }
 
 int Circle::channels() {
@@ -247,6 +244,10 @@ void Circle::postProcessAlways(const ProcessArgs &args) {
 void Circle::addChannel(int channel_i) {
   _engines[channel_i] = new kokopellivcv::dsp::circle::Engine();
   _engines[channel_i]->_gko.sample_time = _sample_time;
+
+  for (int c = 0; c < channels(); c++) {
+    _engines[c]->channelStateReset();
+  }
 }
 
 void Circle::removeChannel(int channel_i) {

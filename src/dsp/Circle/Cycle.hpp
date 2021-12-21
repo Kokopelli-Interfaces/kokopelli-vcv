@@ -51,7 +51,7 @@ struct Cycle {
   }
 
   inline float niceFade(float signal) {
-    bool loop_fade = this->period <= signal_capture->_period;
+    bool loop_fade = this->period < signal_capture->_period;
     if (loop_fade) {
       // return signal;
       Time crossfade_time = signal_capture->_period - this->period;

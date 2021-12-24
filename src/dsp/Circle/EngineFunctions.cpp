@@ -24,6 +24,7 @@ void Engine::cycleObservation() {
 void Engine::ascend() {
   _gko.observer.ascend(_song);
   _gko.nextCycle(_song, CycleEnd::DISCARD);
+  _gko._discard_cycle_at_next_love_return = true;
 }
 
 void Engine::undo() {

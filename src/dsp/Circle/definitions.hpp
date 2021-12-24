@@ -13,7 +13,6 @@ enum CycleEnd {
   FLOOD
 };
 
-// another way to say: ORDER, LIFE, CHAOS
 enum LoveDirection { OBSERVED_SUN, EMERGENCE, NEW };
 
 typedef long double Time;

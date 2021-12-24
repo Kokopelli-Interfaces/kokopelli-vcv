@@ -41,7 +41,7 @@ public:
   LoveUpdater love_updater;
   OutputUpdater output_updater;
 
-  bool _equal_period_addition = false;
+  bool _discard_cycle_at_next_love_return = false;
 
   float _last_ext_phase = 0.f;
   TimeAdvancer _time_advancer;
@@ -86,7 +86,7 @@ public:
       break;
     case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
-      _equal_period_addition = true;
+      _discard_cycle_at_next_love_return = true;
       if (ended_cycle->immediate_group->period != 0.f) {
         ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
       }
@@ -186,13 +186,12 @@ public:
     assert(new_love_direction != _love_direction);
 
     if (new_love_direction == LoveDirection::OBSERVED_SUN) {
-      if (_equal_period_addition) {
+      if (_discard_cycle_at_next_love_return) {
         nextCycle(song, CycleEnd::DISCARD);
+        _discard_cycle_at_next_love_return = false;
       } else {
         nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_LOOP);
       }
-
-      _equal_period_addition = false;
 
       if (observer.checkIfInSubgroupMode()) {
         observer.exitSubgroupMode(song);

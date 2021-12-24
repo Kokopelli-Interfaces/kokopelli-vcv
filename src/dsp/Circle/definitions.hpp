@@ -45,5 +45,5 @@ struct Options {
   float love_resolution = 1000.f;
   float delay_shiftback = 0.f;
   bool include_moon_in_sun_output = true;
-  bool include_unloved_moon_in_sun_output = false;
+  bool include_unloved_moon_in_sun_output = true;
 };

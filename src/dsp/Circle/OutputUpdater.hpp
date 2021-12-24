@@ -50,8 +50,6 @@ public:
 
       out.sun = kokopellivcv::dsp::sum(out.sun, add, signal_type);
     }
-
-    out.observed_sun = kokopellivcv::dsp::sum(out.sun, inputs.in, signal_type);
   }
 };
 

@@ -16,7 +16,6 @@ void Engine::cycleForward() {
   _gko.cycleForward(_song);
 }
 
-// TODO
 void Engine::cycleObservation() {
   _gko.cycleObservation(_song);
 }

@@ -109,10 +109,7 @@ public:
 
       // works better without
 
-      // if (observer.checkIfInSubgroupMode()) {
-      //   observer.exitSubgroupMode(song);
-      // }
-      // song.clearEmptyGroups();
+      _discard_cycle_at_next_love_return = true;
 
       delete ended_cycle;
       break;

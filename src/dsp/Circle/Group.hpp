@@ -20,8 +20,8 @@ struct Group {
 
   std::vector<Time> period_history;
 
-  Time period = 0.f;
-  Time beat_period = 0.f;
+  Time period = 0.0;
+  Time beat_period = 0.0;
 
   inline void undoLastCycleWithoutUndoingParent() {
     assert(cycles_in_group.size() == period_history.size());
@@ -51,7 +51,7 @@ struct Group {
   }
 
   inline float getBeatPhase(Time time) {
-    if (period != 0.f && beat_period != 0.f) {
+    if (period != 0.0 && beat_period != 0.0) {
       Time time_in_beat = std::fmod((float)time, (float)beat_period);
       return rack::clamp(time_in_beat / beat_period , 0.f, 1.f);
     }
@@ -59,7 +59,7 @@ struct Group {
   }
 
   inline float getPhase(Time time) {
-    if (period != 0.f && beat_period != 0.f) {
+    if (period != 0.0 && beat_period != 0.0) {
       Time time_in_observed_sun = std::fmod((float)time, (float)period);
       return rack::clamp(time_in_observed_sun / period , 0.f, 1.f);
     }

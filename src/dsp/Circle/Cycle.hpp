@@ -4,6 +4,7 @@
 #include "SignalCapture.hpp"
 #include "Movement.hpp"
 #include "dsp/Signal.hpp"
+// #include "dsp/Fader.hpp"
 
 #include <numeric> // std::iota
 
@@ -14,7 +15,11 @@ namespace circle {
 struct Group;
 
 struct Cycle {
-  Group* immediate_group;
+  // Fader *fader;
+
+  Group *immediate_group;
+
+  bool active = true;
 
   Time period = 0.f;
   Time capture_start;

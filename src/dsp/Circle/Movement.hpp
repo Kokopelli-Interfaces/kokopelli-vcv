@@ -11,9 +11,7 @@ struct Cycle;
 
 // TODO renam eto grup???
 struct Movement {
-  Time start = 0.f; // FIXME
-
-  char group = 'A';
+  char timeline = '*';
   int group_movement_n = 1;
 
   std::vector<Cycle*> cycles_in_movement;
@@ -22,23 +20,16 @@ struct Movement {
   Movement *prev = nullptr;
   Movement *next = nullptr;
 
-  // TODO
-  // float freq;
+  // inline float getMovementPhase(Time song_time) {
+  //   float movement_phase = 1.f;
+  //   if (this->next) {
+  //     Time relative_time = song_time - this->start;
+  //     Time period = this->next->start - this->start;
+  //     movement_phase = relative_time / period;
+  //   }
 
-  Movement() {
-    return;
-  }
-
-  inline float getMovementPhase(Time song_time) {
-    float movement_phase = 1.f;
-    if (this->next) {
-      Time relative_time = song_time - this->start;
-      Time period = this->next->start - this->start;
-      movement_phase = relative_time / period;
-    }
-
-    return rack::clamp(movement_phase, 0.f, 1.f);
-  }
+  //   return rack::clamp(movement_phase, 0.f, 1.f);
+  // }
 
   // inline static Movement* createNextMovementWithNewGroup(Movement* movement, unsigned int movement_period) {
   //   Movement* group_movement = createNextMovement(movement, start_beat);

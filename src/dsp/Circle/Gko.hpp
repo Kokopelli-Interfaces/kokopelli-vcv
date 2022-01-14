@@ -22,6 +22,9 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
+/**
+   The advancer of the song. Gko - 'the one that emanates the universe'.
+*/
 class Gko {
 public:
   bool use_ext_phase = false;
@@ -66,7 +69,7 @@ public:
 
     // may happen when reverse recording
     ended_cycle->finishWrite();
-    if (ended_cycle->period == 0.0) {
+    if (ended_cycle->period == 0.f) {
       delete ended_cycle;
       song.new_cycle = new Cycle(song.playhead, song.current_movement, song.observed_sun);
       return;
@@ -75,13 +78,6 @@ public:
     switch (cycle_end) {
     case CycleEnd::DISCARD:
       song.clearEmptyGroups();
-      delete ended_cycle;
-      break;
-    case CycleEnd::NEXT_MOVEMENT_VIA_SHIFT:
-      // ended_cycle->loop = false;
-      // song.cycles.push_back(ended_cycle);
-      // ended_cycle->immediate_group->addNewCycle(ended_cycle);
-      conductor.nextMovementViaShift(song);
       delete ended_cycle;
       break;
     case CycleEnd::JOIN_OBSERVED_SUN_LOOP:
@@ -95,6 +91,13 @@ public:
         ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
       }
       addCycle(song, ended_cycle);
+      break;
+    case CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP:
+      // FIXME
+      delete ended_cycle;
+      // ended_cycle->loop = false;
+      // song.cycles.push_back(ended_cycle);
+      // ended_cycle->immediate_group->addNewCycle(ended_cycle);
       break;
     case CycleEnd::FLOOD:
       for (int i = song.cycles.size()-1; 0 <= i; i--) {
@@ -147,11 +150,11 @@ public:
         }
         nextCycle(song, CycleEnd::DISCARD);
       } else {
-        nextCycle(song, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
+        nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP);
       }
       break;
     case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::DISCARD);
+      nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_NO_LOOP);
       break;
     case LoveDirection::NEW:
       nextCycle(song, CycleEnd::FLOOD);
@@ -249,8 +252,6 @@ public:
 
     love_updater.updateSongCyclesLove(song.cycles);
     output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs, options);
-
-    conductor.conduct(song);
   }
 };
 

@@ -25,10 +25,10 @@ struct CircleTextBox : TextBox {
   void step() override {
     TextBox::step();
 		if(_module) {
-      if (_module->channels() == 0) {
+      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
+      if (!e) {
         return;
       }
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
       update(e);
     }
   }
@@ -51,8 +51,10 @@ struct ObservedSunDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
-    backgroundColor.a = phase;
+    if (e) {
+      float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+      backgroundColor.a = phase;
+    }
 
     if (e->_gko.observer.checkIfInSubgroupMode()) {
       // textColor = colors::LOOK_BACK_LAYER;

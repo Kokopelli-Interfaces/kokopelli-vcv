@@ -24,10 +24,10 @@ struct Song {
 
   Cycle *new_cycle = nullptr;
 
-  Time playhead = 0.0;
+  Time playhead = 0.f;
 
   Movement *current_movement = nullptr;
-  Movement *start_movement = nullptr;
+  Movement* start_movement = nullptr;
 
   Outputs out;
 
@@ -36,9 +36,8 @@ struct Song {
     this->current_movement->group_start_movement = this->current_movement;
     this->start_movement = this->current_movement;
     Time start = 0.f;
-    Group *first_group = new Group();
-    this->groups.push_back(first_group);
-    this->observed_sun = first_group;
+    this->groups.push_back(new Group());
+    this->observed_sun = groups[0];
     this->new_cycle = new Cycle(start, this->current_movement, this->observed_sun);
   }
 

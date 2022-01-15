@@ -8,11 +8,11 @@ Circle::Circle() {
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 
-  configInput(WOMB_INPUT, "Moon (Creative Background/Yin/Orchestra/Feminine/Womb of Universe)");
+  configInput(WOMB_INPUT, "Moon (Creative Background/Yin/Orchestra/Feminine)");
   configOutput(OBSERVER_OUTPUT, "Observer (Soul/Consciousness)");
   configOutput(OBSERVER_PHASE_OUTPUT, "Observer Phase");
   configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Beat Phase");
-  configOutput(SUN, "Sun (Emernet/Yang/Song/Masculine/Universe)");
+  configOutput(SUN, "Sun (Emernet/Yang/Song/Masculine)");
 
   configBypass(WOMB_INPUT, SUN);
 

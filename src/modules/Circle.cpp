@@ -22,13 +22,22 @@ Circle::Circle() {
 
   _cycle_forward_button.param = &params[CYCLE_PARAM];
   _cycle_divinity_button.param = &params[DIVINITY_PARAM];
+
+  CIRCLES.push_back(this);
+  printf("CIRCLES size is %ld\n", CIRCLES.size());
 }
 
 Circle::~Circle() {
+  // FIXME memory SPILLAGE
   delete _light_blinker;
+
+  for (unsigned int i = 0; i < CIRCLES.size(); i++) {
+    if (CIRCLES[i] == this) {
+      CIRCLES.erase(CIRCLES.begin()+i);
+    }
+  }
 }
 
-// FIXME update gko phase oscillato
 void Circle::sampleRateChange() {
   _sample_time = APP->engine->getSampleTime();
 }
@@ -256,3 +265,5 @@ void Circle::removeChannel(int channel_i) {
 }
 
 Model *modelCircle = rack::createModel<Circle, CircleWidget>("KokopelliInterfaces-Circle");
+
+

@@ -32,6 +32,7 @@ struct Engine {
   void cycleObservation();
   void ascend();
   void cycleForward();
+  void cycleBackward();
   void undo();
 
   void toggleTuneToFrequencyOfObservedSun();

@@ -250,7 +250,6 @@ struct CircleWidget : ModuleWidget {
 
     // OptionsMenuItem::addToMenu(love_resolution, menu);
 
-
     // TODO
     // menu->addChild(new Slider());
   }

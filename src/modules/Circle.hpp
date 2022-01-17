@@ -7,6 +7,7 @@
 #include "dsp/LightBlinker.hpp"
 #include "widgets.hpp"
 #include "util/colors.hpp"
+#include "modules/CircleShared.hpp"
 
 #include <math.h>
 
@@ -78,4 +79,3 @@ private:
 };
 
 } // namespace kokopellivcv
-

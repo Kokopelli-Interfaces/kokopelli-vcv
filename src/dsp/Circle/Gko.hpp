@@ -138,6 +138,27 @@ public:
     nextCycle(song, CycleEnd::DISCARD);
   }
 
+  inline void cycleBackward(Song &song) {
+    switch(_love_direction) {
+    case LoveDirection::OBSERVED_SUN:
+      if (observer.checkIfInSubgroupMode()) {
+        if (observer.checkIfCanEnterFocusedSubgroup()) {
+          observer.exitSubgroupMode(song);
+        }
+        nextCycle(song, CycleEnd::DISCARD);
+      } else {
+        nextCycle(song, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
+      }
+      break;
+    case LoveDirection::EMERGENCE:
+      nextCycle(song, CycleEnd::DISCARD);
+      break;
+    case LoveDirection::NEW:
+      nextCycle(song, CycleEnd::FLOOD);
+      break;
+    }
+  }
+
   inline void cycleForward(Song &song) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:

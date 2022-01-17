@@ -47,6 +47,66 @@ struct AionTextBox : TextBox {
 	}
 };
 
+// struct SongDisplay : AionTextBox {
+//   using AionTextBox::TimeWheelValueDisplay;
+//   SongDisplay(Seasons *m) : TimeWheelValueDisplay(m) {
+//     // FIXME
+//     // textOffset = Vec(box.size.x * 0.5f, 0.f);
+//   }
+
+//   void update(kokopellivcv::dsp::circle::Engine* e) override {
+//     std::string s = e->_song.name;
+//     AionTextBox::setText(s);
+//   }
+// };
+
+// struct PrevMovementDisplay : AionTextBox {
+//   using AionTextBox::TimeWheelValueDisplay;
+//   PrevMovementDisplay(Seasons *m) : TimeWheelValueDisplay(m) {
+//     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
+//   }
+
+//   void update(kokopellivcv::dsp::circle::Engine* e) override {
+//     std::string s;
+//     if (e->_song.current_movement->prev) {
+//       s = string::f("%c%d", e->_song.current_movement->prev->group, e->_song.current_movement->prev->group_movement_n);
+//     } else {
+//       s = "--";
+//     }
+//     AionTextBox::setText(s);
+//   }
+// };
+
+
+// struct CurrentMovementDisplay : AionTextBox {
+//   using AionTextBox::TimeWheelValueDisplay;
+//   CurrentMovementDisplay(Seasons *m) : TimeWheelValueDisplay(m) {
+//     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
+//   }
+
+//   void update(kokopellivcv::dsp::circle::Engine* e) override {
+//     std::string s = string::f("%c%d", e->_song.current_movement->group, e->_song.current_movement->group_movement_n);
+//     AionTextBox::setText(s);
+//   }
+// };
+
+// struct NextMovementDisplay : AionTextBox {
+//   using AionTextBox::TimeWheelValueDisplay;
+//   NextMovementDisplay(Seasons *m) : TimeWheelValueDisplay(m) {
+//     // textOffset = Vec(box.size.x * 0.4f, box.size.y * 0.70f);
+//   }
+
+//   void update(kokopellivcv::dsp::circle::Engine* e) override {
+//     std::string s;
+//     if (e->_song.current_movement->next) {
+//       s = string::f("%c%d", e->_song.current_movement->next->group, e->_song.current_movement->next->group_movement_n);
+//     } else {
+//       s = "--";
+//     }
+//     AionTextBox::setText(s);
+//   }
+// };
+
 
 struct AionWidget : ModuleWidget {
   const int hp = 4;
@@ -60,6 +120,11 @@ struct AionWidget : ModuleWidget {
   AionTextBox *_prev_movement_box;
   AionTextBox *_prev_prev_movement_box;
 
+  // SongDisplay *song_display;
+  // PrevMovementDisplay *prev_movement_display;
+  // CurrentMovementDisplay *current_movement_display;
+  // NextMovementDisplay *next_movement_display;
+
 	AionWidget(Aion* module) {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/Aion.svg")));
@@ -69,7 +134,8 @@ struct AionWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(8.183, 41.077)), module, Aion::PREV_MOVEMENT_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(8.183, 41.077)), module, Aion::CYCLE_BACKWARD_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(9.648, 42.541)), module, Aion::CYCLE_BACKWARD_LIGHT));
 
     auto top_box_size = mm2px(Vec(19.472, 4.312));
     _aion_box = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 14.862)), top_box_size);

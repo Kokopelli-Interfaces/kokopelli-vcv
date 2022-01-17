@@ -12,6 +12,11 @@ int Engine::getMostRecentCycleLength() {
   return recent_cycle->immediate_group->convertToBeat(recent_cycle->period, false);
 }
 
+void Engine::cycleBackward() {
+  printf("Cycling backward\n");
+  _gko.cycleBackward(_song);
+}
+
 void Engine::cycleForward() {
   _gko.cycleForward(_song);
 }

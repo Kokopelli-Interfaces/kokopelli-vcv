@@ -20,14 +20,14 @@ struct Movement {
   Movement *prev = nullptr;
   Movement *next = nullptr;
 
+  // TODO
   // inline float getMovementPhase(Time song_time) {
-  //   float movement_phase = 1.f;
+  //   float movement_phase = 0.f;
   //   if (this->next) {
   //     Time relative_time = song_time - this->start;
   //     Time period = this->next->start - this->start;
   //     movement_phase = relative_time / period;
   //   }
-
   //   return rack::clamp(movement_phase, 0.f, 1.f);
   // }
 

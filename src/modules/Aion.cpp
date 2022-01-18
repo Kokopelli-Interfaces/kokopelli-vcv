@@ -31,6 +31,7 @@ void Aion::processButtons(const ProcessArgs &args) {
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       _light_blinker->blinkLight(CYCLE_BACKWARD_LIGHT, 0.f); // TODO blink extra extra
+      _connected_circle->_engines[c]->toggleMovementProgression();
       break;
     }
   }

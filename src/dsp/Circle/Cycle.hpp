@@ -4,7 +4,7 @@
 #include "SignalCapture.hpp"
 #include "Movement.hpp"
 #include "dsp/Signal.hpp"
-// #include "dsp/Fader.hpp"
+#include "dsp/Fader.hpp"
 
 #include <numeric> // std::iota
 
@@ -15,7 +15,7 @@ namespace circle {
 struct Group;
 
 struct Cycle {
-  // Fader *fader;
+  kokopellivcv::dsp::Fader fader;
 
   Group *immediate_group;
 
@@ -102,7 +102,8 @@ struct Cycle {
     }
 
     float signal = signal_capture->read(this->playhead);
-    return niceFade(signal) * this->love;
+    signal = niceFade(signal) * this->love;
+    return fader.step(signal);
   }
 
   inline float readLove() {

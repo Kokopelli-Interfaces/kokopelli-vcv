@@ -6,14 +6,19 @@ namespace kokopellivcv {
 namespace dsp {
 
 struct Fader {
+  float volume = 1.f;
+
+  // FIXME
   inline void fadeOut() {
+    volume = 0.f;
   }
 
   inline void fadeIn() {
+    volume = 1.f;
   }
 
-  inline float step(Time time, float signal) {
-    return signal;
+  inline float step(float signal) {
+    return signal * volume;
   }
 };
 

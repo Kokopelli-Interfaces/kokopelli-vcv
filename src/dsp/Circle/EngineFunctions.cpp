@@ -3,6 +3,10 @@
 using namespace kokopellivcv::dsp::circle;
 using namespace kokopellivcv::dsp;
 
+void Engine::toggleMovementProgression() {
+  _gko.conductor.loop_movement = !_gko.conductor.loop_movement;
+}
+
 void Engine::step() {
   _gko.advance(_song, inputs, options);
 }

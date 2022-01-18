@@ -81,7 +81,7 @@ public:
       // ended_cycle->loop = false;
       // song.cycles.push_back(ended_cycle);
       // ended_cycle->immediate_group->addNewCycle(ended_cycle);
-      conductor.nextMovementViaShift(song);
+      conductor.nextMovement(song);
       delete ended_cycle;
       break;
     case CycleEnd::JOIN_OBSERVED_SUN_LOOP:

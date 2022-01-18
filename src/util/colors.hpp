@@ -13,6 +13,7 @@ namespace colors {
 
   // static const NVGcolor SUNLIGHT = nvgRGB(0xe6, 0xa5, 0x68);
   // static const NVGcolor SOFT_SUNLIGHT = nvgRGB(0xd6, 0x91, 0x72); // v != 1
+  static const NVGcolor DIM_SUNLIGHT = nvgRGB(0xbb, 0x59, 0x2c);
   static const NVGcolor SOFT_SUNLIGHT = nvgRGB(0xff, 0xad, 0x88);
 
   // static const NVGcolor SOFT_SUNLIGHT_BRIGHT = nvgRGB(0xff, 0x6a, 0x26); //hmm
@@ -40,6 +41,7 @@ namespace colors {
 
   // default theme colors
 
+  static const NVGcolor DIM_SUN = DIM_SUNLIGHT;
   static const NVGcolor OBSERVED_SUN = SOFT_SUNLIGHT;
   static const NVGcolor SUN = STRONG_SUNLIGHT;
   static const NVGcolor EMERGENCE = CYAN;

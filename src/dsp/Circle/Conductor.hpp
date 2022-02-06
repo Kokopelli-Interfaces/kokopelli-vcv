@@ -18,7 +18,7 @@ struct Conductor {
   }
 
   bool endOfMovement(Song &song) {
-    song.current_movement->getMovementPhase();
+    // song.current_movement->getMovementPhase();
     return false;
   }
 

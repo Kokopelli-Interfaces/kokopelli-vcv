@@ -60,6 +60,14 @@ struct AionTextBox : TextBox {
 	}
 };
 
+struct AlbumDisplay : AionTextBox {
+  using AionTextBox::AionTextBox;
+
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
+    AionTextBox::setText("My Album");
+  }
+};
+
 struct SongDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
@@ -68,7 +76,6 @@ struct SongDisplay : AionTextBox {
     AionTextBox::setText(s);
   }
 };
-
 
 struct PrevMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
@@ -116,7 +123,7 @@ struct NextMovementDisplay : AionTextBox {
 struct AionWidget : ModuleWidget {
   const int hp = 4;
 
-  AionTextBox *_aion_display;
+  AlbumDisplay *_album_display;
   SongDisplay *_song_display;
 
   AionTextBox *_next_next_movement_display;
@@ -139,11 +146,11 @@ struct AionWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(8.183, 41.077)), module, Aion::CYCLE_BACKWARD_PARAM));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(9.648, 42.541)), module, Aion::CYCLE_BACKWARD_LIGHT));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(8.183, 91.694)), module, Aion::CYCLE_BACKWARD_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(9.648, 93.157)), module, Aion::CYCLE_BACKWARD_LIGHT));
 
     auto top_display_size = mm2px(Vec(19.472, 4.312));
-    _aion_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 14.862)), top_display_size);
+    _album_display = new AlbumDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 14.862)), top_display_size);
     _song_display = new SongDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 20.550)), top_display_size);
 
     auto movement_display_size = mm2px(Vec(11.735, 4.327));
@@ -159,7 +166,7 @@ struct AionWidget : ModuleWidget {
 
     _prev_prev_movement_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 83.562)), movement_display_size);
 
-    addChild(_aion_display);
+    addChild(_album_display);
     addChild(_song_display);
     addChild(_next_next_movement_display);
     addChild(_next_movement_display);

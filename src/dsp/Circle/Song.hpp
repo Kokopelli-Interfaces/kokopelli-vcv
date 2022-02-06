@@ -13,7 +13,7 @@ namespace dsp {
 namespace circle {
 
 struct Song {
-  std::string name = "my song";
+  std::string name = "My Song";
 
   std::vector<Group*> groups;
   Group* observed_sun = nullptr;

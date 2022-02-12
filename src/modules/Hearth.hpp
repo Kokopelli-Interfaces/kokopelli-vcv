@@ -2,20 +2,20 @@
 
 #include "kokopellivcv.hpp"
 #include "menu.hpp"
-#include "dsp/Circle/Engine.hpp"
+#include "dsp/Hearth/Engine.hpp"
 #include "dsp/LongPressButton.hpp"
 #include "dsp/LightBlinker.hpp"
 #include "widgets.hpp"
 #include "util/colors.hpp"
-#include "modules/CircleShared.hpp"
+#include "modules/HearthShared.hpp"
 
 #include <math.h>
 
-extern Model *modelCircle;
+extern Model *modelHearth;
 
 namespace kokopellivcv {
 
-struct Circle : KokopelliVcvModule {
+struct Hearth : KokopelliVcvModule {
   enum ParamIds {
 		CYCLE_PARAM,
 		DIVINITY_PARAM,
@@ -59,8 +59,8 @@ struct Circle : KokopelliVcvModule {
   float _love_resolution = 1000.f;
   float _delay_shiftback = 0.f;
 
-  Circle();
-  ~Circle();
+  Hearth();
+  ~Hearth();
 
   void sampleRateChange() override;
   int channels() override;

@@ -4,7 +4,7 @@
 
 namespace kokopellivcv {
 
-struct Circle;
-extern std::vector<Circle*> CIRCLES;
+struct Hearth;
+extern std::vector<Hearth*> CIRCLES;
 
 }; // namespace kokopellivcv

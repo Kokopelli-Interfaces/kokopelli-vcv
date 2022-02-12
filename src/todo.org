@@ -5,3 +5,4 @@
 ** create circle member add-ons
 ** create AION add-on
 ** get movements done
+** add circular buffer for crossfade prepend on new layer

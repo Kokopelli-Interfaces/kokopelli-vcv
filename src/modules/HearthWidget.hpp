@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Circle.hpp"
+#include "Hearth.hpp"
 #include "util/colors.hpp"
 
 namespace kokopellivcv {
 
-struct CircleTextBox : TextBox {
-	Circle *_module = nullptr;
+struct HearthTextBox : TextBox {
+	Hearth *_module = nullptr;
 	int _previous_displayed_value = -1;
 
-	CircleTextBox(Circle *m, NVGcolor background_color, NVGcolor text_color, rack::math::Vec pos, rack::math::Vec size) : TextBox() {
+	HearthTextBox(Hearth *m, NVGcolor background_color, NVGcolor text_color, rack::math::Vec pos, rack::math::Vec size) : TextBox() {
     _module = m;
     fontPath = "res/fonts/Nunito-Bold.ttf";
     font_size = 12;
@@ -47,8 +47,8 @@ struct CircleTextBox : TextBox {
 	}
 };
 
-struct ObservedSunDisplay : CircleTextBox {
-  using CircleTextBox::CircleTextBox;
+struct ObservedSunDisplay : HearthTextBox {
+  using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
@@ -69,37 +69,37 @@ struct ObservedSunDisplay : CircleTextBox {
       }
 
       std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
-      CircleTextBox::setText(s);
-      // CircleTextBox::setText(e->_song.observed_sun->id);
+      HearthTextBox::setText(s);
+      // HearthTextBox::setText(e->_song.observed_sun->id);
     } else {
       textColor = colors::OBSERVED_SUN;
       // std::string s = string::f("%s", e->_song.observed_sun->id);
-      // CircleTextBox::setText(s);
-      CircleTextBox::setText(e->_song.observed_sun->id);
+      // HearthTextBox::setText(s);
+      HearthTextBox::setText(e->_song.observed_sun->id);
     }
   }
 };
 
-struct ObservedSunBeatDisplay : CircleTextBox {
-  using CircleTextBox::CircleTextBox;
+struct ObservedSunBeatDisplay : HearthTextBox {
+  using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     int beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.playhead, true);
-    CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
+    HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
 	}
 };
 
-struct TotalObservedSunBeatDisplay : CircleTextBox {
-  using CircleTextBox::CircleTextBox;
+struct TotalObservedSunBeatDisplay : HearthTextBox {
+  using HearthTextBox::HearthTextBox;
 
   // FIXME
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    CircleTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
+    HearthTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
 	}
 };
 
-struct WombDisplay : CircleTextBox {
-  using CircleTextBox::CircleTextBox;
+struct WombDisplay : HearthTextBox {
+  using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     float phase = 0.f;
@@ -110,54 +110,54 @@ struct WombDisplay : CircleTextBox {
 
     int womb_display = e->_song.observed_sun->cycles_in_group.size() + 1;
     std::string s = string::f("%d", womb_display);
-    CircleTextBox::setText(s);
+    HearthTextBox::setText(s);
 	}
 };
 
-struct WombBeatDisplay : CircleTextBox {
-  using CircleTextBox::CircleTextBox;
+struct WombBeatDisplay : HearthTextBox {
+  using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e->_gko.tune_to_frequency_of_observed_sun) {
       int beat_in_observed_sun;
       beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
 
-      CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
+      HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
     } else {
-      CircleTextBox::setDisplayValue((int)e->_song.new_cycle->playhead);
+      HearthTextBox::setDisplayValue((int)e->_song.new_cycle->playhead);
     }
 	}
 };
 
-struct TotalWombBeatDisplay : CircleTextBox {
-  using CircleTextBox::CircleTextBox;
+struct TotalWombBeatDisplay : HearthTextBox {
+  using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e->_song.cycles.size() == 0) {
       textColor = colors::WOMB;
-      CircleTextBox::setText("--");
-      CircleTextBox::_previous_displayed_value = -1;
+      HearthTextBox::setText("--");
+      HearthTextBox::_previous_displayed_value = -1;
       return;
     }
 
     // option
     if (e->_gko.observer.checkIfInSubgroupMode()) {
-      CircleTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
+      HearthTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;
-      CircleTextBox::setDisplayValue(e->getMostRecentCycleLength());
+      HearthTextBox::setDisplayValue(e->getMostRecentCycleLength());
       // if (e->_song.observed_sun->cycles_in_group.size() == 0) {
-      //   CircleTextBox::setDisplayValue(1);
+      //   HearthTextBox::setDisplayValue(1);
       // } else {
       //   Time adjusted_period = e->_song.observed_sun->getAdjustedPeriod(e->_song.new_cycle->playhead);
       //   int n_beats = e->_song.observed_sun->convertToBeat(adjusted_period, false);
-      //   CircleTextBox::setDisplayValue(n_beats);
+      //   HearthTextBox::setDisplayValue(n_beats);
       // }
     }
 	}
 };
 
-struct CircleWidget : ModuleWidget {
+struct HearthWidget : ModuleWidget {
   const int hp = 6;
 
   ObservedSunDisplay *observed_sun_display;
@@ -169,31 +169,31 @@ struct CircleWidget : ModuleWidget {
   ObservedSunBeatDisplay *group_beat_display;
   TotalObservedSunBeatDisplay *total_observed_sun_beats_display;
 
-  CircleWidget(Circle *module) {
+  HearthWidget(Hearth *module) {
     setModule(module);
     box.size = Vec(RACK_GRID_WIDTH * hp, RACK_GRID_HEIGHT);
-    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Circle.svg")));
+    setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Hearth.svg")));
 
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addOutput(createOutput<ObservedSunPort>(mm2px(Vec(2.276, 16.435)), module, Circle::OBSERVER_OUTPUT));
-		addOutput(createOutput<SunPort>(mm2px(Vec(13.65, 15.365)), module, Circle::SUN));
-		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Circle::WOMB_INPUT));
+		addOutput(createOutput<ObservedSunPort>(mm2px(Vec(2.276, 16.435)), module, Hearth::OBSERVER_OUTPUT));
+		addOutput(createOutput<SunPort>(mm2px(Vec(13.65, 15.365)), module, Hearth::SUN));
+		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Hearth::WOMB_INPUT));
 
-		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Circle::OBSERVER_BEAT_PHASE_OUTPUT));
-		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.719)), module, Circle::AUDITION_PARAM));
-		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Circle::OBSERVER_PHASE_OUTPUT));
+		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Hearth::OBSERVER_BEAT_PHASE_OUTPUT));
+		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.719)), module, Hearth::AUDITION_PARAM));
+		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Hearth::OBSERVER_PHASE_OUTPUT));
 
-		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Circle::LOVE_PARAM));
+		addParam(createParam<LoveKnob>(mm2px(Vec(10.415, 72.903)), module, Hearth::LOVE_PARAM));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.127, 80.017)), module, Circle::DIVINITY_PARAM));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 81.481)), module, Circle::DIVINITY_LIGHT));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.127, 80.017)), module, Hearth::DIVINITY_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 81.481)), module, Hearth::DIVINITY_LIGHT));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 80.017)), module, Circle::CYCLE_PARAM));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Circle::CYCLE_LIGHT));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 80.017)), module, Hearth::CYCLE_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 81.481)), module, Hearth::CYCLE_LIGHT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
 		observed_sun_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_SUN, mm2px(Vec(1.236, 40.865)), focused_display_size);
@@ -214,7 +214,7 @@ struct CircleWidget : ModuleWidget {
   }
 
 	void appendContextMenu(rack::Menu* menu) override {
-		auto m = dynamic_cast<Circle*>(module);
+		auto m = dynamic_cast<Hearth*>(module);
 		assert(m);
 
     menu->addChild(new MenuLabel());

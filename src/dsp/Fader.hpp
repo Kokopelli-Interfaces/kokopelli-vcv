@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dsp/Circle/definitions.hpp"
+#include "dsp/Hearth/definitions.hpp"
 
 namespace kokopellivcv {
 namespace dsp {

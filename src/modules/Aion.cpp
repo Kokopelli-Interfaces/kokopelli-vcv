@@ -37,9 +37,9 @@ void Aion::processButtons(const ProcessArgs &args) {
   }
 }
 
-bool Aion::isNextToCircle() {
+bool Aion::isNextToHearth() {
   // FIXME how to check if its circle?
-  if (this->rightExpander.module && this->rightExpander.module->model == modelCircle) {
+  if (this->rightExpander.module && this->rightExpander.module->model == modelHearth) {
     return true;
   }
   return false;
@@ -56,9 +56,9 @@ void Aion::connect() {
 
 void Aion::processAlways(const ProcessArgs &args) {
   if (_button_divider.process()) {
-    if (isNextToCircle() && !_connected_circle) {
+    if (isNextToHearth() && !_connected_circle) {
       connect();
-    } else if (!isNextToCircle() && _connected_circle) {
+    } else if (!isNextToHearth() && _connected_circle) {
       _connected_circle = nullptr;
     }
 

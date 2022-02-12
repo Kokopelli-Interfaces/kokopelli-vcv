@@ -1,7 +1,7 @@
-#include "Circle.hpp"
-#include "CircleWidget.hpp"
+#include "Hearth.hpp"
+#include "HearthWidget.hpp"
 
-Circle::Circle() {
+Hearth::Hearth() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Rotate Observer");
@@ -27,7 +27,7 @@ Circle::Circle() {
   printf("CIRCLES size is %ld\n", CIRCLES.size());
 }
 
-Circle::~Circle() {
+Hearth::~Hearth() {
   // FIXME memory SPILLAGE
   delete _light_blinker;
 
@@ -38,11 +38,11 @@ Circle::~Circle() {
   }
 }
 
-void Circle::sampleRateChange() {
+void Hearth::sampleRateChange() {
   _sample_time = APP->engine->getSampleTime();
 }
 
-void Circle::processButtons(const ProcessArgs &args) {
+void Hearth::processButtons(const ProcessArgs &args) {
   float sample_time = _sample_time * _button_divider.division;
 
   kokopellivcv::dsp::LongPressButton::Event _cycle_forward_event = _cycle_forward_button.process(sample_time);
@@ -79,7 +79,7 @@ void Circle::processButtons(const ProcessArgs &args) {
   }
 }
 
-void Circle::processAlways(const ProcessArgs &args) {
+void Hearth::processAlways(const ProcessArgs &args) {
   outputs[OBSERVER_PHASE_OUTPUT].setChannels(this->channels());
   outputs[SUN].setChannels(this->channels());
   outputs[OBSERVER_OUTPUT].setChannels(this->channels());
@@ -94,7 +94,7 @@ static inline float smoothValue(float current, float old) {
   return old + (current - old) * lambda;
 }
 
-void Circle::modulate() {
+void Hearth::modulate() {
   _audition_position = smoothValue(params[AUDITION_PARAM].getValue(), _audition_position);
 
   if (_love_resolution != _options.love_resolution) {
@@ -118,7 +118,7 @@ void Circle::modulate() {
   return;
 }
 
-void Circle::modulateChannel(int channel_i) {
+void Hearth::modulateChannel(int channel_i) {
   kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
   float love = params[LOVE_PARAM].getValue();
 
@@ -132,7 +132,7 @@ void Circle::modulateChannel(int channel_i) {
   // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 }
 
-int Circle::channels() {
+int Hearth::channels() {
   int input_channels = inputs[WOMB_INPUT].getChannels();
   if (_channels < input_channels) {
     for (int c = 0; c < _channels; c++) {
@@ -145,7 +145,7 @@ int Circle::channels() {
   return _channels;
 }
 
-void Circle::processChannel(const ProcessArgs& args, int channel_i) {
+void Hearth::processChannel(const ProcessArgs& args, int channel_i) {
   kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
 
   if (inputs[WOMB_INPUT].isConnected()) {
@@ -192,7 +192,7 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 }
 
-void Circle::updateLight(int light, NVGcolor color, float strength) {
+void Hearth::updateLight(int light, NVGcolor color, float strength) {
   if (_light_blinker->_op && _light_blinker->_light_i == light) {
     return;
   }
@@ -202,7 +202,7 @@ void Circle::updateLight(int light, NVGcolor color, float strength) {
   lights[light + 2].value = color.b * strength;
 }
 
-void Circle::updateLights(const ProcessArgs &args) {
+void Hearth::updateLights(const ProcessArgs &args) {
   _light_blinker->step();
 
   kokopellivcv::dsp::circle::Engine *default_e = _engines[0];
@@ -244,13 +244,13 @@ void Circle::updateLights(const ProcessArgs &args) {
   }
 }
 
-void Circle::postProcessAlways(const ProcessArgs &args) {
+void Hearth::postProcessAlways(const ProcessArgs &args) {
   if (_light_divider.process()) {
     updateLights(args);
   }
 }
 
-void Circle::addChannel(int channel_i) {
+void Hearth::addChannel(int channel_i) {
   _engines[channel_i] = new kokopellivcv::dsp::circle::Engine();
   _engines[channel_i]->_gko.sample_time = _sample_time;
 
@@ -259,11 +259,11 @@ void Circle::addChannel(int channel_i) {
   }
 }
 
-void Circle::removeChannel(int channel_i) {
+void Hearth::removeChannel(int channel_i) {
   delete _engines[channel_i];
   _engines[channel_i] = nullptr;
 }
 
-Model *modelCircle = rack::createModel<Circle, CircleWidget>("KokopelliInterfaces-Circle");
+Model *modelHearth = rack::createModel<Hearth, HearthWidget>("KokopelliInterfaces-Hearth");
 
 

@@ -3,10 +3,10 @@
 #include "kokopellivcv.hpp"
 #include "dsp/LongPressButton.hpp"
 #include "dsp/LightBlinker.hpp"
-#include "modules/Circle.hpp"
+#include "modules/Hearth.hpp"
 #include "widgets.hpp"
 #include "util/colors.hpp"
-#include "modules/CircleShared.hpp"
+#include "modules/HearthShared.hpp"
 
 extern Model *modelAion;
 
@@ -29,7 +29,7 @@ struct Aion : KokopelliVcvModule {
     NUM_LIGHTS
 	};
 
-  Circle* _connected_circle = nullptr;
+  Hearth* _connected_circle = nullptr;
   float _sample_time = 1.f;
 
   kokopellivcv::dsp::LongPressButton _cycle_backward_button;
@@ -54,7 +54,7 @@ struct Aion : KokopelliVcvModule {
 
 private:
   void connect();
-  bool isNextToCircle();
+  bool isNextToHearth();
   void processButtons(const ProcessArgs &args);
 };
 

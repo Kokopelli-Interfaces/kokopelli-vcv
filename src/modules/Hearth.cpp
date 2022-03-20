@@ -6,13 +6,13 @@ Hearth::Hearth() {
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observed Song");
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established Song <-> New Song)");
 
-  configInput(WOMB_INPUT, "Moon (Creative Background/Yin/Orchestra/Feminine)");
-  configOutput(OBSERVER_OUTPUT, "Observer (Soul/Consciousness)");
-  configOutput(OBSERVER_PHASE_OUTPUT, "Observer Phase");
+  configInput(WOMB_INPUT, "Band Main");
+  configOutput(OBSERVER_OUTPUT, "Observed Song");
+  configOutput(OBSERVER_PHASE_OUTPUT, "Observed Song Phase");
   configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Beat Phase");
-  configOutput(SUN, "Sun (Emernet/Yang/Song/Masculine)");
+  configOutput(SUN, "Song");
 
   configBypass(WOMB_INPUT, SUN);
 

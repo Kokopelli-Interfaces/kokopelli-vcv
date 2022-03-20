@@ -12,8 +12,7 @@ namespace circle {
 struct Group {
   Group *parent_group = nullptr;
 
-  char letter = 'A';
-  std::string id = "A";
+  std::string id = "*";
 
   std::vector<Cycle*> cycles_in_group;
   std::vector<float> next_cycles_relative_love;

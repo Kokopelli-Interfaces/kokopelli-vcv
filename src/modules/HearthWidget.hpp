@@ -192,7 +192,7 @@ struct HearthWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.127, 85.334)), module, Hearth::DIVINITY_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 86.798)), module, Hearth::DIVINITY_LIGHT));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.631, 85.249)), module, Hearth::CYCLE_PARAM));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 85.333)), module, Hearth::CYCLE_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 86.798)), module, Hearth::CYCLE_LIGHT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));

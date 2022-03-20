@@ -5,7 +5,7 @@
 namespace kokopellivcv {
 
 struct MemberWidget : ModuleWidget {
-  const int hp = 3;
+  const int hp = 4;
 
 	MemberWidget(Member* module) {
 		setModule(module);

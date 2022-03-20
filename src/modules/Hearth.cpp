@@ -4,7 +4,7 @@
 Hearth::Hearth() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
-  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Rotate Observer");
+  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observed Song");
   configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction");
 

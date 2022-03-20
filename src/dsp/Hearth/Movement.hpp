@@ -9,7 +9,6 @@ namespace circle {
 
 struct Cycle;
 
-// TODO renam eto grup???
 struct Movement {
   char timeline = '*';
   int group_movement_n = 1;

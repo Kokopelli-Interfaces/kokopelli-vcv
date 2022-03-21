@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cycle.hpp"
+#include "Voice.hpp"
 #include "definitions.hpp"
 
 #include <vector>
@@ -14,8 +14,8 @@ struct Group {
 
   std::string name= "*";
 
-  std::vector<Cycle*> cycles_in_group;
-  std::vector<float> next_cycles_relative_love;
+  std::vector<Voice*> voices_in_group;
+  std::vector<float> next_voices_relative_love;
 
   std::vector<Time> period_history;
 
@@ -36,27 +36,27 @@ struct Group {
   //   }
   // }
 
-  inline void undoLastCycleWithoutUndoingParent() {
-    assert(cycles_in_group.size() == period_history.size());
+  inline void undoLastVoiceWithoutUndoingParent() {
+    assert(voices_in_group.size() == period_history.size());
 
-    int last_i = cycles_in_group.size() - 1;
-    cycles_in_group.pop_back();
+    int last_i = voices_in_group.size() - 1;
+    voices_in_group.pop_back();
     period = period_history[last_i];
     period_history.pop_back();
-    next_cycles_relative_love.pop_back();
+    next_voices_relative_love.pop_back();
   }
 
-  inline void undoLastCycle() {
-    undoLastCycleWithoutUndoingParent();
+  inline void undoLastVoice() {
+    undoLastVoiceWithoutUndoingParent();
 
     if (parent_group) {
-      parent_group->undoLastCycle();
+      parent_group->undoLastVoice();
     }
   }
 
-  inline bool checkIfCycleIsInGroup(Cycle* cycle) {
-    for (Cycle* cycle_in_group : cycles_in_group) {
-      if (cycle_in_group == cycle) {
+  inline bool checkIfVoiceIsInGroup(Voice* voice) {
+    for (Voice* voice_in_group : voices_in_group) {
+      if (voice_in_group == voice) {
         return true;
       }
     }
@@ -115,16 +115,16 @@ struct Group {
     return snap_beats;
   }
 
-  inline Time getAdjustedPeriod(Time cycle_period) {
-    assert(!cycles_in_group.empty());
+  inline Time getAdjustedPeriod(Time voice_period) {
+    assert(!voices_in_group.empty());
 
     Time adjusted_period;
 
-    Time period_diff = cycle_period - period;
+    Time period_diff = voice_period - period;
     if (0.f < period_diff) {
       Time start_period = period;
       Time new_period = start_period;
-      Time percent_over = cycle_period / period;
+      Time percent_over = voice_period / period;
 
       float period_round_back_percent = 1.5f;
       while (period_round_back_percent <= percent_over) {
@@ -134,15 +134,15 @@ struct Group {
 
       adjusted_period = new_period;
     } else {
-      Time cycle_time_in_beats = cycle_period / beat_period;
+      Time voice_time_in_beats = voice_period / beat_period;
       std::vector<int> snap_beats = getSnapBeats();
       int snap_beat = 1;
       for (unsigned int i = 1; i < snap_beats.size(); i++) {
-        bool cycle_is_between_beats = (float)snap_beats[i-1] <= cycle_time_in_beats && cycle_time_in_beats <= (float)snap_beats[i];
-        if (cycle_is_between_beats) {
+        bool voice_is_between_beats = (float)snap_beats[i-1] <= voice_time_in_beats && voice_time_in_beats <= (float)snap_beats[i];
+        if (voice_is_between_beats) {
           Time time_between_snap_beats = beat_period * (snap_beats[i] - snap_beats[i-1]);
-          Time cycle_position_in_between_snap_beats_area = cycle_period - (beat_period * snap_beats[i-1]);
-          Time percent_position_in_snap_beats_area = cycle_position_in_between_snap_beats_area / time_between_snap_beats;
+          Time voice_position_in_between_snap_beats_area = voice_period - (beat_period * snap_beats[i-1]);
+          Time percent_position_in_snap_beats_area = voice_position_in_between_snap_beats_area / time_between_snap_beats;
 
           if (percent_position_in_snap_beats_area <= 0.5f) {
             snap_beat = snap_beats[i-1];
@@ -160,71 +160,71 @@ struct Group {
     return adjusted_period;
   }
 
-  inline void adjustPeriodsToFit(Time &cycle_period) {
-    assert(!cycles_in_group.empty());
+  inline void adjustPeriodsToFit(Time &voice_period) {
+    assert(!voices_in_group.empty());
 
-    Time adjusted_period = getAdjustedPeriod(cycle_period);
+    Time adjusted_period = getAdjustedPeriod(voice_period);
     if (period < adjusted_period) {
       period = adjusted_period;
     }
 
-    cycle_period = adjusted_period;
+    voice_period = adjusted_period;
   }
 
-  // TODO cycle invariatn
-  inline void addNewCycle(Cycle* cycle) {
-    Time original_playhead = cycle->playhead;
-    Time original_period = cycle->period;
-    if (parent_group != nullptr && cycle->immediate_group != parent_group) {
-      parent_group->addNewCycle(cycle);
+  // TODO voice invariatn
+  inline void addNewVoice(Voice* voice) {
+    Time original_playhead = voice->playhead;
+    Time original_period = voice->period;
+    if (parent_group != nullptr && voice->immediate_group != parent_group) {
+      parent_group->addNewVoice(voice);
     }
 
-    this->cycles_in_group.push_back(cycle);
-    this->next_cycles_relative_love.push_back(1.f);
+    this->voices_in_group.push_back(voice);
+    this->next_voices_relative_love.push_back(1.f);
     this->period_history.push_back(period);
 
-    if (cycle->loop) {
-      if (this->cycles_in_group.size() == 1) {
-        // TODO get crossfade from prev cycle
-        period = cycle->period;
-        beat_period = cycle->period;
+    if (voice->loop) {
+      if (this->voices_in_group.size() == 1) {
+        // TODO get crossfade from prev voice
+        period = voice->period;
+        beat_period = voice->period;
       } else {
-        Time period_before = cycle->period;
-        adjustPeriodsToFit(cycle->period);
-        printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->period, original_period);
-        Time period_diff = period_before - cycle->period;
+        Time period_before = voice->period;
+        adjustPeriodsToFit(voice->period);
+        printf("-- voice period from (%Lf -> %Lf) (original %Lf)\n", period_before, voice->period, original_period);
+        Time period_diff = period_before - voice->period;
         bool period_roundback = 0.f < period_diff;
         if (period_roundback) {
-          cycle->playhead = period_diff;
-          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->period);
+          voice->playhead = period_diff;
+          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, voice->period);
         } else {
-          cycle->playhead = original_playhead;
-          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, cycle->period);
+          voice->playhead = original_playhead;
+          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, voice->period);
         }
       }
     }
 
-    printf("-- added to group %s, n_beats->%d\n", name.c_str(), convertToBeat(cycle->period, false));
-    printf("-- cycle period %Lf, cycle playhead %Lf\n", cycle->period, cycle->playhead);
+    printf("-- added to group %s, n_beats->%d\n", name.c_str(), convertToBeat(voice->period, false));
+    printf("-- voice period %Lf, voice playhead %Lf\n", voice->period, voice->playhead);
   }
 
-  inline void addExistingCycle(Cycle* cycle) {
-    this->cycles_in_group.push_back(cycle);
-    this->next_cycles_relative_love.push_back(1.f);
+  inline void addExistingVoice(Voice* voice) {
+    this->voices_in_group.push_back(voice);
+    this->next_voices_relative_love.push_back(1.f);
     this->period_history.push_back(period);
 
-    Time period_before = cycle->period;
-    if (cycle->loop) {
-      if (this->cycles_in_group.size() == 1) {
-        period = cycle->period;
-        beat_period = cycle->period;
+    Time period_before = voice->period;
+    if (voice->loop) {
+      if (this->voices_in_group.size() == 1) {
+        period = voice->period;
+        beat_period = voice->period;
       } else {
-        adjustPeriodsToFit(cycle->period);
+        adjustPeriodsToFit(voice->period);
       }
     }
-    assert(cycle->period == period_before);
+    assert(voice->period == period_before);
 
-    printf("-- add existing cycle to group %s, n_beats->%d\n", name.c_str(), convertToBeat(cycle->period, false));
+    printf("-- add existing voice to group %s, n_beats->%d\n", name.c_str(), convertToBeat(voice->period, false));
   }
 };
 

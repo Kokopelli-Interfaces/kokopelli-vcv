@@ -7,7 +7,7 @@
 
 // FIXME
 #include "Village.hpp"
-#include "Cycle.hpp"
+#include "Voice.hpp"
 #include "Observer.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
@@ -23,21 +23,21 @@ namespace circle {
 
 class OutputUpdater {
 public:
-  inline void updateOutput(Outputs &out, std::vector<Cycle*> cycles, Group* new_cycle_group, Inputs inputs, Options options) {
+  inline void updateOutput(Outputs &out, std::vector<Voice*> voices, Group* new_voice_group, Inputs inputs, Options options) {
     // FIXME get rid of me
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
     out.sun = 0.f;
     out.observed_sun = 0.f;
 
-    for (unsigned int i = 0; i < cycles.size(); i++) {
-      float cycle_out = cycles[i]->readSignal();
-      if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
-        out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, cycle_out, signal_type);
-        cycle_out *= (1.f - inputs.love);
+    for (unsigned int i = 0; i < voices.size(); i++) {
+      float voice_out = voices[i]->readSignal();
+      if (Observer::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(voices[i]->immediate_group, new_voice_group)) {
+        out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, voice_out, signal_type);
+        voice_out *= (1.f - inputs.love);
       }
 
-      out.sun = kokopellivcv::dsp::sum(out.sun, cycle_out, signal_type);
+      out.sun = kokopellivcv::dsp::sum(out.sun, voice_out, signal_type);
     }
 
     out.attenuated_observed_sun = out.observed_sun * (1.f - inputs.love);

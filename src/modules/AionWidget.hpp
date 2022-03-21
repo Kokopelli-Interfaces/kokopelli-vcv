@@ -64,7 +64,7 @@ struct ParentGroupDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    AionTextBox::setText("My ParentGroup");
+    AionTextBox::setText("Parent Group");
   }
 };
 
@@ -146,8 +146,8 @@ struct AionWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<MediumLEDButton>(mm2px(Vec(8.183, 91.694)), module, Aion::CYCLE_BACKWARD_PARAM));
-		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(9.648, 93.157)), module, Aion::CYCLE_BACKWARD_LIGHT));
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(8.183, 91.694)), module, Aion::PREV_MOVEMENT_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(9.648, 93.157)), module, Aion::PREV_MOVEMENT_LIGHT));
 
     auto top_display_size = mm2px(Vec(19.472, 4.312));
     _parent_group_display = new ParentGroupDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 14.862)), top_display_size);

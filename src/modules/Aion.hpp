@@ -14,7 +14,7 @@ namespace kokopellivcv {
 
 struct Aion : KokopelliVcvModule {
 	enum ParamIds {
-		CYCLE_BACKWARD_PARAM,
+		PREV_MOVEMENT_PARAM,
 		NUM_PARAMS
 	};
 	enum InputIds {
@@ -25,14 +25,14 @@ struct Aion : KokopelliVcvModule {
 		NUM_OUTPUTS
 	};
   enum LightIds {
-    ENUMS(CYCLE_BACKWARD_LIGHT, 3),
+    ENUMS(PREV_MOVEMENT_LIGHT, 3),
     NUM_LIGHTS
 	};
 
   Hearth* _connected_circle = nullptr;
   float _sample_time = 1.f;
 
-  kokopellivcv::dsp::LongPressButton _cycle_backward_button;
+  kokopellivcv::dsp::LongPressButton _prev_movement_button;
   kokopellivcv::dsp::LightBlinker *_light_blinker;
 
   rack::dsp::ClockDivider _light_divider;

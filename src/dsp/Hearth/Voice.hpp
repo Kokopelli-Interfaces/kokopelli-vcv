@@ -14,7 +14,7 @@ namespace circle {
 
 struct Group;
 
-struct Cycle {
+struct Voice {
   kokopellivcv::dsp::Fader fader;
 
   Group *immediate_group;
@@ -41,7 +41,7 @@ struct Cycle {
   Time fade_in_time = 0.02f;
   Time fade_out_time = 0.07f;
 
-  inline Cycle(Time start, Movement* movement, Group *immediate_group) {
+  inline Voice(Time start, Movement* movement, Group *immediate_group) {
     this->capture_start = start;
     this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
@@ -50,7 +50,7 @@ struct Cycle {
     this->immediate_group = immediate_group;
   }
 
-  inline ~Cycle() {
+  inline ~Voice() {
     delete signal_capture;
     delete love_capture;
   }
@@ -135,7 +135,7 @@ struct Cycle {
     }
 
     this->period = window;
-    printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
+    printf("Voice End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
 
   inline void finishWrite() {
@@ -143,7 +143,7 @@ struct Cycle {
     this->signal_capture->finishWrite();
     this->love_capture->finishWrite();
 
-    printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
+    printf("Voice End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
 };
 

@@ -23,18 +23,18 @@ struct Conductor {
   }
 
   void progressToMovement(Village &village, Movement *next_movement) {
-    for (auto cycle : next_movement->cycles_in_movement) {
-      bool new_cycle = find(village.cycles.begin(), village.cycles.end(), cycle) == village.cycles.end();
-      if (new_cycle) {
-        cycle->playhead = 0.f;
-        cycle->fader.fadeIn();
+    for (auto voice : next_movement->voices_in_movement) {
+      bool new_voice = find(village.voices.begin(), village.voices.end(), voice) == village.voices.end();
+      if (new_voice) {
+        voice->playhead = 0.f;
+        voice->fader.fadeIn();
       }
     }
 
-    for (auto cycle : village.cycles) {
-      bool old_cycle = find(next_movement->cycles_in_movement.begin(), next_movement->cycles_in_movement.end(), cycle) == next_movement->cycles_in_movement.end();
-      if (old_cycle) {
-        cycle->fader.fadeOut();
+    for (auto voice : village.voices) {
+      bool old_voice = find(next_movement->voices_in_movement.begin(), next_movement->voices_in_movement.end(), voice) == next_movement->voices_in_movement.end();
+      if (old_voice) {
+        voice->fader.fadeOut();
       }
     }
   }

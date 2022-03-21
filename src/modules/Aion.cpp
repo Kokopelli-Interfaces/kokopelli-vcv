@@ -3,13 +3,13 @@
 
 Aion::Aion() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(CYCLE_BACKWARD_PARAM, 0.f, 1.f, 0.f, "Previous Movement");
+  configParam(PREV_MOVEMENT_PARAM, 0.f, 1.f, 0.f, "Previous Movement");
 
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
   _light_blinker = new kokopellivcv::dsp::LightBlinker(&lights);
 
-  _cycle_backward_button.param = &params[CYCLE_BACKWARD_PARAM];
+  _prev_movement_button.param = &params[PREV_MOVEMENT_PARAM];
 }
 
 void Aion::sampleRateChange() {
@@ -19,18 +19,18 @@ void Aion::sampleRateChange() {
 void Aion::processButtons(const ProcessArgs &args) {
   float sample_time = _sample_time * _button_divider.division;
 
-  kokopellivcv::dsp::LongPressButton::Event _cycle_backward_event = _cycle_backward_button.process(sample_time);
+  kokopellivcv::dsp::LongPressButton::Event _prev_movement_event = _prev_movement_button.process(sample_time);
 
   for (int c = 0; c < _connected_circle->channels(); c++) {
-    switch (_cycle_backward_event) {
+    switch (_prev_movement_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      _light_blinker->blinkLight(CYCLE_BACKWARD_LIGHT, 3.f);
-      _connected_circle->_engines[c]->cycleBackward();
+      _light_blinker->blinkLight(PREV_MOVEMENT_LIGHT, 3.f);
+      _connected_circle->_engines[c]->voiceBackward();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      _light_blinker->blinkLight(CYCLE_BACKWARD_LIGHT, 0.f); // TODO blink extra extra
+      _light_blinker->blinkLight(PREV_MOVEMENT_LIGHT, 0.f); // TODO blink extra extra
       _connected_circle->_engines[c]->toggleMovementProgression();
       break;
     }
@@ -91,7 +91,7 @@ void Aion::updateLights(const ProcessArgs &args) {
   if (_connected_circle) {
     light_strength = .3f;
   }
-  updateLight(CYCLE_BACKWARD_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+  updateLight(PREV_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
 }
 
 Model* modelAion = rack::createModel<Aion, AionWidget>("KokopelliInterfaces-Aion");

@@ -5,7 +5,7 @@
 #include <vector>
 #include <cmath>
 
-enum CycleEnd {
+enum VoiceEnd {
   DISCARD,
   NEXT_MOVEMENT_VIA_SHIFT,
   SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP,

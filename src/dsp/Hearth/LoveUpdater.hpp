@@ -7,7 +7,7 @@
 
 // FIXME
 #include "Village.hpp"
-#include "Cycle.hpp"
+#include "Voice.hpp"
 #include "Observer.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
@@ -26,7 +26,7 @@ public:
   float love_resolution = 1000.f;
 
   rack::dsp::ClockDivider _love_calculator_divider;
-  std::vector<float> _next_cycles_love;
+  std::vector<float> _next_voices_love;
 
   LoveUpdater() {
     _love_calculator_divider.setDivision(love_resolution);
@@ -39,40 +39,40 @@ public:
   }
 
 private:
-  // TODO cycle types (song or movement), depends on tuning and affects love
+  // TODO voice types (song or movement), depends on tuning and affects love
   inline float smoothValue(float current, float old) {
     float lambda = 1 / love_resolution;
     return old + (current - old) * lambda;
   }
 
 public:
-  inline void updateVillageCyclesLove(std::vector<Cycle*> &cycles) {
+  inline void updateVillageVoicesLove(std::vector<Voice*> &voices) {
     // TODO maybe put in function so to not call every step
-    if (_next_cycles_love.size() < cycles.size()) {
-      while (_next_cycles_love.size() < cycles.size()) {
-        _next_cycles_love.push_back(0.f);
+    if (_next_voices_love.size() < voices.size()) {
+      while (_next_voices_love.size() < voices.size()) {
+        _next_voices_love.push_back(0.f);
       }
     }
 
     if (_love_calculator_divider.process()) {
-      for (unsigned int i = 0; i < cycles.size(); i++) {
-        float cycle_i_love = 1.f;
-        for (unsigned int j = i + 1; j < cycles.size(); j++) {
-          if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, cycles[j]->immediate_group)) {
-            cycle_i_love *= (1.f - cycles[j]->readLove());
-            if (cycle_i_love <= 0.0001f) {
-              cycle_i_love = 0.f;
+      for (unsigned int i = 0; i < voices.size(); i++) {
+        float voice_i_love = 1.f;
+        for (unsigned int j = i + 1; j < voices.size(); j++) {
+          if (Observer::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(voices[i]->immediate_group, voices[j]->immediate_group)) {
+            voice_i_love *= (1.f - voices[j]->readLove());
+            if (voice_i_love <= 0.0001f) {
+              voice_i_love = 0.f;
               break;
             }
           }
         }
 
-        _next_cycles_love[i] = cycle_i_love;
+        _next_voices_love[i] = voice_i_love;
       }
     }
 
-    for (unsigned int i = 0; i < cycles.size(); i++) {
-      cycles[i]->love = smoothValue(_next_cycles_love[i], cycles[i]->love);
+    for (unsigned int i = 0; i < voices.size(); i++) {
+      voices[i]->love = smoothValue(_next_voices_love[i], voices[i]->love);
     }
   }
 };

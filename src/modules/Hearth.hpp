@@ -17,7 +17,7 @@ namespace kokopellivcv {
 
 struct Hearth : KokopelliVcvModule {
   enum ParamIds {
-		CYCLE_PARAM,
+		NEXT_MOVEMENT_PARAM,
 		DIVINITY_PARAM,
 		LOVE_PARAM,
 		AUDITION_PARAM,
@@ -37,7 +37,7 @@ struct Hearth : KokopelliVcvModule {
 
   enum LightIds {
     ENUMS(DIVINITY_LIGHT, 3),
-    ENUMS(CYCLE_LIGHT, 3),
+    ENUMS(NEXT_MOVEMENT_LIGHT, 3),
     NUM_LIGHTS
   };
 
@@ -45,8 +45,8 @@ struct Hearth : KokopelliVcvModule {
 
   float _sample_time = 1.0f;
 
-  kokopellivcv::dsp::LongPressButton _cycle_forward_button;
-  kokopellivcv::dsp::LongPressButton _cycle_divinity_button;
+  kokopellivcv::dsp::LongPressButton _next_movement_button;
+  kokopellivcv::dsp::LongPressButton _voice_divinity_button;
 
   kokopellivcv::dsp::LightBlinker *_light_blinker;
 

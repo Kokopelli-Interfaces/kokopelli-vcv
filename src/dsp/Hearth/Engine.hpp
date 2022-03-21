@@ -29,16 +29,16 @@ struct Engine {
   void step();
 
   void channelStateReset();
-  void cycleObservation();
+  void voiceObservation();
   void ascend();
   void toggleMovementProgression();
-  void cycleForward();
-  void cycleBackward();
+  void voiceForward();
+  void voiceBackward();
   void undo();
 
   void toggleTuneToFrequencyOfObservedSun();
 
-  int getMostRecentCycleLength();
+  int getMostRecentVoiceLength();
 
 private:
   inline void write();

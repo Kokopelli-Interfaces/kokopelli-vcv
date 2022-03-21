@@ -5,7 +5,7 @@ Hearth::Hearth() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observed Song");
-  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
+  configParam(NEXT_MOVEMENT_PARAM, 0.f, 1.f, 0.f, "Next Movement");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established Song <-> New Song)");
 
   configInput(WOMB_INPUT, "Band Main");
@@ -20,8 +20,8 @@ Hearth::Hearth() {
   _button_divider.setDivision(4);
   _light_blinker = new kokopellivcv::dsp::LightBlinker(&lights);
 
-  _cycle_forward_button.param = &params[CYCLE_PARAM];
-  _cycle_divinity_button.param = &params[DIVINITY_PARAM];
+  _next_movement_button.param = &params[NEXT_MOVEMENT_PARAM];
+  _voice_divinity_button.param = &params[DIVINITY_PARAM];
 
   CIRCLES.push_back(this);
   printf("CIRCLES size is %ld\n", CIRCLES.size());
@@ -45,17 +45,17 @@ void Hearth::sampleRateChange() {
 void Hearth::processButtons(const ProcessArgs &args) {
   float sample_time = _sample_time * _button_divider.division;
 
-  kokopellivcv::dsp::LongPressButton::Event _cycle_forward_event = _cycle_forward_button.process(sample_time);
-  kokopellivcv::dsp::LongPressButton::Event _cycle_divinity_event = _cycle_divinity_button.process(sample_time);
+  kokopellivcv::dsp::LongPressButton::Event _next_movement_event = _next_movement_button.process(sample_time);
+  kokopellivcv::dsp::LongPressButton::Event _voice_divinity_event = _voice_divinity_button.process(sample_time);
 
   for (int c = 0; c < channels(); c++) {
     kokopellivcv::dsp::circle::Engine *e = _engines[c];
 
-    switch (_cycle_divinity_event) {
+    switch (_voice_divinity_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->cycleObservation();
+      e->voiceObservation();
       _light_blinker->blinkLight(DIVINITY_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
@@ -64,16 +64,16 @@ void Hearth::processButtons(const ProcessArgs &args) {
       break;
     }
 
-    switch (_cycle_forward_event) {
+    switch (_next_movement_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->cycleForward();
-      _light_blinker->blinkLight(CYCLE_LIGHT, 3.f);
+      e->voiceForward();
+      _light_blinker->blinkLight(NEXT_MOVEMENT_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       e->undo();
-      _light_blinker->blinkLight(CYCLE_LIGHT, 0.f); // TODO blink extra extra
+      _light_blinker->blinkLight(NEXT_MOVEMENT_LIGHT, 0.f); // TODO blink extra extra
       break;
     }
   }
@@ -220,7 +220,7 @@ void Hearth::updateLights(const ProcessArgs &args) {
   float light_strength = .3f;
   LoveDirection love_direction = default_e->_gko._love_direction;
   if (love_direction == LoveDirection::OBSERVED_SUN) {
-    if (!default_e->_village.cycles.empty()) {
+    if (!default_e->_village.voices.empty()) {
       updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
     } else {
       updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
@@ -228,19 +228,19 @@ void Hearth::updateLights(const ProcessArgs &args) {
 
     if (default_e->_gko.observer.checkIfInSubgroupMode()) {
       if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
-        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+        updateLight(NEXT_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
       } else {
-        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
+        updateLight(NEXT_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
       }
     } else {
-      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+      updateLight(NEXT_MOVEMENT_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
     }
   } else if (love_direction == LoveDirection::EMERGENCE) {
     updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
-    updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+    updateLight(NEXT_MOVEMENT_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
   } else { // LoveDirection::NEW
     updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
-    updateLight(CYCLE_LIGHT, colors::WOMB_LIGHT, light_strength);
+    updateLight(NEXT_MOVEMENT_LIGHT, colors::WOMB_LIGHT, light_strength);
   }
 }
 

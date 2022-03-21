@@ -7,13 +7,13 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
-struct Cycle;
+struct Voice;
 
 struct Movement {
   char timeline = '*';
   int group_movement_n = 1;
 
-  std::vector<Cycle*> cycles_in_movement;
+  std::vector<Voice*> voices_in_movement;
 
   Movement *group_start_movement = nullptr;
   Movement *prev = nullptr;

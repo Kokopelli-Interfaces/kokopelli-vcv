@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cycle.hpp"
+#include "Voice.hpp"
 #include "Movement.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
@@ -16,11 +16,11 @@ struct Village {
   std::vector<Group*> groups;
   Group* observed_sun = nullptr;
 
-  std::vector<Cycle*> cycles;
+  std::vector<Voice*> voices;
   // TODO move to inactive if pre-entrance movement
-  // std::vector<Cycle*> inactive_cycles;
+  // std::vector<Voice*> inactive_voices;
 
-  Cycle *new_cycle = nullptr;
+  Voice *new_voice = nullptr;
 
   Time playhead = 0.0;
 
@@ -37,12 +37,12 @@ struct Village {
     Group *first_group = new Group();
     this->groups.push_back(first_group);
     this->observed_sun = first_group;
-    this->new_cycle = new Cycle(start, this->current_movement, this->observed_sun);
+    this->new_voice = new Voice(start, this->current_movement, this->observed_sun);
   }
 
   void clearEmptyGroups() {
     for (int i = groups.size()-1; 0 <= i; i--) {
-      if (groups[i]->cycles_in_group.size() == 0) {
+      if (groups[i]->voices_in_group.size() == 0) {
         if (groups[i]->parent_group == nullptr) {
           continue;
         }

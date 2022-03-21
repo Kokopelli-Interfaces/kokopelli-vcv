@@ -5,7 +5,7 @@
 
 #include "rack.hpp"
 
-#include "Cycle.hpp"
+#include "Voice.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
 
@@ -25,21 +25,21 @@ public:
   static inline std::vector<Group*> breakIntoSubgroups(Group* parent) {
     std::vector<Group*> subgroups;
 
-    for (unsigned int i = 0; i < parent->cycles_in_group.size(); i++) {
-      Cycle* cycle = parent->cycles_in_group[i];
-      bool create_subgroup = cycle->immediate_group == parent;
+    for (unsigned int i = 0; i < parent->voices_in_group.size(); i++) {
+      Voice* voice = parent->voices_in_group[i];
+      bool create_subgroup = voice->immediate_group == parent;
       if (create_subgroup) {
         Group* subgroup = new Group();
         subgroups.push_back(subgroup);
         subgroup->parent_group = parent;
         subgroup->name = rack::string::f("%s-%d", parent->name.c_str(), i+1);
-        subgroup->addExistingCycle(cycle);
-        // cycle->immediate_group = subgroup;
+        subgroup->addExistingVoice(voice);
+        // voice->immediate_group = subgroup;
       } else {
-        if (cycle->immediate_group->parent_group == parent) {
-          bool already_accounted_for = std::find(subgroups.begin(), subgroups.end(), cycle->immediate_group) != subgroups.end();
+        if (voice->immediate_group->parent_group == parent) {
+          bool already_accounted_for = std::find(subgroups.begin(), subgroups.end(), voice->immediate_group) != subgroups.end();
           if (!already_accounted_for) {
-            subgroups.push_back(cycle->immediate_group);
+            subgroups.push_back(voice->immediate_group);
           }
         }
       }
@@ -48,7 +48,7 @@ public:
     return subgroups;
   }
 
-  static inline bool checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(Group *one, Group *two) {
+  static inline bool checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(Group *one, Group *two) {
     if (!one) {
       return false;
     }
@@ -57,7 +57,7 @@ public:
       return true;
     }
 
-    return checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(one->parent_group, two);
+    return checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(one->parent_group, two);
   }
 
   inline bool checkIfInSubgroupMode() {
@@ -67,7 +67,7 @@ public:
   inline bool checkIfCanEnterFocusedSubgroup() {
     assert(_subgroup_mode);
     Group* focused_subgroup = _subgroups[_focused_subgroup_i];
-    bool can_enter =  1 < focused_subgroup->cycles_in_group.size();
+    bool can_enter =  1 < focused_subgroup->voices_in_group.size();
     return can_enter;
   }
 
@@ -76,7 +76,7 @@ public:
     assert(village.observed_sun);
 
     _pivot_parent = village.observed_sun;
-    if (_pivot_parent->cycles_in_group.empty()) {
+    if (_pivot_parent->voices_in_group.empty()) {
       return;
     }
 
@@ -88,8 +88,8 @@ public:
     Group* subgroup = _subgroups[_focused_subgroup_i];
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
-      for (auto cycle : subgroup->cycles_in_group) {
-        cycle->immediate_group = subgroup;
+      for (auto voice : subgroup->voices_in_group) {
+        voice->immediate_group = subgroup;
       }
       village.groups.push_back(subgroup);
     }
@@ -99,13 +99,13 @@ public:
 inline void exitSubgroupMode(Village &village) {
   Group* subgroup = _subgroups[_focused_subgroup_i];
 
-  if (!subgroup->cycles_in_group.empty()) {
+  if (!subgroup->voices_in_group.empty()) {
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
       village.groups.push_back(subgroup);
 
       // TODO is it right?
-      subgroup->cycles_in_group[0]->immediate_group = subgroup;
+      subgroup->voices_in_group[0]->immediate_group = subgroup;
     }
     village.observed_sun = subgroup;
   } else {
@@ -115,9 +115,9 @@ inline void exitSubgroupMode(Village &village) {
   for (Group* group: _subgroups) {
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), group) != village.groups.end();
     if (!subgroup_in_village) {
-      // for (auto cycle: village.cycles) {
-      //   if (cycle->immediate_group == group) {
-      //     cycle->immediate_group = _pivot_parent;
+      // for (auto voice: village.voices) {
+      //   if (voice->immediate_group == group) {
+      //     voice->immediate_group = _pivot_parent;
       //   }
       // }
 
@@ -128,15 +128,15 @@ inline void exitSubgroupMode(Village &village) {
   _subgroup_mode = false;
 }
 
-  inline void cycleSubgroup(Village &village) {
+  inline void voicesubgroup(Village &village) {
     assert(_subgroup_mode);
 
     Group* last_subgroup = _subgroups[_focused_subgroup_i];
-    bool subgroup_created = last_subgroup->cycles_in_group.size() == 1;
+    bool subgroup_created = last_subgroup->voices_in_group.size() == 1;
     if (subgroup_created) {
       bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), last_subgroup) != village.groups.end();
       if (subgroup_in_village) {
-        last_subgroup->cycles_in_group[0]->immediate_group = _pivot_parent;
+        last_subgroup->voices_in_group[0]->immediate_group = _pivot_parent;
       }
       village.groups.pop_back();
     }
@@ -151,8 +151,8 @@ inline void exitSubgroupMode(Village &village) {
 
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
-      for (auto cycle : subgroup->cycles_in_group) {
-        cycle->immediate_group = subgroup;
+      for (auto voice : subgroup->voices_in_group) {
+        voice->immediate_group = subgroup;
       }
       village.groups.push_back(subgroup);
     }

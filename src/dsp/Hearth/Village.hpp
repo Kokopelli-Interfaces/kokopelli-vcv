@@ -10,7 +10,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 struct Village {
   std::vector<Group*> groups;
@@ -59,6 +59,6 @@ struct Village {
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

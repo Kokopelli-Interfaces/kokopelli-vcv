@@ -50,7 +50,7 @@ struct Hearth : KokopelliVcvModule {
 
   kokopellivcv::dsp::LightBlinker *_light_blinker;
 
-  std::array<kokopellivcv::dsp::circle::Engine*, maxChannels> _engines;
+  std::array<kokopellivcv::dsp::hearth::Engine*, maxChannels> _engines;
 
   rack::dsp::ClockDivider _light_divider;
   rack::dsp::ClockDivider _button_divider;

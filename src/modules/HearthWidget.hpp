@@ -28,12 +28,12 @@ struct HearthTextBox : TextBox {
       if (_module->channels() == 0) {
         return;
       }
-      kokopellivcv::dsp::circle::Engine* e = _module->_engines[0];
+      kokopellivcv::dsp::hearth::Engine* e = _module->_engines[0];
       update(e);
     }
   }
 
-  virtual void update(kokopellivcv::dsp::circle::Engine* engine) {
+  virtual void update(kokopellivcv::dsp::hearth::Engine* engine) {
     return;
   };
 
@@ -50,7 +50,7 @@ struct HearthTextBox : TextBox {
 struct ObservedSunDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
     // float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
     float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
     backgroundColor.a = phase;
@@ -84,7 +84,7 @@ struct ObservedSunDisplay : HearthTextBox {
 struct ObservedSunBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
     int beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.playhead, true);
     HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
 	}
@@ -94,7 +94,7 @@ struct TotalObservedSunBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   // FIXME
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
     HearthTextBox::setDisplayValue(e->_village.observed_sun->getTotalBeats());
 	}
 };
@@ -102,7 +102,7 @@ struct TotalObservedSunBeatDisplay : HearthTextBox {
 struct WombDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
     float phase = 0.f;
     // phase = e->_village.observed_sun->getBeatPhase(e->_village.new_voice->playhead);
     phase = e->_village.observed_sun->getBeatPhase(e->_village.playhead);
@@ -118,7 +118,7 @@ struct WombDisplay : HearthTextBox {
 struct WombBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
     if (e->_gko.tune_to_frequency_of_observed_sun) {
       int beat_in_observed_sun;
       beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.new_voice->playhead, false);
@@ -133,7 +133,7 @@ struct WombBeatDisplay : HearthTextBox {
 struct TotalWombBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
-  void update(kokopellivcv::dsp::circle::Engine* e) override {
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
     if (e->_village.voices.size() == 0) {
       textColor = colors::WOMB;
       HearthTextBox::setText("--");

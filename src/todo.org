@@ -2,7 +2,7 @@
 ** TODO make 'set' buttons in option menu for ~love_resolution~ as well as fade params (global and group).
 ** TODO add option for outputting group phase or group beat phase
 ** create C
-** create circle member add-ons
+** create hearth member add-ons
 ** create AION add-on
 ** get movements done
 ** add circular buffer for crossfade prepend on new layer

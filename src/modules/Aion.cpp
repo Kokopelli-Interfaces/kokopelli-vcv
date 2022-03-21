@@ -21,24 +21,24 @@ void Aion::processButtons(const ProcessArgs &args) {
 
   kokopellivcv::dsp::LongPressButton::Event _prev_movement_event = _prev_movement_button.process(sample_time);
 
-  for (int c = 0; c < _connected_circle->channels(); c++) {
+  for (int c = 0; c < _connected_hearth->channels(); c++) {
     switch (_prev_movement_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       _light_blinker->blinkLight(PREV_MOVEMENT_LIGHT, 3.f);
-      _connected_circle->_engines[c]->cycleBackward();
+      _connected_hearth->_engines[c]->cycleBackward();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       _light_blinker->blinkLight(PREV_MOVEMENT_LIGHT, 0.f); // TODO blink extra extra
-      _connected_circle->_engines[c]->toggleMovementProgression();
+      _connected_hearth->_engines[c]->toggleMovementProgression();
       break;
     }
   }
 }
 
 bool Aion::isNextToHearth() {
-  // FIXME how to check if its circle?
+  // FIXME how to check if its hearth?
   if (this->rightExpander.module && this->rightExpander.module->model == modelHearth) {
     return true;
   }
@@ -46,23 +46,23 @@ bool Aion::isNextToHearth() {
 }
 
 void Aion::connect() {
-  // FIXME find right circle
-  printf("CSIZE %ld\n", CIRCLES.size());
-  if (!CIRCLES.empty()) {
-    _connected_circle = CIRCLES[0];
+  // FIXME find right hearth
+  printf("CSIZE %ld\n", HEARTHS.size());
+  if (!HEARTHS.empty()) {
+    _connected_hearth = HEARTHS[0];
     printf("Aion connected!\n");
   }
 }
 
 void Aion::processAlways(const ProcessArgs &args) {
   if (_button_divider.process()) {
-    if (isNextToHearth() && !_connected_circle) {
+    if (isNextToHearth() && !_connected_hearth) {
       connect();
-    } else if (!isNextToHearth() && _connected_circle) {
-      _connected_circle = nullptr;
+    } else if (!isNextToHearth() && _connected_hearth) {
+      _connected_hearth = nullptr;
     }
 
-    if (_connected_circle) {
+    if (_connected_hearth) {
       processButtons(args);
     }
   }
@@ -88,7 +88,7 @@ void Aion::updateLights(const ProcessArgs &args) {
   _light_blinker->step();
 
   float light_strength = 0.0f;
-  if (_connected_circle) {
+  if (_connected_hearth) {
     light_strength = .3f;
   }
   updateLight(PREV_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);

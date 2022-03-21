@@ -32,8 +32,8 @@ struct Engine {
   void voiceObservation();
   void ascend();
   void toggleMovementProgression();
-  void voiceForward();
-  void voiceBackward();
+  void cycleForward();
+  void cycleBackward();
   void undo();
 
   void toggleTuneToFrequencyOfObservedSun();

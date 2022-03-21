@@ -16,13 +16,13 @@ int Engine::getMostRecentVoiceLength() {
   return recent_voice->immediate_group->convertToBeat(recent_voice->period, false);
 }
 
-void Engine::voiceBackward() {
+void Engine::cycleBackward() {
   printf("Cycling backward\n");
-  _gko.voiceBackward(_village);
+  _gko.cycleBackward(_village);
 }
 
-void Engine::voiceForward() {
-  _gko.voiceForward(_village);
+void Engine::cycleForward() {
+  _gko.cycleForward(_village);
 }
 
 void Engine::voiceObservation() {

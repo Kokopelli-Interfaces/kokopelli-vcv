@@ -27,7 +27,7 @@ void Aion::processButtons(const ProcessArgs &args) {
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
       _light_blinker->blinkLight(PREV_MOVEMENT_LIGHT, 3.f);
-      _connected_circle->_engines[c]->voiceBackward();
+      _connected_circle->_engines[c]->cycleBackward();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
       _light_blinker->blinkLight(PREV_MOVEMENT_LIGHT, 0.f); // TODO blink extra extra

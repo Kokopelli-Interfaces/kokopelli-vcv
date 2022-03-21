@@ -45,6 +45,9 @@ public:
 
   LoveDirection _love_direction;
 
+  // TODO
+  // rack::dsp::ClockDivider _advance_groups_playhead_divider;
+
 public:
   Gko() {
     _time_advancer.setTickFrequency(1.0f);
@@ -138,7 +141,7 @@ public:
     nextVoice(village, VoiceEnd::DISCARD);
   }
 
-  inline void voiceBackward(Village &village) {
+  inline void cycleBackward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (observer.checkIfInSubgroupMode()) {
@@ -159,7 +162,7 @@ public:
     }
   }
 
-  inline void voiceForward(Village &village) {
+  inline void cycleForward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (observer.checkIfInSubgroupMode()) {

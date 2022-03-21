@@ -64,7 +64,12 @@ struct ParentGroupDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    AionTextBox::setText("Parent Group");
+    if (e->_village.observed_sun->parent_group) {
+      std::string s = e->_village.observed_sun->parent_group->name;
+      AionTextBox::setText(s);
+    } else {
+      AionTextBox::setText("--");
+    }
   }
 };
 

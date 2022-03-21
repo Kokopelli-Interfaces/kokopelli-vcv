@@ -12,7 +12,7 @@ namespace circle {
 struct Group {
   Group *parent_group = nullptr;
 
-  std::string name= "*";
+  std::string name= "A";
 
   std::vector<Voice*> voices_in_group;
   std::vector<float> next_voices_relative_love;

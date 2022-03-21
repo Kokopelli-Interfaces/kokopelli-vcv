@@ -32,7 +32,7 @@ public:
         Group* subgroup = new Group();
         subgroups.push_back(subgroup);
         subgroup->parent_group = parent;
-        subgroup->name = rack::string::f("%s-%d", parent->name.c_str(), i+1);
+        subgroup->name = rack::string::f("%s/%d", parent->name.c_str(), i + 1);
         subgroup->addExistingVoice(voice);
         // voice->immediate_group = subgroup;
       } else {

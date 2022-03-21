@@ -12,9 +12,7 @@ namespace kokopellivcv {
 namespace dsp {
 namespace circle {
 
-struct Song {
-  std::string name = "My Song";
-
+struct Village {
   std::vector<Group*> groups;
   Group* observed_sun = nullptr;
 
@@ -31,7 +29,7 @@ struct Song {
 
   Outputs out;
 
-  Song() {
+  Village() {
     this->current_movement = new Movement();
     this->current_movement->group_start_movement = this->current_movement;
     this->start_movement = this->current_movement;

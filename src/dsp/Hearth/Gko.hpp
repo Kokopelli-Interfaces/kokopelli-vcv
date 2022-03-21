@@ -9,7 +9,7 @@
 #include "Conductor.hpp"
 #include "LoveUpdater.hpp"
 #include "OutputUpdater.hpp"
-#include "Song.hpp"
+#include "Village.hpp"
 #include "Cycle.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
@@ -52,8 +52,8 @@ public:
   }
 
 private:
-  inline void addCycle(Song &song, Cycle* ended_cycle) {
-    song.cycles.push_back(ended_cycle);
+  inline void addCycle(Village &village, Cycle* ended_cycle) {
+    village.cycles.push_back(ended_cycle);
     ended_cycle->immediate_group->addNewCycle(ended_cycle);
     if (delay_shiftback < ended_cycle->period) {
       ended_cycle->playhead += delay_shiftback;
@@ -61,32 +61,32 @@ private:
   }
 
 public:
-  inline void nextCycle(Song &song, CycleEnd cycle_end) {
-    Cycle* ended_cycle = song.new_cycle;
+  inline void nextCycle(Village &village, CycleEnd cycle_end) {
+    Cycle* ended_cycle = village.new_cycle;
 
     // may happen when reverse recording
     ended_cycle->finishWrite();
     if (ended_cycle->period == 0.0) {
       delete ended_cycle;
-      song.new_cycle = new Cycle(song.playhead, song.current_movement, song.observed_sun);
+      village.new_cycle = new Cycle(village.playhead, village.current_movement, village.observed_sun);
       return;
     }
 
     switch (cycle_end) {
     case CycleEnd::DISCARD:
-      song.clearEmptyGroups();
+      village.clearEmptyGroups();
       delete ended_cycle;
       break;
     case CycleEnd::NEXT_MOVEMENT_VIA_SHIFT:
       // ended_cycle->loop = false;
-      // song.cycles.push_back(ended_cycle);
+      // village.cycles.push_back(ended_cycle);
       // ended_cycle->immediate_group->addNewCycle(ended_cycle);
-      conductor.nextMovement(song);
+      conductor.nextMovement(village);
       delete ended_cycle;
       break;
     case CycleEnd::JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
-      addCycle(song, ended_cycle);
+      addCycle(village, ended_cycle);
       break;
     case CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
       ended_cycle->loop = true;
@@ -94,13 +94,13 @@ public:
       if (ended_cycle->immediate_group->period != 0.f) {
         ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
       }
-      addCycle(song, ended_cycle);
+      addCycle(village, ended_cycle);
       break;
     case CycleEnd::FLOOD:
-      for (int i = song.cycles.size()-1; 0 <= i; i--) {
-        if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(song.cycles[i]->immediate_group, ended_cycle->immediate_group)) {
-          song.cycles[i]->immediate_group->undoLastCycle();
-          song.cycles.erase(song.cycles.begin() + i);
+      for (int i = village.cycles.size()-1; 0 <= i; i--) {
+        if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(village.cycles[i]->immediate_group, ended_cycle->immediate_group)) {
+          village.cycles[i]->immediate_group->undoLastCycle();
+          village.cycles.erase(village.cycles.begin() + i);
         }
       }
 
@@ -115,110 +115,110 @@ public:
     // TODO
     Movement* cycle_movement;
     if (tune_to_frequency_of_observed_sun) {
-      cycle_movement = song.current_movement;
+      cycle_movement = village.current_movement;
     } else {
       // FIXME next movement
-      cycle_movement = song.current_movement;
+      cycle_movement = village.current_movement;
     }
 
-    song.new_cycle = new Cycle(song.playhead, cycle_movement, song.observed_sun);
+    village.new_cycle = new Cycle(village.playhead, cycle_movement, village.observed_sun);
   }
 
-  inline void undoCycle(Song &song) {
+  inline void undoCycle(Village &village) {
     if (observer.checkIfInSubgroupMode()) {
-      observer.exitSubgroupMode(song);
+      observer.exitSubgroupMode(village);
     }
 
-    if (0 < song.cycles.size()) {
-      Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
+    if (0 < village.cycles.size()) {
+      Cycle* most_recent_cycle = village.cycles[village.cycles.size()-1];
       most_recent_cycle->immediate_group->undoLastCycle();
-      song.cycles.pop_back();
+      village.cycles.pop_back();
     }
 
-    nextCycle(song, CycleEnd::DISCARD);
+    nextCycle(village, CycleEnd::DISCARD);
   }
 
-  inline void cycleBackward(Song &song) {
+  inline void cycleBackward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (observer.checkIfInSubgroupMode()) {
         if (observer.checkIfCanEnterFocusedSubgroup()) {
-          observer.exitSubgroupMode(song);
+          observer.exitSubgroupMode(village);
         }
-        nextCycle(song, CycleEnd::DISCARD);
+        nextCycle(village, CycleEnd::DISCARD);
       } else {
-        nextCycle(song, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
+        nextCycle(village, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
       }
       break;
     case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::DISCARD);
+      nextCycle(village, CycleEnd::DISCARD);
       break;
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::FLOOD);
+      nextCycle(village, CycleEnd::FLOOD);
       break;
     }
   }
 
-  inline void cycleForward(Song &song) {
+  inline void cycleForward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (observer.checkIfInSubgroupMode()) {
         if (observer.checkIfCanEnterFocusedSubgroup()) {
-          observer.exitSubgroupMode(song);
+          observer.exitSubgroupMode(village);
         }
-        nextCycle(song, CycleEnd::DISCARD);
+        nextCycle(village, CycleEnd::DISCARD);
       } else {
-        nextCycle(song, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
+        nextCycle(village, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
       }
       break;
     case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::DISCARD);
+      nextCycle(village, CycleEnd::DISCARD);
       break;
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::FLOOD);
+      nextCycle(village, CycleEnd::FLOOD);
       break;
     }
   }
 
-  inline void cycleObservation(Song &song) {
+  inline void cycleObservation(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (!observer.checkIfInSubgroupMode()) {
-        observer.tryEnterSubgroupMode(song);
+        observer.tryEnterSubgroupMode(village);
       } else {
-        observer.cycleSubgroup(song);
+        observer.cycleSubgroup(village);
       }
-      nextCycle(song, CycleEnd::DISCARD);
+      nextCycle(village, CycleEnd::DISCARD);
       break;
     case LoveDirection::EMERGENCE:
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP);
+      nextCycle(village, CycleEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP);
       break;
     }
   }
 
-  inline void handleLoveDirectionChange(Song &song, LoveDirection new_love_direction) {
+  inline void handleLoveDirectionChange(Village &village, LoveDirection new_love_direction) {
     assert(new_love_direction != _love_direction);
 
     if (new_love_direction == LoveDirection::OBSERVED_SUN) {
       if (_discard_cycle_at_next_love_return) {
-        nextCycle(song, CycleEnd::DISCARD);
+        nextCycle(village, CycleEnd::DISCARD);
         _discard_cycle_at_next_love_return = false;
       } else {
-        nextCycle(song, CycleEnd::JOIN_OBSERVED_SUN_LOOP);
+        nextCycle(village, CycleEnd::JOIN_OBSERVED_SUN_LOOP);
       }
 
       if (observer.checkIfInSubgroupMode()) {
-        observer.exitSubgroupMode(song);
+        observer.exitSubgroupMode(village);
       }
     } else if (_love_direction == LoveDirection::OBSERVED_SUN && new_love_direction == LoveDirection::EMERGENCE) {
-      nextCycle(song, CycleEnd::DISCARD);
+      nextCycle(village, CycleEnd::DISCARD);
     }
 
     _love_direction = new_love_direction;
   }
 
-  inline void advanceTime(Song &song) {
+  inline void advanceTime(Village &village) {
     float step = this->sample_time;
     if (use_ext_phase) {
       step = ext_phase - _last_ext_phase;
@@ -230,48 +230,55 @@ public:
       _last_ext_phase = ext_phase;
     }
 
-    if (!song.cycles.empty()) {
-      _time_advancer.step(song.playhead, step);
+    if (!village.cycles.empty()) {
+      _time_advancer.step(village.playhead, step);
     } else {
-      song.playhead = 0.f;
+      village.playhead = 0.f;
     }
 
-    _time_advancer.step(song.new_cycle->playhead, step);
+    _time_advancer.step(village.new_cycle->playhead, step);
     if (use_ext_phase) {
-      if (song.playhead < 0.f) {
-        song.playhead = 0.f;
+      if (village.playhead < 0.f) {
+        village.playhead = 0.f;
       }
-      if (song.new_cycle->playhead < 0.f) {
-        song.new_cycle->playhead = 0.f;
+      if (village.new_cycle->playhead < 0.f) {
+        village.new_cycle->playhead = 0.f;
       }
     }
 
-    for (Cycle* cycle : song.cycles) {
+    for (Cycle* cycle : village.cycles) {
       _time_advancer.step(cycle->playhead, step);
       if (cycle->period < cycle->playhead) {
+        while (cycle->period < cycle->playhead) {
         // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
-        cycle->playhead -= cycle->period;
-        assert(cycle->playhead < cycle->period);
+          cycle->playhead -= cycle->period;
+        }
       } else if (cycle->playhead < 0.f) {
+        while (cycle->playhead < 0.f) {
+        // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
+          cycle->playhead += cycle->period;
+        }
         cycle->playhead += cycle->period;
       }
+
+      assert(0 <= cycle->playhead);
     }
   }
 
 public:
-  inline void advance(Song &song, Inputs inputs, Options options) {
-    advanceTime(song);
-    song.new_cycle->write(inputs.in, inputs.love);
+  inline void advance(Village &village, Inputs inputs, Options options) {
+    advanceTime(village);
+    village.new_cycle->write(inputs.in, inputs.love);
 
     LoveDirection new_love_direction = Inputs::getLoveDirection(inputs.love);
     if (_love_direction != new_love_direction) {
-      handleLoveDirectionChange(song, new_love_direction);
+      handleLoveDirectionChange(village, new_love_direction);
     }
 
-    love_updater.updateSongCyclesLove(song.cycles);
-    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs, options);
+    love_updater.updateVillageCyclesLove(village.cycles);
+    output_updater.updateOutput(village.out, village.cycles, village.new_cycle->immediate_group, inputs, options);
 
-    conductor.conduct(song);
+    conductor.conduct(village);
   }
 };
 

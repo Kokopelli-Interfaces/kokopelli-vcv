@@ -161,18 +161,18 @@ void Hearth::processChannel(const ProcessArgs& args, int channel_i) {
   // }
 
   if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+    float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
     outputs[OBSERVER_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   if (outputs[OBSERVER_BEAT_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
+    float phase = e->_village.observed_sun->getBeatPhase(e->_village.playhead);
     outputs[OBSERVER_BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   e->step();
 
-  Outputs out = e->_song.out;
+  Outputs out = e->_village.out;
   if (outputs[SUN].isConnected()) {
     float sun_out = 0.f;
     if (_audition_position < 1.f) {
@@ -220,7 +220,7 @@ void Hearth::updateLights(const ProcessArgs &args) {
   float light_strength = .3f;
   LoveDirection love_direction = default_e->_gko._love_direction;
   if (love_direction == LoveDirection::OBSERVED_SUN) {
-    if (!default_e->_song.cycles.empty()) {
+    if (!default_e->_village.cycles.empty()) {
       updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
     } else {
       updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);

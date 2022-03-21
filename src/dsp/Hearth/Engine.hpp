@@ -2,7 +2,7 @@
 
 #include "definitions.hpp"
 #include "dsp/Signal.hpp"
-#include "Song.hpp"
+#include "Village.hpp"
 #include "Gko.hpp"
 
 #include "rack.hpp"
@@ -20,7 +20,7 @@ struct Engine {
   Inputs inputs;
   Options options;
 
-  Song _song;
+  Village _village;
   Gko _gko;
 
   // FIXME not set

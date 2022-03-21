@@ -60,19 +60,19 @@ struct AionTextBox : TextBox {
 	}
 };
 
-struct AlbumDisplay : AionTextBox {
+struct ParentGroupDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    AionTextBox::setText("My Album");
+    AionTextBox::setText("My ParentGroup");
   }
 };
 
-struct SongDisplay : AionTextBox {
+struct GroupDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    std::string s = e->_song.name;
+    std::string s = e->_village.observed_sun->name;
     AionTextBox::setText(s);
   }
 };
@@ -81,8 +81,8 @@ struct PrevMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    unsigned int group_movement_n = e->_song.current_movement->group_movement_n;
-    if (e->_song.current_movement->prev) {
+    unsigned int group_movement_n = e->_village.current_movement->group_movement_n;
+    if (e->_village.current_movement->prev) {
       textColor = colors::OBSERVED_SUN;
       AionTextBox::setMovementNumber(group_movement_n-1);
     } else {
@@ -96,7 +96,7 @@ struct CurrentMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    unsigned int group_movement_n = e->_song.current_movement->group_movement_n;
+    unsigned int group_movement_n = e->_village.current_movement->group_movement_n;
     AionTextBox::setMovementNumber(group_movement_n);
   }
 };
@@ -105,8 +105,8 @@ struct NextMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    unsigned int group_movement_n = e->_song.current_movement->group_movement_n;
-    if (e->_song.current_movement->next) {
+    unsigned int group_movement_n = e->_village.current_movement->group_movement_n;
+    if (e->_village.current_movement->next) {
       textColor = colors::OBSERVED_SUN;
       AionTextBox::setMovementNumber(group_movement_n+1);
     } else if (group_movement_n != 1) {
@@ -123,8 +123,8 @@ struct NextMovementDisplay : AionTextBox {
 struct AionWidget : ModuleWidget {
   const int hp = 4;
 
-  AlbumDisplay *_album_display;
-  SongDisplay *_song_display;
+  ParentGroupDisplay *_parent_group_display;
+  GroupDisplay *_group_display;
 
   AionTextBox *_next_next_movement_display;
   NextMovementDisplay *_next_movement_display;
@@ -132,7 +132,7 @@ struct AionWidget : ModuleWidget {
   PrevMovementDisplay *_prev_movement_display;
   AionTextBox *_prev_prev_movement_display;
 
-  // SongDisplay *song_display;
+  // GroupDisplay *group_display;
   // PrevMovementDisplay *prev_movement_display;
   // CurrentMovementDisplay *current_movement_display;
   // NextMovementDisplay *next_movement_display;
@@ -150,24 +150,24 @@ struct AionWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(9.648, 93.157)), module, Aion::CYCLE_BACKWARD_LIGHT));
 
     auto top_display_size = mm2px(Vec(19.472, 4.312));
-    _album_display = new AlbumDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 14.862)), top_display_size);
-    _song_display = new SongDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 20.550)), top_display_size);
+    _parent_group_display = new ParentGroupDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 14.862)), top_display_size);
+    _group_display = new GroupDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 20.550)), top_display_size);
 
     auto movement_display_size = mm2px(Vec(11.735, 4.327));
 
-		_next_next_movement_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 51.468)), movement_display_size);
+		_prev_prev_movement_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 51.468)), movement_display_size);
 
-    _next_movement_display = new NextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 59.131)), movement_display_size);
+    _prev_movement_display = new PrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 59.131)), movement_display_size);
 
     auto current_movement_display_size = mm2px(Vec(15.736, 4.312));
     _current_movement_display = new CurrentMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(3.604, 67.484)), current_movement_display_size);
 
-    _prev_movement_display = new PrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 75.551)), movement_display_size);
+    _next_movement_display = new NextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 75.551)), movement_display_size);
 
-    _prev_prev_movement_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 83.562)), movement_display_size);
+    _next_next_movement_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 83.562)), movement_display_size);
 
-    addChild(_album_display);
-    addChild(_song_display);
+    addChild(_parent_group_display);
+    addChild(_group_display);
     addChild(_next_next_movement_display);
     addChild(_next_movement_display);
     addChild(_current_movement_display);

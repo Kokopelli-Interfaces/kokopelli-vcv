@@ -6,7 +6,7 @@
 #include "rack.hpp"
 
 // FIXME
-#include "Song.hpp"
+#include "Village.hpp"
 #include "Cycle.hpp"
 #include "Observer.hpp"
 #include "Group.hpp"
@@ -46,7 +46,7 @@ private:
   }
 
 public:
-  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles) {
+  inline void updateVillageCyclesLove(std::vector<Cycle*> &cycles) {
     // TODO maybe put in function so to not call every step
     if (_next_cycles_love.size() < cycles.size()) {
       while (_next_cycles_love.size() < cycles.size()) {

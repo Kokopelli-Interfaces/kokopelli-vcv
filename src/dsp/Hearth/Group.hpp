@@ -12,7 +12,7 @@ namespace circle {
 struct Group {
   Group *parent_group = nullptr;
 
-  std::string id = "*";
+  std::string name= "*";
 
   std::vector<Cycle*> cycles_in_group;
   std::vector<float> next_cycles_relative_love;
@@ -21,6 +21,20 @@ struct Group {
 
   Time period = 0.0;
   Time beat_period = 0.0;
+
+  Time playhead = 0.f;
+
+  // inline void growPeriodAndRippleUpwards(float new_period) {
+  //   if (new_period < period) {
+  //     return;
+  //   }
+
+  //   assert(period % beat_period == 0);
+  //   period = new_period;
+  //   if (parent_group) {
+  //     parent_group->growPeriodAndRippleUpwards(new_period);
+  //   }
+  // }
 
   inline void undoLastCycleWithoutUndoingParent() {
     assert(cycles_in_group.size() == period_history.size());
@@ -190,7 +204,7 @@ struct Group {
       }
     }
 
-    printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
+    printf("-- added to group %s, n_beats->%d\n", name.c_str(), convertToBeat(cycle->period, false));
     printf("-- cycle period %Lf, cycle playhead %Lf\n", cycle->period, cycle->playhead);
   }
 
@@ -210,7 +224,7 @@ struct Group {
     }
     assert(cycle->period == period_before);
 
-    printf("-- add existing cycle to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
+    printf("-- add existing cycle to group %s, n_beats->%d\n", name.c_str(), convertToBeat(cycle->period, false));
   }
 };
 

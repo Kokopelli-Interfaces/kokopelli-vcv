@@ -51,31 +51,32 @@ struct ObservedSunDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+    // float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
+    float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
     backgroundColor.a = phase;
 
     if (e->_gko.observer.checkIfInSubgroupMode()) {
       // textColor = colors::LOOK_BACK_LAYER;
       textColor = colors::OBSERVED_SUN;
-      int pivot_id_len = e->_gko.observer._pivot_parent->id.size();
-      std::string left_text = e->_gko.observer._pivot_parent->id.substr(0, pivot_id_len);
+      int pivot_id_len = e->_gko.observer._pivot_parent->name.size();
+      std::string left_text = e->_gko.observer._pivot_parent->name.substr(0, pivot_id_len);
 
       std::string right_text;
       // this is an invariant that does not hold sometimes due to race condition as this is widget thread
-      if ((unsigned int)pivot_id_len < e->_song.observed_sun->id.size()) {
-        right_text = e->_song.observed_sun->id.substr(pivot_id_len+1);
+      if ((unsigned int)pivot_id_len < e->_village.observed_sun->name.size()) {
+        right_text = e->_village.observed_sun->name.substr(pivot_id_len+1);
       } else {
-        right_text = e->_song.observed_sun->id.substr(pivot_id_len);
+        right_text = e->_village.observed_sun->name.substr(pivot_id_len);
       }
 
       std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
       HearthTextBox::setText(s);
-      // HearthTextBox::setText(e->_song.observed_sun->id);
+      // HearthTextBox::setText(e->_village.observed_sun->name);
     } else {
       textColor = colors::OBSERVED_SUN;
-      // std::string s = string::f("%s", e->_song.observed_sun->id);
+      // std::string s = string::f("%s", e->_village.observed_sun->name);
       // HearthTextBox::setText(s);
-      HearthTextBox::setText(e->_song.observed_sun->id);
+      HearthTextBox::setText(e->_village.observed_sun->name);
     }
   }
 };
@@ -84,7 +85,7 @@ struct ObservedSunBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.playhead, true);
+    int beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.playhead, true);
     HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
 	}
 };
@@ -94,7 +95,7 @@ struct TotalObservedSunBeatDisplay : HearthTextBox {
 
   // FIXME
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    HearthTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
+    HearthTextBox::setDisplayValue(e->_village.observed_sun->getTotalBeats());
 	}
 };
 
@@ -103,12 +104,12 @@ struct WombDisplay : HearthTextBox {
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     float phase = 0.f;
-    // phase = e->_song.observed_sun->getBeatPhase(e->_song.new_cycle->playhead);
-    phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
+    // phase = e->_village.observed_sun->getBeatPhase(e->_village.new_cycle->playhead);
+    phase = e->_village.observed_sun->getBeatPhase(e->_village.playhead);
 
     backgroundColor.a = phase;
 
-    int womb_display = e->_song.observed_sun->cycles_in_group.size() + 1;
+    int womb_display = e->_village.observed_sun->cycles_in_group.size() + 1;
     std::string s = string::f("%d", womb_display);
     HearthTextBox::setText(s);
 	}
@@ -120,11 +121,11 @@ struct WombBeatDisplay : HearthTextBox {
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e->_gko.tune_to_frequency_of_observed_sun) {
       int beat_in_observed_sun;
-      beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
+      beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.new_cycle->playhead, false);
 
       HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
     } else {
-      HearthTextBox::setDisplayValue((int)e->_song.new_cycle->playhead);
+      HearthTextBox::setDisplayValue((int)e->_village.new_cycle->playhead);
     }
 	}
 };
@@ -133,7 +134,7 @@ struct TotalWombBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    if (e->_song.cycles.size() == 0) {
+    if (e->_village.cycles.size() == 0) {
       textColor = colors::WOMB;
       HearthTextBox::setText("--");
       HearthTextBox::_previous_displayed_value = -1;
@@ -142,15 +143,15 @@ struct TotalWombBeatDisplay : HearthTextBox {
 
     // option
     if (e->_gko.observer.checkIfInSubgroupMode()) {
-      HearthTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
+      HearthTextBox::setDisplayValue(e->_village.observed_sun->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;
       HearthTextBox::setDisplayValue(e->getMostRecentCycleLength());
-      // if (e->_song.observed_sun->cycles_in_group.size() == 0) {
+      // if (e->_village.observed_sun->cycles_in_group.size() == 0) {
       //   HearthTextBox::setDisplayValue(1);
       // } else {
-      //   Time adjusted_period = e->_song.observed_sun->getAdjustedPeriod(e->_song.new_cycle->playhead);
-      //   int n_beats = e->_song.observed_sun->convertToBeat(adjusted_period, false);
+      //   Time adjusted_period = e->_village.observed_sun->getAdjustedPeriod(e->_village.new_cycle->playhead);
+      //   int n_beats = e->_village.observed_sun->convertToBeat(adjusted_period, false);
       //   HearthTextBox::setDisplayValue(n_beats);
       // }
     }

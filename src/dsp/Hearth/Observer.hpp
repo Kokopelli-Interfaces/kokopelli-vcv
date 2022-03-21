@@ -32,7 +32,7 @@ public:
         Group* subgroup = new Group();
         subgroups.push_back(subgroup);
         subgroup->parent_group = parent;
-        subgroup->id = rack::string::f("%s-%d", parent->id.c_str(), i+1);
+        subgroup->name = rack::string::f("%s-%d", parent->name.c_str(), i+1);
         subgroup->addExistingCycle(cycle);
         // cycle->immediate_group = subgroup;
       } else {
@@ -71,11 +71,11 @@ public:
     return can_enter;
   }
 
-  inline void tryEnterSubgroupMode(Song &song) {
+  inline void tryEnterSubgroupMode(Village &village) {
     assert(!_subgroup_mode);
-    assert(song.observed_sun);
+    assert(village.observed_sun);
 
-    _pivot_parent = song.observed_sun;
+    _pivot_parent = village.observed_sun;
     if (_pivot_parent->cycles_in_group.empty()) {
       return;
     }
@@ -83,39 +83,39 @@ public:
     _subgroups = breakIntoSubgroups(_pivot_parent);
     _subgroup_mode = true;
     _focused_subgroup_i = _subgroups.size() - 1;
-    song.observed_sun = _subgroups[_focused_subgroup_i];
+    village.observed_sun = _subgroups[_focused_subgroup_i];
 
     Group* subgroup = _subgroups[_focused_subgroup_i];
-    bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), subgroup) != song.groups.end();
-    if (!subgroup_in_song) {
+    bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
+    if (!subgroup_in_village) {
       for (auto cycle : subgroup->cycles_in_group) {
         cycle->immediate_group = subgroup;
       }
-      song.groups.push_back(subgroup);
+      village.groups.push_back(subgroup);
     }
 
 }
 
-inline void exitSubgroupMode(Song &song) {
+inline void exitSubgroupMode(Village &village) {
   Group* subgroup = _subgroups[_focused_subgroup_i];
 
   if (!subgroup->cycles_in_group.empty()) {
-    bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), subgroup) != song.groups.end();
-    if (!subgroup_in_song) {
-      song.groups.push_back(subgroup);
+    bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
+    if (!subgroup_in_village) {
+      village.groups.push_back(subgroup);
 
       // TODO is it right?
       subgroup->cycles_in_group[0]->immediate_group = subgroup;
     }
-    song.observed_sun = subgroup;
+    village.observed_sun = subgroup;
   } else {
-    song.observed_sun = _pivot_parent;
+    village.observed_sun = _pivot_parent;
   }
 
   for (Group* group: _subgroups) {
-    bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), group) != song.groups.end();
-    if (!subgroup_in_song) {
-      // for (auto cycle: song.cycles) {
+    bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), group) != village.groups.end();
+    if (!subgroup_in_village) {
+      // for (auto cycle: village.cycles) {
       //   if (cycle->immediate_group == group) {
       //     cycle->immediate_group = _pivot_parent;
       //   }
@@ -128,17 +128,17 @@ inline void exitSubgroupMode(Song &song) {
   _subgroup_mode = false;
 }
 
-  inline void cycleSubgroup(Song &song) {
+  inline void cycleSubgroup(Village &village) {
     assert(_subgroup_mode);
 
     Group* last_subgroup = _subgroups[_focused_subgroup_i];
     bool subgroup_created = last_subgroup->cycles_in_group.size() == 1;
     if (subgroup_created) {
-      bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), last_subgroup) != song.groups.end();
-      if (subgroup_in_song) {
+      bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), last_subgroup) != village.groups.end();
+      if (subgroup_in_village) {
         last_subgroup->cycles_in_group[0]->immediate_group = _pivot_parent;
       }
-      song.groups.pop_back();
+      village.groups.pop_back();
     }
 
     if (_focused_subgroup_i == 0) {
@@ -149,27 +149,27 @@ inline void exitSubgroupMode(Song &song) {
 
     Group* subgroup = _subgroups[_focused_subgroup_i];
 
-    bool subgroup_in_song = std::find(song.groups.begin(), song.groups.end(), subgroup) != song.groups.end();
-    if (!subgroup_in_song) {
+    bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
+    if (!subgroup_in_village) {
       for (auto cycle : subgroup->cycles_in_group) {
         cycle->immediate_group = subgroup;
       }
-      song.groups.push_back(subgroup);
+      village.groups.push_back(subgroup);
     }
 
-    song.observed_sun = subgroup;
+    village.observed_sun = subgroup;
   }
 
-  inline void ascend(Song &song) {
+  inline void ascend(Village &village) {
     if (_subgroup_mode) {
-      exitSubgroupMode(song);
+      exitSubgroupMode(village);
     }
 
-    if (song.observed_sun->parent_group) {
-      song.observed_sun = song.observed_sun->parent_group;
+    if (village.observed_sun->parent_group) {
+      village.observed_sun = village.observed_sun->parent_group;
     }
 
-    song.clearEmptyGroups();
+    village.clearEmptyGroups();
   }
 };
 

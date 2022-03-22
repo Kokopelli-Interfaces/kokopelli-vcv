@@ -38,7 +38,6 @@ void Aion::processButtons(const ProcessArgs &args) {
 }
 
 bool Aion::isNextToHearth() {
-  // FIXME how to check if its hearth?
   if (this->rightExpander.module && this->rightExpander.module->model == modelHearth) {
     return true;
   }

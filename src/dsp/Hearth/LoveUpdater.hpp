@@ -23,25 +23,29 @@ namespace hearth {
 
 class LoveUpdater {
 public:
-  float love_resolution = 1000.f;
+  float _love_resolution = 1000.f;
 
   rack::dsp::ClockDivider _love_calculator_divider;
   std::vector<float> _next_voices_love;
 
   LoveUpdater() {
-    _love_calculator_divider.setDivision(love_resolution);
+    _love_calculator_divider.setDivision(_love_resolution);
   }
 
   inline void updateLoveResolution(float resolution) {
-    love_resolution = resolution;
+    _love_resolution = resolution;
     _love_calculator_divider.reset();
     _love_calculator_divider.setDivision(resolution);
+  }
+
+  inline void resetState() {
+    _love_calculator_divider.reset();
   }
 
 private:
   // TODO voice types (song or movement), depends on tuning and affects love
   inline float smoothValue(float current, float old) {
-    float lambda = 1 / love_resolution;
+    float lambda = 1 / _love_resolution;
     return old + (current - old) * lambda;
   }
 

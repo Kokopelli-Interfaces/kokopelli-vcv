@@ -4,11 +4,11 @@ using namespace kokopellivcv::dsp::hearth;
 using namespace kokopellivcv::dsp;
 
 void Engine::toggleMovementProgression() {
-  _gko.conductor.loop_movement = !_gko.conductor.loop_movement;
+  _gko.toggleMovementProgression();
 }
 
 void Engine::step() {
-  _gko.advance(_village, inputs, options);
+  _gko.advance(_village, this->inputs, this->options);
 }
 
 int Engine::getMostRecentVoiceLength() {
@@ -17,7 +17,6 @@ int Engine::getMostRecentVoiceLength() {
 }
 
 void Engine::cycleBackward() {
-  printf("Cycling backward\n");
   _gko.cycleBackward(_village);
 }
 
@@ -30,9 +29,7 @@ void Engine::voiceObservation() {
 }
 
 void Engine::ascend() {
-  _gko.observer.ascend(_village);
-  _gko.nextVoice(_village, VoiceEnd::DISCARD);
-  _gko._discard_voice_at_next_love_return = true;
+  _gko.ascend(_village);
 }
 
 void Engine::undo() {
@@ -40,6 +37,5 @@ void Engine::undo() {
 }
 
 void Engine::channelStateReset() {
-  _gko.nextVoice(_village, VoiceEnd::DISCARD);
-  _gko.love_updater._love_calculator_divider.reset();
+  _gko.resetState(_village);
 }

@@ -46,3 +46,9 @@ struct Options {
   bool include_moon_in_sun_output = true;
   bool include_unloved_moon_in_sun_output = true;
 };
+
+struct VoiceOptions {
+  Time max_crossfade_time = 0.05f;
+  Time fade_in_time = 0.02f;
+  Time fade_out_time = 0.07f;
+};

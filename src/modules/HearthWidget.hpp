@@ -55,11 +55,11 @@ struct ObservedSunDisplay : HearthTextBox {
     float phase = e->_village.observed_sun->getPhase();
     backgroundColor.a = phase;
 
-    if (e->_gko.observer.checkIfInSubgroupMode()) {
+    if (e->_gko._observer.checkIfInSubgroupMode()) {
       // textColor = colors::LOOK_BACK_LAYER;
       textColor = colors::OBSERVED_SUN;
-      int pivot_id_len = e->_gko.observer._pivot_parent->name.size();
-      std::string left_text = e->_gko.observer._pivot_parent->name.substr(0, pivot_id_len);
+      int pivot_id_len = e->_gko._observer._pivot_parent->name.size();
+      std::string left_text = e->_gko._observer._pivot_parent->name.substr(0, pivot_id_len);
 
       std::string right_text;
       // this is an invariant that does not hold sometimes due to race condition as this is widget thread
@@ -109,7 +109,7 @@ struct WombDisplay : HearthTextBox {
 
     backgroundColor.a = phase;
 
-    int womb_display = e->_village.observed_sun->voices_in_group.size() + 1;
+    int womb_display = e->_village.observed_sun->_voices_in_group.size() + 1;
     std::string s = string::f("%d", womb_display);
     HearthTextBox::setText(s);
 	}
@@ -142,12 +142,12 @@ struct TotalWombBeatDisplay : HearthTextBox {
     }
 
     // option
-    if (e->_gko.observer.checkIfInSubgroupMode()) {
+    if (e->_gko._observer.checkIfInSubgroupMode()) {
       HearthTextBox::setDisplayValue(e->_village.observed_sun->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;
       HearthTextBox::setDisplayValue(e->getMostRecentVoiceLength());
-      // if (e->_village.observed_sun->voices_in_group.size() == 0) {
+      // if (e->_village.observed_sun->_voices_in_group.size() == 0) {
       //   HearthTextBox::setDisplayValue(1);
       // } else {
       //   Time adjusted_period = e->_village.observed_sun->getAdjustedPeriod(e->_village.new_voice->playhead);

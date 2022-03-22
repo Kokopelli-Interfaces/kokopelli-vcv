@@ -25,8 +25,8 @@ public:
   static inline std::vector<Group*> breakIntoSubgroups(Group* parent) {
     std::vector<Group*> subgroups;
 
-    for (unsigned int i = 0; i < parent->voices_in_group.size(); i++) {
-      Voice* voice = parent->voices_in_group[i];
+    for (unsigned int i = 0; i < parent->_voices_in_group.size(); i++) {
+      Voice* voice = parent->_voices_in_group[i];
       bool create_subgroup = voice->immediate_group == parent;
       if (create_subgroup) {
         Group* subgroup = new Group();
@@ -67,7 +67,7 @@ public:
   inline bool checkIfCanEnterFocusedSubgroup() {
     assert(_subgroup_mode);
     Group* focused_subgroup = _subgroups[_focused_subgroup_i];
-    bool can_enter =  1 < focused_subgroup->voices_in_group.size();
+    bool can_enter =  1 < focused_subgroup->_voices_in_group.size();
     return can_enter;
   }
 
@@ -76,7 +76,7 @@ public:
     assert(village.observed_sun);
 
     _pivot_parent = village.observed_sun;
-    if (_pivot_parent->voices_in_group.empty()) {
+    if (_pivot_parent->_voices_in_group.empty()) {
       return;
     }
 
@@ -88,7 +88,7 @@ public:
     Group* subgroup = _subgroups[_focused_subgroup_i];
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
-      for (auto voice : subgroup->voices_in_group) {
+      for (auto voice : subgroup->_voices_in_group) {
         voice->immediate_group = subgroup;
       }
       village.groups.push_back(subgroup);
@@ -99,13 +99,13 @@ public:
 inline void exitSubgroupMode(Village &village) {
   Group* subgroup = _subgroups[_focused_subgroup_i];
 
-  if (!subgroup->voices_in_group.empty()) {
+  if (!subgroup->_voices_in_group.empty()) {
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
       village.groups.push_back(subgroup);
 
       // TODO is it right?
-      subgroup->voices_in_group[0]->immediate_group = subgroup;
+      subgroup->_voices_in_group[0]->immediate_group = subgroup;
     }
     village.observed_sun = subgroup;
   } else {
@@ -132,11 +132,11 @@ inline void exitSubgroupMode(Village &village) {
     assert(_subgroup_mode);
 
     Group* last_subgroup = _subgroups[_focused_subgroup_i];
-    bool subgroup_created = last_subgroup->voices_in_group.size() == 1;
+    bool subgroup_created = last_subgroup->_voices_in_group.size() == 1;
     if (subgroup_created) {
       bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), last_subgroup) != village.groups.end();
       if (subgroup_in_village) {
-        last_subgroup->voices_in_group[0]->immediate_group = _pivot_parent;
+        last_subgroup->_voices_in_group[0]->immediate_group = _pivot_parent;
       }
       village.groups.pop_back();
     }
@@ -151,7 +151,7 @@ inline void exitSubgroupMode(Village &village) {
 
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
-      for (auto voice : subgroup->voices_in_group) {
+      for (auto voice : subgroup->_voices_in_group) {
         voice->immediate_group = subgroup;
       }
       village.groups.push_back(subgroup);

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <numeric> // std::iota
 
 #include "rack.hpp"
 
@@ -31,10 +30,10 @@ public:
 
   /** read only */
 
-  Conductor conductor;
-  Observer observer;
-  LoveUpdater love_updater;
-  OutputUpdater output_updater;
+  Conductor _conductor;
+  Observer _observer;
+  LoveUpdater _love_updater;
+  OutputUpdater _output_updater;
 
   bool _discard_voice_at_next_love_return = false;
 
@@ -78,7 +77,7 @@ public:
       // ended_voice->loop = false;
       // village.voices.push_back(ended_voice);
       // ended_voice->immediate_group->addNewVoice(ended_voice);
-      conductor.nextMovement(village);
+      _conductor.nextMovement(village);
       delete ended_voice;
       break;
     case VoiceEnd::JOIN_OBSERVED_SUN_LOOP:
@@ -88,8 +87,8 @@ public:
     case VoiceEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
       ended_voice->loop = true;
       _discard_voice_at_next_love_return = true;
-      if (ended_voice->immediate_group->period != 0.f) {
-        ended_voice->setPeriodToCaptureWindow(ended_voice->immediate_group->period);
+      if (ended_voice->immediate_group->_period != 0.f) {
+        ended_voice->setPeriodToCaptureWindow(ended_voice->immediate_group->_period);
       }
       addVoice(village, ended_voice);
       break;
@@ -122,8 +121,8 @@ public:
   }
 
   inline void undoVoice(Village &village) {
-    if (observer.checkIfInSubgroupMode()) {
-      observer.exitSubgroupMode(village);
+    if (_observer.checkIfInSubgroupMode()) {
+      _observer.exitSubgroupMode(village);
     }
 
     if (0 < village.voices.size()) {
@@ -138,9 +137,9 @@ public:
   inline void cycleBackward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
-      if (observer.checkIfInSubgroupMode()) {
-        if (observer.checkIfCanEnterFocusedSubgroup()) {
-          observer.exitSubgroupMode(village);
+      if (_observer.checkIfInSubgroupMode()) {
+        if (_observer.checkIfCanEnterFocusedSubgroup()) {
+          _observer.exitSubgroupMode(village);
         }
         nextVoice(village, VoiceEnd::DISCARD);
       } else {
@@ -159,9 +158,9 @@ public:
   inline void cycleForward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
-      if (observer.checkIfInSubgroupMode()) {
-        if (observer.checkIfCanEnterFocusedSubgroup()) {
-          observer.exitSubgroupMode(village);
+      if (_observer.checkIfInSubgroupMode()) {
+        if (_observer.checkIfCanEnterFocusedSubgroup()) {
+          _observer.exitSubgroupMode(village);
         }
         nextVoice(village, VoiceEnd::DISCARD);
       } else {
@@ -180,10 +179,10 @@ public:
   inline void voiceObservation(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
-      if (!observer.checkIfInSubgroupMode()) {
-        observer.tryEnterSubgroupMode(village);
+      if (!_observer.checkIfInSubgroupMode()) {
+        _observer.tryEnterSubgroupMode(village);
       } else {
-        observer.voicesubgroup(village);
+        _observer.voicesubgroup(village);
       }
       nextVoice(village, VoiceEnd::DISCARD);
       break;
@@ -205,8 +204,8 @@ public:
         nextVoice(village, VoiceEnd::JOIN_OBSERVED_SUN_LOOP);
       }
 
-      if (observer.checkIfInSubgroupMode()) {
-        observer.exitSubgroupMode(village);
+      if (_observer.checkIfInSubgroupMode()) {
+        _observer.exitSubgroupMode(village);
       }
     } else if (_love_direction == LoveDirection::OBSERVED_SUN && new_love_direction == LoveDirection::EMERGENCE) {
       nextVoice(village, VoiceEnd::DISCARD);
@@ -216,6 +215,21 @@ public:
   }
 
 public:
+  inline void resetState(Village &village) {
+    nextVoice(village, VoiceEnd::DISCARD);
+    _love_updater.resetState();
+  }
+
+  inline void toggleMovementProgression() {
+    _conductor.loop_movement = !_conductor.loop_movement;
+  }
+
+  inline void ascend(Village &village) {
+    _observer.ascend(village);
+    nextVoice(village, VoiceEnd::DISCARD);
+    _discard_voice_at_next_love_return = true;
+  }
+
   inline void advance(Village &village, Inputs inputs, Options options) {
     time_advancer.advanceTime(village);
     village.new_voice->write(inputs.in, inputs.love);
@@ -225,8 +239,8 @@ public:
       handleLoveDirectionChange(village, new_love_direction);
     }
 
-    love_updater.updateVillageVoicesLove(village.voices);
-    output_updater.updateOutput(village.out, village.voices, village.new_voice->immediate_group, inputs, options);
+    _love_updater.updateVillageVoicesLove(village.voices);
+    _output_updater.updateOutput(village.out, village.voices, village.new_voice->immediate_group, inputs, options);
   }
 };
 

@@ -101,7 +101,7 @@ void Hearth::modulate() {
     _love_resolution = _options.love_resolution;
     for (int c = 0; c < channels(); c++) {
       kokopellivcv::dsp::hearth::Engine *e = _engines[c];
-      e->_gko.love_updater.updateLoveResolution(_love_resolution);
+      e->_gko._love_updater.updateLoveResolution(_love_resolution);
     }
   }
 
@@ -226,8 +226,8 @@ void Hearth::updateLights(const ProcessArgs &args) {
       updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
     }
 
-    if (default_e->_gko.observer.checkIfInSubgroupMode()) {
-      if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
+    if (default_e->_gko._observer.checkIfInSubgroupMode()) {
+      if (default_e->_gko._observer.checkIfCanEnterFocusedSubgroup()) {
         updateLight(NEXT_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
       } else {
         updateLight(NEXT_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);

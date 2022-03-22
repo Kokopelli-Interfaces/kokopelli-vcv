@@ -29,18 +29,18 @@ struct Village {
   }
 
   void clearEmptyGroups() {
-    for (int i = groups.size()-1; 0 <= i; i--) {
-      if (groups[i]->voices_in_group.size() == 0) {
-        if (groups[i]->parent_group == nullptr) {
+    for (int i = this->groups.size()-1; 0 <= i; i--) {
+      if (this->groups[i]->_voices_in_group.size() == 0) {
+        if (this->groups[i]->parent_group == nullptr) {
           continue;
         }
 
-        if (groups[i] == observed_sun && groups[i]->parent_group) {
-          observed_sun = groups[i]->parent_group;
+        if (this->groups[i] == this->observed_sun && this->groups[i]->parent_group) {
+          this->observed_sun = this->groups[i]->parent_group;
         }
 
-        Group* delete_group = groups[i];
-        groups.erase(groups.begin() + i);
+        Group* delete_group = this->groups[i];
+        this->groups.erase(this->groups.begin() + i);
         delete delete_group;
       }
     }

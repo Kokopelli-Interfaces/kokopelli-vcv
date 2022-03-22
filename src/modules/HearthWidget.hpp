@@ -52,7 +52,7 @@ struct ObservedSunDisplay : HearthTextBox {
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
     // float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
-    float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
+    float phase = e->_village.observed_sun->getPhase();
     backgroundColor.a = phase;
 
     if (e->_gko.observer.checkIfInSubgroupMode()) {
@@ -85,7 +85,7 @@ struct ObservedSunBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    int beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.playhead, true);
+    int beat_in_observed_sun = e->_village.observed_sun->getBeatN();
     HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
 	}
 };
@@ -105,7 +105,7 @@ struct WombDisplay : HearthTextBox {
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
     float phase = 0.f;
     // phase = e->_village.observed_sun->getBeatPhase(e->_village.new_voice->playhead);
-    phase = e->_village.observed_sun->getBeatPhase(e->_village.playhead);
+    phase = e->_village.observed_sun->getBeatPhase();
 
     backgroundColor.a = phase;
 
@@ -121,7 +121,7 @@ struct WombBeatDisplay : HearthTextBox {
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
     if (e->_gko.tune_to_frequency_of_observed_sun) {
       int beat_in_observed_sun;
-      beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.new_voice->playhead, false);
+      beat_in_observed_sun = e->_village.observed_sun->getBeatN();
 
       HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
     } else {
@@ -151,7 +151,7 @@ struct TotalWombBeatDisplay : HearthTextBox {
       //   HearthTextBox::setDisplayValue(1);
       // } else {
       //   Time adjusted_period = e->_village.observed_sun->getAdjustedPeriod(e->_village.new_voice->playhead);
-      //   int n_beats = e->_village.observed_sun->convertToBeat(adjusted_period, false);
+      //   int n_beats = e->_village.observed_sun->getBeatN();
       //   HearthTextBox::setDisplayValue(n_beats);
       // }
     }

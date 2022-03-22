@@ -24,12 +24,10 @@ namespace hearth {
 
 class Gko {
 public:
-  bool use_ext_phase = false;
-  float ext_phase = 0.f;
-
-  float sample_time = 1.0f;
   Time delay_shiftback = 0.f;
   bool tune_to_frequency_of_observed_sun = true;
+
+  TimeAdvancer time_advancer;
 
   /** read only */
 
@@ -40,17 +38,13 @@ public:
 
   bool _discard_voice_at_next_love_return = false;
 
-  float _last_ext_phase = 0.f;
-  TimeAdvancer _time_advancer;
 
   LoveDirection _love_direction;
 
-  // TODO
-  // rack::dsp::ClockDivider _advance_groups_playhead_divider;
 
 public:
   Gko() {
-    _time_advancer.setTickFrequency(1.0f);
+    time_advancer.setTickFrequency(1.0f);
     // TODO set me when loop is observed_sun for consistent loops
   }
 
@@ -71,7 +65,7 @@ public:
     ended_voice->finishWrite();
     if (ended_voice->period == 0.0) {
       delete ended_voice;
-      village.new_voice = new Voice(village.playhead, village.current_movement, village.observed_sun);
+      village.new_voice = new Voice(village.observed_sun);
       return;
     }
 
@@ -115,16 +109,16 @@ public:
       break;
     }
 
-    // TODO
-    Movement* voice_movement;
-    if (tune_to_frequency_of_observed_sun) {
-      voice_movement = village.current_movement;
-    } else {
-      // FIXME next movement
-      voice_movement = village.current_movement;
-    }
+    // // TODO
+    // Movement* voice_movement;
+    // if (tune_to_frequency_of_observed_sun) {
+    //   voice_movement = village.current_movement;
+    // } else {
+    //   // FIXME next movement
+    //   voice_movement = village.current_movement;
+    // }
 
-    village.new_voice = new Voice(village.playhead, voice_movement, village.observed_sun);
+    village.new_voice = new Voice(village.observed_sun);
   }
 
   inline void undoVoice(Village &village) {
@@ -221,56 +215,9 @@ public:
     _love_direction = new_love_direction;
   }
 
-  inline void advanceTime(Village &village) {
-    float step = this->sample_time;
-    if (use_ext_phase) {
-      step = ext_phase - _last_ext_phase;
-      if (step < -0.95f) {
-        step = ext_phase + 1 - _last_ext_phase;
-      } else if (0.95f < step) {
-        step = ext_phase - 1 - _last_ext_phase;
-      }
-      _last_ext_phase = ext_phase;
-    }
-
-    if (!village.voices.empty()) {
-      _time_advancer.step(village.playhead, step);
-    } else {
-      village.playhead = 0.f;
-    }
-
-    _time_advancer.step(village.new_voice->playhead, step);
-    if (use_ext_phase) {
-      if (village.playhead < 0.f) {
-        village.playhead = 0.f;
-      }
-      if (village.new_voice->playhead < 0.f) {
-        village.new_voice->playhead = 0.f;
-      }
-    }
-
-    for (Voice* voice : village.voices) {
-      _time_advancer.step(voice->playhead, step);
-      if (voice->period < voice->playhead) {
-        while (voice->period < voice->playhead) {
-        // printf("advanceTime: skip back voice (%Lf < %Lf)\n", voice->period, voice->playhead);
-          voice->playhead -= voice->period;
-        }
-      } else if (voice->playhead < 0.f) {
-        while (voice->playhead < 0.f) {
-        // printf("advanceTime: skip back voice (%Lf < %Lf)\n", voice->period, voice->playhead);
-          voice->playhead += voice->period;
-        }
-        voice->playhead += voice->period;
-      }
-
-      assert(0 <= voice->playhead);
-    }
-  }
-
 public:
   inline void advance(Village &village, Inputs inputs, Options options) {
-    advanceTime(village);
+    time_advancer.advanceTime(village);
     village.new_voice->write(inputs.in, inputs.love);
 
     LoveDirection new_love_direction = Inputs::getLoveDirection(inputs.love);
@@ -280,8 +227,6 @@ public:
 
     love_updater.updateVillageVoicesLove(village.voices);
     output_updater.updateOutput(village.out, village.voices, village.new_voice->immediate_group, inputs, options);
-
-    conductor.conduct(village);
   }
 };
 

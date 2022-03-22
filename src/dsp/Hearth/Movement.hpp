@@ -10,14 +10,9 @@ namespace hearth {
 struct Voice;
 
 struct Movement {
-  char timeline = '*';
-  int group_movement_n = 1;
-
-  std::vector<Voice*> voices_in_movement;
-
-  Movement *group_start_movement = nullptr;
-  Movement *prev = nullptr;
-  Movement *next = nullptr;
+  Time entrance_time = 0.0;
+  Time period = 0.0;
+  Time beat_period = 0.0;
 
   // TODO
   // inline float getMovementPhase(Time song_time) {

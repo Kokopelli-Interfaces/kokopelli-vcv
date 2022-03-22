@@ -9,20 +9,36 @@ namespace kokopellivcv {
 namespace dsp {
 namespace hearth {
 
+// FIXME rename to Emergence
 struct Group {
   Group *parent_group = nullptr;
-
   std::string name= "A";
 
+  std::vector<Movement*> movements;
+  int i = 0;
+
   std::vector<Voice*> voices_in_group;
+  std::vector<int> voice_i_to_entrance_movement_i;
+
   std::vector<float> next_voices_relative_love;
 
   std::vector<Time> period_history;
-
   Time period = 0.0;
   Time beat_period = 0.0;
 
   Time playhead = 0.f;
+
+  unsigned int getMostRecentMovement(int offset) {
+    if (movements.empty()) {
+      return 0;
+    }
+
+    int index = this->i + offset;
+    while (index < 0) {
+      index += movements.size();
+    }
+    return (index % movements.size()) + 1;
+  }
 
   // inline void growPeriodAndRippleUpwards(float new_period) {
   //   if (new_period < period) {
@@ -63,30 +79,33 @@ struct Group {
     return false;
   }
 
-  inline float getBeatPhase(Time time) {
+  inline float getBeatPhase() {
     if (period != 0.0 && beat_period != 0.0) {
-      Time time_in_beat = std::fmod((float)time, (float)beat_period);
+      Time time_in_beat = std::fmod((float)this->playhead, (float)beat_period);
       return rack::clamp(time_in_beat / beat_period , 0.f, 1.f);
     }
     return 0.f;
   }
 
-  inline float getPhase(Time time) {
+  inline float getPhase() {
     if (period != 0.0 && beat_period != 0.0) {
-      Time time_in_observed_sun = std::fmod((float)time, (float)period);
-      return rack::clamp(time_in_observed_sun / period , 0.f, 1.f);
+      // FIXME
+      // Time time_in_movement = std::fmod((float)this->playhead, (float)period);
+      // return rack::clamp(time_in_movement / period , 0.f, 1.f);
+      return rack::clamp(this->playhead / period , 0.f, 1.f);
     }
     return 0.f;
   }
 
-  inline int convertToBeat(Time time, bool mod) {
+  inline int getBeatN() {
     if (period != 0.f && beat_period != 0.f) {
-      float time_in_observed_sun = time;
-      if (mod && period < time) {
-        time_in_observed_sun = std::fmod((float)time, (float)period);
-      }
+      // float time_in_movement = this->playhead;
+      // if (period < this->playhead) { // FIXME
+      //   time_in_movement = std::fmod((float)this->playhead, (float)period);
+      // }
 
-      return (int) (time_in_observed_sun / beat_period);
+      // return (int) (time_in_movement / beat_period);
+      return (int) (playhead / beat_period);
     }
     return 0;
   }
@@ -171,7 +190,6 @@ struct Group {
     voice_period = adjusted_period;
   }
 
-  // TODO voice invariatn
   inline void addNewVoice(Voice* voice) {
     Time original_playhead = voice->playhead;
     Time original_period = voice->period;
@@ -204,7 +222,7 @@ struct Group {
       }
     }
 
-    printf("-- added to group %s, n_beats->%d\n", name.c_str(), convertToBeat(voice->period, false));
+    printf("-- added to group %s, n_beats->%d\n", name.c_str(), getBeatN());
     printf("-- voice period %Lf, voice playhead %Lf\n", voice->period, voice->playhead);
   }
 
@@ -224,7 +242,7 @@ struct Group {
     }
     assert(voice->period == period_before);
 
-    printf("-- add existing voice to group %s, n_beats->%d\n", name.c_str(), convertToBeat(voice->period, false));
+    printf("-- add existing voice to group %s, n_beats->%d\n", name.c_str(), getBeatN());
   }
 };
 

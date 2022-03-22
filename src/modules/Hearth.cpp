@@ -129,7 +129,7 @@ void Hearth::modulateChannel(int channel_i) {
   e->options = _options;
 
   // TODO AION
-  // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+  // e->_gko.time_advancer.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 }
 
 int Hearth::channels() {
@@ -157,16 +157,16 @@ void Hearth::processChannel(const ProcessArgs& args, int channel_i) {
   // TODO get from AION
   // if (inputs[PHASE_INPUT].isConnected()) {
   //   float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
-  //   e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+  //   e->_gko.time_advancer.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   // }
 
   if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
+    float phase = e->_village.observed_sun->getPhase();
     outputs[OBSERVER_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   if (outputs[OBSERVER_BEAT_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_village.observed_sun->getBeatPhase(e->_village.playhead);
+    float phase = e->_village.observed_sun->getBeatPhase();
     outputs[OBSERVER_BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
@@ -252,7 +252,7 @@ void Hearth::postProcessAlways(const ProcessArgs &args) {
 
 void Hearth::addChannel(int channel_i) {
   _engines[channel_i] = new kokopellivcv::dsp::hearth::Engine();
-  _engines[channel_i]->_gko.sample_time = _sample_time;
+  _engines[channel_i]->_gko.time_advancer.sample_time = _sample_time;
 
   for (int c = 0; c < channels(); c++) {
     _engines[c]->channelStateReset();

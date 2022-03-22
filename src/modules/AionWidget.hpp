@@ -82,17 +82,33 @@ struct GroupDisplay : AionTextBox {
   }
 };
 
+struct PrevPrevMovementDisplay : AionTextBox {
+  using AionTextBox::AionTextBox;
+
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
+    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(-2);
+    if (group_movement_n == 0) {
+      textColor = colors::DIM_SUN;
+      AionTextBox::setText("--");
+    } else {
+      textColor = colors::OBSERVED_SUN;
+      AionTextBox::setMovementNumber(group_movement_n);
+    }
+  }
+};
+
+
 struct PrevMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    unsigned int group_movement_n = e->_village.current_movement->group_movement_n;
-    if (e->_village.current_movement->prev) {
-      textColor = colors::OBSERVED_SUN;
-      AionTextBox::setMovementNumber(group_movement_n-1);
-    } else {
+    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(-1);
+    if (group_movement_n == 0) {
       textColor = colors::DIM_SUN;
       AionTextBox::setText("--");
+    } else {
+      textColor = colors::OBSERVED_SUN;
+      AionTextBox::setMovementNumber(group_movement_n);
     }
   }
 };
@@ -101,8 +117,15 @@ struct CurrentMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    unsigned int group_movement_n = e->_village.current_movement->group_movement_n;
-    AionTextBox::setMovementNumber(group_movement_n);
+    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(0);
+    if (group_movement_n == 0) {
+      textColor = colors::DIM_SUN;
+      AionTextBox::setText("--");
+    } else {
+      textColor = colors::OBSERVED_SUN;
+      AionTextBox::setMovementNumber(group_movement_n);
+    }
+
   }
 };
 
@@ -110,19 +133,40 @@ struct NextMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    unsigned int group_movement_n = e->_village.current_movement->group_movement_n;
-    if (e->_village.current_movement->next) {
-      textColor = colors::OBSERVED_SUN;
-      AionTextBox::setMovementNumber(group_movement_n+1);
-    } else if (group_movement_n != 1) {
+    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(1);
+
+    if (group_movement_n == 1) {
       textColor = colors::DIM_SUN;
       AionTextBox::setMovementNumber(1);
-    } else {
+    } else if (group_movement_n == 0) {
       textColor = colors::DIM_SUN;
       AionTextBox::setText("--");
+    } else {
+      textColor = colors::OBSERVED_SUN;
+      AionTextBox::setMovementNumber(group_movement_n);
     }
   }
 };
+
+struct NextNextMovementDisplay : AionTextBox {
+  using AionTextBox::AionTextBox;
+
+  void update(kokopellivcv::dsp::hearth::Engine* e) override {
+    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(2);
+
+    if (group_movement_n == 2) {
+      textColor = colors::DIM_SUN;
+      AionTextBox::setMovementNumber(2);
+    } else if (group_movement_n == 0) {
+      textColor = colors::DIM_SUN;
+      AionTextBox::setText("--");
+    } else {
+      textColor = colors::OBSERVED_SUN;
+      AionTextBox::setMovementNumber(group_movement_n);
+    }
+  }
+};
+
 
 
 struct AionWidget : ModuleWidget {
@@ -131,16 +175,11 @@ struct AionWidget : ModuleWidget {
   ParentGroupDisplay *_parent_group_display;
   GroupDisplay *_group_display;
 
-  AionTextBox *_next_next_movement_display;
+  NextNextMovementDisplay *_next_next_movement_display;
   NextMovementDisplay *_next_movement_display;
   CurrentMovementDisplay *_current_movement_display;
   PrevMovementDisplay *_prev_movement_display;
-  AionTextBox *_prev_prev_movement_display;
-
-  // GroupDisplay *group_display;
-  // PrevMovementDisplay *prev_movement_display;
-  // CurrentMovementDisplay *current_movement_display;
-  // NextMovementDisplay *next_movement_display;
+  PrevPrevMovementDisplay *_prev_prev_movement_display;
 
 	AionWidget(Aion* module) {
 		setModule(module);
@@ -160,7 +199,7 @@ struct AionWidget : ModuleWidget {
 
     auto movement_display_size = mm2px(Vec(11.735, 4.327));
 
-		_prev_prev_movement_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 51.468)), movement_display_size);
+		_prev_prev_movement_display = new PrevPrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 51.468)), movement_display_size);
 
     _prev_movement_display = new PrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 59.131)), movement_display_size);
 
@@ -169,7 +208,7 @@ struct AionWidget : ModuleWidget {
 
     _next_movement_display = new NextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 75.551)), movement_display_size);
 
-    _next_next_movement_display = new AionTextBox(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 83.562)), movement_display_size);
+    _next_next_movement_display = new NextNextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 83.562)), movement_display_size);
 
     addChild(_parent_group_display);
     addChild(_group_display);

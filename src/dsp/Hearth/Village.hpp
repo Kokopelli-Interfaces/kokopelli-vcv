@@ -17,27 +17,15 @@ struct Village {
   Group* observed_sun = nullptr;
 
   std::vector<Voice*> voices;
-  // TODO move to inactive if pre-entrance movement
-  // std::vector<Voice*> inactive_voices;
-
   Voice *new_voice = nullptr;
-
-  Time playhead = 0.0;
-
-  Movement *current_movement = nullptr;
-  Movement *start_movement = nullptr;
 
   Outputs out;
 
   Village() {
-    this->current_movement = new Movement();
-    this->current_movement->group_start_movement = this->current_movement;
-    this->start_movement = this->current_movement;
-    Time start = 0.f;
     Group *first_group = new Group();
     this->groups.push_back(first_group);
     this->observed_sun = first_group;
-    this->new_voice = new Voice(start, this->current_movement, this->observed_sun);
+    this->new_voice = new Voice(this->observed_sun);
   }
 
   void clearEmptyGroups() {

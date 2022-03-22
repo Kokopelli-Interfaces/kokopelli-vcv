@@ -13,7 +13,7 @@ void Engine::step() {
 
 int Engine::getMostRecentVoiceLength() {
   Voice* recent_voice = _village.voices[_village.voices.size()-1];
-  return recent_voice->immediate_group->getBeatN();
+  return recent_voice->immediate_group->convertToBeat(recent_voice->period, false);
 }
 
 void Engine::cycleBackward() {

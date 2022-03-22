@@ -121,7 +121,7 @@ public:
   }
 
   inline void undoVoice(Village &village) {
-    if (_observer.checkIfInSubgroupMode()) {
+    if (_observer._subgroup_mode) {
       _observer.exitSubgroupMode(village);
     }
 
@@ -137,7 +137,7 @@ public:
   inline void cycleBackward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
-      if (_observer.checkIfInSubgroupMode()) {
+      if (_observer._subgroup_mode) {
         if (_observer.checkIfCanEnterFocusedSubgroup()) {
           _observer.exitSubgroupMode(village);
         }
@@ -158,7 +158,7 @@ public:
   inline void cycleForward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
-      if (_observer.checkIfInSubgroupMode()) {
+      if (_observer._subgroup_mode) {
         if (_observer.checkIfCanEnterFocusedSubgroup()) {
           _observer.exitSubgroupMode(village);
         }
@@ -179,7 +179,7 @@ public:
   inline void voiceObservation(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
-      if (!_observer.checkIfInSubgroupMode()) {
+      if (!_observer._subgroup_mode) {
         _observer.tryEnterSubgroupMode(village);
       } else {
         _observer.voicesubgroup(village);
@@ -204,7 +204,7 @@ public:
         nextVoice(village, VoiceEnd::JOIN_OBSERVED_SUN_LOOP);
       }
 
-      if (_observer.checkIfInSubgroupMode()) {
+      if (_observer._subgroup_mode) {
         _observer.exitSubgroupMode(village);
       }
     } else if (_love_direction == LoveDirection::OBSERVED_SUN && new_love_direction == LoveDirection::EMERGENCE) {

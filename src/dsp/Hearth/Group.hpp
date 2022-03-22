@@ -87,9 +87,6 @@ struct Group {
 
   inline float getPhase() {
     if (_period != 0.0 && _beat_period != 0.0) {
-      // FIXME
-      // Time time_in_movement = std::fmod((float)this->playhead, (float)_period);
-      // return rack::clamp(time_in_movement / _period , 0.f, 1.f);
       return rack::clamp(this->playhead / _period , 0.f, 1.f);
     }
     return 0.f;
@@ -97,16 +94,23 @@ struct Group {
 
   inline int getBeatN() {
     if (_period != 0.f && _beat_period != 0.f) {
-      // float time_in_movement = this->playhead;
-      // if (_period < this->playhead) { // FIXME
-      //   time_in_movement = std::fmod((float)this->playhead, (float)_period);
-      // }
-
-      // return (int) (time_in_movement / _beat_period);
       return (int) (this->playhead / _beat_period);
     }
     return 0;
   }
+
+  inline int convertToBeat(Time time, bool mod) {
+    if (_period != 0.f && _beat_period != 0.f) {
+      float time_in_observed_sun = time;
+      if (mod && _period < time) {
+        time_in_observed_sun = std::fmod((float)time, (float)_period);
+      }
+
+      return (int) (time_in_observed_sun / _beat_period);
+    }
+    return 0;
+  }
+
 
   inline int getTotalBeats() {
     if (_beat_period != 0.f) {
@@ -219,6 +223,8 @@ struct Group {
         }
       }
     }
+
+
 
     printf("-- added to group %s, n_beats->%d\n", this->name.c_str(), getBeatN());
     printf("-- voice _period %Lf, voice playhead %Lf\n", voice->period, voice->playhead);

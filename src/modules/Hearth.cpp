@@ -226,7 +226,7 @@ void Hearth::updateLights(const ProcessArgs &args) {
       updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
     }
 
-    if (default_e->_gko._observer.checkIfInSubgroupMode()) {
+    if (default_e->_gko._observer._subgroup_mode) {
       if (default_e->_gko._observer.checkIfCanEnterFocusedSubgroup()) {
         updateLight(NEXT_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
       } else {

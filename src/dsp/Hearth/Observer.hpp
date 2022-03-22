@@ -60,10 +60,6 @@ public:
     return checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(one->parent_group, two);
   }
 
-  inline bool checkIfInSubgroupMode() {
-    return _subgroup_mode;
-  }
-
   inline bool checkIfCanEnterFocusedSubgroup() {
     assert(_subgroup_mode);
     Group* focused_subgroup = _subgroups[_focused_subgroup_i];

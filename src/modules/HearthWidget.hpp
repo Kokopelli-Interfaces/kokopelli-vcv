@@ -55,7 +55,7 @@ struct ObservedSunDisplay : HearthTextBox {
     float phase = e->_village.observed_sun->getPhase();
     backgroundColor.a = phase;
 
-    if (e->_gko._observer.checkIfInSubgroupMode()) {
+    if (e->_gko._observer._subgroup_mode) {
       // textColor = colors::LOOK_BACK_LAYER;
       textColor = colors::OBSERVED_SUN;
       int pivot_id_len = e->_gko._observer._pivot_parent->name.size();
@@ -121,7 +121,7 @@ struct WombBeatDisplay : HearthTextBox {
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
     if (e->_gko.tune_to_frequency_of_observed_sun) {
       int beat_in_observed_sun;
-      beat_in_observed_sun = e->_village.observed_sun->getBeatN();
+      beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.new_voice->playhead, false);
 
       HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
     } else {
@@ -142,7 +142,7 @@ struct TotalWombBeatDisplay : HearthTextBox {
     }
 
     // option
-    if (e->_gko._observer.checkIfInSubgroupMode()) {
+    if (e->_gko._observer._subgroup_mode) {
       HearthTextBox::setDisplayValue(e->_village.observed_sun->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;

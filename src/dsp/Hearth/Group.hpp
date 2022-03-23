@@ -26,6 +26,7 @@ struct Group {
   Time _period = 0.0;
   Time _beat_period = 0.0;
 
+public:
   unsigned int getMostRecentMovement(int offset) {
     if (this->movements.empty()) {
       return 0;
@@ -50,6 +51,7 @@ struct Group {
   //   }
   // }
 
+private:
   inline void undoLastVoiceWithoutUndoingParent() {
     assert(_voices_in_group.size() == _period_history.size());
 
@@ -60,6 +62,7 @@ struct Group {
     _next_voices_relative_love.pop_back();
   }
 
+public:
   inline void undoLastVoice() {
     undoLastVoiceWithoutUndoingParent();
 
@@ -111,7 +114,6 @@ struct Group {
     return 0;
   }
 
-
   inline int getTotalBeats() {
     if (_beat_period != 0.f) {
       return (_period / _beat_period);
@@ -120,6 +122,7 @@ struct Group {
     }
   }
 
+private:
   inline std::vector<int> getSnapBeats() {
     assert(_beat_period != 0.f);
 
@@ -181,7 +184,7 @@ struct Group {
     return adjusted_period;
   }
 
-  inline void adjustPeriodsToFit(Time &voice_period) {
+  inline void adjustVoiceAndGroupPeriodsForNewLoopingVoice(Time &voice_period) {
     assert(!_voices_in_group.empty());
 
     Time adjusted_period = getAdjustedPeriod(voice_period);
@@ -192,39 +195,49 @@ struct Group {
     voice_period = adjusted_period;
   }
 
-  inline void addNewVoice(Voice* voice) {
+  inline void adjustVoiceAndGroupPeriodsForNewLoopingVoiceAndCorrectPlayhead(Voice* voice) {
+    // TODO can't change after.
+    assert(voice->loop);
+
     Time original_playhead = voice->playhead;
     Time original_period = voice->period;
+
+    if (_voices_in_group.size() == 1) {
+      // TODO get crossfade from prev voice
+      _period = voice->period;
+      _beat_period = voice->period;
+    } else {
+      Time period_before = voice->period;
+      adjustVoiceAndGroupPeriodsForNewLoopingVoice(voice->period);
+      printf("-- voice period from (%Lf -> %Lf) (original %Lf)\n", period_before, voice->period, original_period);
+      Time period_diff = period_before - voice->period;
+      bool period_roundback = 0.f < period_diff;
+      if (period_roundback) {
+        voice->playhead = period_diff;
+        printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, voice->period);
+      } else {
+        voice->playhead = original_playhead;
+        printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, voice->period);
+      }
+    }
+  }
+
+inline void updateMovements(Voice* voice) {
+}
+
+public:
+  inline void addNewLoopingVoice(Voice* voice) {
+    assert(voice->loop);
+
     if (this->parent_group != nullptr && voice->immediate_group != this->parent_group) {
-      this->parent_group->addNewVoice(voice);
+      this->parent_group->addNewLoopingVoice(voice);
     }
 
     _voices_in_group.push_back(voice);
     _next_voices_relative_love.push_back(1.f);
     _period_history.push_back(_period);
 
-    if (voice->loop) {
-      if (_voices_in_group.size() == 1) {
-        // TODO get crossfade from prev voice
-        _period = voice->period;
-        _beat_period = voice->period;
-      } else {
-        Time period_before = voice->period;
-        adjustPeriodsToFit(voice->period);
-        printf("-- voice _period from (%Lf -> %Lf) (original %Lf)\n", period_before, voice->period, original_period);
-        Time period_diff = period_before - voice->period;
-        bool period_roundback = 0.f < period_diff;
-        if (period_roundback) {
-          voice->playhead = period_diff;
-          printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, voice->period);
-        } else {
-          voice->playhead = original_playhead;
-          printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, voice->period);
-        }
-      }
-    }
-
-
+    adjustVoiceAndGroupPeriodsForNewLoopingVoiceAndCorrectPlayhead(voice);
 
     printf("-- added to group %s, n_beats->%d\n", this->name.c_str(), getBeatN());
     printf("-- voice _period %Lf, voice playhead %Lf\n", voice->period, voice->playhead);
@@ -241,7 +254,7 @@ struct Group {
         _period = voice->period;
         _beat_period = voice->period;
       } else {
-        adjustPeriodsToFit(voice->period);
+        adjustVoiceAndGroupPeriodsForNewLoopingVoice(voice->period);
       }
     }
     assert(voice->period == period_before);

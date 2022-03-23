@@ -48,9 +48,9 @@ public:
   }
 
 private:
-  inline void addVoice(Village &village, Voice* ended_voice) {
+  inline void addLoopingVoice(Village &village, Voice* ended_voice) {
     village.voices.push_back(ended_voice);
-    ended_voice->immediate_group->addNewVoice(ended_voice);
+    ended_voice->immediate_group->addNewLoopingVoice(ended_voice);
     if (delay_shiftback < ended_voice->period) {
       ended_voice->playhead += delay_shiftback;
     }
@@ -76,13 +76,13 @@ public:
     case VoiceEnd::NEXT_MOVEMENT_VIA_SHIFT:
       // ended_voice->loop = false;
       // village.voices.push_back(ended_voice);
-      // ended_voice->immediate_group->addNewVoice(ended_voice);
+      // ended_voice->immediate_group->addNewLoopingVoice(ended_voice);
       _conductor.nextMovement(village);
       delete ended_voice;
       break;
     case VoiceEnd::JOIN_OBSERVED_SUN_LOOP:
       ended_voice->loop = true;
-      addVoice(village, ended_voice);
+      addLoopingVoice(village, ended_voice);
       break;
     case VoiceEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
       ended_voice->loop = true;
@@ -90,7 +90,7 @@ public:
       if (ended_voice->immediate_group->_period != 0.f) {
         ended_voice->setPeriodToCaptureWindow(ended_voice->immediate_group->_period);
       }
-      addVoice(village, ended_voice);
+      addLoopingVoice(village, ended_voice);
       break;
     case VoiceEnd::FLOOD:
       for (int i = village.voices.size()-1; 0 <= i; i--) {

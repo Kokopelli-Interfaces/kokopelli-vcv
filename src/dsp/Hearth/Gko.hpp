@@ -5,14 +5,12 @@
 #include "rack.hpp"
 
 #include "Observer.hpp"
-#include "Conductor.hpp"
 #include "LoveUpdater.hpp"
 #include "OutputUpdater.hpp"
 #include "Village.hpp"
 #include "Voice.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
-#include "Movement.hpp"
 #include "TimeAdvancer.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
@@ -30,7 +28,6 @@ public:
 
   /** read only */
 
-  Conductor _conductor;
   Observer _observer;
   LoveUpdater _love_updater;
   OutputUpdater _output_updater;
@@ -77,7 +74,8 @@ public:
       // ended_voice->loop = false;
       // village.voices.push_back(ended_voice);
       // ended_voice->immediate_group->addNewLoopingVoice(ended_voice);
-      _conductor.nextMovement(village);
+
+      // TODO _conductor.nextMovement(village);
       delete ended_voice;
       break;
     case VoiceEnd::JOIN_OBSERVED_SUN_LOOP:
@@ -223,7 +221,8 @@ public:
   }
 
   inline void toggleMovementProgression() {
-    _conductor.loop_movement = !_conductor.loop_movement;
+    // FIXME
+    return;
   }
 
   inline void ascend(Village &village) {

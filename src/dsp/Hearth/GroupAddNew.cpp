@@ -110,8 +110,10 @@ void Group::addNewLoopingVoice(Voice* voice) {
     adjustVoiceAndGroupPeriodsForNewLoopingVoiceAndCorrectPlayhead(voice, _period, _beat_period);
   }
 
-  printf("-- added to group %s, n_beats->%d\n", this->name.c_str(), getBeatN());
-  printf("-- voice group_period %Lf, voice playhead %Lf\n", voice->period, voice->playhead);
+  addVoiceToMovements(voice);
+
+  printf("-- added voice to group %s, n_beats->%d\n", this->name.c_str(), getBeatN());
+  printf("-- group period %Lf, voice _period %Lf, voice playhead %Lf\n", _period, voice->period, voice->playhead);
 }
 
 void Group::addExistingVoice(Voice* voice) {

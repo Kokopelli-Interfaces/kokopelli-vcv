@@ -8,13 +8,22 @@ float Group::getMostRecentMovementPhase() {
 }
 
 unsigned int Group::getMostRecentMovement(int offset) {
-  if (this->movements.empty()) {
+  if (_movements.empty()) {
     return 0;
   }
 
-  int index = this->movement_i + offset;
+  int index = _current_movement_i + offset;
   while (index < 0) {
-    index += this->movements.size();
+    index += _movements.size();
   }
-  return (index % this->movements.size()) + 1;
+  return (index % _movements.size()) + 1;
+}
+
+void Group::addVoiceToMovements(Voice *voice) {
+  if (_movements.empty()) {
+    _movements.push_back(0.f);
+  }
+
+  _voice_i_to_movement_i.push_back(_current_movement_i);
+  assert(_voice_i_to_movement_i.size() == _voices_in_group.size());
 }

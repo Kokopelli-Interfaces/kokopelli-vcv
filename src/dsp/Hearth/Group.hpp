@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Voice.hpp"
-#include "Movement.hpp"
 #include "definitions.hpp"
 
 #include <vector>
@@ -15,11 +14,11 @@ struct Group {
   Group *parent_group = nullptr;
   std::string name = "A";
 
-  std::vector<Movement*> movements;
-  int movement_i = 0;
+  std::vector<Time> _movements;
+  std::vector<int> _voice_i_to_movement_i;
+  int _current_movement_i = 0;
 
   std::vector<Voice*> _voices_in_group;
-  std::vector<int> _voice_i_to_entrance_movement_i;
 
   std::vector<float> _next_voices_relative_love;
   std::vector<Time> _period_history;
@@ -40,9 +39,10 @@ public:
 
 public: // GroupAddNew.cpp
   void addNewLoopingVoice(Voice* voice);
-  void addExistingVoice(Voice* voice) ;;
+  void addExistingVoice(Voice* voice);
 
 private: // GroupMovements.cpp
+  void addVoiceToMovements(Voice *voice);
 public:
   float getMostRecentMovementPhase();
   unsigned int getMostRecentMovement(int offset);

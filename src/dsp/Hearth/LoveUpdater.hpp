@@ -12,7 +12,6 @@
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "SignalCapture.hpp"
-#include "Movement.hpp"
 #include "TimeAdvancer.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"

@@ -33,6 +33,9 @@ public:
         subgroups.push_back(subgroup);
         subgroup->parent_group = parent;
         subgroup->name = rack::string::f("%s/%d", parent->name.c_str(), i + 1);
+        subgroup->_movements.push_back(0.f);
+        subgroup->_voice_i_to_movement_i.push_back(0);
+
         subgroup->addExistingVoice(voice);
         // voice->immediate_group = subgroup;
       } else {

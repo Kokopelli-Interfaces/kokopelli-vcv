@@ -11,6 +11,7 @@ void Group::undoLastVoiceWithoutUndoingParent() {
   _period = _period_history[last_i];
   _period_history.pop_back();
   _next_voices_relative_love.pop_back();
+  _voice_i_to_movement_i.pop_back();
 }
 
 void Group::undoLastVoice() {

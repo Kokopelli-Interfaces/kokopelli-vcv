@@ -54,12 +54,12 @@ int Group::getBeatN() {
 
 int Group::convertToBeat(Time time, bool mod) {
   if (_period != 0.f && _beat_period != 0.f) {
-    float time_in_observed_sun = time;
+    float time_in_observed_group = time;
     if (mod && _period < time) {
-      time_in_observed_sun = std::fmod((float)time, (float)_period);
+      time_in_observed_group = std::fmod((float)time, (float)_period);
     }
 
-    return (int) (time_in_observed_sun / _beat_period);
+    return (int) (time_in_observed_group / _beat_period);
   }
   return 0;
 }

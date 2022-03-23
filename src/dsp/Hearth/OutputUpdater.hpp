@@ -23,19 +23,19 @@ public:
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
     out.sun = 0.f;
-    out.observed_sun = 0.f;
+    out.observed_group = 0.f;
 
     for (unsigned int i = 0; i < voices.size(); i++) {
       float voice_out = voices[i]->readSignal();
       if (Observer::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(voices[i]->immediate_group, new_voice_group)) {
-        out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, voice_out, signal_type);
+        out.observed_group = kokopellivcv::dsp::sum(out.observed_group, voice_out, signal_type);
         voice_out *= (1.f - inputs.love);
       }
 
       out.sun = kokopellivcv::dsp::sum(out.sun, voice_out, signal_type);
     }
 
-    out.attenuated_observed_sun = out.observed_sun * (1.f - inputs.love);
+    out.attenuated_observed_group = out.observed_group * (1.f - inputs.love);
 
     if (options.include_moon_in_sun_output) {
       float add = inputs.in;

@@ -51,32 +51,32 @@ struct ObservedSunDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    // float phase = e->_village.observed_sun->getPhase(e->_village.playhead);
-    float phase = e->_village.observed_sun->getPhase();
+    // float phase = e->_village.observed_group->getPhase(e->_village.playhead);
+    float phase = e->_village.observed_group->getPhase();
     backgroundColor.a = phase;
 
     if (e->_gko._observer._subgroup_mode) {
       // textColor = colors::LOOK_BACK_LAYER;
-      textColor = colors::OBSERVED_SUN;
+      textColor = colors::OBSERVED_GROUP;
       int pivot_id_len = e->_gko._observer._pivot_parent->name.size();
       std::string left_text = e->_gko._observer._pivot_parent->name.substr(0, pivot_id_len);
 
       std::string right_text;
       // this is an invariant that does not hold sometimes due to race condition as this is widget thread
-      if ((unsigned int)pivot_id_len < e->_village.observed_sun->name.size()) {
-        right_text = e->_village.observed_sun->name.substr(pivot_id_len+1);
+      if ((unsigned int)pivot_id_len < e->_village.observed_group->name.size()) {
+        right_text = e->_village.observed_group->name.substr(pivot_id_len+1);
       } else {
-        right_text = e->_village.observed_sun->name.substr(pivot_id_len);
+        right_text = e->_village.observed_group->name.substr(pivot_id_len);
       }
 
       std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
       HearthTextBox::setText(s);
-      // HearthTextBox::setText(e->_village.observed_sun->name);
+      // HearthTextBox::setText(e->_village.observed_group->name);
     } else {
-      textColor = colors::OBSERVED_SUN;
-      // std::string s = string::f("%s", e->_village.observed_sun->name);
+      textColor = colors::OBSERVED_GROUP;
+      // std::string s = string::f("%s", e->_village.observed_group->name);
       // HearthTextBox::setText(s);
-      HearthTextBox::setText(e->_village.observed_sun->name);
+      HearthTextBox::setText(e->_village.observed_group->name);
     }
   }
 };
@@ -85,8 +85,8 @@ struct ObservedSunBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    int beat_in_observed_sun = e->_village.observed_sun->getBeatN();
-    HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
+    int beat_in_observed_group = e->_village.observed_group->getBeatN();
+    HearthTextBox::setDisplayValue(beat_in_observed_group + 1);
 	}
 };
 
@@ -95,7 +95,7 @@ struct TotalObservedSunBeatDisplay : HearthTextBox {
 
   // FIXME
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    HearthTextBox::setDisplayValue(e->_village.observed_sun->getTotalBeats());
+    HearthTextBox::setDisplayValue(e->_village.observed_group->getTotalBeats());
 	}
 };
 
@@ -104,12 +104,12 @@ struct WombDisplay : HearthTextBox {
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
     float phase = 0.f;
-    // phase = e->_village.observed_sun->getBeatPhase(e->_village.new_voice->playhead);
-    phase = e->_village.observed_sun->getBeatPhase();
+    // phase = e->_village.observed_group->getBeatPhase(e->_village.new_voice->playhead);
+    phase = e->_village.observed_group->getBeatPhase();
 
     backgroundColor.a = phase;
 
-    int womb_display = e->_village.observed_sun->_voices_in_group.size() + 1;
+    int womb_display = e->_village.observed_group->_voices_in_group.size() + 1;
     std::string s = string::f("%d", womb_display);
     HearthTextBox::setText(s);
 	}
@@ -119,11 +119,11 @@ struct WombBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    if (e->_gko.tune_to_frequency_of_observed_sun) {
-      int beat_in_observed_sun;
-      beat_in_observed_sun = e->_village.observed_sun->convertToBeat(e->_village.new_voice->playhead, false);
+    if (e->_gko.tune_to_frequency_of_observed_group) {
+      int beat_in_observed_group;
+      beat_in_observed_group = e->_village.observed_group->convertToBeat(e->_village.new_voice->playhead, false);
 
-      HearthTextBox::setDisplayValue(beat_in_observed_sun + 1);
+      HearthTextBox::setDisplayValue(beat_in_observed_group + 1);
     } else {
       HearthTextBox::setDisplayValue((int)e->_village.new_voice->playhead);
     }
@@ -143,15 +143,15 @@ struct TotalWombBeatDisplay : HearthTextBox {
 
     // option
     if (e->_gko._observer._subgroup_mode) {
-      HearthTextBox::setDisplayValue(e->_village.observed_sun->getTotalBeats());
+      HearthTextBox::setDisplayValue(e->_village.observed_group->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;
       HearthTextBox::setDisplayValue(e->getMostRecentVoiceLength());
-      // if (e->_village.observed_sun->_voices_in_group.size() == 0) {
+      // if (e->_village.observed_group->_voices_in_group.size() == 0) {
       //   HearthTextBox::setDisplayValue(1);
       // } else {
-      //   Time adjusted_period = e->_village.observed_sun->getAdjustedPeriod(e->_village.new_voice->playhead);
-      //   int n_beats = e->_village.observed_sun->getBeatN();
+      //   Time adjusted_period = e->_village.observed_group->getAdjustedPeriod(e->_village.new_voice->playhead);
+      //   int n_beats = e->_village.observed_group->getBeatN();
       //   HearthTextBox::setDisplayValue(n_beats);
       // }
     }
@@ -161,14 +161,14 @@ struct TotalWombBeatDisplay : HearthTextBox {
 struct HearthWidget : ModuleWidget {
   const int hp = 6;
 
-  ObservedSunDisplay *observed_sun_display;
+  ObservedSunDisplay *observed_group_display;
   WombDisplay *womb_display;
 
   WombBeatDisplay *womb_beat_display;
   TotalWombBeatDisplay *total_womb_beats_display;
 
   ObservedSunBeatDisplay *group_beat_display;
-  TotalObservedSunBeatDisplay *total_observed_sun_beats_display;
+  TotalObservedSunBeatDisplay *total_observed_group_beats_display;
 
   HearthWidget(Hearth *module) {
     setModule(module);
@@ -197,19 +197,19 @@ struct HearthWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 86.798)), module, Hearth::NEXT_MOVEMENT_LIGHT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
-		observed_sun_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_SUN, mm2px(Vec(1.236, 40.865)), focused_display_size);
+		observed_group_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_GROUP, mm2px(Vec(1.236, 40.865)), focused_display_size);
 		womb_display = new WombDisplay(module, colors::BOX_BG_LIGHT, colors::WOMB, mm2px(Vec(18.644, 40.865)), focused_display_size);
 
     auto beat_display_size = mm2px(Vec(7.527, 4.327));
-    group_beat_display = new ObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(1.268, 45.968)), beat_display_size);
-    total_observed_sun_beats_display = new TotalObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.321, 45.968)), beat_display_size);
+    group_beat_display = new ObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(1.268, 45.968)), beat_display_size);
+    total_observed_group_beats_display = new TotalObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(9.321, 45.968)), beat_display_size);
     womb_beat_display = new WombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(18.675, 45.968)), beat_display_size);
     total_womb_beats_display = new TotalWombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(26.729, 45.968)), beat_display_size);
 
-    addChild(observed_sun_display);
+    addChild(observed_group_display);
     addChild(womb_display);
     addChild(group_beat_display);
-    addChild(total_observed_sun_beats_display);
+    addChild(total_observed_group_beats_display);
     addChild(womb_beat_display);
     addChild(total_womb_beats_display);
   }

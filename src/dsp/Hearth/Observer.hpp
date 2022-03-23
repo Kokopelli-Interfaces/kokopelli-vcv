@@ -69,9 +69,9 @@ public:
 
   inline void tryEnterSubgroupMode(Village &village) {
     assert(!_subgroup_mode);
-    assert(village.observed_sun);
+    assert(village.observed_group);
 
-    _pivot_parent = village.observed_sun;
+    _pivot_parent = village.observed_group;
     if (_pivot_parent->_voices_in_group.empty()) {
       return;
     }
@@ -79,7 +79,7 @@ public:
     _subgroups = breakIntoSubgroups(_pivot_parent);
     _subgroup_mode = true;
     _focused_subgroup_i = _subgroups.size() - 1;
-    village.observed_sun = _subgroups[_focused_subgroup_i];
+    village.observed_group = _subgroups[_focused_subgroup_i];
 
     Group* subgroup = _subgroups[_focused_subgroup_i];
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
@@ -103,9 +103,9 @@ inline void exitSubgroupMode(Village &village) {
       // TODO is it right?
       subgroup->_voices_in_group[0]->immediate_group = subgroup;
     }
-    village.observed_sun = subgroup;
+    village.observed_group = subgroup;
   } else {
-    village.observed_sun = _pivot_parent;
+    village.observed_group = _pivot_parent;
   }
 
   for (Group* group: _subgroups) {
@@ -153,7 +153,7 @@ inline void exitSubgroupMode(Village &village) {
       village.groups.push_back(subgroup);
     }
 
-    village.observed_sun = subgroup;
+    village.observed_group = subgroup;
   }
 
   inline void ascend(Village &village) {
@@ -161,8 +161,8 @@ inline void exitSubgroupMode(Village &village) {
       exitSubgroupMode(village);
     }
 
-    if (village.observed_sun->parent_group) {
-      village.observed_sun = village.observed_sun->parent_group;
+    if (village.observed_group->parent_group) {
+      village.observed_group = village.observed_group->parent_group;
     }
 
     village.clearEmptyGroups();

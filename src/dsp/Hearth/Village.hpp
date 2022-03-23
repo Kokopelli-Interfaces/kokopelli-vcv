@@ -13,7 +13,7 @@ namespace hearth {
 
 struct Village {
   std::vector<Group*> groups;
-  Group* observed_sun = nullptr;
+  Group* observed_group = nullptr;
 
   std::vector<Voice*> voices;
   Voice *new_voice = nullptr;
@@ -23,8 +23,8 @@ struct Village {
   Village() {
     Group *first_group = new Group();
     this->groups.push_back(first_group);
-    this->observed_sun = first_group;
-    this->new_voice = new Voice(this->observed_sun);
+    this->observed_group = first_group;
+    this->new_voice = new Voice(this->observed_group);
   }
 
   void clearEmptyGroups() {
@@ -34,8 +34,8 @@ struct Village {
           continue;
         }
 
-        if (this->groups[i] == this->observed_sun && this->groups[i]->parent_group) {
-          this->observed_sun = this->groups[i]->parent_group;
+        if (this->groups[i] == this->observed_group && this->groups[i]->parent_group) {
+          this->observed_group = this->groups[i]->parent_group;
         }
 
         Group* delete_group = this->groups[i];

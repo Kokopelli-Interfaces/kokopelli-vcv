@@ -112,7 +112,7 @@ struct TextBox : TransparentWidget {
   // int textAlign;
 
   TextBox() {
-    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // observed_sun
+    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // observed_group
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0x19, 0x0d, 0x05);
     font_size = 20;

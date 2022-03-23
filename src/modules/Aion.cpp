@@ -90,7 +90,7 @@ void Aion::updateLights(const ProcessArgs &args) {
   if (_connected_hearth) {
     light_strength = .3f;
   }
-  updateLight(PREV_MOVEMENT_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+  updateLight(PREV_MOVEMENT_LIGHT, colors::OBSERVED_GROUP_LIGHT, light_strength);
 }
 
 Model* modelAion = rack::createModel<Aion, AionWidget>("KokopelliInterfaces-Aion");

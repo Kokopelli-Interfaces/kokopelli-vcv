@@ -64,8 +64,8 @@ struct ParentGroupDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    if (e->_village.observed_sun->parent_group) {
-      std::string s = e->_village.observed_sun->parent_group->name;
+    if (e->_village.observed_group->parent_group) {
+      std::string s = e->_village.observed_group->parent_group->name;
       AionTextBox::setText(s);
     } else {
       AionTextBox::setText("--");
@@ -77,7 +77,7 @@ struct GroupDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    std::string s = e->_village.observed_sun->name;
+    std::string s = e->_village.observed_group->name;
     AionTextBox::setText(s);
   }
 };
@@ -86,12 +86,12 @@ struct PrevPrevMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(-2);
+    unsigned int group_movement_n = e->_village.observed_group->getMostRecentMovement(-2);
     if (group_movement_n == 0) {
       textColor = colors::DIM_SUN;
       AionTextBox::setText("--");
     } else {
-      textColor = colors::OBSERVED_SUN;
+      textColor = colors::OBSERVED_GROUP;
       AionTextBox::setMovementNumber(group_movement_n);
     }
   }
@@ -102,12 +102,12 @@ struct PrevMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(-1);
+    unsigned int group_movement_n = e->_village.observed_group->getMostRecentMovement(-1);
     if (group_movement_n == 0) {
       textColor = colors::DIM_SUN;
       AionTextBox::setText("--");
     } else {
-      textColor = colors::OBSERVED_SUN;
+      textColor = colors::OBSERVED_GROUP;
       AionTextBox::setMovementNumber(group_movement_n);
     }
   }
@@ -117,15 +117,15 @@ struct CurrentMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    float movement_phase = e->_village.observed_sun->getMostRecentMovementPhase();
+    float movement_phase = e->_village.observed_group->getMostRecentMovementPhase();
     backgroundColor.a = movement_phase;
 
-    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(0);
+    unsigned int group_movement_n = e->_village.observed_group->getMostRecentMovement(0);
     if (group_movement_n == 0) {
       textColor = colors::DIM_SUN;
       AionTextBox::setText("--");
     } else {
-      textColor = colors::OBSERVED_SUN;
+      textColor = colors::OBSERVED_GROUP;
       AionTextBox::setMovementNumber(group_movement_n);
     }
 
@@ -136,7 +136,7 @@ struct NextMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(1);
+    unsigned int group_movement_n = e->_village.observed_group->getMostRecentMovement(1);
 
     if (group_movement_n == 1) {
       textColor = colors::DIM_SUN;
@@ -145,7 +145,7 @@ struct NextMovementDisplay : AionTextBox {
       textColor = colors::DIM_SUN;
       AionTextBox::setText("--");
     } else {
-      textColor = colors::OBSERVED_SUN;
+      textColor = colors::OBSERVED_GROUP;
       AionTextBox::setMovementNumber(group_movement_n);
     }
   }
@@ -155,7 +155,7 @@ struct NextNextMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(2);
+    unsigned int group_movement_n = e->_village.observed_group->getMostRecentMovement(2);
 
     if (group_movement_n == 2) {
       textColor = colors::DIM_SUN;
@@ -164,7 +164,7 @@ struct NextNextMovementDisplay : AionTextBox {
       textColor = colors::DIM_SUN;
       AionTextBox::setText("--");
     } else {
-      textColor = colors::OBSERVED_SUN;
+      textColor = colors::OBSERVED_GROUP;
       AionTextBox::setMovementNumber(group_movement_n);
     }
   }
@@ -197,21 +197,21 @@ struct AionWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(9.648, 93.157)), module, Aion::PREV_MOVEMENT_LIGHT));
 
     auto top_display_size = mm2px(Vec(19.472, 4.312));
-    _parent_group_display = new ParentGroupDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 14.862)), top_display_size);
-    _group_display = new GroupDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(2.531, 20.550)), top_display_size);
+    _parent_group_display = new ParentGroupDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(2.531, 14.862)), top_display_size);
+    _group_display = new GroupDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(2.531, 20.550)), top_display_size);
 
     auto movement_display_size = mm2px(Vec(11.735, 4.327));
 
-		_prev_prev_movement_display = new PrevPrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 51.468)), movement_display_size);
+		_prev_prev_movement_display = new PrevPrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(9.403, 51.468)), movement_display_size);
 
-    _prev_movement_display = new PrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 59.131)), movement_display_size);
+    _prev_movement_display = new PrevMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(6.020, 59.131)), movement_display_size);
 
     auto current_movement_display_size = mm2px(Vec(15.736, 4.312));
-    _current_movement_display = new CurrentMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(3.604, 67.484)), current_movement_display_size);
+    _current_movement_display = new CurrentMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(3.604, 67.484)), current_movement_display_size);
 
-    _next_movement_display = new NextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(6.020, 75.551)), movement_display_size);
+    _next_movement_display = new NextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(6.020, 75.551)), movement_display_size);
 
-    _next_next_movement_display = new NextNextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.403, 83.562)), movement_display_size);
+    _next_next_movement_display = new NextNextMovementDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(9.403, 83.562)), movement_display_size);
 
     addChild(_parent_group_display);
     addChild(_group_display);

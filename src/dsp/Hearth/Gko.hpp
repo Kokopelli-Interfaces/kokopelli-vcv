@@ -22,7 +22,7 @@ namespace hearth {
 class Gko {
 public:
   Time delay_shiftback = 0.f;
-  bool tune_to_frequency_of_observed_sun = true;
+  bool tune_to_frequency_of_observed_group = true;
 
   TimeAdvancer time_advancer;
 
@@ -41,7 +41,7 @@ public:
 public:
   Gko() {
     time_advancer.setTickFrequency(1.0f);
-    // TODO set me when loop is observed_sun for consistent loops
+    // TODO set me when loop is observed_group for consistent loops
   }
 
 private:
@@ -61,7 +61,7 @@ public:
     ended_voice->finishWrite();
     if (ended_voice->period == 0.0) {
       delete ended_voice;
-      village.new_voice = new Voice(village.observed_sun);
+      village.new_voice = new Voice(village.observed_group);
       return;
     }
 
@@ -76,13 +76,14 @@ public:
       // ended_voice->immediate_group->addNewLoopingVoice(ended_voice);
 
       // TODO _conductor.nextMovement(village);
+
       delete ended_voice;
       break;
-    case VoiceEnd::JOIN_OBSERVED_SUN_LOOP:
+    case VoiceEnd::JOIN_OBSERVED_GROUP_LOOP:
       ended_voice->loop = true;
       addLoopingVoice(village, ended_voice);
       break;
-    case VoiceEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP:
+    case VoiceEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_GROUP_LOOP:
       ended_voice->loop = true;
       _discard_voice_at_next_love_return = true;
       if (ended_voice->immediate_group->_period != 0.f) {
@@ -108,14 +109,14 @@ public:
 
     // // TODO
     // Movement* voice_movement;
-    // if (tune_to_frequency_of_observed_sun) {
+    // if (tune_to_frequency_of_observed_group) {
     //   voice_movement = village.current_movement;
     // } else {
     //   // FIXME next movement
     //   voice_movement = village.current_movement;
     // }
 
-    village.new_voice = new Voice(village.observed_sun);
+    village.new_voice = new Voice(village.observed_group);
   }
 
   inline void undoVoice(Village &village) {
@@ -134,7 +135,7 @@ public:
 
   inline void cycleBackward(Village &village) {
     switch(_love_direction) {
-    case LoveDirection::OBSERVED_SUN:
+    case LoveDirection::OBSERVED_GROUP:
       // nextVoice(village, VoiceEnd::PREV_MOVEMENT_VIA_SHIFT);
 
       // if (_observer._subgroup_mode) {
@@ -157,7 +158,7 @@ public:
 
   inline void cycleForward(Village &village) {
     switch(_love_direction) {
-    case LoveDirection::OBSERVED_SUN:
+    case LoveDirection::OBSERVED_GROUP:
       if (_observer._subgroup_mode) {
         if (_observer.checkIfCanEnterFocusedSubgroup()) {
           _observer.exitSubgroupMode(village);
@@ -178,7 +179,7 @@ public:
 
   inline void cycleObservation(Village &village) {
     switch(_love_direction) {
-    case LoveDirection::OBSERVED_SUN:
+    case LoveDirection::OBSERVED_GROUP:
       if (!_observer._subgroup_mode) {
         _observer.tryEnterSubgroupMode(village);
       } else {
@@ -188,7 +189,7 @@ public:
       break;
     case LoveDirection::EMERGENCE:
     case LoveDirection::NEW:
-      nextVoice(village, VoiceEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP);
+      nextVoice(village, VoiceEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_GROUP_LOOP);
       break;
     }
   }
@@ -196,18 +197,18 @@ public:
   inline void handleLoveDirectionChange(Village &village, LoveDirection new_love_direction) {
     assert(new_love_direction != _love_direction);
 
-    if (new_love_direction == LoveDirection::OBSERVED_SUN) {
+    if (new_love_direction == LoveDirection::OBSERVED_GROUP) {
       if (_discard_voice_at_next_love_return) {
         nextVoice(village, VoiceEnd::DISCARD);
         _discard_voice_at_next_love_return = false;
       } else {
-        nextVoice(village, VoiceEnd::JOIN_OBSERVED_SUN_LOOP);
+        nextVoice(village, VoiceEnd::JOIN_OBSERVED_GROUP_LOOP);
       }
 
       if (_observer._subgroup_mode) {
         _observer.exitSubgroupMode(village);
       }
-    } else if (_love_direction == LoveDirection::OBSERVED_SUN && new_love_direction == LoveDirection::EMERGENCE) {
+    } else if (_love_direction == LoveDirection::OBSERVED_GROUP && new_love_direction == LoveDirection::EMERGENCE) {
       nextVoice(village, VoiceEnd::DISCARD);
     }
 

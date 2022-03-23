@@ -137,20 +137,22 @@ public:
   inline void cycleBackward(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
-      if (_observer._subgroup_mode) {
-        if (_observer.checkIfCanEnterFocusedSubgroup()) {
-          _observer.exitSubgroupMode(village);
-        }
-        nextVoice(village, VoiceEnd::DISCARD);
-      } else {
-        nextVoice(village, VoiceEnd::NEXT_MOVEMENT_VIA_SHIFT);
-      }
+      // nextVoice(village, VoiceEnd::PREV_MOVEMENT_VIA_SHIFT);
+
+      // if (_observer._subgroup_mode) {
+      //   if (_observer.checkIfCanEnterFocusedSubgroup()) {
+      //     _observer.exitSubgroupMode(village);
+      //   }
+      //   nextVoice(village, VoiceEnd::DISCARD);
+      // } else {
+        // nextVoice(village, VoiceEnd::PREV_MOVEMENT_VIA_SHIFT);
+      // }
       break;
     case LoveDirection::EMERGENCE:
-      nextVoice(village, VoiceEnd::DISCARD);
+      // nextVoice(village, VoiceEnd::NO_LOOP_AND_GO_TO_MOVEMENT_START)
       break;
     case LoveDirection::NEW:
-      nextVoice(village, VoiceEnd::FLOOD);
+      // nextVoice(village, VoiceEnd::FLOOD);
       break;
     }
   }
@@ -176,7 +178,7 @@ public:
     }
   }
 
-  inline void voiceObservation(Village &village) {
+  inline void cycleObservation(Village &village) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (!_observer._subgroup_mode) {

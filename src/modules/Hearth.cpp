@@ -55,7 +55,7 @@ void Hearth::processButtons(const ProcessArgs &args) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->voiceObservation();
+      e->cycleObservation();
       _light_blinker->blinkLight(DIVINITY_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:

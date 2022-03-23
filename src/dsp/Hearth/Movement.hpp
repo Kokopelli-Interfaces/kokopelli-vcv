@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Village.hpp"
 #include "definitions.hpp"
 
 namespace kokopellivcv {
@@ -10,9 +9,11 @@ namespace hearth {
 struct Voice;
 
 struct Movement {
-  Time entrance_time = 0.0;
-  Time period = 0.0;
-  Time beat_period = 0.0;
+  // relative to group start
+  Time start = 0.0;
+
+  // Time period = 0.0;
+  // Time beat_period = 0.0;
 
   // TODO
   // inline float getMovementPhase(Time song_time) {

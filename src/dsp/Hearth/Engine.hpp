@@ -29,7 +29,7 @@ struct Engine {
   void step();
 
   void channelStateReset();
-  void voiceObservation();
+  void cycleObservation();
   void ascend();
   void toggleMovementProgression();
   void cycleForward();

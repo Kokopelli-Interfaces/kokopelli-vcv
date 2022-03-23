@@ -117,6 +117,9 @@ struct CurrentMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
+    float movement_phase = e->_village.observed_sun->getMostRecentMovementPhase();
+    backgroundColor.a = movement_phase;
+
     unsigned int group_movement_n = e->_village.observed_sun->getMostRecentMovement(0);
     if (group_movement_n == 0) {
       textColor = colors::DIM_SUN;

@@ -24,8 +24,8 @@ void Engine::cycleForward() {
   _gko.cycleForward(_village);
 }
 
-void Engine::voiceObservation() {
-  _gko.voiceObservation(_village);
+void Engine::cycleObservation() {
+  _gko.cycleObservation(_village);
 }
 
 void Engine::ascend() {

@@ -47,55 +47,55 @@ struct HearthTextBox : TextBox {
 	}
 };
 
-struct ObservedSunDisplay : HearthTextBox {
+struct FocusGroupDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    // float phase = e->_village.observed_group->getPhase(e->_village.playhead);
-    float phase = e->_village.observed_group->getPhase();
+    // float phase = e->_village.conductor.focus_group->getPhase(e->_village.playhead);
+    float phase = e->_village.conductor.focus_group->getPhase();
     backgroundColor.a = phase;
 
-    if (e->_gko._observer._subgroup_mode) {
+    if (e->_village.conductor.is_choosing_next_group) {
       // textColor = colors::LOOK_BACK_LAYER;
-      textColor = colors::OBSERVED_GROUP;
-      int pivot_id_len = e->_gko._observer._pivot_parent->name.size();
-      std::string left_text = e->_gko._observer._pivot_parent->name.substr(0, pivot_id_len);
+      textColor = colors::FOCUS_GROUP;
+      int pivot_id_len = e->_village.conductor.parent_of_next_focus_group->name.size();
+      std::string left_text = e->_village.conductor.parent_of_next_focus_group->name.substr(0, pivot_id_len);
 
       std::string right_text;
       // this is an invariant that does not hold sometimes due to race condition as this is widget thread
-      if ((unsigned int)pivot_id_len < e->_village.observed_group->name.size()) {
-        right_text = e->_village.observed_group->name.substr(pivot_id_len+1);
+      if ((unsigned int)pivot_id_len < e->_village.conductor.focus_group->name.size()) {
+        right_text = e->_village.conductor.focus_group->name.substr(pivot_id_len+1);
       } else {
-        right_text = e->_village.observed_group->name.substr(pivot_id_len);
+        right_text = e->_village.conductor.focus_group->name.substr(pivot_id_len);
       }
 
       std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
       HearthTextBox::setText(s);
-      // HearthTextBox::setText(e->_village.observed_group->name);
+      // HearthTextBox::setText(e->_village.conductor.focus_group->name);
     } else {
-      textColor = colors::OBSERVED_GROUP;
-      // std::string s = string::f("%s", e->_village.observed_group->name);
+      textColor = colors::FOCUS_GROUP;
+      // std::string s = string::f("%s", e->_village.conductor.focus_group->name);
       // HearthTextBox::setText(s);
-      HearthTextBox::setText(e->_village.observed_group->name);
+      HearthTextBox::setText(e->_village.conductor.focus_group->name);
     }
   }
 };
 
-struct ObservedSunBeatDisplay : HearthTextBox {
+struct FocusGroupBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    int beat_in_observed_group = e->_village.observed_group->getBeatN();
-    HearthTextBox::setDisplayValue(beat_in_observed_group + 1);
+    int beat_in_focus_group = e->_village.conductor.focus_group->getBeatN();
+    HearthTextBox::setDisplayValue(beat_in_focus_group + 1);
 	}
 };
 
-struct TotalObservedSunBeatDisplay : HearthTextBox {
+struct TotalFocusGroupBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   // FIXME
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    HearthTextBox::setDisplayValue(e->_village.observed_group->getTotalBeats());
+    HearthTextBox::setDisplayValue(e->_village.conductor.focus_group->getTotalBeats());
 	}
 };
 
@@ -104,12 +104,12 @@ struct WombDisplay : HearthTextBox {
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
     float phase = 0.f;
-    // phase = e->_village.observed_group->getBeatPhase(e->_village.new_voice->playhead);
-    phase = e->_village.observed_group->getBeatPhase();
+    // phase = e->_village.conductor.focus_group->getBeatPhase(e->_village.new_voice->playhead);
+    phase = e->_village.conductor.focus_group->getBeatPhase();
 
     backgroundColor.a = phase;
 
-    int womb_display = e->_village.observed_group->voices.size() + 1;
+    int womb_display = e->_village.conductor.focus_group->voices.size() + 1;
     std::string s = string::f("%d", womb_display);
     HearthTextBox::setText(s);
 	}
@@ -119,11 +119,11 @@ struct WombBeatDisplay : HearthTextBox {
   using HearthTextBox::HearthTextBox;
 
   void update(kokopellivcv::dsp::hearth::Engine* e) override {
-    if (e->_gko.tune_to_frequency_of_observed_group) {
-      int beat_in_observed_group;
-      beat_in_observed_group = e->_village.observed_group->convertToBeat(e->_village.new_voice->playhead, false);
+    if (e->_gko.tune_to_frequency_of_focus_group) {
+      int beat_in_focus_group;
+      beat_in_focus_group = e->_village.conductor.focus_group->convertToBeat(e->_village.new_voice->playhead, false);
 
-      HearthTextBox::setDisplayValue(beat_in_observed_group + 1);
+      HearthTextBox::setDisplayValue(beat_in_focus_group + 1);
     } else {
       HearthTextBox::setDisplayValue((int)e->_village.new_voice->playhead);
     }
@@ -142,16 +142,16 @@ struct TotalWombBeatDisplay : HearthTextBox {
     }
 
     // option
-    if (e->_gko._observer._subgroup_mode) {
-      HearthTextBox::setDisplayValue(e->_village.observed_group->getTotalBeats());
+    if (e->_village.conductor.is_choosing_next_group) {
+      HearthTextBox::setDisplayValue(e->_village.conductor.focus_group->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;
       HearthTextBox::setDisplayValue(e->getMostRecentVoiceLength());
-      // if (e->_village.observed_group->voices.size() == 0) {
+      // if (e->_village.conductor.focus_group->voices.size() == 0) {
       //   HearthTextBox::setDisplayValue(1);
       // } else {
-      //   Time adjusted_period = e->_village.observed_group->getAdjustedPeriod(e->_village.new_voice->playhead);
-      //   int n_beats = e->_village.observed_group->getBeatN();
+      //   Time adjusted_period = e->_village.conductor.focus_group->getAdjustedPeriod(e->_village.new_voice->playhead);
+      //   int n_beats = e->_village.conductor.focus_group->getBeatN();
       //   HearthTextBox::setDisplayValue(n_beats);
       // }
     }
@@ -161,14 +161,14 @@ struct TotalWombBeatDisplay : HearthTextBox {
 struct HearthWidget : ModuleWidget {
   const int hp = 6;
 
-  ObservedSunDisplay *observed_group_display;
+  FocusGroupDisplay *focus_group_display;
   WombDisplay *womb_display;
 
   WombBeatDisplay *womb_beat_display;
   TotalWombBeatDisplay *total_womb_beats_display;
 
-  ObservedSunBeatDisplay *group_beat_display;
-  TotalObservedSunBeatDisplay *total_observed_group_beats_display;
+  FocusGroupBeatDisplay *group_beat_display;
+  TotalFocusGroupBeatDisplay *total_focus_group_beats_display;
 
   HearthWidget(Hearth *module) {
     setModule(module);
@@ -180,13 +180,13 @@ struct HearthWidget : ModuleWidget {
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addOutput(createOutput<ObservedSunPort>(mm2px(Vec(2.276, 16.435)), module, Hearth::OBSERVER_OUTPUT));
+		addOutput(createOutput<FocusGroupPort>(mm2px(Vec(2.276, 16.435)), module, Hearth::CONDUCTOR_FOCUS_OUTPUT));
 		addOutput(createOutput<SunPort>(mm2px(Vec(13.65, 15.365)), module, Hearth::SUN));
 		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Hearth::WOMB_INPUT));
 
-		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Hearth::OBSERVER_BEAT_PHASE_OUTPUT));
+		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Hearth::CONDUCTOR_FOCUS_BEAT_PHASE_OUTPUT));
 		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.719)), module, Hearth::AUDITION_PARAM));
-		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Hearth::OBSERVER_PHASE_OUTPUT));
+		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(2.276, 29.961)), module, Hearth::CONDUCTOR_FOCUS_PHASE_OUTPUT));
 
 		addParam(createParam<LoveKnob>(mm2px(Vec(10.220, 76.609)), module, Hearth::LOVE_PARAM));
 
@@ -197,19 +197,19 @@ struct HearthWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 86.798)), module, Hearth::NEXT_MOVEMENT_LIGHT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
-		observed_group_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_GROUP, mm2px(Vec(1.236, 40.865)), focused_display_size);
+		focus_group_display = new FocusGroupDisplay(module, colors::BOX_BG_LIGHT, colors::FOCUS_GROUP, mm2px(Vec(1.236, 40.865)), focused_display_size);
 		womb_display = new WombDisplay(module, colors::BOX_BG_LIGHT, colors::WOMB, mm2px(Vec(18.644, 40.865)), focused_display_size);
 
     auto beat_display_size = mm2px(Vec(7.527, 4.327));
-    group_beat_display = new ObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(1.268, 45.968)), beat_display_size);
-    total_observed_group_beats_display = new TotalObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_GROUP, mm2px(Vec(9.321, 45.968)), beat_display_size);
+    group_beat_display = new FocusGroupBeatDisplay(module, colors::BOX_BG_DARK, colors::FOCUS_GROUP, mm2px(Vec(1.268, 45.968)), beat_display_size);
+    total_focus_group_beats_display = new TotalFocusGroupBeatDisplay(module, colors::BOX_BG_DARK, colors::FOCUS_GROUP, mm2px(Vec(9.321, 45.968)), beat_display_size);
     womb_beat_display = new WombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(18.675, 45.968)), beat_display_size);
     total_womb_beats_display = new TotalWombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(26.729, 45.968)), beat_display_size);
 
-    addChild(observed_group_display);
+    addChild(focus_group_display);
     addChild(womb_display);
     addChild(group_beat_display);
-    addChild(total_observed_group_beats_display);
+    addChild(total_focus_group_beats_display);
     addChild(womb_beat_display);
     addChild(total_womb_beats_display);
   }
@@ -224,8 +224,8 @@ struct HearthWidget : ModuleWidget {
     // menu->addChild(new SpacerOptionMenuItem());
 
     // OptionsMenuItem* phase_selection = new OptionsMenuItem("Output Phase Selection");
-    // phase_selection->addItem(OptionMenuItem("ObservedSun Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
-    // phase_selection->addItem(OptionMenuItem("ObservedSun Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
+    // phase_selection->addItem(OptionMenuItem("FocusGroup Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
+    // phase_selection->addItem(OptionMenuItem("FocusGroup Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
     // OptionsMenuItem::addToMenu(phase_selection, menu);
 
     // menu->addChild(new MenuLabel("Love Resolution"));

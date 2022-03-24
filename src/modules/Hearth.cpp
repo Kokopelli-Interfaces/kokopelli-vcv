@@ -6,12 +6,12 @@ Hearth::Hearth() {
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observed Group");
   configParam(NEXT_MOVEMENT_PARAM, 0.f, 1.f, 0.f, "Next Movement");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established Song <-> New Song)");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Focus Group <-> New Song)");
 
   configInput(WOMB_INPUT, "Band Main");
-  configOutput(OBSERVER_OUTPUT, "Observed Group");
-  configOutput(OBSERVER_PHASE_OUTPUT, "Observed Group Phase");
-  configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Beat Phase");
+  configOutput(CONDUCTOR_FOCUS_OUTPUT, "Focus Group");
+  configOutput(CONDUCTOR_FOCUS_PHASE_OUTPUT, "Focus Group Phase");
+  configOutput(CONDUCTOR_FOCUS_BEAT_PHASE_OUTPUT, "Beat Phase");
   configOutput(SUN, "Song");
 
   configBypass(WOMB_INPUT, SUN);
@@ -80,9 +80,9 @@ void Hearth::processButtons(const ProcessArgs &args) {
 }
 
 void Hearth::processAlways(const ProcessArgs &args) {
-  outputs[OBSERVER_PHASE_OUTPUT].setChannels(this->channels());
+  outputs[CONDUCTOR_FOCUS_PHASE_OUTPUT].setChannels(this->channels());
   outputs[SUN].setChannels(this->channels());
-  outputs[OBSERVER_OUTPUT].setChannels(this->channels());
+  outputs[CONDUCTOR_FOCUS_OUTPUT].setChannels(this->channels());
 
   if (_button_divider.process()) {
     processButtons(args);
@@ -160,14 +160,14 @@ void Hearth::processChannel(const ProcessArgs& args, int channel_i) {
   //   e->_gko.time_advancer.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
   // }
 
-  if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_village.observed_group->getPhase();
-    outputs[OBSERVER_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
+  if (outputs[CONDUCTOR_FOCUS_PHASE_OUTPUT].isConnected()) {
+    float phase = e->_village.conductor.focus_group->getPhase();
+    outputs[CONDUCTOR_FOCUS_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
-  if (outputs[OBSERVER_BEAT_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_village.observed_group->getBeatPhase();
-    outputs[OBSERVER_BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
+  if (outputs[CONDUCTOR_FOCUS_BEAT_PHASE_OUTPUT].isConnected()) {
+    float phase = e->_village.conductor.focus_group->getBeatPhase();
+    outputs[CONDUCTOR_FOCUS_BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   e->step();
@@ -176,8 +176,8 @@ void Hearth::processChannel(const ProcessArgs& args, int channel_i) {
   if (outputs[SUN].isConnected()) {
     float sun_out = 0.f;
     if (_audition_position < 1.f) {
-      float observed_group_and_input = kokopellivcv::dsp::sum(out.attenuated_observed_group, e->inputs.in, e->_signal_type);
-      sun_out = rack::crossfade(observed_group_and_input, out.sun, _audition_position);
+      float focus_group_and_input = kokopellivcv::dsp::sum(out.attenuated_focus_group, e->inputs.in, e->_signal_type);
+      sun_out = rack::crossfade(focus_group_and_input, out.sun, _audition_position);
     } else if (1.f == _audition_position) {
       sun_out = out.sun;
     } else if (1.f < _audition_position) {
@@ -187,8 +187,8 @@ void Hearth::processChannel(const ProcessArgs& args, int channel_i) {
     outputs[SUN].setVoltage(sun_out, channel_i);
   }
 
-  if (outputs[OBSERVER_OUTPUT].isConnected()) {
-    outputs[OBSERVER_OUTPUT].setVoltage(out.observed_group, channel_i);
+  if (outputs[CONDUCTOR_FOCUS_OUTPUT].isConnected()) {
+    outputs[CONDUCTOR_FOCUS_OUTPUT].setVoltage(out.focus_group, channel_i);
   }
 }
 
@@ -208,29 +208,29 @@ void Hearth::updateLights(const ProcessArgs &args) {
   kokopellivcv::dsp::hearth::Engine *default_e = _engines[0];
 
   float new_sum = 0.f;
-  float observed_group_sum = 0.f;
+  float focus_group_sum = 0.f;
   for (int c = 0; c < channels(); c++) {
     new_sum += inputs[WOMB_INPUT].getPolyVoltage(c);
-    observed_group_sum += outputs[OBSERVER_OUTPUT].getPolyVoltage(c);
+    focus_group_sum += outputs[CONDUCTOR_FOCUS_OUTPUT].getPolyVoltage(c);
   }
   new_sum = rack::clamp(new_sum, 0.f, 1.f);
-  observed_group_sum = rack::clamp(observed_group_sum, 0.f, 1.f);
-  observed_group_sum = observed_group_sum * (1.f - default_e->inputs.love);
+  focus_group_sum = rack::clamp(focus_group_sum, 0.f, 1.f);
+  focus_group_sum = focus_group_sum * (1.f - default_e->inputs.love);
 
   float light_strength = .3f;
   LoveDirection love_direction = default_e->_gko._love_direction;
-  if (love_direction == LoveDirection::OBSERVED_GROUP) {
+  if (love_direction == LoveDirection::FOCUS_GROUP) {
     if (!default_e->_village.voices.empty()) {
-      updateLight(DIVINITY_LIGHT, colors::OBSERVED_GROUP_LIGHT, light_strength);
+      updateLight(DIVINITY_LIGHT, colors::FOCUS_GROUP_LIGHT, light_strength);
     } else {
-      updateLight(DIVINITY_LIGHT, colors::OBSERVED_GROUP_LIGHT, 0.f);
+      updateLight(DIVINITY_LIGHT, colors::FOCUS_GROUP_LIGHT, 0.f);
     }
 
-    if (default_e->_gko._observer._subgroup_mode) {
-      if (default_e->_gko._observer.checkIfCanEnterFocusedSubgroup()) {
-        updateLight(NEXT_MOVEMENT_LIGHT, colors::OBSERVED_GROUP_LIGHT, light_strength);
+    if (default_e->_village.conductor.is_choosing_next_group) {
+      if (default_e->_village.conductor.checkIfCanEnterFocusedSubgroup()) {
+        updateLight(NEXT_MOVEMENT_LIGHT, colors::FOCUS_GROUP_LIGHT, light_strength);
       } else {
-        updateLight(NEXT_MOVEMENT_LIGHT, colors::OBSERVED_GROUP_LIGHT, 0.f);
+        updateLight(NEXT_MOVEMENT_LIGHT, colors::FOCUS_GROUP_LIGHT, 0.f);
       }
     } else {
       updateLight(NEXT_MOVEMENT_LIGHT, colors::EMERGENCE_LIGHT, light_strength);

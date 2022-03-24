@@ -7,7 +7,7 @@
 
 #include "definitions.hpp"
 #include "Voice.hpp"
-#include "Observer.hpp"
+#include "ConductorChanger.hpp"
 #include "Group.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
@@ -18,24 +18,24 @@ namespace hearth {
 
 class OutputUpdater {
 public:
-  inline void updateOutput(Outputs &out, std::vector<Voice*> voices, Group* new_voice_group, Inputs inputs, Options options) {
+  static inline void updateOutput(Outputs &out, std::vector<Voice*> voices, Group* new_voice_group, Inputs inputs, Options options) {
     // FIXME get rid of me
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
     out.sun = 0.f;
-    out.observed_group = 0.f;
+    out.focus_group = 0.f;
 
     for (unsigned int i = 0; i < voices.size(); i++) {
       float voice_out = voices[i]->readSignal();
-      if (Observer::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(voices[i]->immediate_group, new_voice_group)) {
-        out.observed_group = kokopellivcv::dsp::sum(out.observed_group, voice_out, signal_type);
+      if (ConductorChanger::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(voices[i]->immediate_group, new_voice_group)) {
+        out.focus_group = kokopellivcv::dsp::sum(out.focus_group, voice_out, signal_type);
         voice_out *= (1.f - inputs.love);
       }
 
       out.sun = kokopellivcv::dsp::sum(out.sun, voice_out, signal_type);
     }
 
-    out.attenuated_observed_group = out.observed_group * (1.f - inputs.love);
+    out.attenuated_focus_group = out.focus_group * (1.f - inputs.love);
 
     if (options.include_moon_in_sun_output) {
       float add = inputs.in;

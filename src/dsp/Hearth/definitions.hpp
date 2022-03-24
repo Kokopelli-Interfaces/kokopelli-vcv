@@ -8,12 +8,12 @@
 enum VoiceEnd {
   DISCARD,
   NEXT_MOVEMENT_VIA_SHIFT,
-  SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_GROUP_LOOP,
-  JOIN_OBSERVED_GROUP_LOOP,
+  SET_EQUAL_PERIOD_AND_JOIN_FOCUS_GROUP_LOOP,
+  JOIN_FOCUS_GROUP_LOOP,
   FLOOD
 };
 
-enum LoveDirection { OBSERVED_GROUP, EMERGENCE, NEW };
+enum LoveDirection { FOCUS_GROUP, EMERGENCE, NEW };
 
 typedef long double Time;
 
@@ -25,7 +25,7 @@ struct Inputs {
 
   static inline LoveDirection getLoveDirection(float love) {
     if (love < love_emergence_threshold) {
-      return LoveDirection::OBSERVED_GROUP;
+      return LoveDirection::FOCUS_GROUP;
     } else if (love < 1.f - love_emergence_threshold) {
       return LoveDirection::EMERGENCE;
     } else {
@@ -36,8 +36,8 @@ struct Inputs {
 
 struct Outputs {
   float sun = 0.f;
-  float observed_group = 0.f;
-  float attenuated_observed_group = 0.f;
+  float focus_group = 0.f;
+  float attenuated_focus_group = 0.f;
 };
 
 struct Options {

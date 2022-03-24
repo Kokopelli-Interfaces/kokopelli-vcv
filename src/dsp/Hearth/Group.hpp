@@ -75,12 +75,12 @@ struct Group {
 
   inline int convertToBeat(Time time, bool mod) {
     if (this->period != 0.f && this->beat_period != 0.f) {
-      float time_in_observed_group = time;
+      float time_in_focus_group = time;
       if (mod && this->period < time) {
-        time_in_observed_group = std::fmod((float)time, (float)this->period);
+        time_in_focus_group = std::fmod((float)time, (float)this->period);
       }
 
-      return (int) (time_in_observed_group / this->beat_period);
+      return (int) (time_in_focus_group / this->beat_period);
     }
     return 0;
   }
@@ -93,6 +93,7 @@ struct Group {
     }
   }
 };
+
 } // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

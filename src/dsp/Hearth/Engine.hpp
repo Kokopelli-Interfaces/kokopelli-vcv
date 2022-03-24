@@ -36,7 +36,7 @@ struct Engine {
   void cycleBackward();
   void undo();
 
-  void toggleTuneToFrequencyOfObservedSun();
+  void toggleTuneToFrequencyOfFocusGroup();
 
   int getMostRecentVoiceLength();
 

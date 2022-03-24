@@ -8,7 +8,7 @@ void Engine::toggleMovementProgression() {
 }
 
 void Engine::step() {
-  _gko.advance(_village, this->inputs, this->options);
+  _gko.advance(&_village, this->inputs, this->options);
 }
 
 int Engine::getMostRecentVoiceLength() {
@@ -17,25 +17,25 @@ int Engine::getMostRecentVoiceLength() {
 }
 
 void Engine::cycleBackward() {
-  _gko.cycleBackward(_village);
+  _gko.cycleBackward(&_village);
 }
 
 void Engine::cycleForward() {
-  _gko.cycleForward(_village);
+  _gko.cycleForward(&_village);
 }
 
 void Engine::cycleObservation() {
-  _gko.cycleObservation(_village);
+  _gko.cycleObservation(&_village);
 }
 
 void Engine::ascend() {
-  _gko.ascend(_village);
+  _gko.ascend(&_village);
 }
 
 void Engine::undo() {
-  _gko.undoVoice(_village);
+  _gko.undoVoice(&_village);
 }
 
 void Engine::channelStateReset() {
-  _gko.resetState(_village);
+  _gko.resetState(&_village);
 }

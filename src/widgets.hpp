@@ -37,9 +37,9 @@ struct KokopelliPort : SvgPort {
   }
 };
 
-struct ObservedSunPort : SvgPort {
-	ObservedSunPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/ObservedSunPort.svg")));
+struct FocusGroupPort : SvgPort {
+	FocusGroupPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/FocusGroupPort.svg")));
   }
 };
 
@@ -112,7 +112,7 @@ struct TextBox : TransparentWidget {
   // int textAlign;
 
   TextBox() {
-    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // observed_group
+    defaultTextColor = nvgRGB(0x19, 0x0d, 0x05); // focus_group
     textColor = defaultTextColor;
     backgroundColor = nvgRGB(0x19, 0x0d, 0x05);
     font_size = 20;

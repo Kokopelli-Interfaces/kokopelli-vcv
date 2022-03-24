@@ -8,7 +8,7 @@
 // FIXME
 #include "Village.hpp"
 #include "Voice.hpp"
-#include "Observer.hpp"
+#include "ConductorChanger.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "SignalCapture.hpp"
@@ -61,7 +61,7 @@ public:
       for (unsigned int i = 0; i < voices.size(); i++) {
         float voice_i_love = 1.f;
         for (unsigned int j = i + 1; j < voices.size(); j++) {
-          if (Observer::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(voices[i]->immediate_group, voices[j]->immediate_group)) {
+          if (ConductorChanger::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(voices[i]->immediate_group, voices[j]->immediate_group)) {
             voice_i_love *= (1.f - voices[j]->readLove());
             if (voice_i_love <= 0.0001f) {
               voice_i_love = 0.f;

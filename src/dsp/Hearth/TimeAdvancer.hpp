@@ -75,7 +75,7 @@ struct TimeAdvancer {
     scrubGroup(group, _freq * dt);
   }
 
-  inline void advanceTime(Village &village) {
+  inline void advanceTime(Village *village) {
     float dt = this->sample_time;
     // FIXME
     // if (this->use_ext_phase) {
@@ -89,14 +89,14 @@ struct TimeAdvancer {
     // }
 
     // new voice does not have period set until finish
-    village.new_voice->playhead += _freq * dt;
+    village->new_voice->playhead += _freq * dt;
 
-    for (Voice* voice : village.voices) {
+    for (Voice* voice : village->voices) {
       advanceVoice(voice, dt);
     }
 
     // TODO if _advance_groups_playhead_divider)
-    for (Group* group : village.groups) {
+    for (Group* group : village->groups) {
       advanceGroup(group, dt);
     }
   }

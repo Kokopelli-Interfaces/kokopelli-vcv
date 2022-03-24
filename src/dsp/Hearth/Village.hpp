@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Voice.hpp"
+#include "Conductor.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "util/math.hpp"
@@ -13,18 +14,19 @@ namespace hearth {
 
 struct Village {
   std::vector<Group*> groups;
-  Group* observed_group = nullptr;
 
   std::vector<Voice*> voices;
   Voice *new_voice = nullptr;
 
   Outputs out;
 
+  Conductor conductor;
+
   Village() {
     Group *first_group = new Group();
     this->groups.push_back(first_group);
-    this->observed_group = first_group;
-    this->new_voice = new Voice(this->observed_group);
+    this->conductor.focus_group = first_group;
+    this->new_voice = new Voice(this->conductor.focus_group);
   }
 
   void clearEmptyGroups() {
@@ -34,8 +36,8 @@ struct Village {
           continue;
         }
 
-        if (this->groups[i] == this->observed_group && this->groups[i]->parent_group) {
-          this->observed_group = this->groups[i]->parent_group;
+        if (this->groups[i] == this->conductor.focus_group && this->groups[i]->parent_group) {
+          this->conductor.focus_group = this->groups[i]->parent_group;
         }
 
         Group* delete_group = this->groups[i];

@@ -29,7 +29,7 @@ struct Village {
 
   void clearEmptyGroups() {
     for (int i = this->groups.size()-1; 0 <= i; i--) {
-      if (this->groups[i]->_voices_in_group.size() == 0) {
+      if (this->groups[i]->voices.size() == 0) {
         if (this->groups[i]->parent_group == nullptr) {
           continue;
         }

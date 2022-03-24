@@ -109,7 +109,7 @@ struct WombDisplay : HearthTextBox {
 
     backgroundColor.a = phase;
 
-    int womb_display = e->_village.observed_group->_voices_in_group.size() + 1;
+    int womb_display = e->_village.observed_group->voices.size() + 1;
     std::string s = string::f("%d", womb_display);
     HearthTextBox::setText(s);
 	}
@@ -147,7 +147,7 @@ struct TotalWombBeatDisplay : HearthTextBox {
     } else {
       textColor = colors::LOOK_BACK_LAYER;
       HearthTextBox::setDisplayValue(e->getMostRecentVoiceLength());
-      // if (e->_village.observed_group->_voices_in_group.size() == 0) {
+      // if (e->_village.observed_group->voices.size() == 0) {
       //   HearthTextBox::setDisplayValue(1);
       // } else {
       //   Time adjusted_period = e->_village.observed_group->getAdjustedPeriod(e->_village.new_voice->playhead);

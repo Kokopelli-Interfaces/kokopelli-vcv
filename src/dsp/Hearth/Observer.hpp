@@ -7,6 +7,7 @@
 
 #include "Voice.hpp"
 #include "Group.hpp"
+#include "GroupChanger.hpp"
 #include "definitions.hpp"
 
 namespace kokopellivcv {
@@ -15,7 +16,6 @@ namespace hearth {
 
 class Observer {
 public:
-
   /* read only */
   bool _subgroup_mode = false;
   Group* _pivot_parent = nullptr;
@@ -25,18 +25,18 @@ public:
   static inline std::vector<Group*> breakIntoSubgroups(Group* parent) {
     std::vector<Group*> subgroups;
 
-    for (unsigned int i = 0; i < parent->_voices_in_group.size(); i++) {
-      Voice* voice = parent->_voices_in_group[i];
+    for (unsigned int i = 0; i < parent->voices.size(); i++) {
+      Voice* voice = parent->voices[i];
       bool create_subgroup = voice->immediate_group == parent;
       if (create_subgroup) {
         Group* subgroup = new Group();
         subgroups.push_back(subgroup);
         subgroup->parent_group = parent;
         subgroup->name = rack::string::f("%s/%d", parent->name.c_str(), i + 1);
-        subgroup->_movements.push_back(0.f);
-        subgroup->_voice_i_to_movement_i.push_back(0);
+        subgroup->movements.push_back(0.f);
+        subgroup->voice_i_to_movement_i.push_back(0);
 
-        subgroup->addExistingVoice(voice);
+        GroupChanger::addExistingVoice(subgroup, voice);
         // voice->immediate_group = subgroup;
       } else {
         if (voice->immediate_group->parent_group == parent) {
@@ -66,7 +66,7 @@ public:
   inline bool checkIfCanEnterFocusedSubgroup() {
     assert(_subgroup_mode);
     Group* focused_subgroup = _subgroups[_focused_subgroup_i];
-    bool can_enter =  1 < focused_subgroup->_voices_in_group.size();
+    bool can_enter =  1 < focused_subgroup->voices.size();
     return can_enter;
   }
 
@@ -75,7 +75,7 @@ public:
     assert(village.observed_group);
 
     _pivot_parent = village.observed_group;
-    if (_pivot_parent->_voices_in_group.empty()) {
+    if (_pivot_parent->voices.empty()) {
       return;
     }
 
@@ -87,24 +87,23 @@ public:
     Group* subgroup = _subgroups[_focused_subgroup_i];
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
-      for (auto voice : subgroup->_voices_in_group) {
+      for (auto voice : subgroup->voices) {
         voice->immediate_group = subgroup;
       }
       village.groups.push_back(subgroup);
     }
-
-}
+  }
 
 inline void exitSubgroupMode(Village &village) {
   Group* subgroup = _subgroups[_focused_subgroup_i];
 
-  if (!subgroup->_voices_in_group.empty()) {
+  if (!subgroup->voices.empty()) {
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
       village.groups.push_back(subgroup);
 
       // TODO is it right?
-      subgroup->_voices_in_group[0]->immediate_group = subgroup;
+      subgroup->voices[0]->immediate_group = subgroup;
     }
     village.observed_group = subgroup;
   } else {
@@ -131,11 +130,11 @@ inline void exitSubgroupMode(Village &village) {
     assert(_subgroup_mode);
 
     Group* last_subgroup = _subgroups[_focused_subgroup_i];
-    bool subgroup_created = last_subgroup->_voices_in_group.size() == 1;
+    bool subgroup_created = last_subgroup->voices.size() == 1;
     if (subgroup_created) {
       bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), last_subgroup) != village.groups.end();
       if (subgroup_in_village) {
-        last_subgroup->_voices_in_group[0]->immediate_group = _pivot_parent;
+        last_subgroup->voices[0]->immediate_group = _pivot_parent;
       }
       village.groups.pop_back();
     }
@@ -150,7 +149,7 @@ inline void exitSubgroupMode(Village &village) {
 
     bool subgroup_in_village = std::find(village.groups.begin(), village.groups.end(), subgroup) != village.groups.end();
     if (!subgroup_in_village) {
-      for (auto voice : subgroup->_voices_in_group) {
+      for (auto voice : subgroup->voices) {
         voice->immediate_group = subgroup;
       }
       village.groups.push_back(subgroup);

@@ -43,8 +43,8 @@ struct TimeAdvancer {
   inline void scrubGroup(Group *group, Time time) {
     group->playhead += time;
 
-    while (group->_period <= group->playhead) {
-      group->playhead -= group->_period;
+    while (group->period <= group->playhead) {
+      group->playhead -= group->period;
     }
   }
 
@@ -69,7 +69,7 @@ struct TimeAdvancer {
   }
 
   inline void advanceGroup(Group *group, float dt) {
-    if (group->_period == 0.f) {
+    if (group->period == 0.f) {
       return;
     }
     scrubGroup(group, _freq * dt);

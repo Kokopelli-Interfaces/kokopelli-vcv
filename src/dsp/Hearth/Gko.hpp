@@ -6,6 +6,7 @@
 
 #include "Observer.hpp"
 #include "LoveUpdater.hpp"
+#include "GroupChanger.hpp"
 #include "OutputUpdater.hpp"
 #include "Village.hpp"
 #include "Voice.hpp"
@@ -19,6 +20,7 @@ namespace kokopellivcv {
 namespace dsp {
 namespace hearth {
 
+// The Advancer of the Village
 class Gko {
 public:
   Time delay_shiftback = 0.f;
@@ -34,9 +36,7 @@ public:
 
   bool _discard_voice_at_next_love_return = false;
 
-
   LoveDirection _love_direction;
-
 
 public:
   Gko() {
@@ -47,7 +47,7 @@ public:
 private:
   inline void addLoopingVoice(Village &village, Voice* ended_voice) {
     village.voices.push_back(ended_voice);
-    ended_voice->immediate_group->addNewLoopingVoice(ended_voice);
+    GroupChanger::addNewLoopingVoice(ended_voice->immediate_group, ended_voice);
     if (delay_shiftback < ended_voice->period) {
       ended_voice->playhead += delay_shiftback;
     }
@@ -86,21 +86,24 @@ public:
     case VoiceEnd::SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_GROUP_LOOP:
       ended_voice->loop = true;
       _discard_voice_at_next_love_return = true;
-      if (ended_voice->immediate_group->_period != 0.f) {
-        ended_voice->setPeriodToCaptureWindow(ended_voice->immediate_group->_period);
+      if (ended_voice->immediate_group->period != 0.f) {
+        ended_voice->setPeriodToCaptureWindow(ended_voice->immediate_group->period);
       }
       addLoopingVoice(village, ended_voice);
       break;
     case VoiceEnd::FLOOD:
       for (int i = village.voices.size()-1; 0 <= i; i--) {
         if (Observer::checkIfVoiceInGroupOneIsObservedByVoiceInGroupTwo(village.voices[i]->immediate_group, ended_voice->immediate_group)) {
-          village.voices[i]->immediate_group->undoLastVoice();
+          GroupChanger::undoLastVoice(village.voices[i]->immediate_group);
           village.voices.erase(village.voices.begin() + i);
         }
       }
 
-      // works better without
+      if (_observer._subgroup_mode) {
+        _observer.exitSubgroupMode(village);
+      }
 
+      // works better without
       _discard_voice_at_next_love_return = true;
 
       delete ended_voice;
@@ -126,7 +129,7 @@ public:
 
     if (0 < village.voices.size()) {
       Voice* most_recent_voice = village.voices[village.voices.size()-1];
-      most_recent_voice->immediate_group->undoLastVoice();
+                GroupChanger::undoLastVoice(most_recent_voice->immediate_group);
       village.voices.pop_back();
     }
 

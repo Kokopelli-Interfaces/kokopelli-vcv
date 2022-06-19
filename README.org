@@ -1,4 +1,4 @@
 * Kokopelli Interfaces VCV Rack Modules
 [[file:img/cavee.jpg]]
 
-(Demonstration Stream)[https://odysee.com/human-stream-day-1:9703a05b7b588181df0ef116a03e63c280a8deea?lid=180ef4625f51ffc1270ed63b8857ac5835fdf9ad]
+[Demonstration Stream](https://odysee.com/human-stream-day-1:9703a05b7b588181df0ef116a03e63c280a8deea?lid=180ef4625f51ffc1270ed63b8857ac5835fdf9ad)

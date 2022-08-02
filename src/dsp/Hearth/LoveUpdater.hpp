@@ -19,7 +19,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 class LoveUpdater {
 public:
@@ -77,6 +77,6 @@ public:
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

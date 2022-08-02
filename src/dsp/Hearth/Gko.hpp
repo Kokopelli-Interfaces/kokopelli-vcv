@@ -20,7 +20,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 class Gko {
 public:
@@ -275,6 +275,6 @@ public:
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

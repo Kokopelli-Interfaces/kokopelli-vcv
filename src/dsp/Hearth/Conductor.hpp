@@ -6,7 +6,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 // TODO renam eto grup???
 struct Conductor {
@@ -67,6 +67,6 @@ struct Conductor {
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

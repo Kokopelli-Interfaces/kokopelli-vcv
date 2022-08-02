@@ -23,17 +23,17 @@ Hearth::Hearth() {
   _cycle_forward_button.param = &params[CYCLE_PARAM];
   _cycle_divinity_button.param = &params[DIVINITY_PARAM];
 
-  CIRCLES.push_back(this);
-  printf("CIRCLES size is %ld\n", CIRCLES.size());
+  HEARTHS.push_back(this);
+  printf("HEARTHS size is %ld\n", HEARTHS.size());
 }
 
 Hearth::~Hearth() {
   // FIXME memory SPILLAGE
   delete _light_blinker;
 
-  for (unsigned int i = 0; i < CIRCLES.size(); i++) {
-    if (CIRCLES[i] == this) {
-      CIRCLES.erase(CIRCLES.begin()+i);
+  for (unsigned int i = 0; i < HEARTHS.size(); i++) {
+    if (HEARTHS[i] == this) {
+      HEARTHS.erase(HEARTHS.begin()+i);
     }
   }
 }
@@ -49,7 +49,7 @@ void Hearth::processButtons(const ProcessArgs &args) {
   kokopellivcv::dsp::LongPressButton::Event _cycle_divinity_event = _cycle_divinity_button.process(sample_time);
 
   for (int c = 0; c < channels(); c++) {
-    kokopellivcv::dsp::circle::Engine *e = _engines[c];
+    kokopellivcv::dsp::hearth::Engine *e = _engines[c];
 
     switch (_cycle_divinity_event) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
@@ -100,7 +100,7 @@ void Hearth::modulate() {
   if (_love_resolution != _options.love_resolution) {
     _love_resolution = _options.love_resolution;
     for (int c = 0; c < channels(); c++) {
-      kokopellivcv::dsp::circle::Engine *e = _engines[c];
+      kokopellivcv::dsp::hearth::Engine *e = _engines[c];
       e->_gko.love_updater.updateLoveResolution(_love_resolution);
     }
   }
@@ -109,7 +109,7 @@ void Hearth::modulate() {
   if (_delay_shiftback != _options.delay_shiftback) {
     _delay_shiftback = _options.delay_shiftback;
     for (int c = 0; c < channels(); c++) {
-      kokopellivcv::dsp::circle::Engine *e = _engines[c];
+      kokopellivcv::dsp::hearth::Engine *e = _engines[c];
       Time delay_shiftback_time = _delay_shiftback * _sample_time;
       e->_gko.delay_shiftback = delay_shiftback_time;
     }
@@ -119,7 +119,7 @@ void Hearth::modulate() {
 }
 
 void Hearth::modulateChannel(int channel_i) {
-  kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
+  kokopellivcv::dsp::hearth::Engine *e = _engines[channel_i];
   float love = params[LOVE_PARAM].getValue();
 
   // more intuitive curve
@@ -146,7 +146,7 @@ int Hearth::channels() {
 }
 
 void Hearth::processChannel(const ProcessArgs& args, int channel_i) {
-  kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
+  kokopellivcv::dsp::hearth::Engine *e = _engines[channel_i];
 
   if (inputs[WOMB_INPUT].isConnected()) {
     e->inputs.in = inputs[WOMB_INPUT].getPolyVoltage(channel_i);
@@ -205,7 +205,7 @@ void Hearth::updateLight(int light, NVGcolor color, float strength) {
 void Hearth::updateLights(const ProcessArgs &args) {
   _light_blinker->step();
 
-  kokopellivcv::dsp::circle::Engine *default_e = _engines[0];
+  kokopellivcv::dsp::hearth::Engine *default_e = _engines[0];
 
   float new_sum = 0.f;
   float observed_sun_sum = 0.f;
@@ -251,7 +251,7 @@ void Hearth::postProcessAlways(const ProcessArgs &args) {
 }
 
 void Hearth::addChannel(int channel_i) {
-  _engines[channel_i] = new kokopellivcv::dsp::circle::Engine();
+  _engines[channel_i] = new kokopellivcv::dsp::hearth::Engine();
   _engines[channel_i]->_gko.sample_time = _sample_time;
 
   for (int c = 0; c < channels(); c++) {

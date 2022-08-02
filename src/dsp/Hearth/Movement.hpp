@@ -5,7 +5,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 struct Cycle;
 
@@ -104,6 +104,6 @@ struct Movement {
   // }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

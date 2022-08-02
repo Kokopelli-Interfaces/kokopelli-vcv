@@ -1,6 +1,6 @@
 #include "Engine.hpp"
 
-using namespace kokopellivcv::dsp::circle;
+using namespace kokopellivcv::dsp::hearth;
 using namespace kokopellivcv::dsp;
 
 void Engine::toggleMovementProgression() {

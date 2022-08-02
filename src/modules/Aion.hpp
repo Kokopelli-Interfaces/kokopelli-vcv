@@ -29,7 +29,7 @@ struct Aion : KokopelliVcvModule {
     NUM_LIGHTS
 	};
 
-  Hearth* _connected_circle = nullptr;
+  Hearth* _connected_hearth = nullptr;
   float _sample_time = 1.f;
 
   kokopellivcv::dsp::LongPressButton _cycle_backward_button;

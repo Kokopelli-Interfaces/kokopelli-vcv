@@ -14,7 +14,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 struct Engine {
   Inputs inputs;
@@ -44,6 +44,6 @@ private:
   inline void write();
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

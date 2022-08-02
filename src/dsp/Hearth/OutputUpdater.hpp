@@ -19,7 +19,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 class OutputUpdater {
 public:
@@ -53,6 +53,6 @@ public:
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

@@ -11,7 +11,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 class Observer {
 public:
@@ -173,6 +173,6 @@ inline void exitSubgroupMode(Song &song) {
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

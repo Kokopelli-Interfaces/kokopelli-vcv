@@ -7,7 +7,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 struct Group {
   Group *parent_group = nullptr;
@@ -214,6 +214,6 @@ struct Group {
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

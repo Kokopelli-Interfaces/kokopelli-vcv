@@ -10,7 +10,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 struct Song {
   std::string name = "My Song";
@@ -60,6 +60,6 @@ struct Song {
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

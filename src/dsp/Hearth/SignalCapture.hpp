@@ -14,7 +14,7 @@ using namespace kokopellivcv::util;
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 struct SignalCapture {
   float _last_sample = 0.f;
@@ -92,6 +92,6 @@ struct SignalCapture {
 };
 
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namepsace kokopellivcv

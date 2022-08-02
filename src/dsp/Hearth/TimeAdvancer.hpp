@@ -6,7 +6,7 @@
 
 namespace kokopellivcv {
 namespace dsp {
-namespace circle {
+namespace hearth {
 
 // TODO set with ext phase
 struct TimeAdvancer {
@@ -33,6 +33,6 @@ struct TimeAdvancer {
   }
 };
 
-} // namespace circle
+} // namespace hearth
 } // namespace dsp
 } // namespace kokopellivcv

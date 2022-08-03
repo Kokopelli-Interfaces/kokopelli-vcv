@@ -74,7 +74,14 @@ public:
 
     switch (cycle_end) {
     case CycleEnd::DISCARD:
+      // FIXME crashes
+      if (observer.checkIfInSubgroupMode()) {
+        if (ended_cycle->immediate_group->cycles_in_group.empty()) {
+        observer.exitSubgroupMode(song);
+        }
+      }
       song.clearEmptyGroups();
+
       delete ended_cycle;
       break;
     case CycleEnd::NEXT_MOVEMENT_VIA_SHIFT:
@@ -103,8 +110,6 @@ public:
           song.cycles.erase(song.cycles.begin() + i);
         }
       }
-
-      // works better without
 
       _discard_cycle_at_next_love_return = true;
 

@@ -22,24 +22,6 @@
         "Sequencer",
         "Sampler"
       ]
-    },
-    {
-      "slug": "KokopelliInterfaces-Aion",
-      "name": "Aion",
-      "description": "",
-      "tags": []
-    },
-    {
-      "slug": "KokopelliInterfaces-Member",
-      "name": "Member",
-      "description": "",
-      "tags": []
-    },
-    {
-      "slug": "KokopelliInterfaces-Ether",
-      "name": "Ether",
-      "description": "",
-      "tags": []
     }
   ]
 }

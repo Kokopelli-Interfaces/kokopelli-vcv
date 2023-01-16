@@ -160,7 +160,7 @@ struct Group {
   // TODO cycle invariatn
   inline void addNewCycle(Cycle* cycle) {
     Time original_playhead = cycle->playhead;
-    Time original_period = cycle->period;
+    // Time original_period = cycle->period;
     if (parent_group != nullptr && cycle->immediate_group != parent_group) {
       parent_group->addNewCycle(cycle);
     }

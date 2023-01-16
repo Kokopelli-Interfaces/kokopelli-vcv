@@ -47,10 +47,10 @@ bool Aion::isNextToCircle() {
 
 void Aion::connect() {
   // FIXME find right circle
-  printf("CSIZE %ld\n", CIRCLES.size());
+  // printf("CSIZE %ld\n", CIRCLES.size());
   if (!CIRCLES.empty()) {
     _connected_circle = CIRCLES[0];
-    printf("Aion connected!\n");
+    // printf("Aion connected!\n");
   }
 }
 

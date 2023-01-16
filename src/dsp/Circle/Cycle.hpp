@@ -135,7 +135,7 @@ struct Cycle {
     }
 
     this->period = window;
-    printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
+    // printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
 
   inline void finishWrite() {
@@ -143,7 +143,7 @@ struct Cycle {
     this->signal_capture->finishWrite();
     this->love_capture->finishWrite();
 
-    printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
+    // printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
 };
 

@@ -17,7 +17,7 @@ int Engine::getMostRecentCycleLength() {
 }
 
 void Engine::cycleBackward() {
-  printf("Cycling backward\n");
+  // printf("Cycling backward\n");
   _gko.cycleBackward(_song);
 }
 

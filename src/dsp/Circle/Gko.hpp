@@ -254,7 +254,7 @@ public:
     for (Cycle* cycle : song.cycles) {
       _time_advancer.step(cycle->playhead, step);
       if (cycle->period < cycle->playhead) {
-        // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
+        // // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
         cycle->playhead -= cycle->period;
         assert(cycle->playhead < cycle->period);
       } else if (cycle->playhead < 0.f) {

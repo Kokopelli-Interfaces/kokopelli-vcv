@@ -24,7 +24,7 @@ Circle::Circle() {
   _cycle_divinity_button.param = &params[DIVINITY_PARAM];
 
   CIRCLES.push_back(this);
-  printf("CIRCLES size is %ld\n", CIRCLES.size());
+  // printf("CIRCLES size is %ld\n", CIRCLES.size());
 }
 
 Circle::~Circle() {

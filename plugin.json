@@ -13,8 +13,8 @@
   "donateUrl": "https://ko-fi.com/michaelmuszynski",
   "modules": [
     {
-      "slug": "KokopelliInterfaces-Hearth",
-      "name": "Hearth",
+      "slug": "KokopelliInterfaces-Circle",
+      "name": "Circle",
       "description": "It's a looper, it's a timeline - it's the heart of a new composition workflow based in live-creation.\n Made with care to be a reflection of that which eminates the universe.",
       "tags": [
         "Poly",

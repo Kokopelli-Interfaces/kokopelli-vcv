@@ -30,15 +30,15 @@ struct AionTextBox : TextBox {
 
   void step() override {
     TextBox::step();
-    if (!_module || !_module->_connected_hearth || _module->_connected_hearth->channels() == 0) {
+    if (!_module || !_module->_connected_circle || _module->_connected_circle->channels() == 0) {
       return;
     }
 
-    kokopellivcv::dsp::hearth::Engine* e = _module->_connected_hearth->_engines[0];
+    kokopellivcv::dsp::circle::Engine* e = _module->_connected_circle->_engines[0];
     update(e);
   }
 
-  virtual void update(kokopellivcv::dsp::hearth::Engine* engine) {
+  virtual void update(kokopellivcv::dsp::circle::Engine* engine) {
     return;
   };
 
@@ -63,7 +63,7 @@ struct AionTextBox : TextBox {
 struct AlbumDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
-  void update(kokopellivcv::dsp::hearth::Engine* e) override {
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
     AionTextBox::setText("My Album");
   }
 };
@@ -71,7 +71,7 @@ struct AlbumDisplay : AionTextBox {
 struct SongDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
-  void update(kokopellivcv::dsp::hearth::Engine* e) override {
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
     std::string s = e->_song.name;
     AionTextBox::setText(s);
   }
@@ -80,7 +80,7 @@ struct SongDisplay : AionTextBox {
 struct PrevMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
-  void update(kokopellivcv::dsp::hearth::Engine* e) override {
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
     unsigned int group_movement_n = e->_song.current_movement->group_movement_n;
     if (e->_song.current_movement->prev) {
       textColor = colors::OBSERVED_SUN;
@@ -95,7 +95,7 @@ struct PrevMovementDisplay : AionTextBox {
 struct CurrentMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
-  void update(kokopellivcv::dsp::hearth::Engine* e) override {
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
     unsigned int group_movement_n = e->_song.current_movement->group_movement_n;
     AionTextBox::setMovementNumber(group_movement_n);
   }
@@ -104,7 +104,7 @@ struct CurrentMovementDisplay : AionTextBox {
 struct NextMovementDisplay : AionTextBox {
   using AionTextBox::AionTextBox;
 
-  void update(kokopellivcv::dsp::hearth::Engine* e) override {
+  void update(kokopellivcv::dsp::circle::Engine* e) override {
     unsigned int group_movement_n = e->_song.current_movement->group_movement_n;
     if (e->_song.current_movement->next) {
       textColor = colors::OBSERVED_SUN;

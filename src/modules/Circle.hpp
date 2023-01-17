@@ -25,7 +25,7 @@ struct Circle : KokopelliVcvModule {
 		NUM_PARAMS
   };
 	enum InputIds {
-		WOMB_INPUT,
+		BAND_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {

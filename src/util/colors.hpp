@@ -29,13 +29,13 @@ namespace colors {
 
   static const NVGcolor YELLOWY = nvgRGB(0xe6, 0xa6, 0x0e);
   // static const NVGcolor YELLOWY = nvgRGB(0xff, 0x99, 0x55);
-  // static const NVGcolor WOMB_RED = nvgRGB(0xbd, 0x37, 0x37); // v != 1
-  static const NVGcolor WOMB_RED = nvgRGB(0xfe, 0x4a, 0x4a);
+  // static const NVGcolor BAND_RED = nvgRGB(0xbd, 0x37, 0x37); // v != 1
+  static const NVGcolor BAND_RED = nvgRGB(0xfe, 0x4a, 0x4a);
 
-  // static const NVGcolor WOMB_RED_BRIGHT = nvgRGB(0xff, 0x2a, 0x2a); // pinky
-  static const NVGcolor WOMB_RED_HARD = nvgRGB(0xff, 0x05, 0x05);
-  static const NVGcolor WOMB_RED_BRIGHT = nvgRGB(0xff, 0x18, 0x18);
-  static const NVGcolor WOMB_RED_SOFT = nvgRGB(0xff, 0x29, 0x29);
+  // static const NVGcolor BAND_RED_BRIGHT = nvgRGB(0xff, 0x2a, 0x2a); // pinky
+  static const NVGcolor BAND_RED_HARD = nvgRGB(0xff, 0x05, 0x05);
+  static const NVGcolor BAND_RED_BRIGHT = nvgRGB(0xff, 0x18, 0x18);
+  static const NVGcolor BAND_RED_SOFT = nvgRGB(0xff, 0x29, 0x29);
 
   static const NVGcolor MOONLIGHT = nvgRGB(0xff, 0xc3, 0xc3);
 
@@ -45,13 +45,13 @@ namespace colors {
   static const NVGcolor OBSERVED_SUN = SOFT_SUNLIGHT;
   static const NVGcolor SUN = STRONG_SUNLIGHT;
   static const NVGcolor EMERGENCE = CYAN;
-  static const NVGcolor WOMB = WOMB_RED;
+  static const NVGcolor BAND = BAND_RED;
   static const NVGcolor BOX_BG_DARK = NIGHT_SKY;
   static const NVGcolor BOX_BG_LIGHT = TAN_BROWN;
   static const NVGcolor LOOK_BACK_LAYER = STRONG_SUNLIGHT;
 
   static const NVGcolor OBSERVED_SUN_LIGHT = STRONG_SUNLIGHT;
-  static const NVGcolor EMERGENCE_LIGHT = WOMB_RED_BRIGHT;
-  static const NVGcolor WOMB_LIGHT = WOMB_RED_HARD;
+  static const NVGcolor EMERGENCE_LIGHT = BAND_RED_BRIGHT;
+  static const NVGcolor BAND_LIGHT = BAND_RED_HARD;
 
 } // namespace colors

@@ -3,18 +3,18 @@
 
 Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
-  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Filter Sun Audio");
-  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observed Song");
-  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement");
-  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Love Direction (Established Song <-> New Song)");
+  configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Solo (Observed Song <-> Band Input)");
+  configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observed Song (Long Press to Ascend) (Press While Change Active to Capture Window)");
+  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement (Long Press to Undo) (Press While Change Fully Active to Begin Next Section)");
+  configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Change");
 
-  configInput(WOMB_INPUT, "Band Main");
+  configInput(BAND_INPUT, "Band");
   configOutput(OBSERVER_OUTPUT, "Observed Song");
   configOutput(OBSERVER_PHASE_OUTPUT, "Observed Song Phase");
   configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Beat Phase");
-  configOutput(SUN, "Song");
+  configOutput(SUN, "Total Song");
 
-  configBypass(WOMB_INPUT, SUN);
+  configBypass(BAND_INPUT, SUN);
 
   _light_divider.setDivision(512);
   _button_divider.setDivision(4);
@@ -133,7 +133,7 @@ void Circle::modulateChannel(int channel_i) {
 }
 
 int Circle::channels() {
-  int input_channels = inputs[WOMB_INPUT].getChannels();
+  int input_channels = inputs[BAND_INPUT].getChannels();
   if (_channels < input_channels) {
     for (int c = 0; c < _channels; c++) {
       _engines[c]->channelStateReset();
@@ -148,8 +148,8 @@ int Circle::channels() {
 void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
 
-  if (inputs[WOMB_INPUT].isConnected()) {
-    e->inputs.in = inputs[WOMB_INPUT].getPolyVoltage(channel_i);
+  if (inputs[BAND_INPUT].isConnected()) {
+    e->inputs.in = inputs[BAND_INPUT].getPolyVoltage(channel_i);
   } else {
     e->inputs.in = 0.f;
   }
@@ -210,7 +210,7 @@ void Circle::updateLights(const ProcessArgs &args) {
   float new_sum = 0.f;
   float observed_sun_sum = 0.f;
   for (int c = 0; c < channels(); c++) {
-    new_sum += inputs[WOMB_INPUT].getPolyVoltage(c);
+    new_sum += inputs[BAND_INPUT].getPolyVoltage(c);
     observed_sun_sum += outputs[OBSERVER_OUTPUT].getPolyVoltage(c);
   }
   new_sum = rack::clamp(new_sum, 0.f, 1.f);
@@ -240,7 +240,7 @@ void Circle::updateLights(const ProcessArgs &args) {
     updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
   } else { // LoveDirection::NEW
     updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
-    updateLight(CYCLE_LIGHT, colors::WOMB_LIGHT, light_strength);
+    updateLight(CYCLE_LIGHT, colors::BAND_LIGHT, light_strength);
   }
 }
 

@@ -100,7 +100,7 @@ struct TotalObservedSunBeatDisplay : CircleTextBox {
 	}
 };
 
-struct WombDisplay : CircleTextBox {
+struct BandDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
@@ -110,13 +110,13 @@ struct WombDisplay : CircleTextBox {
 
     backgroundColor.a = phase;
 
-    int womb_display = e->_song.observed_sun->cycles_in_group.size() + 1;
-    std::string s = string::f("%d", womb_display);
+    int band_display = e->_song.observed_sun->cycles_in_group.size() + 1;
+    std::string s = string::f("%d", band_display);
     CircleTextBox::setText(s);
 	}
 };
 
-struct WombBeatDisplay : CircleTextBox {
+struct BandBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
@@ -131,12 +131,12 @@ struct WombBeatDisplay : CircleTextBox {
 	}
 };
 
-struct TotalWombBeatDisplay : CircleTextBox {
+struct TotalBandBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     if (e->_song.cycles.size() == 0) {
-      textColor = colors::WOMB;
+      textColor = colors::BAND;
       CircleTextBox::setText("--");
       CircleTextBox::_previous_displayed_value = -1;
       return;
@@ -163,10 +163,10 @@ struct CircleWidget : ModuleWidget {
   const int hp = 6;
 
   ObservedSunDisplay *observed_sun_display;
-  WombDisplay *womb_display;
+  BandDisplay *band_display;
 
-  WombBeatDisplay *womb_beat_display;
-  TotalWombBeatDisplay *total_womb_beats_display;
+  BandBeatDisplay *band_beat_display;
+  TotalBandBeatDisplay *total_band_beats_display;
 
   ObservedSunBeatDisplay *group_beat_display;
   TotalObservedSunBeatDisplay *total_observed_sun_beats_display;
@@ -183,7 +183,7 @@ struct CircleWidget : ModuleWidget {
 
 		addOutput(createOutput<ObservedSunPort>(mm2px(Vec(2.276, 16.435)), module, Circle::OBSERVER_OUTPUT));
 		addOutput(createOutput<SunPort>(mm2px(Vec(13.65, 15.365)), module, Circle::SUN));
-		addInput(createInput<WombPort>(mm2px(Vec(24.925, 16.435)), module, Circle::WOMB_INPUT));
+		addInput(createInput<BandPort>(mm2px(Vec(24.925, 16.435)), module, Circle::BAND_INPUT));
 
 		addOutput(createOutput<PhaseOutPort>(mm2px(Vec(24.925, 29.961)), module, Circle::OBSERVER_BEAT_PHASE_OUTPUT));
 		addParam(createParam<AuditionKnob>(mm2px(Vec(12.699, 28.719)), module, Circle::AUDITION_PARAM));
@@ -199,20 +199,20 @@ struct CircleWidget : ModuleWidget {
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
 		observed_sun_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_SUN, mm2px(Vec(1.236, 40.865)), focused_display_size);
-		womb_display = new WombDisplay(module, colors::BOX_BG_LIGHT, colors::WOMB, mm2px(Vec(18.644, 40.865)), focused_display_size);
+		band_display = new BandDisplay(module, colors::BOX_BG_LIGHT, colors::BAND, mm2px(Vec(18.644, 40.865)), focused_display_size);
 
     auto beat_display_size = mm2px(Vec(7.527, 4.327));
     group_beat_display = new ObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(1.268, 45.968)), beat_display_size);
     total_observed_sun_beats_display = new TotalObservedSunBeatDisplay(module, colors::BOX_BG_DARK, colors::OBSERVED_SUN, mm2px(Vec(9.321, 45.968)), beat_display_size);
-    womb_beat_display = new WombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(18.675, 45.968)), beat_display_size);
-    total_womb_beats_display = new TotalWombBeatDisplay(module, colors::BOX_BG_DARK, colors::WOMB, mm2px(Vec(26.729, 45.968)), beat_display_size);
+    band_beat_display = new BandBeatDisplay(module, colors::BOX_BG_DARK, colors::BAND, mm2px(Vec(18.675, 45.968)), beat_display_size);
+    total_band_beats_display = new TotalBandBeatDisplay(module, colors::BOX_BG_DARK, colors::BAND, mm2px(Vec(26.729, 45.968)), beat_display_size);
 
     addChild(observed_sun_display);
-    addChild(womb_display);
+    addChild(band_display);
     addChild(group_beat_display);
     addChild(total_observed_sun_beats_display);
-    addChild(womb_beat_display);
-    addChild(total_womb_beats_display);
+    addChild(band_beat_display);
+    addChild(total_band_beats_display);
   }
 
 	void appendContextMenu(rack::Menu* menu) override {

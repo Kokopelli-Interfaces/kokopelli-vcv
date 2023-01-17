@@ -68,9 +68,9 @@ struct PhaseInPort : SvgPort {
   }
 };
 
-struct WombPort : SvgPort {
-	WombPort() {
-    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/WombPort.svg")));
+struct BandPort : SvgPort {
+	BandPort() {
+    setSvg(APP->window->loadSvg(asset::plugin(pluginInstance, "res/components/BandPort.svg")));
   }
 };
 

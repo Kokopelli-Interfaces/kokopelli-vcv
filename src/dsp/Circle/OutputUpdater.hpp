@@ -42,14 +42,7 @@ public:
 
     out.attenuated_observed_sun = out.observed_sun * (1.f - inputs.love);
 
-    if (options.include_moon_in_sun_output) {
-      float add = inputs.in;
-      if (!options.include_unloved_moon_in_sun_output && inputs.love < 0.01) {
-        add *= 100 * inputs.love;
-      }
-
-      out.sun = kokopellivcv::dsp::sum(out.sun, add, signal_type);
-    }
+    out.sun = kokopellivcv::dsp::sum(out.sun, inputs.in, signal_type);
   }
 };
 

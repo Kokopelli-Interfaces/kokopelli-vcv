@@ -242,13 +242,13 @@ struct CircleWidget : ModuleWidget {
 		// delay_shiftback_slider->box.size.x = 190.f;
 		// menu->addChild(delay_shiftback_slider);
 
-    menu->addChild(new BoolOptionMenuItem("Include moon in sun output", [m]() {
-      return &m->_options.include_moon_in_sun_output;
-    }));
-
-    menu->addChild(new BoolOptionMenuItem("Include unloved moon in sun output", [m]() {
-      return &m->_options.include_unloved_moon_in_sun_output;
-    }));
+    // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
+    //   return &m->_options.include_moon_in_sun_output;
+    // }));
+    
+    // menu->addChild(new BoolOptionMenuItem("Include unloved band in sun output", [m]() {
+    //   return &m->_options.include_unloved_moon_in_sun_output;
+    // }));
 
     // OptionsMenuItem::addToMenu(love_resolution, menu);
 

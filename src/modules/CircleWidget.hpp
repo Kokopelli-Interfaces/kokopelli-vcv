@@ -104,6 +104,12 @@ struct BandDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
+    if (e->isRecording()) {
+      textColor = colors::BAND;
+    } else {
+      textColor = colors::OBSERVED_SUN;
+    }
+
     float phase = 0.f;
     // phase = e->_song.observed_sun->getBeatPhase(e->_song.new_cycle->playhead);
     phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
@@ -120,14 +126,15 @@ struct BandBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    if (e->_gko.tune_to_frequency_of_observed_sun) {
-      int beat_in_observed_sun;
-      beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
-
-      CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
+    int beat_in_observed_sun;
+    beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
+    if (e->isRecording()) {
+      textColor = colors::BAND;
     } else {
-      CircleTextBox::setDisplayValue((int)e->_song.new_cycle->playhead);
+      textColor = colors::OBSERVED_SUN;;
     }
+
+    CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
 	}
 };
 
@@ -140,6 +147,12 @@ struct TotalBandBeatDisplay : CircleTextBox {
       CircleTextBox::setText("--");
       CircleTextBox::_previous_displayed_value = -1;
       return;
+    }
+
+    if (e->isRecording()) {
+      textColor = colors::BAND;
+    } else {
+      textColor = colors::OBSERVED_SUN;;
     }
 
     // option

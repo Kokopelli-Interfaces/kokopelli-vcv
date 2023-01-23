@@ -28,6 +28,7 @@ struct Engine {
 
   void step();
 
+  bool isRecording();
   void channelStateReset();
   void cycleObservation();
   void ascend();

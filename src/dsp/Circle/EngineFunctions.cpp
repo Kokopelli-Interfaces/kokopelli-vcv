@@ -29,10 +29,16 @@ void Engine::cycleObservation() {
   _gko.cycleObservation(_song);
 }
 
+bool Engine::isRecording() {
+  return _gko._love_direction != LoveDirection::OBSERVED_SUN;
+}
+
 void Engine::ascend() {
   _gko.observer.ascend(_song);
   _gko.nextCycle(_song, CycleEnd::DISCARD);
-  _gko._discard_cycle_at_next_love_return = true;
+  if (isRecording()) {
+    _gko._discard_cycle_at_next_love_return = true;
+  }
 }
 
 void Engine::undo() {

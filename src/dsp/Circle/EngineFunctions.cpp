@@ -26,7 +26,7 @@ void Engine::cycleForward() {
 }
 
 void Engine::cycleObservation() {
-  _gko.cycleObservation(_song);
+  _gko.cycleObservation(_song, options.cycle_forward_not_back);
 }
 
 bool Engine::isRecording() {

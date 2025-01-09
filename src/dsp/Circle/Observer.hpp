@@ -128,7 +128,7 @@ inline void exitSubgroupMode(Song &song) {
   _subgroup_mode = false;
 }
 
-  inline void cycleSubgroup(Song &song) {
+  inline void cycleSubgroup(Song &song, bool forward) {
     assert(_subgroup_mode);
 
     Group* last_subgroup = _subgroups[_focused_subgroup_i];
@@ -141,10 +141,18 @@ inline void exitSubgroupMode(Song &song) {
       song.groups.pop_back();
     }
 
-    if (_focused_subgroup_i == 0) {
-      _focused_subgroup_i = _subgroups.size()-1;
+    if (!forward) {
+      if (_focused_subgroup_i == 0) {
+        _focused_subgroup_i = _subgroups.size()-1;
+      } else {
+        _focused_subgroup_i--;
+      }
     } else {
-      _focused_subgroup_i--;
+      if (_focused_subgroup_i == (int)_subgroups.size()-1) {
+        _focused_subgroup_i = 0;
+      } else {
+        _focused_subgroup_i++;
+      }
     }
 
     Group* subgroup = _subgroups[_focused_subgroup_i];

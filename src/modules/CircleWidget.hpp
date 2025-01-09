@@ -208,6 +208,8 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 85.333)), module, Circle::CYCLE_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 86.798)), module, Circle::CYCLE_LIGHT));
 
+		addInput(createInput<PhaseOutPort>(mm2px(Vec(13.65, 94.00)), module, Circle::PHASE_INPUT));
+
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
 		observed_sun_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_SUN, mm2px(Vec(1.236, 40.865)), focused_display_size);
 		band_display = new BandDisplay(module, colors::BOX_BG_LIGHT, colors::BAND, mm2px(Vec(18.644, 40.865)), focused_display_size);
@@ -247,6 +249,14 @@ struct CircleWidget : ModuleWidget {
 		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
+
+
+    menu->addChild(new BoolOptionMenuItem("Cycle Forwards, Not Baack", [m]() {
+      return &m->_options.cycle_forward_not_back;
+    }));
+
+
+    // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
 
     // FIXME
 		// DelayShiftbackSlider *delay_shiftback_slider = new DelayShiftbackSlider(&m->_options.delay_shiftback, "Input Delay Shiftback");

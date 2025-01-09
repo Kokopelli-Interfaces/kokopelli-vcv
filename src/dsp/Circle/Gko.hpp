@@ -185,13 +185,13 @@ public:
     }
   }
 
-  inline void cycleObservation(Song &song) {
+  inline void cycleObservation(Song &song, bool forward) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (!observer.checkIfInSubgroupMode()) {
         observer.tryEnterSubgroupMode(song);
       } else {
-        observer.cycleSubgroup(song);
+        observer.cycleSubgroup(song, forward);
       }
       nextCycle(song, CycleEnd::DISCARD);
       break;

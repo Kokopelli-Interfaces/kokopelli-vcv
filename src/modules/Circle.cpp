@@ -9,6 +9,7 @@ Circle::Circle() {
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Change");
 
   configInput(BAND_INPUT, "Band");
+  configInput(PHASE_INPUT, "Phase");
   configOutput(OBSERVER_OUTPUT, "Observed Song");
   configOutput(OBSERVER_PHASE_OUTPUT, "Observed Song Phase");
   configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Beat Phase");
@@ -128,8 +129,7 @@ void Circle::modulateChannel(int channel_i) {
 
   e->options = _options;
 
-  // TODO AION
-  // e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
+  e->_gko.use_ext_phase = inputs[PHASE_INPUT].isConnected();
 }
 
 int Circle::channels() {
@@ -154,11 +154,10 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
     e->inputs.in = 0.f;
   }
 
-  // TODO get from AION
-  // if (inputs[PHASE_INPUT].isConnected()) {
-  //   float phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
-  //   e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
-  // }
+  if (inputs[PHASE_INPUT].isConnected()) {
+    float phase_in = inputs[PHASE_INPUT].getVoltage();
+    e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+  }
 
   if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {
     float phase = e->_song.observed_sun->getPhase(e->_song.playhead);

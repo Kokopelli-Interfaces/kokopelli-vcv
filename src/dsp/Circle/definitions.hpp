@@ -43,4 +43,5 @@ struct Outputs {
 struct Options {
   float love_resolution = 1000.f;
   float delay_shiftback = 0.f;
+  bool cycle_forward_not_back = false;
 };

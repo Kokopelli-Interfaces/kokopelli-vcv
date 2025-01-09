@@ -12,7 +12,6 @@
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "SignalCapture.hpp"
-#include "Movement.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
 
@@ -22,7 +21,7 @@ namespace circle {
 
 class OutputUpdater {
 public:
-  inline void updateOutput(Outputs &out, std::vector<Cycle*> cycles, Group* new_cycle_group, Inputs inputs, Options options) {
+  inline void updateOutput(Outputs &out, std::vector<Cycle*> cycles, Group* new_cycle_group, float signal_in, float love_in, Options options) {
     // FIXME get rid of me
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
@@ -33,15 +32,15 @@ public:
       float cycle_out = cycles[i]->readSignal();
       if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
         out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, cycle_out, signal_type);
-        cycle_out *= (1.f - inputs.love);
+        cycle_out *= (1.f - love_in);
       }
 
       out.sun = kokopellivcv::dsp::sum(out.sun, cycle_out, signal_type);
     }
 
-    out.attenuated_observed_sun = out.observed_sun * (1.f - inputs.love);
+    out.attenuated_observed_sun = out.observed_sun * (1.f - love_in);
 
-    out.sun = kokopellivcv::dsp::sum(out.sun, inputs.in, signal_type);
+    out.sun = kokopellivcv::dsp::sum(out.sun, signal_in, signal_type);
   }
 };
 

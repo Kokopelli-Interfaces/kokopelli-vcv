@@ -7,7 +7,6 @@
 
 enum CycleEnd {
   DISCARD,
-  NEXT_MOVEMENT_VIA_SHIFT,
   SET_EQUAL_PERIOD_AND_JOIN_OBSERVED_SUN_LOOP,
   JOIN_OBSERVED_SUN_LOOP,
   FLOOD
@@ -44,4 +43,6 @@ struct Options {
   float love_resolution = 1000.f;
   float delay_shiftback = 0.f;
   bool cycle_forward_not_back = false;
+  bool use_antipop_filter_when_using_ext_phase = true;
+  bool discard_cycle_on_change_return_after_refresh = true;
 };

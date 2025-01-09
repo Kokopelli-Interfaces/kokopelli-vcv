@@ -12,7 +12,6 @@
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "SignalCapture.hpp"
-#include "Movement.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
 
@@ -38,7 +37,6 @@ public:
   }
 
 private:
-  // TODO cycle types (song or movement), depends on tuning and affects love
   inline float smoothValue(float current, float old) {
     float lambda = 1 / love_resolution;
     return old + (current - old) * lambda;

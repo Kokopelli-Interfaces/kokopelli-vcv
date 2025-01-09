@@ -6,16 +6,15 @@
 #include "rack.hpp"
 
 #include "Observer.hpp"
-#include "Conductor.hpp"
 #include "LoveUpdater.hpp"
 #include "OutputUpdater.hpp"
 #include "Song.hpp"
 #include "Cycle.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
-#include "Movement.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
+#include "dsp/AntipopFilter.hpp"
 
 namespace kokopellivcv {
 namespace dsp {
@@ -27,15 +26,18 @@ public:
   float ext_phase = 0.f;
 
   float sample_time = 1.0f;
+
   Time delay_shiftback = 0.f;
   bool tune_to_frequency_of_observed_sun = true;
 
   /** read only */
 
-  Conductor conductor;
   Observer observer;
   LoveUpdater love_updater;
   OutputUpdater output_updater;
+  AntipopFilter antipop_filter;
+
+  float _step_size = 0.0f;
 
   bool _discard_cycle_at_next_love_return = false;
 
@@ -61,7 +63,7 @@ public:
     ended_cycle->finishWrite();
     if (ended_cycle->period == 0.0) {
       delete ended_cycle;
-      song.new_cycle = new Cycle(song.playhead, song.current_movement, song.observed_sun);
+      song.new_cycle = new Cycle(song.playhead, song.observed_sun);
       return;
     }
 
@@ -75,13 +77,6 @@ public:
       }
       song.clearEmptyGroups();
 
-      delete ended_cycle;
-      break;
-    case CycleEnd::NEXT_MOVEMENT_VIA_SHIFT:
-      // ended_cycle->loop = false;
-      // song.cycles.push_back(ended_cycle);
-      // ended_cycle->immediate_group->addNewCycle(ended_cycle);
-      conductor.nextMovement(song);
       delete ended_cycle;
       break;
     case CycleEnd::JOIN_OBSERVED_SUN_LOOP:
@@ -110,16 +105,7 @@ public:
       break;
     }
 
-    // TODO
-    Movement* cycle_movement;
-    if (tune_to_frequency_of_observed_sun) {
-      cycle_movement = song.current_movement;
-    } else {
-      // FIXME next movement
-      cycle_movement = song.current_movement;
-    }
-
-    song.new_cycle = new Cycle(song.playhead, cycle_movement, song.observed_sun);
+    song.new_cycle = new Cycle(song.playhead, song.observed_sun);
   }
 
   inline void undoCycle(Song &song) {
@@ -136,41 +122,21 @@ public:
     nextCycle(song, CycleEnd::DISCARD);
   }
 
-  inline void cycleBackward(Song &song) {
+  inline void cycleForward(Song &song, Options options) {
     switch(_love_direction) {
     case LoveDirection::OBSERVED_SUN:
       if (observer.checkIfInSubgroupMode()) {
         if (observer.checkIfCanEnterFocusedSubgroup()) {
           observer.exitSubgroupMode(song);
         }
-        nextCycle(song, CycleEnd::DISCARD);
-      } else {
-        nextCycle(song, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
       }
+      nextCycle(song, CycleEnd::DISCARD);
       break;
     case LoveDirection::EMERGENCE:
       nextCycle(song, CycleEnd::DISCARD);
-      break;
-    case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::FLOOD);
-      break;
-    }
-  }
-
-  inline void cycleForward(Song &song) {
-    switch(_love_direction) {
-    case LoveDirection::OBSERVED_SUN:
-      if (observer.checkIfInSubgroupMode()) {
-        if (observer.checkIfCanEnterFocusedSubgroup()) {
-          observer.exitSubgroupMode(song);
-        }
-        nextCycle(song, CycleEnd::DISCARD);
-      } else {
-        nextCycle(song, CycleEnd::NEXT_MOVEMENT_VIA_SHIFT);
+      if (options.discard_cycle_on_change_return_after_refresh) {
+        _discard_cycle_at_next_love_return = true;
       }
-      break;
-    case LoveDirection::EMERGENCE:
-      nextCycle(song, CycleEnd::DISCARD);
       break;
     case LoveDirection::NEW:
       nextCycle(song, CycleEnd::FLOOD);
@@ -218,14 +184,21 @@ public:
 
   inline void advanceTime(Song &song) {
     float step = this->sample_time;
+    if (_step_size > 0.0f) {
+      step = _step_size;
+    }
+
     if (use_ext_phase) {
       step = ext_phase - _last_ext_phase;
-      if (step < -0.95f) {
-        step = ext_phase + 1 - _last_ext_phase;
-      } else if (0.95f < step) {
-        step = ext_phase - 1 - _last_ext_phase;
+      if (step < -0.99f) {
+        step = ext_phase + 1.0f - _last_ext_phase;
+        antipop_filter.trigger();
+      } else if (0.99f < step) {
+        step = ext_phase - 1.0f - _last_ext_phase;
+        antipop_filter.trigger();
       }
       _last_ext_phase = ext_phase;
+      _step_size = step;
     }
 
     if (!song.cycles.empty()) {
@@ -238,7 +211,10 @@ public:
       }
     }
 
-    song.new_cycle->playhead += step;
+    if (_love_direction != LoveDirection::OBSERVED_SUN) {
+      song.new_cycle->playhead += step;
+    }
+
     if (use_ext_phase) {
       if (song.playhead < 0.f) {
         song.playhead = 0.f;
@@ -262,8 +238,13 @@ public:
 
 public:
   inline void advance(Song &song, Inputs inputs, Options options) {
+    float signal_in = inputs.in;
+    if (use_ext_phase && options.use_antipop_filter_when_using_ext_phase) {
+      signal_in = antipop_filter.process(inputs.in);
+    }
+
     advanceTime(song);
-    song.new_cycle->write(inputs.in, inputs.love);
+    song.new_cycle->write(signal_in, inputs.love);
 
     LoveDirection new_love_direction = Inputs::getLoveDirection(inputs.love);
     if (_love_direction != new_love_direction) {
@@ -271,9 +252,7 @@ public:
     }
 
     love_updater.updateSongCyclesLove(song.cycles);
-    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs, options);
-
-    conductor.conduct(song);
+    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, signal_in, inputs.love, options);
   }
 };
 

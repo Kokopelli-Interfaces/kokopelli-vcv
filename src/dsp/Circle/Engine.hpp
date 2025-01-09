@@ -32,12 +32,8 @@ struct Engine {
   void channelStateReset();
   void cycleObservation();
   void ascend();
-  void toggleMovementProgression();
   void cycleForward();
-  void cycleBackward();
   void undo();
-
-  void toggleTuneToFrequencyOfObservedSun();
 
   int getMostRecentCycleLength();
 

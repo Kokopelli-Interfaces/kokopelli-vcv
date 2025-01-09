@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Cycle.hpp"
-#include "Movement.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "util/math.hpp"
@@ -19,26 +18,18 @@ struct Song {
   Group* observed_sun = nullptr;
 
   std::vector<Cycle*> cycles;
-  // TODO move to inactive if pre-entrance movement
-  // std::vector<Cycle*> inactive_cycles;
 
   Cycle *new_cycle = nullptr;
 
   Time playhead = 0.f;
 
-  Movement *current_movement = nullptr;
-  Movement* start_movement = nullptr;
-
   Outputs out;
 
   Song() {
-    this->current_movement = new Movement();
-    this->current_movement->group_start_movement = this->current_movement;
-    this->start_movement = this->current_movement;
     Time start = 0.f;
     this->groups.push_back(new Group());
     this->observed_sun = groups[0];
-    this->new_cycle = new Cycle(start, this->current_movement, this->observed_sun);
+    this->new_cycle = new Cycle(start, this->observed_sun);
   }
 
   void clearEmptyGroups() {

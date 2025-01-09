@@ -2,7 +2,6 @@
 
 #include "definitions.hpp"
 #include "SignalCapture.hpp"
-#include "Movement.hpp"
 #include "dsp/Signal.hpp"
 #include "dsp/Fader.hpp"
 
@@ -28,9 +27,6 @@ struct Cycle {
 
   float love = 1.f;
 
-  Movement movement_at_start;
-  Movement* movement;
-
   SignalCapture *signal_capture;
   SignalCapture *love_capture;
 
@@ -41,12 +37,10 @@ struct Cycle {
   Time fade_in_time = 0.02f;
   Time fade_out_time = 0.07f;
 
-  inline Cycle(Time start, Movement* movement, Group *immediate_group) {
+  inline Cycle(Time start, Group *immediate_group) {
     this->capture_start = start;
     this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
-    this->movement_at_start = *movement;
-    this->movement = movement;
     this->immediate_group = immediate_group;
   }
 

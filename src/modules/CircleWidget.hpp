@@ -124,12 +124,10 @@ struct BandBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    int beat_in_observed_sun;
-    beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
+    int beat_in_observed_sun = 0;
     if (e->isRecording()) {
       textColor = colors::BAND;
-    } else {
-      textColor = colors::OBSERVED_SUN;;
+      beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
     }
 
     CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
@@ -234,27 +232,21 @@ struct CircleWidget : ModuleWidget {
 
     menu->addChild(new MenuLabel());
 
-    // menu->addChild(new MenuLabel("Phase Output"));
-    // menu->addChild(new SpacerOptionMenuItem());
-
-    // OptionsMenuItem* phase_selection = new OptionsMenuItem("Output Phase Selection");
-    // phase_selection->addItem(OptionMenuItem("ObservedSun Beat Period", [m]() { return m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase  = true; }));
-    // phase_selection->addItem(OptionMenuItem("ObservedSun Period", [m]() { return !m->_options.output_beat_phase; }, [m]() { m->_options.output_beat_phase = false; }));
-    // OptionsMenuItem::addToMenu(phase_selection, menu);
-
-    // menu->addChild(new MenuLabel("Love Resolution"));
-
-    // menu->addChild(new SpacerOptionMenuItem());
-
 		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
-
 
     menu->addChild(new BoolOptionMenuItem("Cycle Forwards, Not Baack", [m]() {
       return &m->_options.cycle_forward_not_back;
     }));
 
+    menu->addChild(new BoolOptionMenuItem("Discard cycle on change return after refresh capture", [m]() {
+      return &m->_options.discard_cycle_on_change_return_after_refresh;
+    }));
+
+    menu->addChild(new BoolOptionMenuItem("Use anti pop filter when using external phase", [m]() {
+      return &m->_options.use_antipop_filter_when_using_ext_phase;
+    }));
 
     // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
 
@@ -266,7 +258,7 @@ struct CircleWidget : ModuleWidget {
     // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
     //   return &m->_options.include_moon_in_sun_output;
     // }));
-    
+
     // menu->addChild(new BoolOptionMenuItem("Include unloved band in sun output", [m]() {
     //   return &m->_options.include_unloved_moon_in_sun_output;
     // }));

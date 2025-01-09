@@ -5,7 +5,7 @@ Circle::Circle() {
   config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
   configParam(AUDITION_PARAM, 0.f, 2.f, 1.f, "Solo (Observed Song <-> Band Input)");
   configParam(DIVINITY_PARAM, 0.f, 1.f, 0.f, "Change Observed Song (Long Press to Ascend) (Press While Change Active to Capture Window)");
-  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Next Movement (Long Press to Undo) (Press While Change Fully Active to Begin Next Section)");
+  configParam(CYCLE_PARAM, 0.f, 1.f, 0.f, "Enter Group/Refresh Capture (Long Press to Undo) (Press While Change Fully Active to Remove Observered Song)");
   configParam(LOVE_PARAM, 0.f, 1.f, 0.f, "Change");
 
   configInput(BAND_INPUT, "Band");

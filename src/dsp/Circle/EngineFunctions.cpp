@@ -3,10 +3,6 @@
 using namespace kokopellivcv::dsp::circle;
 using namespace kokopellivcv::dsp;
 
-void Engine::toggleMovementProgression() {
-  _gko.conductor.loop_movement = !_gko.conductor.loop_movement;
-}
-
 void Engine::step() {
   _gko.advance(_song, inputs, options);
 }
@@ -16,13 +12,8 @@ int Engine::getMostRecentCycleLength() {
   return recent_cycle->immediate_group->convertToBeat(recent_cycle->period, false);
 }
 
-void Engine::cycleBackward() {
-  // printf("Cycling backward\n");
-  _gko.cycleBackward(_song);
-}
-
 void Engine::cycleForward() {
-  _gko.cycleForward(_song);
+  _gko.cycleForward(_song, options);
 }
 
 void Engine::cycleObservation() {

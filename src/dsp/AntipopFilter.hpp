@@ -21,7 +21,7 @@ struct AntipopFilter {
     }
 
     if (recover) {
-      _alpha += 1.f / 30.f; // recovers in ~30 samples
+      _alpha += 1.f / 60.f;
     }
 
     _filter += _alpha * (in - _filter);

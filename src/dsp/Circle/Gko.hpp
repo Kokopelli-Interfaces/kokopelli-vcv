@@ -192,7 +192,9 @@ public:
         output_updater.antipop_filter.trigger();
       }
       _last_ext_phase = ext_phase;
-      _step_size = step;
+      if (step != 0.f) {
+        _step_size = step;
+      }
     }
 
     if (!song.cycles.empty()) {

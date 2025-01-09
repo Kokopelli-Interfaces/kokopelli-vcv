@@ -106,7 +106,6 @@ void Circle::modulate() {
     }
   }
 
-
   return;
 }
 
@@ -255,5 +254,3 @@ void Circle::removeChannel(int channel_i) {
 }
 
 Model *modelCircle = rack::createModel<Circle, CircleWidget>("KokopelliInterfaces-Circle");
-
-

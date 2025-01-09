@@ -5,7 +5,6 @@
 
 #include "rack.hpp"
 
-// FIXME
 #include "Song.hpp"
 #include "Cycle.hpp"
 #include "Observer.hpp"
@@ -30,7 +29,7 @@ public:
 
     out.sun = 0.f;
     out.observed_sun = 0.f;
-a
+
     for (unsigned int i = 0; i < cycles.size(); i++) {
       float cycle_out = cycles[i]->readSignal(options.fade_time_mult);
       if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {

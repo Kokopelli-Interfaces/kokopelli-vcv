@@ -157,7 +157,7 @@ struct FadeDuration : Quantity {
 	FadeDuration(float *_src, std::string fade_label) {
 		src = _src;
 		label = fade_label;
-	2
+	}
 	void setValue(float value) override {
 		*src = math::clamp(value, getMinValue(), getMaxValue());
 	}

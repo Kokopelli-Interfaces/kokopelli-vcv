@@ -14,6 +14,7 @@
 #include "SignalCapture.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
+#include "dsp/AntipopFilter.hpp"
 
 namespace kokopellivcv {
 namespace dsp {
@@ -21,6 +22,8 @@ namespace circle {
 
 class OutputUpdater {
 public:
+  AntipopFilter antipop_filter;
+
   inline void updateOutput(Outputs &out, std::vector<Cycle*> cycles, Group* new_cycle_group, float signal_in, float love_in, Options options) {
     // FIXME get rid of me
     kokopellivcv::dsp::SignalType signal_type = kokopellivcv::dsp::SignalType::AUDIO;
@@ -41,6 +44,11 @@ public:
     out.attenuated_observed_sun = out.observed_sun * (1.f - love_in);
 
     out.sun = kokopellivcv::dsp::sum(out.sun, signal_in, signal_type);
+
+    if (options.use_antipop_filter) {
+      out.sun = antipop_filter.process(out.sun, true);
+      out.attenuated_observed_sun = antipop_filter.process(out.sun, false);
+    }
   }
 };
 

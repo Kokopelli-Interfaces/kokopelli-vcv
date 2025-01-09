@@ -14,13 +14,15 @@ struct AntipopFilter {
     _alpha = 0.f;
   }
 
-  inline float process(float in) {
+  inline float process(float in, bool recover) {
     if (_alpha >= 1.0f) {
         _filter = in;
         return in;
     }
 
-    _alpha += 1.f / 30.f; // recovers in ~30 samples
+    if (recover) {
+      _alpha += 1.f / 30.f; // recovers in ~30 samples
+    }
 
     _filter += _alpha * (in - _filter);
 

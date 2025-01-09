@@ -41,8 +41,7 @@ struct Outputs {
 
 struct Options {
   float love_resolution = 1000.f;
-  float delay_shiftback = 0.f;
   bool cycle_forward_not_back = false;
-  bool use_antipop_filter_when_using_ext_phase = true;
+  bool use_antipop_filter = true;
   bool discard_cycle_on_change_return_after_refresh = true;
 };

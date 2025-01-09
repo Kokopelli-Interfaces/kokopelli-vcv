@@ -244,16 +244,11 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.discard_cycle_on_change_return_after_refresh;
     }));
 
-    menu->addChild(new BoolOptionMenuItem("Use anti pop filter when using external phase", [m]() {
-      return &m->_options.use_antipop_filter_when_using_ext_phase;
+    menu->addChild(new BoolOptionMenuItem("Use anti pop filter", [m]() {
+      return &m->_options.use_antipop_filter;
     }));
 
     // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
-
-    // FIXME
-		// DelayShiftbackSlider *delay_shiftback_slider = new DelayShiftbackSlider(&m->_options.delay_shiftback, "Input Delay Shiftback");
-		// delay_shiftback_slider->box.size.x = 190.f;
-		// menu->addChild(delay_shiftback_slider);
 
     // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
     //   return &m->_options.include_moon_in_sun_output;

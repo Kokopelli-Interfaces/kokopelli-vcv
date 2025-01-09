@@ -187,44 +187,6 @@ struct FadeSliderItem : ui::Slider {
 	}
 };
 
-// fade duration for fade slider menu item
-struct DelayShiftback : Quantity {
-	float *src = NULL;
-	std::string label = "";
-
-	DelayShiftback(float *_src, std::string fade_label) {
-		src = _src;
-		label = fade_label;
-	}
-	void setValue(float value) override {
-		*src = math::clamp(value, getMinValue(), getMaxValue());
-	}
-	float getValue() override {
-		return *src;
-	}
-	float getMinValue() override {return 0.f;}
-	float getMaxValue() override {return 44100.0f;}
-	float getDefaultValue() override {return 0.0f;}
-	float getDisplayValue() override {return getValue() / (44100 / 100);}
-	std::string getDisplayValueString() override {
-		float value = getDisplayValue();
-		return string::f("%.0f", value);
-	}
-	void setDisplayValue(float displayValue) override {setValue(displayValue);}
-	std::string getLabel() override {return label;}
-	std::string getUnit() override {return " ms";}
-};
-
-struct DelayShiftbackSlider : ui::Slider {
-	DelayShiftbackSlider(float *shiftback, std::string label) {
-		quantity = new DelayShiftback(shiftback, label);
-	}
-
-	~DelayShiftbackSlider() {
-		delete quantity;
-	}
-};
-
 struct BlinkableRedGreenBlueLight : RedGreenBlueLight {
   std::chrono::time_point<std::chrono::system_clock> blink;
   bool op = true;

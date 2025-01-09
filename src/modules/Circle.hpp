@@ -59,7 +59,6 @@ struct Circle : KokopelliVcvModule {
 
   Options _options;
   float _love_resolution = 1000.f;
-  float _delay_shiftback = 0.f;
 
   Circle();
   ~Circle();

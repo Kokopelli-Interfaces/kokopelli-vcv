@@ -106,15 +106,9 @@ void Circle::modulate() {
     }
   }
 
-  // TODO FIXME
-  if (_delay_shiftback != _options.delay_shiftback) {
-    _delay_shiftback = _options.delay_shiftback;
-    for (int c = 0; c < channels(); c++) {
-      kokopellivcv::dsp::circle::Engine *e = _engines[c];
-      Time delay_shiftback_time = _delay_shiftback * _sample_time;
-      e->_gko.delay_shiftback = delay_shiftback_time;
-    }
-  }
+  // TODO
+  // if (_fade_in) {
+  // }
 
   return;
 }

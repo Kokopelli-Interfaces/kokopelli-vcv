@@ -14,7 +14,6 @@
 #include "definitions.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
-#include "dsp/AntipopFilter.hpp"
 
 namespace kokopellivcv {
 namespace dsp {
@@ -27,7 +26,6 @@ public:
 
   float sample_time = 1.0f;
 
-  Time delay_shiftback = 0.f;
   bool tune_to_frequency_of_observed_sun = true;
 
   /** read only */
@@ -35,7 +33,6 @@ public:
   Observer observer;
   LoveUpdater love_updater;
   OutputUpdater output_updater;
-  AntipopFilter antipop_filter;
 
   float _step_size = 0.0f;
 
@@ -49,10 +46,7 @@ private:
   inline void addCycle(Song &song, Cycle* ended_cycle) {
     song.cycles.push_back(ended_cycle);
     ended_cycle->immediate_group->addNewCycle(ended_cycle, use_ext_phase);
-
-    if (delay_shiftback < ended_cycle->period) {
-      ended_cycle->playhead += delay_shiftback;
-    }
+    output_updater.antipop_filter.trigger();
   }
 
 public:
@@ -69,7 +63,6 @@ public:
 
     switch (cycle_end) {
     case CycleEnd::DISCARD:
-      // FIXME crashes
       if (observer.checkIfInSubgroupMode()) {
         if (ended_cycle->immediate_group->cycles_in_group.empty()) {
         observer.exitSubgroupMode(song);
@@ -117,6 +110,7 @@ public:
       Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
       most_recent_cycle->immediate_group->undoLastCycle();
       song.cycles.pop_back();
+      output_updater.antipop_filter.trigger();
     }
 
     nextCycle(song, CycleEnd::DISCARD);
@@ -192,10 +186,10 @@ public:
       step = ext_phase - _last_ext_phase;
       if (step < -0.99f) {
         step = ext_phase + 1.0f - _last_ext_phase;
-        antipop_filter.trigger();
+        output_updater.antipop_filter.trigger();
       } else if (0.99f < step) {
         step = ext_phase - 1.0f - _last_ext_phase;
-        antipop_filter.trigger();
+        output_updater.antipop_filter.trigger();
       }
       _last_ext_phase = ext_phase;
       _step_size = step;
@@ -239,9 +233,6 @@ public:
 public:
   inline void advance(Song &song, Inputs inputs, Options options) {
     float signal_in = inputs.in;
-    if (use_ext_phase && options.use_antipop_filter_when_using_ext_phase) {
-      signal_in = antipop_filter.process(inputs.in);
-    }
 
     advanceTime(song);
     song.new_cycle->write(signal_in, inputs.love);

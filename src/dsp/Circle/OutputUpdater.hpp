@@ -30,9 +30,9 @@ public:
 
     out.sun = 0.f;
     out.observed_sun = 0.f;
-
+a
     for (unsigned int i = 0; i < cycles.size(); i++) {
-      float cycle_out = cycles[i]->readSignal();
+      float cycle_out = cycles[i]->readSignal(options.fade_time_mult);
       if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
         out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, cycle_out, signal_type);
         cycle_out *= (1.f - love_in);
@@ -47,7 +47,7 @@ public:
 
     if (options.use_antipop_filter) {
       out.sun = antipop_filter.process(out.sun, true);
-      out.attenuated_observed_sun = antipop_filter.process(out.sun, false);
+      out.attenuated_observed_sun = antipop_filter.process(out.attenuated_observed_sun, false);
     }
   }
 };

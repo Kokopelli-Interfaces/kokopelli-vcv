@@ -157,7 +157,7 @@ struct FadeDuration : Quantity {
 	FadeDuration(float *_src, std::string fade_label) {
 		src = _src;
 		label = fade_label;
-	}
+	2
 	void setValue(float value) override {
 		*src = math::clamp(value, getMinValue(), getMaxValue());
 	}
@@ -186,6 +186,37 @@ struct FadeSliderItem : ui::Slider {
 		delete quantity;
 	}
 };
+
+struct FadeTimeMult : Quantity {
+	float *src = NULL;
+	std::string label = "";
+
+	FadeTimeMult(float *_src, std::string fade_label) {
+		src = _src;
+		label = fade_label;
+	}
+	void setValue(float value) override {
+		*src = math::clamp(value, getMinValue(), getMaxValue());
+	}
+	float getValue() override {
+		return *src;
+	}
+	float getMinValue() override {return 0.0f;}
+	float getMaxValue() override {return 100.f;}
+	float getDefaultValue() override {return 1.0f;}
+	std::string getLabel() override {return label;}
+};
+
+struct FadeTimeMultSliderItem : ui::Slider {
+	FadeTimeMultSliderItem(float *fade_mult, std::string fade_label) {
+		quantity = new FadeTimeMult(fade_mult, fade_label);
+	}
+
+	~FadeTimeMultSliderItem() {
+		delete quantity;
+	}
+};
+
 
 struct BlinkableRedGreenBlueLight : RedGreenBlueLight {
   std::chrono::time_point<std::chrono::system_clock> blink;

@@ -106,9 +106,6 @@ void Circle::modulate() {
     }
   }
 
-  // TODO
-  // if (_fade_in) {
-  // }
 
   return;
 }

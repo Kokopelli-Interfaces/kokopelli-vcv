@@ -14,7 +14,6 @@
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "Movement.hpp"
-#include "TimeAdvancer.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
 
@@ -41,20 +40,14 @@ public:
   bool _discard_cycle_at_next_love_return = false;
 
   float _last_ext_phase = 0.f;
-  TimeAdvancer _time_advancer;
 
   LoveDirection _love_direction;
-
-public:
-  Gko() {
-    _time_advancer.setTickFrequency(1.0f);
-    // TODO set me when loop is observed_sun for consistent loops
-  }
 
 private:
   inline void addCycle(Song &song, Cycle* ended_cycle) {
     song.cycles.push_back(ended_cycle);
-    ended_cycle->immediate_group->addNewCycle(ended_cycle);
+    ended_cycle->immediate_group->addNewCycle(ended_cycle, use_ext_phase);
+
     if (delay_shiftback < ended_cycle->period) {
       ended_cycle->playhead += delay_shiftback;
     }
@@ -236,12 +229,16 @@ public:
     }
 
     if (!song.cycles.empty()) {
-      _time_advancer.step(song.playhead, step);
+      song.playhead += step;
     } else {
-      song.playhead = 0.f;
+      if (use_ext_phase) {
+        song.playhead = ext_phase;
+      } else {
+        song.playhead = 0.f;
+      }
     }
 
-    _time_advancer.step(song.new_cycle->playhead, step);
+    song.new_cycle->playhead += step;
     if (use_ext_phase) {
       if (song.playhead < 0.f) {
         song.playhead = 0.f;
@@ -252,7 +249,7 @@ public:
     }
 
     for (Cycle* cycle : song.cycles) {
-      _time_advancer.step(cycle->playhead, step);
+      cycle->playhead += step;
       if (cycle->period < cycle->playhead) {
         // // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
         cycle->playhead -= cycle->period;

@@ -158,11 +158,11 @@ struct Group {
   }
 
   // TODO cycle invariatn
-  inline void addNewCycle(Cycle* cycle) {
+  inline void addNewCycle(Cycle* cycle, bool use_ext_phase) {
     Time original_playhead = cycle->playhead;
     // Time original_period = cycle->period;
     if (parent_group != nullptr && cycle->immediate_group != parent_group) {
-      parent_group->addNewCycle(cycle);
+      parent_group->addNewCycle(cycle, use_ext_phase);
     }
 
     this->cycles_in_group.push_back(cycle);
@@ -171,22 +171,27 @@ struct Group {
 
     if (cycle->loop) {
       if (this->cycles_in_group.size() == 1) {
-        // TODO get crossfade from prev cycle
-        period = cycle->period;
-        beat_period = cycle->period;
-      } else {
-        Time period_before = cycle->period;
-        adjustPeriodsToFit(cycle->period);
-        // printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->period, original_period);
-        Time period_diff = period_before - cycle->period;
-        bool period_roundback = 0.f < period_diff;
-        if (period_roundback) {
-          cycle->playhead = period_diff;
-          // printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->period);
+        if (use_ext_phase) {
+          period = 1.0f;
+          beat_period = 1.0f;
         } else {
-          cycle->playhead = original_playhead;
-          // printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, cycle->period);
+          period = cycle->period;
+          beat_period = cycle->period;
+          return;
         }
+      }
+
+      Time period_before = cycle->period;
+      adjustPeriodsToFit(cycle->period);
+      // printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->period, original_period);
+      Time period_diff = period_before - cycle->period;
+      bool period_roundback = 0.f < period_diff;
+      if (period_roundback) {
+        cycle->playhead = period_diff;
+        // printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->period);
+      } else {
+        cycle->playhead = original_playhead;
+        // printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, cycle->period);
       }
     }
 

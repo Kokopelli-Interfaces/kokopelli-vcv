@@ -236,10 +236,17 @@ struct CircleWidget : ModuleWidget {
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
 
+		FadeTimeSliderItem *crossfade_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.crossfade, "Cycle Crossfade Factor");
+		crossfade_time_slider->box.size.x = 190.f;
+		menu->addChild(crossfade_time_slider);
 
-		FadeTimeMultSliderItem *fade_time_mult_slider = new FadeTimeMultSliderItem(&m->_options.fade_time_mult, "Fade Time Multiplier");
-		fade_time_mult_slider->box.size.x = 190.f;
-		menu->addChild(fade_time_mult_slider);
+		FadeTimeSliderItem *fade_in_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.fade_in, "Cycle Fade In Factor ");
+		fade_in_time_slider->box.size.x = 190.f;
+		menu->addChild(fade_in_time_slider);
+
+		FadeTimeSliderItem *fade_out_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.fade_out, "Cycle Fade Out Factor");
+		fade_out_time_slider->box.size.x = 190.f;
+		menu->addChild(fade_out_time_slider);
 
     menu->addChild(new BoolOptionMenuItem("Cycle Forwards, Not Back", [m]() {
       return &m->_options.cycle_forward_not_back;

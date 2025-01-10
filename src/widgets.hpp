@@ -187,11 +187,11 @@ struct FadeSliderItem : ui::Slider {
 	}
 };
 
-struct FadeTimeMult : Quantity {
+struct FadeTime : Quantity {
 	float *src = NULL;
 	std::string label = "";
 
-	FadeTimeMult(float *_src, std::string fade_label) {
+	FadeTime(float *_src, std::string fade_label) {
 		src = _src;
 		label = fade_label;
 	}
@@ -202,17 +202,17 @@ struct FadeTimeMult : Quantity {
 		return *src;
 	}
 	float getMinValue() override {return 0.0f;}
-	float getMaxValue() override {return 100.f;}
-	float getDefaultValue() override {return 1.0f;}
+	float getMaxValue() override {return 1.0f;}
+	float getDefaultValue() override {return 0.02f;}
 	std::string getLabel() override {return label;}
 };
 
-struct FadeTimeMultSliderItem : ui::Slider {
-	FadeTimeMultSliderItem(float *fade_mult, std::string fade_label) {
-		quantity = new FadeTimeMult(fade_mult, fade_label);
+struct FadeTimeSliderItem : ui::Slider {
+	FadeTimeSliderItem(float *fade_time, std::string fade_label) {
+		quantity = new FadeTime(fade_time, fade_label);
 	}
 
-	~FadeTimeMultSliderItem() {
+	~FadeTimeSliderItem() {
 		delete quantity;
 	}
 };

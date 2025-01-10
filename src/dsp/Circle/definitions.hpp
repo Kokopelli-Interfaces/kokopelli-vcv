@@ -39,9 +39,15 @@ struct Outputs {
   float attenuated_observed_sun = 0.f;
 };
 
+struct FadeTimes {
+  float fade_in = 0.02f;
+  float fade_out = 0.01f;
+  float crossfade = 0.03f;
+};
+
 struct Options {
+  FadeTimes fade_times;
   float love_resolution = 1000.f;
-  float fade_time_mult = 1.f;
   bool smooth_phase = false;
   bool cycle_forward_not_back = false;
   bool discard_cycle_on_change_return_after_refresh = true;

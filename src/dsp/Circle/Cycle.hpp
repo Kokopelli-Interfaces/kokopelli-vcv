@@ -33,11 +33,6 @@ struct Cycle {
 
   bool loop = false;
 
-  // TODO option
-  Time max_crossfade_time = 0.02f;
-  Time fade_in_time = 0.01f;
-  Time fade_out_time = 0.02f;
-
 private:
   inline float equalPowerCrossfade(float a, float b, float fade) {
       float fadeA = std::cos(fade * M_PI_2); // Fades out A
@@ -59,46 +54,63 @@ public:
     delete love_capture;
   }
 
-  inline float niceFade(float signal, float fade_time_mult) {
+  inline Time getMaxCrossfadeTime() {
+    Time max_crossfade_time = signal_capture->_period - this->period;
+    if (this->period < max_crossfade_time) {
+      max_crossfade_time = this->period;
+    }
+    return max_crossfade_time;
+  }
+
+  inline float niceFade(float signal, FadeTimes fade_times) {
     bool loop_fade = this->period < signal_capture->_period;
     if (loop_fade) {
-      Time crossfade_time = signal_capture->_period - this->period;
-      float real_max_crossfade_time = max_crossfade_time * fade_time_mult;
-      if (real_max_crossfade_time < crossfade_time) {
-        crossfade_time = real_max_crossfade_time;
+      Time crossfade_time = fade_times.crossfade;
+      Time max_crossfade_time = getMaxCrossfadeTime();
+      if (max_crossfade_time < crossfade_time ) {
+        crossfade_time = max_crossfade_time;
       }
 
-      if (this->playhead <= real_max_crossfade_time) {
+      if (this->playhead <= crossfade_time) {
         float crossfade_left_sample = signal_capture->read(this->playhead + this->period);
-        float fade = this->playhead / real_max_crossfade_time;
+        float fade = this->playhead / crossfade_time;
         return equalPowerCrossfade(crossfade_left_sample, signal, fade);
       }
 
       return signal;
     }
 
-    // assert(signal_capture->_period < this->period);
-    float real_fade_out_time = fade_out_time * fade_time_mult;
-    bool fade_out = this->period - real_fade_out_time <= this->playhead;
+    float signal_after_fade_in_out = signal;
+
+    bool fade_out = this->period - fade_times.fade_out <= this->playhead;
     if (fade_out) {
-      Time crossfade_start_time = this->period - real_fade_out_time;
+      Time fade_out_time = fade_times.fade_out;
+      if (this->period - fade_times.fade_out <= 0.f) {
+        fade_out_time = this->period;
+      }
+
       float crossfade_right_sample = 0.f;
-      float fade = (this->playhead - crossfade_start_time) / real_fade_out_time;
-      return equalPowerCrossfade(signal, crossfade_right_sample, fade);
+      float fade = (this->playhead - fade_out_time) / fade_out_time;
+      signal_after_fade_in_out = equalPowerCrossfade(signal, crossfade_right_sample, fade);
     }
 
-    float real_fade_in_time = fade_in_time * fade_time_mult;
-    bool fade_in = this->playhead <= real_fade_in_time;
-    if (fade_in) { // fade in
+
+    bool fade_in = this->playhead <= fade_times.fade_in;
+    if (fade_in) {
+      Time fade_in_time = fade_times.fade_in;
+      if (this->period  <= fade_times.fade_in) {
+        fade_in_time = this->period;
+      }
+
       float crossfade_left_sample = 0.f;
-      float fade = this->playhead / real_fade_in_time;
-      return equalPowerCrossfade(crossfade_left_sample, signal, fade);
+      float fade = this->playhead / fade_in_time;
+      signal_after_fade_in_out = equalPowerCrossfade(crossfade_left_sample, signal_after_fade_in_out, fade);
     }
 
-    return signal;
+    return signal_after_fade_in_out;
   }
 
-  inline float readSignal(float fade_time_mult) {
+  inline float readSignal(FadeTimes fade_times) {
     if (signal_capture->_period < this->playhead) {
       return 0.f;
     }
@@ -108,8 +120,7 @@ public:
     }
 
     float signal = signal_capture->read(this->playhead);
-    signal = niceFade(signal, fade_time_mult) * this->love;
-    // return fader.step(signal);
+    signal = niceFade(signal, fade_times) * this->love;
     return signal;
   }
 
@@ -132,13 +143,10 @@ public:
 
   inline void setPeriodToCaptureWindow(Time window) {
     if (window < this->signal_capture->_period) {
-      Time crossfade_time = this->signal_capture->_period - window;
-      if (max_crossfade_time < crossfade_time) {
-        crossfade_time = max_crossfade_time;
-      }
-      this->signal_capture->fitToWindow(window + crossfade_time);
-      this->love_capture->fitToWindow(window + crossfade_time);
-      this->playhead = crossfade_time;
+      Time max_crossfade_time = getMaxCrossfadeTime();
+      this->signal_capture->fitToWindow(window + max_crossfade_time);
+      this->love_capture->fitToWindow(window + max_crossfade_time);
+      this->playhead = max_crossfade_time;
     }
 
     this->period = window;

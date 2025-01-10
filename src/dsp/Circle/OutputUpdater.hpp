@@ -29,7 +29,7 @@ public:
     out.observed_sun = 0.f;
 
     for (unsigned int i = 0; i < cycles.size(); i++) {
-      float cycle_out = cycles[i]->readSignal(options.fade_time_mult);
+      float cycle_out = cycles[i]->readSignal(options.fade_times);
       float cycle_out_observer = cycle_out * cycles[i]->observer_love;
       out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, cycle_out_observer, signal_type);
 

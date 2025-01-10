@@ -25,6 +25,7 @@ public:
 
   rack::dsp::ClockDivider _love_calculator_divider;
   std::vector<float> _next_cycles_love;
+  std::vector<float> _next_cycles_observer_love;
 
   LoveUpdater() {
     _love_calculator_divider.setDivision(love_resolution);
@@ -43,16 +44,27 @@ private:
   }
 
 public:
-  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles) {
-    // TODO maybe put in function so to not call every step
+  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles, Group* new_cycle_group) {
     if (_next_cycles_love.size() < cycles.size()) {
       while (_next_cycles_love.size() < cycles.size()) {
         _next_cycles_love.push_back(0.f);
       }
     }
 
+    if (_next_cycles_observer_love.size() < cycles.size()) {
+      while (_next_cycles_observer_love.size() < cycles.size()) {
+        _next_cycles_observer_love.push_back(0.f);
+      }
+    }
+
     if (_love_calculator_divider.process()) {
       for (unsigned int i = 0; i < cycles.size(); i++) {
+        if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
+          _next_cycles_observer_love[i] = 1.f;
+        } else {
+          _next_cycles_observer_love[i] = 0.f;
+        }
+
         float cycle_i_love = 1.f;
         for (unsigned int j = i + 1; j < cycles.size(); j++) {
           if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, cycles[j]->immediate_group)) {
@@ -70,6 +82,7 @@ public:
 
     for (unsigned int i = 0; i < cycles.size(); i++) {
       cycles[i]->love = smoothValue(_next_cycles_love[i], cycles[i]->love);
+      cycles[i]->observer_love = smoothValue(_next_cycles_observer_love[i], cycles[i]->observer_love);
     }
   }
 };

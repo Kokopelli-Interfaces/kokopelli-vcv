@@ -273,7 +273,7 @@ public:
       song.new_cycle->write(attenuated_signal_in, inputs.love);
     }
 
-    love_updater.updateSongCyclesLove(song.cycles);
+    love_updater.updateSongCyclesLove(song.cycles, song.new_cycle->immediate_group);
     output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs.in, inputs.love, options);
   }
 };

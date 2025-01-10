@@ -26,6 +26,7 @@ struct Cycle {
   Time playhead = 0.f;
 
   float love = 1.f;
+  float observer_love = 1.f;
 
   SignalCapture *signal_capture;
   SignalCapture *love_capture;

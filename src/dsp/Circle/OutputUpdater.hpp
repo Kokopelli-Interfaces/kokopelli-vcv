@@ -13,6 +13,7 @@
 #include "SignalCapture.hpp"
 #include "util/math.hpp"
 #include "dsp/Signal.hpp"
+
 namespace kokopellivcv {
 namespace dsp {
 namespace circle {
@@ -29,8 +30,10 @@ public:
 
     for (unsigned int i = 0; i < cycles.size(); i++) {
       float cycle_out = cycles[i]->readSignal(options.fade_time_mult);
+      float cycle_out_observer = cycle_out * cycles[i]->observer_love;
+      out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, cycle_out_observer, signal_type);
+
       if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
-        out.observed_sun = kokopellivcv::dsp::sum(out.observed_sun, cycle_out, signal_type);
         cycle_out *= (1.f - love_in);
       }
 
@@ -38,7 +41,6 @@ public:
     }
 
     out.attenuated_observed_sun = out.observed_sun * (1.f - love_in);
-
     out.sun = kokopellivcv::dsp::sum(out.sun, signal_in, signal_type);
   }
 };

@@ -249,9 +249,9 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.discard_cycle_on_change_return_after_refresh;
     }));
 
-    menu->addChild(new BoolOptionMenuItem("Use anti pop filter", [m]() {
-      return &m->_options.use_antipop_filter;
-    }));
+    // menu->addChild(new BoolOptionMenuItem("Use anti pop filter", [m]() {
+    //   return &m->_options.use_antipop_filter;
+    // }));
 
     menu->addChild(new BoolOptionMenuItem("Smooth External Phase", [m]() {
       return &m->_options.smooth_phase;

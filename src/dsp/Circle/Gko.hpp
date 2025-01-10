@@ -48,7 +48,6 @@ private:
   inline void addCycle(Song &song, Cycle* ended_cycle) {
     song.cycles.push_back(ended_cycle);
     ended_cycle->immediate_group->addNewCycle(ended_cycle, use_ext_phase);
-    output_updater.antipop_filter.trigger();
   }
 
 public:
@@ -112,7 +111,6 @@ public:
       Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
       most_recent_cycle->immediate_group->undoLastCycle();
       song.cycles.pop_back();
-      output_updater.antipop_filter.trigger();
     }
 
     nextCycle(song, CycleEnd::DISCARD);
@@ -188,10 +186,8 @@ public:
       step = ext_phase - _last_ext_phase;
       if (step < -0.99f) {
         step = ext_phase + 1.0f - _last_ext_phase;
-        output_updater.antipop_filter.trigger();
       } else if (0.99f < step) {
         step = ext_phase - 1.0f - _last_ext_phase;
-        output_updater.antipop_filter.trigger();
       }
       _last_ext_phase = ext_phase;
       if (step != 0.f) {
@@ -246,7 +242,7 @@ public:
   }
 
   inline float attenuateSignalInAtChangeTransients(float signal_in, float love) {
-    float threshold = 0.025f;
+    float threshold = 0.02f;
     if (love < threshold) {
         return signal_in * (love / threshold);
     } else {

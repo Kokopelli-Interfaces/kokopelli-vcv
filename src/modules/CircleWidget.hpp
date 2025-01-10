@@ -236,15 +236,15 @@ struct CircleWidget : ModuleWidget {
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
 
-		FadeTimeSliderItem *crossfade_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.crossfade, "Cycle Crossfade Factor");
+		FadeTimeSliderItem *crossfade_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.crossfade, "Cycle Crossfade Time");
 		crossfade_time_slider->box.size.x = 190.f;
 		menu->addChild(crossfade_time_slider);
 
-		FadeTimeSliderItem *fade_in_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.fade_in, "Cycle Fade In Factor ");
+		FadeTimeSliderItem *fade_in_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.fade_in, "Cycle Fade In Time ");
 		fade_in_time_slider->box.size.x = 190.f;
 		menu->addChild(fade_in_time_slider);
 
-		FadeTimeSliderItem *fade_out_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.fade_out, "Cycle Fade Out Factor");
+		FadeTimeSliderItem *fade_out_time_slider = new FadeTimeSliderItem(&m->_options.fade_times.fade_out, "Cycle Fade Out Time");
 		fade_out_time_slider->box.size.x = 190.f;
 		menu->addChild(fade_out_time_slider);
 

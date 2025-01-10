@@ -18,10 +18,8 @@ struct Cycle {
 
   Group *immediate_group;
 
-  bool active = true;
-
+  Time start = 0.f;
   Time period = 0.f;
-  Time capture_start;
 
   Time playhead = 0.f;
 
@@ -32,6 +30,7 @@ struct Cycle {
   SignalCapture *love_capture;
 
   bool loop = false;
+  bool trim_beginning_not_end_of_signal = false;
 
 private:
   inline float equalPowerCrossfade(float a, float b, float fade) {
@@ -43,7 +42,6 @@ private:
 public:
 
   inline Cycle(Time start, Group *immediate_group) {
-    this->capture_start = start;
     this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->immediate_group = immediate_group;
@@ -71,10 +69,18 @@ public:
         crossfade_time = max_crossfade_time;
       }
 
-      if (this->playhead <= crossfade_time) {
-        float crossfade_left_sample = signal_capture->read(this->playhead + this->period);
-        float fade = this->playhead / crossfade_time;
-        return equalPowerCrossfade(crossfade_left_sample, signal, fade);
+      if (trim_beginning_not_end_of_signal) {
+        if (this->start + this->period - crossfade_time < this->playhead) {
+          float crossfade_right_sample = signal_capture->read(this->playhead - this->period);
+          float fade = (this->playhead - (this->start + this->period - crossfade_time)) / crossfade_time;
+          return equalPowerCrossfade(signal, crossfade_right_sample, fade);
+        }
+      } else {
+        if (this->playhead <= crossfade_time) {
+          float crossfade_left_sample = signal_capture->read(this->playhead + this->period);
+          float fade = this->playhead / crossfade_time;
+          return equalPowerCrossfade(crossfade_left_sample, signal, fade);
+        }
       }
 
       return signal;
@@ -90,8 +96,8 @@ public:
       }
 
       float crossfade_right_sample = 0.f;
-      float fade = (this->playhead - fade_out_time) / fade_out_time;
-      signal_after_fade_in_out = equalPowerCrossfade(signal, crossfade_right_sample, fade);
+      float fade = (this->playhead - (this->period - fade_out_time)) / fade_out_time;
+      signal_after_fade_in_out = rack::crossfade(signal, crossfade_right_sample, fade);
     }
 
 
@@ -104,7 +110,7 @@ public:
 
       float crossfade_left_sample = 0.f;
       float fade = this->playhead / fade_in_time;
-      signal_after_fade_in_out = equalPowerCrossfade(crossfade_left_sample, signal_after_fade_in_out, fade);
+      signal_after_fade_in_out = rack::crossfade(crossfade_left_sample, signal_after_fade_in_out, fade);
     }
 
     return signal_after_fade_in_out;
@@ -141,14 +147,19 @@ public:
     love_capture->write(playhead, love);
   }
 
-  inline void setPeriodToCaptureWindow(Time window) {
+  inline void captureWindowAndAlignPlayhead(Time window) {
     this->period = window;
 
     if (window < this->signal_capture->_period) {
+      trim_beginning_not_end_of_signal = true;
       Time max_crossfade_time = getMaxCrossfadeTime();
       this->signal_capture->fitToWindow(window + max_crossfade_time);
       this->love_capture->fitToWindow(window + max_crossfade_time);
+
+      this->start = max_crossfade_time;
       this->playhead = max_crossfade_time;
+
+      // printf("set cycle start and playhead to %Lf)\n", this->start);
     }
 
     // printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);

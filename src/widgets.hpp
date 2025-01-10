@@ -205,6 +205,7 @@ struct FadeTime : Quantity {
 	float getMaxValue() override {return 1.0f;}
 	float getDefaultValue() override {return 0.02f;}
 	std::string getLabel() override {return label;}
+	std::string getUnit() override {return " beats";}
 };
 
 struct FadeTimeSliderItem : ui::Slider {

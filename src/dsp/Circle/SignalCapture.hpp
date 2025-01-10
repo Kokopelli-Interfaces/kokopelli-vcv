@@ -17,7 +17,6 @@ namespace dsp {
 namespace circle {
 
 struct SignalCapture {
-  float _last_sample = 0.f;
   Time _period = 0.f;
 
   kokopellivcv::dsp::SignalType _signal_type;
@@ -84,7 +83,6 @@ struct SignalCapture {
   inline void write(Time t, float sample) {
     if (_period < t) {
       _period = t;
-      _last_sample = sample;
     }
 
     _buffer.push_back(sample);

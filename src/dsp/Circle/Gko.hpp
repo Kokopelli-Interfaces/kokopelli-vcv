@@ -81,7 +81,7 @@ public:
       ended_cycle->loop = true;
       _discard_cycle_at_next_love_return = true;
       if (ended_cycle->immediate_group->period != 0.f) {
-        ended_cycle->setPeriodToCaptureWindow(ended_cycle->immediate_group->period);
+        ended_cycle->captureWindowAndAlignPlayhead(ended_cycle->immediate_group->period);
       }
       addCycle(song, ended_cycle);
       break;
@@ -226,10 +226,10 @@ public:
 
     for (Cycle* cycle : song.cycles) {
       cycle->playhead += _step_size;
-      if (cycle->period < cycle->playhead) {
+      if (cycle->period + cycle->start < cycle->playhead) {
         // // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
         cycle->playhead -= cycle->period;
-        assert(cycle->playhead < cycle->period);
+        assert(cycle->playhead < cycle->start + cycle->period);
       } else if (cycle->playhead < 0.f) {
         cycle->playhead += cycle->period;
       }

@@ -142,6 +142,8 @@ public:
   }
 
   inline void setPeriodToCaptureWindow(Time window) {
+    this->period = window;
+
     if (window < this->signal_capture->_period) {
       Time max_crossfade_time = getMaxCrossfadeTime();
       this->signal_capture->fitToWindow(window + max_crossfade_time);
@@ -149,7 +151,6 @@ public:
       this->playhead = max_crossfade_time;
     }
 
-    this->period = window;
     // printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
   }
 

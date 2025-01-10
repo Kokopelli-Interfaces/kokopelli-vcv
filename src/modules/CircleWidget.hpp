@@ -253,6 +253,10 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.use_antipop_filter;
     }));
 
+    menu->addChild(new BoolOptionMenuItem("Smooth External Phase", [m]() {
+      return &m->_options.smooth_phase;
+    }));
+
     // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
 
     // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {

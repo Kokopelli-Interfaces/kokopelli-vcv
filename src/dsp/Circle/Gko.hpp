@@ -246,7 +246,7 @@ public:
   }
 
   inline float attenuateSignalInAtChangeTransients(float signal_in, float love) {
-    float threshold = 0.01f;
+    float threshold = 0.025f;
     if (love < threshold) {
         return signal_in * (love / threshold);
     } else {
@@ -261,11 +261,6 @@ public:
 
 
   inline void advance(Song &song, Inputs inputs, Options options) {
-    float next_love = inputs.love;
-    _hi_res_love = smoothValue(next_love, _hi_res_love);
-
-    float signal_in = attenuateSignalInAtChangeTransients(inputs.in, _hi_res_love);
-
     advanceTime(song, options.smooth_phase);
 
     LoveDirection new_love_direction = Inputs::getLoveDirection(inputs.love);
@@ -274,11 +269,16 @@ public:
     }
 
     if (isRecording()) {
-      song.new_cycle->write(signal_in, inputs.love);
+      float next_love = inputs.love;
+      _hi_res_love = smoothValue(next_love, _hi_res_love);
+
+      float attenuated_signal_in = attenuateSignalInAtChangeTransients(inputs.in, _hi_res_love);
+
+      song.new_cycle->write(attenuated_signal_in, inputs.love);
     }
 
     love_updater.updateSongCyclesLove(song.cycles);
-    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, signal_in, inputs.love, options);
+    output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs.in, inputs.love, options);
   }
 };
 

@@ -65,5 +65,6 @@ struct Options {
   bool cycle_forward_not_back = false;
   bool attenuate_captured_band_input_at_change_transients = true;
   bool discard_cycle_on_change_return_after_refresh = true;
+  bool output_observed_song_beat_phase_not_total_song = true;
   bool poly_input_phase_mode = false;
 };

@@ -34,6 +34,8 @@ struct Engine {
   void ascend();
   void cycleForward();
   void undo();
+  float getPhaseInObservedSun();
+  float getBeatPhase();
 
   int getMostRecentCycleLength();
 

@@ -40,3 +40,27 @@ void Engine::channelStateReset() {
   _gko.nextCycle(_song, CycleEnd::DISCARD);
   _gko.love_updater._love_calculator_divider.reset();
 }
+
+float Engine::getPhaseInObservedSun() {
+  if (this->_gko.use_ext_phase && this->_song.cycles.empty()) {
+    return this->_gko.ext_phase;
+  }
+
+  return this->_song.observed_sun->getPhase(this->_song.playhead);
+}
+
+float Engine::getBeatPhase() {
+  if (this->_gko.use_ext_phase && this->_song.cycles.empty()) {
+    return this->_gko.ext_phase;
+  }
+
+  if (this->_song.groups.empty()) {
+    return 0.f;
+  }
+
+  if (this->options.output_observed_song_beat_phase_not_total_song) {
+    return this->_song.observed_sun->getBeatPhase(this->_song.playhead);
+  }
+
+  return this->_song.groups[0]->getBeatPhase(this->_song.playhead);
+}

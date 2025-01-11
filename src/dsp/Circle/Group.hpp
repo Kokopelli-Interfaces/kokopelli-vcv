@@ -22,6 +22,10 @@ struct Group {
   Time period = 0.f;
   Time beat_period = 0.f;
 
+  inline bool isEmpty() {
+    return cycles_in_group.empty();
+  }
+
   inline void undoLastCycleWithoutUndoingParent() {
     assert(cycles_in_group.size() == period_history.size());
 
@@ -54,6 +58,7 @@ struct Group {
       Time time_in_beat = std::fmod((float)time, (float)beat_period);
       return rack::clamp(time_in_beat / beat_period , 0.f, 1.f);
     }
+
     return 0.f;
   }
 
@@ -62,6 +67,7 @@ struct Group {
       Time time_in_observed_sun = std::fmod((float)time, (float)period);
       return rack::clamp(time_in_observed_sun / period , 0.f, 1.f);
     }
+
     return 0.f;
   }
 

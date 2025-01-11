@@ -49,6 +49,8 @@ json_t* Circle::dataToJson() {
   json_object_set_new(rootJ, "cycle forward not back", json_integer(_options.cycle_forward_not_back));
   json_object_set_new(rootJ, "discard cycle on change return after refresh", json_integer(_options.discard_cycle_on_change_return_after_refresh));
   json_object_set_new(rootJ, "attenuate captured band input at change transients", json_integer(_options.attenuate_captured_band_input_at_change_transients));
+  json_object_set_new(rootJ, "output observed song beat phase not total song", json_integer(_options.output_observed_song_beat_phase_not_total_song));
+
 
   return rootJ;
 }
@@ -62,6 +64,7 @@ void Circle::dataFromJson(json_t* rootJ) {
   _options.cycle_forward_not_back = json_integer_value(json_object_get(rootJ, "cycle forward not back"));
 _options.discard_cycle_on_change_return_after_refresh = json_integer_value(json_object_get(rootJ, "discard cycle on change return after refresh"));
 _options.attenuate_captured_band_input_at_change_transients = json_integer_value(json_object_get(rootJ, "attenuate captured band input at change transients"));
+_options.output_observed_song_beat_phase_not_total_song = json_integer_value(json_object_get(rootJ, "output observed song beat phase not total song"));
 }
 
 void Circle::sampleRateChange() {
@@ -184,12 +187,12 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+    float phase = e->getPhaseInObservedSun();
     outputs[OBSERVER_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 
   if (outputs[OBSERVER_BEAT_PHASE_OUTPUT].isConnected()) {
-    float phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
+    float phase = e->getBeatPhase();
     outputs[OBSERVER_BEAT_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 

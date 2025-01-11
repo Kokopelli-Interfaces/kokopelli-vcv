@@ -48,7 +48,7 @@ struct FadeTimes {
 struct Options {
   FadeTimes fade_times;
   float love_resolution = 1000.f;
-  float ext_phase_smoothing_lambda = 1.f;
+  float ext_phase_smoothing_lambda = 0.01f;
   bool cycle_forward_not_back = false;
   bool discard_cycle_on_change_return_after_refresh = true;
   bool poly_input_phase_mode = false;

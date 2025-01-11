@@ -234,7 +234,7 @@ struct SmoothingLambda : Quantity {
 	}
 	float getMinValue() override {return 0.00001f;}
 	float getMaxValue() override {return 1.0f;}
-	float getDefaultValue() override {return 1.00f;}
+	float getDefaultValue() override {return 0.01f;}
 	std::string getLabel() override {return label;}
 };
 

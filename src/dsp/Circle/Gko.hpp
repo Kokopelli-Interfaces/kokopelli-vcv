@@ -176,7 +176,7 @@ public:
     _love_direction = new_love_direction;
   }
 
-  inline void advanceTime(Song &song, bool smooth_phase) {
+  inline void advanceTime(Song &song, float ext_phase_smoothing_lambda) {
     float step = this->sample_time;
     if (_saved_step_size > 0.0f && !use_ext_phase) {
       step = _saved_step_size;
@@ -195,11 +195,7 @@ public:
       }
     }
 
-    if (step != _step_size && smooth_phase) {
-      _step_size = smoothValue(step, _step_size);
-    } else {
-      _step_size = step;
-    }
+    _step_size = smoothValue(step, _step_size, ext_phase_smoothing_lambda);
 
     if (!song.cycles.empty()) {
       song.playhead += _step_size;
@@ -250,14 +246,13 @@ public:
     }
   }
 
-  static inline float smoothValue(float current, float old) {
-    float lambda = .1;
+  static inline float smoothValue(float current, float old, float lambda) {
     return old + (current - old) * lambda;
   }
 
 
   inline void advance(Song &song, Inputs inputs, Options options) {
-    advanceTime(song, options.smooth_phase);
+    advanceTime(song, options.ext_phase_smoothing_lambda);
 
     LoveDirection new_love_direction = Inputs::getLoveDirection(inputs.love);
     if (_love_direction != new_love_direction) {
@@ -266,7 +261,8 @@ public:
 
     if (isRecording()) {
       float next_love = inputs.love;
-      _hi_res_love = smoothValue(next_love, _hi_res_love);
+      float lambda = .1f;
+      _hi_res_love = smoothValue(next_love, _hi_res_love, lambda);
 
       float attenuated_signal_in = attenuateSignalInAtChangeTransients(inputs.in, _hi_res_love);
 

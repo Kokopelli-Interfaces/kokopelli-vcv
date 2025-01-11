@@ -218,6 +218,35 @@ struct FadeTimeSliderItem : ui::Slider {
 	}
 };
 
+struct SmoothingLambda : Quantity {
+	float *src = NULL;
+	std::string label = "";
+
+	SmoothingLambda(float *_src, std::string smoothing_lambda_label) {
+		src = _src;
+		label = smoothing_lambda_label;
+	}
+	void setValue(float value) override {
+		*src = math::clamp(value, getMinValue(), getMaxValue());
+	}
+	float getValue() override {
+		return *src;
+	}
+	float getMinValue() override {return 0.00001f;}
+	float getMaxValue() override {return 1.0f;}
+	float getDefaultValue() override {return 1.00f;}
+	std::string getLabel() override {return label;}
+};
+
+struct SmoothingLambdaSliderItem : ui::Slider {
+	SmoothingLambdaSliderItem(float *smoothing_lambda_time, std::string smoothing_lambda_label) {
+		quantity = new SmoothingLambda(smoothing_lambda_time, smoothing_lambda_label);
+	}
+
+	~SmoothingLambdaSliderItem() {
+		delete quantity;
+	}
+};
 
 struct BlinkableRedGreenBlueLight : RedGreenBlueLight {
   std::chrono::time_point<std::chrono::system_clock> blink;

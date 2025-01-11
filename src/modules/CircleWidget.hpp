@@ -259,6 +259,10 @@ struct CircleWidget : ModuleWidget {
 		fade_out_time_slider->box.size.x = 190.f;
 		menu->addChild(fade_out_time_slider);
 
+		SmoothingLambdaSliderItem *ext_phase_smoothing_lambda_slider = new SmoothingLambdaSliderItem(&m->_options.ext_phase_smoothing_lambda, "External Phase Smoothing Lambda");
+		ext_phase_smoothing_lambda_slider->box.size.x = 190.f;
+		menu->addChild(ext_phase_smoothing_lambda_slider);
+
     menu->addChild(new BoolOptionMenuItem("Cycle Forwards, Not Back", [m]() {
       return &m->_options.cycle_forward_not_back;
     }));
@@ -270,10 +274,6 @@ struct CircleWidget : ModuleWidget {
     // menu->addChild(new BoolOptionMenuItem("Use anti pop filter", [m]() {
     //   return &m->_options.use_antipop_filter;
     // }));
-
-    menu->addChild(new BoolOptionMenuItem("Smooth External Phase", [m]() {
-      return &m->_options.smooth_phase;
-    }));
 
     // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
 

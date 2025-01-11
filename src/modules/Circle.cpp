@@ -44,13 +44,9 @@ json_t* Circle::dataToJson() {
   json_object_set_new(rootJ, "fade in time", json_real(_options.fade_times.fade_in));
   json_object_set_new(rootJ, "fade out time", json_real(_options.fade_times.fade_out));
   json_object_set_new(rootJ, "crossfade time", json_real(_options.fade_times.crossfade));
-
   json_object_set_new(rootJ, "love resolution", json_real(_options.love_resolution));
-
-  json_object_set_new(rootJ, "smooth phase", json_integer(_options.smooth_phase));
-
+  json_object_set_new(rootJ, "smoothing lambda", json_real(_options.ext_phase_smoothing_lambda));
   json_object_set_new(rootJ, "cycle forward not_back", json_integer(_options.cycle_forward_not_back));
-
   json_object_set_new(rootJ, "discard cycle on change return after refresh", json_integer(_options.discard_cycle_on_change_return_after_refresh));
 
   return rootJ;
@@ -61,7 +57,7 @@ void Circle::dataFromJson(json_t* rootJ) {
   _options.fade_times.fade_out = json_real_value(json_object_get(rootJ, "fade out time"));
   _options.fade_times.crossfade = json_real_value(json_object_get(rootJ, "crossfade time"));
   _options.love_resolution = json_real_value(json_object_get(rootJ, "love resolution"));
-  _options.smooth_phase = json_integer_value(json_object_get(rootJ, "smooth phase"));
+  _options.ext_phase_smoothing_lambda = json_real_value(json_object_get(rootJ, "smoothing lambda"));
   _options.cycle_forward_not_back = json_integer_value(json_object_get(rootJ, "cycle forward not back"));
 _options.discard_cycle_on_change_return_after_refresh = json_integer_value(json_object_get(rootJ, "discard cycle on change return after refresh"));
 }

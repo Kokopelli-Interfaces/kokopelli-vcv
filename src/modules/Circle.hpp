@@ -63,6 +63,10 @@ struct Circle : KokopelliVcvModule {
   Circle();
   ~Circle();
 
+
+  json_t* dataToJson() override;
+  void dataFromJson(json_t* rootJ) override;
+
   void sampleRateChange() override;
   int channels() override;
   void modulate() override;

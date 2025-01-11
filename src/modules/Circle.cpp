@@ -46,8 +46,9 @@ json_t* Circle::dataToJson() {
   json_object_set_new(rootJ, "crossfade time", json_real(_options.fade_times.crossfade));
   json_object_set_new(rootJ, "love resolution", json_real(_options.love_resolution));
   json_object_set_new(rootJ, "smoothing lambda", json_real(_options.ext_phase_smoothing_lambda));
-  json_object_set_new(rootJ, "cycle forward not_back", json_integer(_options.cycle_forward_not_back));
+  json_object_set_new(rootJ, "cycle forward not back", json_integer(_options.cycle_forward_not_back));
   json_object_set_new(rootJ, "discard cycle on change return after refresh", json_integer(_options.discard_cycle_on_change_return_after_refresh));
+  json_object_set_new(rootJ, "attenuate captured band input at change transients", json_integer(_options.attenuate_captured_band_input_at_change_transients));
 
   return rootJ;
 }
@@ -60,8 +61,8 @@ void Circle::dataFromJson(json_t* rootJ) {
   _options.ext_phase_smoothing_lambda = json_real_value(json_object_get(rootJ, "smoothing lambda"));
   _options.cycle_forward_not_back = json_integer_value(json_object_get(rootJ, "cycle forward not back"));
 _options.discard_cycle_on_change_return_after_refresh = json_integer_value(json_object_get(rootJ, "discard cycle on change return after refresh"));
+_options.attenuate_captured_band_input_at_change_transients = json_integer_value(json_object_get(rootJ, "attenuate captured band input at change transients"));
 }
-
 
 void Circle::sampleRateChange() {
   _sample_time = APP->engine->getSampleTime();

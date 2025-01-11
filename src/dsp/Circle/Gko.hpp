@@ -251,12 +251,14 @@ public:
     }
 
     if (isRecording()) {
-      float next_love = inputs.love;
-      float lambda = .1f;
-      _hi_res_love = smoothValue(next_love, _hi_res_love, lambda);
-
-      float attenuated_signal_in = Inputs::attenuateSignalInAtChangeTransients(inputs.in, _hi_res_love);
-      song.new_cycle->write(attenuated_signal_in, inputs.love);
+      float write_signal = inputs.in;
+      if (options.attenuate_captured_band_input_at_change_transients) {
+        float next_love = inputs.love;
+        const float lambda = .1f;
+        _hi_res_love = smoothValue(next_love, _hi_res_love, lambda);
+        write_signal = Inputs::attenuateSignalInAtChangeTransients(inputs.in, _hi_res_love);
+      }
+      song.new_cycle->write(write_signal, inputs.love);
     }
 
     love_updater.updateSongCyclesLove(song.cycles, song.new_cycle->immediate_group);

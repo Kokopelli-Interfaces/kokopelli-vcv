@@ -243,7 +243,7 @@ struct CircleWidget : ModuleWidget {
 
     menu->addChild(new MenuLabel());
 
-		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Resolution");
+		FadeSliderItem *love_resolution_slider = new FadeSliderItem(&m->_options.love_resolution, "Love Update Frequency");
 		love_resolution_slider->box.size.x = 190.f;
 		menu->addChild(love_resolution_slider);
 
@@ -269,6 +269,10 @@ struct CircleWidget : ModuleWidget {
 
     menu->addChild(new BoolOptionMenuItem("Discard cycle on change return after refresh capture", [m]() {
       return &m->_options.discard_cycle_on_change_return_after_refresh;
+    }));
+
+    menu->addChild(new BoolOptionMenuItem("Attenuate captured band input at change transients", [m]() {
+      return &m->_options.attenuate_captured_band_input_at_change_transients;
     }));
 
     // menu->addChild(new BoolOptionMenuItem("Use anti pop filter", [m]() {

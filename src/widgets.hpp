@@ -202,7 +202,7 @@ struct FadeTime : Quantity {
 		return *src;
 	}
 	float getMinValue() override {return 0.0f;}
-	float getMaxValue() override {return 1.0f;}
+	float getMaxValue() override {return 0.5f;}
 	float getDefaultValue() override {return 0.02f;}
 	std::string getLabel() override {return label;}
 	std::string getUnit() override {return " beats";}
@@ -234,7 +234,7 @@ struct SmoothingLambda : Quantity {
 	}
 	float getMinValue() override {return 0.00001f;}
 	float getMaxValue() override {return 1.0f;}
-	float getDefaultValue() override {return 0.01f;}
+	float getDefaultValue() override {return 1.00f;}
 	std::string getLabel() override {return label;}
 };
 

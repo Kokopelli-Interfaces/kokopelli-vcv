@@ -126,6 +126,7 @@ public:
     }
 
     float signal = signal_capture->read(this->playhead);
+    signal = fader.step(this->playhead, signal);
     signal = niceFade(signal, fade_times) * this->love;
     return signal;
   }

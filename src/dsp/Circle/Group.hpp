@@ -188,6 +188,9 @@ struct Group {
       bool period_roundback = 0.f < period_diff;
       if (period_roundback) {
         cycle->playhead = period_diff;
+
+        const Time fade_duration = 0.01;
+        cycle->fader.triggerFadeIn(cycle->playhead, fade_duration);
         // printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->period);
       } else {
         cycle->playhead = original_playhead;

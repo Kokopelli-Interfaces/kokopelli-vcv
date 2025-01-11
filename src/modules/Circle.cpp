@@ -105,6 +105,7 @@ void Circle::modulate() {
       e->_gko.love_updater.updateLoveResolution(_love_resolution);
     }
   }
+  _options.poly_input_phase_mode = 1 < inputs[PHASE_INPUT].getChannels();
 
   return;
 }
@@ -145,8 +146,16 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   if (inputs[PHASE_INPUT].isConnected()) {
-    float phase_in = inputs[PHASE_INPUT].getVoltage();
+    float phase_in = 0.f;
+    if (_options.poly_input_phase_mode) {
+      phase_in = inputs[PHASE_INPUT].getPolyVoltage(channel_i);
+    } else {
+      phase_in = inputs[PHASE_INPUT].getVoltage();
+    }
+
     e->_gko.ext_phase = rack::clamp(phase_in / 10, 0.f, 1.0f);
+
+    e->inputs.in = inputs[BAND_INPUT].getPolyVoltage(channel_i);
   }
 
   if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {

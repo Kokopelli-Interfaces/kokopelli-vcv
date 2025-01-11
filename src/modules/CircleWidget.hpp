@@ -52,6 +52,12 @@ struct ObservedSunDisplay : CircleTextBox {
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
     float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+    if (e->options.poly_input_phase_mode) {
+      backgroundColor = colors::CYAN;
+    } else {
+      backgroundColor = colors::BOX_BG_LIGHT;
+    }
+
     backgroundColor.a = phase;
 
     if (e->_gko.observer.checkIfInSubgroupMode()) {
@@ -112,6 +118,11 @@ struct BandDisplay : CircleTextBox {
     // phase = e->_song.observed_sun->getBeatPhase(e->_song.new_cycle->playhead);
     phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
 
+    if (e->options.poly_input_phase_mode) {
+      backgroundColor = colors::CYAN;
+    } else {
+      backgroundColor = colors::BOX_BG_LIGHT;
+    }
     backgroundColor.a = phase;
 
     int band_display = e->_song.observed_sun->cycles_in_group.size() + 1;

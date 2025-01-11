@@ -51,4 +51,5 @@ struct Options {
   bool smooth_phase = false;
   bool cycle_forward_not_back = false;
   bool discard_cycle_on_change_return_after_refresh = true;
+  bool poly_input_phase_mode = false;
 };

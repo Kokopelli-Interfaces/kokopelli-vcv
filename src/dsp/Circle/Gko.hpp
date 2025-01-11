@@ -58,7 +58,7 @@ public:
     ended_cycle->finishWrite();
     if (ended_cycle->period == 0.0) {
       delete ended_cycle;
-      song.new_cycle = new Cycle(song.playhead, song.observed_sun);
+      song.new_cycle = new Cycle(song.observed_sun);
       return;
     }
 
@@ -99,7 +99,7 @@ public:
       break;
     }
 
-    song.new_cycle = new Cycle(song.playhead, song.observed_sun);
+    song.new_cycle = new Cycle(song.observed_sun);
   }
 
   inline void undoCycle(Song &song) {
@@ -237,15 +237,6 @@ public:
     return _love_direction != LoveDirection::OBSERVED_SUN;
   }
 
-  inline float attenuateSignalInAtChangeTransients(float signal_in, float love) {
-    float threshold = 0.02f;
-    if (love < threshold) {
-        return signal_in * (love / threshold);
-    } else {
-        return signal_in;
-    }
-  }
-
   static inline float smoothValue(float current, float old, float lambda) {
     return old + (current - old) * lambda;
   }
@@ -264,8 +255,7 @@ public:
       float lambda = .1f;
       _hi_res_love = smoothValue(next_love, _hi_res_love, lambda);
 
-      float attenuated_signal_in = attenuateSignalInAtChangeTransients(inputs.in, _hi_res_love);
-
+      float attenuated_signal_in = Inputs::attenuateSignalInAtChangeTransients(inputs.in, _hi_res_love);
       song.new_cycle->write(attenuated_signal_in, inputs.love);
     }
 

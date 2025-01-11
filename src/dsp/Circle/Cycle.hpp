@@ -41,7 +41,7 @@ private:
 
 public:
 
-  inline Cycle(Time start, Group *immediate_group) {
+  inline Cycle(Group *immediate_group) {
     this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->immediate_group = immediate_group;
@@ -88,24 +88,24 @@ public:
 
     float signal_after_fade_in_out = signal;
 
-    bool fade_out = this->period - fade_times.fade_out <= this->playhead;
+    float signal_capture_period = this->signal_capture->_period;
+    bool fade_out = signal_capture_period - fade_times.fade_out <= this->playhead;
     if (fade_out) {
       Time fade_out_time = fade_times.fade_out;
-      if (this->period - fade_times.fade_out <= 0.f) {
-        fade_out_time = this->period;
+      if (signal_capture_period - fade_times.fade_out <= 0.f) {
+        fade_out_time = signal_capture_period;
       }
 
       float crossfade_right_sample = 0.f;
-      float fade = (this->playhead - (this->period - fade_out_time)) / fade_out_time;
+      float fade = (this->playhead - (signal_capture_period - fade_out_time)) / fade_out_time;
       signal_after_fade_in_out = rack::crossfade(signal, crossfade_right_sample, fade);
     }
-
 
     bool fade_in = this->playhead <= fade_times.fade_in;
     if (fade_in) {
       Time fade_in_time = fade_times.fade_in;
-      if (this->period  <= fade_times.fade_in) {
-        fade_in_time = this->period;
+      if (signal_capture_period  <= fade_times.fade_in) {
+        fade_in_time = signal_capture_period;
       }
 
       float crossfade_left_sample = 0.f;

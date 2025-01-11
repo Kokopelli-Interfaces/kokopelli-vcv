@@ -22,6 +22,19 @@ struct Inputs {
   float in = 0.f;
   float love = 0.f;
 
+  static inline float attenuateSignalInAtChangeTransients(float signal_in, float love_in) {
+    const float threshold = 0.005f;
+
+    if (love_in < love_emergence_threshold) {
+      return 0.f;
+    } else if (love_in < threshold) {
+        return signal_in * ((love_in - love_emergence_threshold) / (threshold - love_emergence_threshold));
+    } else {
+        return signal_in;
+    }
+  }
+
+
   static inline LoveDirection getLoveDirection(float love) {
     if (love < love_emergence_threshold) {
       return LoveDirection::OBSERVED_SUN;

@@ -26,10 +26,9 @@ struct Song {
   Outputs out;
 
   Song() {
-    Time start = 0.f;
     this->groups.push_back(new Group());
     this->observed_sun = groups[0];
-    this->new_cycle = new Cycle(start, this->observed_sun);
+    this->new_cycle = new Cycle(this->observed_sun);
   }
 
   void clearEmptyGroups() {

@@ -267,7 +267,7 @@ struct CircleWidget : ModuleWidget {
 		ext_phase_smoothing_lambda_slider->box.size.x = 190.f;
 		menu->addChild(ext_phase_smoothing_lambda_slider);
 
-    menu->addChild(new BoolOptionMenuItem("Cycle Observed Song Forwards, Not Back", [m]() {
+    menu->addChild(new BoolOptionMenuItem("Cycle observed song forwards, not back", [m]() {
       return &m->_options.cycle_forward_not_back;
     }));
 
@@ -279,7 +279,7 @@ struct CircleWidget : ModuleWidget {
       return &m->_options.attenuate_captured_band_input_at_change_transients;
     }));
 
-    menu->addChild(new BoolOptionMenuItem("Output observed song beat phase not total song", [m]() {
+    menu->addChild(new BoolOptionMenuItem("Output observed song beat phase, not total song", [m]() {
       return &m->_options.output_observed_song_beat_phase_not_total_song;
     }));
 

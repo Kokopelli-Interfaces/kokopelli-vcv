@@ -138,7 +138,11 @@ struct BandBeatDisplay : CircleTextBox {
     int beat_in_observed_sun = 0;
     if (e->isRecording()) {
       textColor = colors::BAND;
-      beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
+      if (e->_song.cycles.empty() && e->_gko.use_ext_phase) {
+        beat_in_observed_sun = (int) e->_song.new_cycle->playhead;
+      } else {
+        beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
+      }
     }
 
     CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);

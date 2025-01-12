@@ -28,8 +28,7 @@ struct Inputs {
     if (love_in < love_emergence_threshold) {
       return 0.f;
     } else if (love_in < threshold) {
-      float attenuation = (love_in - love_emergence_threshold) / (threshold - love_emergence_threshold);
-      return signal_in * rack::clamp(attenuation, 0.f, 1.f);
+        return signal_in * ((love_in - love_emergence_threshold) / (threshold - love_emergence_threshold));
     } else {
         return signal_in;
     }

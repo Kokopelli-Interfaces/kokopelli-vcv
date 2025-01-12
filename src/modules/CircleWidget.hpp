@@ -218,10 +218,11 @@ struct CircleWidget : ModuleWidget {
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(3.127, 85.334)), module, Circle::DIVINITY_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(4.592, 86.798)), module, Circle::DIVINITY_LIGHT));
 
+		addParam(createParam<MediumLEDButton>(mm2px(Vec(14.779, 93.176)), module, Circle::TOGGLE_PROGRESSION_PARAM));
+		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.244, 94.64)), module, Circle::TOGGLE_PROGRESSION_LIGHT));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 85.333)), module, Circle::CYCLE_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 86.798)), module, Circle::CYCLE_LIGHT));
-
-		addInput(createInput<PhaseOutPort>(mm2px(Vec(13.65, 94.00)), module, Circle::PHASE_INPUT));
+		addInput(createInput<PhaseOutPort>(mm2px(Vec(24.925, 99.598)), module, Circle::PHASE_INPUT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));
 		observed_sun_display = new ObservedSunDisplay(module, colors::BOX_BG_LIGHT, colors::OBSERVED_SUN, mm2px(Vec(1.236, 40.865)), focused_display_size);

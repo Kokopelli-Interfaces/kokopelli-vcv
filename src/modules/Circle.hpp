@@ -20,6 +20,7 @@ struct Circle : KokopelliVcvModule {
   enum ParamIds {
 		CYCLE_PARAM,
 		DIVINITY_PARAM,
+		TOGGLE_PROGRESSION_PARAM,
 		LOVE_PARAM,
 		AUDITION_PARAM,
 		NUM_PARAMS
@@ -40,6 +41,7 @@ struct Circle : KokopelliVcvModule {
   enum LightIds {
     ENUMS(DIVINITY_LIGHT, 3),
     ENUMS(CYCLE_LIGHT, 3),
+    ENUMS(TOGGLE_PROGRESSION_LIGHT, 3),
     NUM_LIGHTS
   };
 
@@ -49,6 +51,7 @@ struct Circle : KokopelliVcvModule {
 
   kokopellivcv::dsp::LongPressButton _cycle_forward_button;
   kokopellivcv::dsp::LongPressButton _cycle_divinity_button;
+  kokopellivcv::dsp::LongPressButton _toggle_progression_button;
 
   kokopellivcv::dsp::LightBlinker *_light_blinker;
 
@@ -62,7 +65,6 @@ struct Circle : KokopelliVcvModule {
 
   Circle();
   ~Circle();
-
 
   json_t* dataToJson() override;
   void dataFromJson(json_t* rootJ) override;

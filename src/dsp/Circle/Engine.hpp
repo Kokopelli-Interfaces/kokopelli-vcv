@@ -32,6 +32,8 @@ struct Engine {
   void channelStateReset();
   void cycleObservation();
   void ascend();
+  void toggleProgression();
+  void mergeNextGroupWithCurrent();
   void cycleForward();
   void undo();
   float getPhaseInObservedSun();

@@ -33,13 +33,24 @@ struct LightBlinker {
     _time = std::chrono::system_clock::now();
     _op = true;
 
+    bool light_off = true;
     for (int i = 0; i < 3; i++) {
       _saved_light_brightness[i] = _lights->operator[](light_i + i).value;
+      if (_saved_light_brightness[i] > 0.f) {
+        light_off = false;
+      }
     }
 
+    if (light_off) {
+      _lights->operator[](_light_i + 0).value = 1.f;
+      _lights->operator[](_light_i + 1).value = 1.f;
+      _lights->operator[](_light_i + 2).value = 1.f;
+    } else {
     _lights->operator[](_light_i + 0).value = _lights->operator[](_light_i + 0).value * mult;
     _lights->operator[](_light_i + 1).value = _lights->operator[](_light_i + 1).value * mult;
     _lights->operator[](_light_i + 2).value = _lights->operator[](_light_i + 2).value * mult;
+    }
+
   }
 
   void step() {

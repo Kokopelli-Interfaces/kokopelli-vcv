@@ -26,7 +26,7 @@ public:
 
   float sample_time = 1.0f;
 
-  bool tune_to_frequency_of_observed_sun = true;
+  bool progression = false;
 
   /** read only */
 
@@ -41,6 +41,7 @@ public:
 
   float _last_ext_phase = 0.f;
   float _hi_res_love = 0.f;
+
 
   LoveDirection _love_direction;
 

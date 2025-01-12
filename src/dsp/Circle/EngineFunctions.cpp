@@ -20,6 +20,14 @@ void Engine::cycleObservation() {
   _gko.cycleObservation(_song, options.cycle_forward_not_back);
 }
 
+void Engine::toggleProgression() {
+  _gko.progression = !_gko.progression;
+}
+
+void Engine::mergeNextGroupWithCurrent() {
+  //TODO
+}
+
 bool Engine::isRecording() {
   return _gko._love_direction != LoveDirection::OBSERVED_SUN;
 }

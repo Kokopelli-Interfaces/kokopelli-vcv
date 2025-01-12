@@ -60,6 +60,9 @@ void Circle::dataFromJson(json_t* rootJ) {
   _options.fade_times.fade_out = json_real_value(json_object_get(rootJ, "fade out time"));
   _options.fade_times.crossfade = json_real_value(json_object_get(rootJ, "crossfade time"));
   _options.love_resolution = json_real_value(json_object_get(rootJ, "love resolution"));
+  if (_options.love_resolution <= 0.f) {
+    _options.love_resolution = 10000.0f;
+  }
   _options.ext_phase_smoothing_lambda = json_real_value(json_object_get(rootJ, "smoothing lambda"));
   _options.cycle_forward_not_back = json_integer_value(json_object_get(rootJ, "cycle forward not back"));
 _options.discard_cycle_on_change_return_after_refresh = json_integer_value(json_object_get(rootJ, "discard cycle on change return after refresh"));

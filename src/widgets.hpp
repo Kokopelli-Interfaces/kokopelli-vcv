@@ -170,7 +170,7 @@ struct FadeDuration : Quantity {
 	float getDisplayValue() override {return getValue() / (44100 / 100);}
 	std::string getDisplayValueString() override {
 		float value = getDisplayValue();
-		return string::f("%.0f", value);
+		return string::f("%.2f", value);
 	}
 	void setDisplayValue(float displayValue) override {setValue(displayValue);}
 	std::string getLabel() override {return label;}

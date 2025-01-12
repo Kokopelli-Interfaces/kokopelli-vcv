@@ -9,7 +9,7 @@ See youtube ['Michael Muszynski'](https://www.youtube.com/@michaelampm) for a tu
 
 ## Circle
 
-![Circle](img/circle.ong)
+![Circle](img/circle.png)
 
 
 ## License
@@ -23,8 +23,8 @@ This software is dual-licensed:
 
 To talk to me about music or music interfaces (I'm obsessed), or to inquire about a commercial license, please contact:
 
-**[Michael Muszynski]**
-- **Telegram**: [@gwatcha] (preferred)
-- **Email**: [michael.ampm@gmail.com]
+**Michael Muszynski**
+- **Telegram**: @gwatcha (preferred)
+- **Email**: michael.ampm@gmail.com
 
 I also have a genius idea for a music live-creation physical device that would replace all music software hosts (e.g DAW, Vcv Rack) and most synthesizers (including modular). God is calling me to pursue other avenues of life so I can't work on transforming my sketches into approachable animations, and contacting or starting a company to create the device for people. If you're looking for a calling this would be a good one.

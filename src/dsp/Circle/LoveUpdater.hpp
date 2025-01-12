@@ -38,9 +38,9 @@ public:
   }
 
 private:
-  inline float smoothValue(float current, float old) {
+  inline float smoothLoveValue(float current, float old) {
     float lambda = 1 / love_resolution;
-    return old + (current - old) * lambda;
+    return rack::clamp(old + (current - old) * lambda, 0.f, 1.f);
   }
 
 public:
@@ -81,8 +81,8 @@ public:
     }
 
     for (unsigned int i = 0; i < cycles.size(); i++) {
-      cycles[i]->love = smoothValue(_next_cycles_love[i], cycles[i]->love);
-      cycles[i]->observer_love = smoothValue(_next_cycles_observer_love[i], cycles[i]->observer_love);
+      cycles[i]->love = smoothLoveValue(_next_cycles_love[i], cycles[i]->love);
+      cycles[i]->observer_love = smoothLoveValue(_next_cycles_observer_love[i], cycles[i]->observer_love);
     }
   }
 };

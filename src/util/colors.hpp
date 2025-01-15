@@ -39,6 +39,11 @@ namespace colors {
 
   static const NVGcolor MOONLIGHT = nvgRGB(0xff, 0xc3, 0xc3);
 
+  static const NVGcolor SOFT_GREEN = nvgRGB(0x76, 0xbb, 0x44);
+  static const NVGcolor HARD_GREEN = nvgRGB(0x00, 0xff, 0x00);
+
+  static const NVGcolor SOFT_BROWN = nvgRGB(0x96, 0x63, 0x51);
+
   // default theme colors
 
   static const NVGcolor DIM_SUN = DIM_SUNLIGHT;
@@ -53,5 +58,10 @@ namespace colors {
   static const NVGcolor OBSERVED_SUN_LIGHT = STRONG_SUNLIGHT;
   static const NVGcolor EMERGENCE_LIGHT = BAND_RED_BRIGHT;
   static const NVGcolor BAND_LIGHT = BAND_RED_HARD;
+
+  static const NVGcolor PROGRESSION_LIGHT = HARD_GREEN;
+
+  static const NVGcolor SKIPPED_MOVEMENT = SOFT_BROWN;
+
 
 } // namespace colors

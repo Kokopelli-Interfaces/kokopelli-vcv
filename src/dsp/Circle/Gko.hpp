@@ -26,13 +26,12 @@ public:
 
   float sample_time = 1.0f;
 
-  bool progression = false;
-
   /** read only */
 
   Observer observer;
   LoveUpdater love_updater;
   OutputUpdater output_updater;
+  Conductor conductor;
 
   float _step_size = 0.0f;
   float _saved_step_size = 0.0f;
@@ -42,16 +41,23 @@ public:
   float _last_ext_phase = 0.f;
   float _hi_res_love = 0.f;
 
-
   LoveDirection _love_direction;
 
 private:
   inline void addCycle(Song &song, Cycle* ended_cycle) {
     song.cycles.push_back(ended_cycle);
     ended_cycle->immediate_group->addNewCycle(ended_cycle, use_ext_phase);
+    conductor.createNewMovementForCycleAndShiftMovementsAfter(song.cycles, ended_cycle);
+
+    conductor.progressToMovement(song.cycles, ended_cycle->enter_at_movement_i);
   }
 
 public:
+  inline void toggleProgression(Song &song) {
+    conductor.progression_mode = !conductor.progression_mode;
+    nextCycle(song, CycleEnd::DISCARD);
+  }
+
   inline void nextCycle(Song &song, CycleEnd cycle_end) {
     Cycle* ended_cycle = song.new_cycle;
 
@@ -59,7 +65,7 @@ public:
     ended_cycle->finishWrite();
     if (ended_cycle->period == 0.0) {
       delete ended_cycle;
-      song.new_cycle = new Cycle(song.observed_sun);
+      song.new_cycle = new Cycle(song.observed_sun, conductor._movement_i+1);
       return;
     }
 
@@ -86,35 +92,39 @@ public:
       }
       addCycle(song, ended_cycle);
       break;
-    case CycleEnd::FLOOD:
+    case CycleEnd::DELETE_OBSERVED:
       for (int i = song.cycles.size()-1; 0 <= i; i--) {
         if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(song.cycles[i]->immediate_group, ended_cycle->immediate_group)) {
-          song.cycles[i]->immediate_group->undoLastCycle();
-          song.cycles.erase(song.cycles.begin() + i);
+    conductor.deleteCycleFromCyclesAndAdjustMovements(song.cycles, i);
         }
       }
 
-      _discard_cycle_at_next_love_return = true;
-
       delete ended_cycle;
+      _discard_cycle_at_next_love_return = true;
       break;
     }
 
-    song.new_cycle = new Cycle(song.observed_sun);
+      song.new_cycle = new Cycle(song.observed_sun, conductor._movement_i+1);
   }
 
-  inline void undoCycle(Song &song) {
+  inline void deleteCycles(Song &song, Options options) {
     if (observer.checkIfInSubgroupMode()) {
       observer.exitSubgroupMode(song);
     }
 
-    if (0 < song.cycles.size()) {
-      Cycle* most_recent_cycle = song.cycles[song.cycles.size()-1];
-      most_recent_cycle->immediate_group->undoLastCycle();
-      song.cycles.pop_back();
+    if (_love_direction == LoveDirection::EMERGENCE) {
+      nextCycle(song, CycleEnd::DISCARD);
+      if (options.discard_cycle_on_change_return_after_refresh) {
+        _discard_cycle_at_next_love_return = true;
+      }
+    } else if (0 < song.cycles.size()) {
+      if (_love_direction == LoveDirection::OBSERVED_SUN) {
+      conductor.deleteCycleFromCyclesAndAdjustMovements(song.cycles, song.cycles.size()-1);
+        nextCycle(song, CycleEnd::DISCARD);
+      } else if (_love_direction == LoveDirection::NEW) {
+        nextCycle(song, CycleEnd::DELETE_OBSERVED);
+      }
     }
-
-    nextCycle(song, CycleEnd::DISCARD);
   }
 
   inline void cycleForward(Song &song, Options options) {
@@ -134,7 +144,7 @@ public:
       }
       break;
     case LoveDirection::NEW:
-      nextCycle(song, CycleEnd::FLOOD);
+      // nextCycle(song, CycleEnd::DELETE_OBSERVED);
       break;
     }
   }
@@ -262,7 +272,7 @@ public:
       song.new_cycle->write(write_signal, inputs.love);
     }
 
-    love_updater.updateSongCyclesLove(song.cycles, song.new_cycle->immediate_group);
+    love_updater.updateSongCyclesLove(song.cycles, song.new_cycle->immediate_group, conductor._movement_i);
     output_updater.updateOutput(song.out, song.cycles, song.new_cycle->immediate_group, inputs.in, inputs.love, options);
   }
 };

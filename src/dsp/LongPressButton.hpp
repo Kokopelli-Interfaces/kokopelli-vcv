@@ -14,7 +14,7 @@ struct LongPressButton {
   float pressedTime = 0.f;
   rack::dsp::BooleanTrigger trigger;
 
-  inline Event process(float sampleTime, float longPressThreshold = 1.f) {
+  inline Event process(float sampleTime, float longPressThreshold = 0.5f) {
     Event result = NO_PRESS;
     bool pressed = param->value > 0.f;
     if (pressed && pressedTime >= 0.f) {

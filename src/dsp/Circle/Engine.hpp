@@ -23,8 +23,7 @@ struct Engine {
   Song _song;
   Gko _gko;
 
-  // FIXME not set
-  kokopellivcv::dsp::SignalType _signal_type = kokopellivcv::dsp::SignalType::AUDIO;
+  const kokopellivcv::dsp::SignalType _signal_type = kokopellivcv::dsp::SignalType::AUDIO;
 
   void step();
 
@@ -33,9 +32,17 @@ struct Engine {
   void cycleObservation();
   void ascend();
   void toggleProgression();
-  void mergeNextGroupWithCurrent();
+  void toggleSkip();
+
   void cycleForward();
-  void undo();
+
+  void nextMovement(bool ignore_skip_flag);
+  void prevMovement(bool ignore_skip_flag);
+  void goToStartMovement();
+  bool isInProgressionMode();
+
+  void deleteCycles();
+
   float getPhaseInObservedSun();
   float getBeatPhase();
 

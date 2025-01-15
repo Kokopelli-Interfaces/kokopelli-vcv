@@ -11,6 +11,8 @@ Circle::Circle() {
 
   configInput(BAND_INPUT, "Band");
   configInput(PHASE_INPUT, "Phase");
+  //TODO
+  configInput(LOVE_INPUT, "Change");
   configOutput(OBSERVER_OUTPUT, "Observed Song");
   configOutput(OBSERVER_PHASE_OUTPUT, "Observed Song Phase");
   configOutput(OBSERVER_BEAT_PHASE_OUTPUT, "Beat Phase");
@@ -90,11 +92,20 @@ void Circle::processButtons(const ProcessArgs &args) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->cycleObservation();
+      if (e->isInProgressionMode()) {
+        bool ignore_skip_flag = false;
+        e->prevMovement(ignore_skip_flag);
+      } else {
+        e->cycleObservation();
+      }
       _light_blinker->blinkLight(DIVINITY_LIGHT, 3.f);
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->ascend();
+      if (e->isInProgressionMode()) {
+        e->goToStartMovement();
+      } else {
+        e->ascend();
+      }
       _light_blinker->blinkLight(DIVINITY_LIGHT, 0.f); // TODO extra
       break;
     }
@@ -103,12 +114,23 @@ void Circle::processButtons(const ProcessArgs &args) {
     case kokopellivcv::dsp::LongPressButton::NO_PRESS:
       break;
     case kokopellivcv::dsp::LongPressButton::SHORT_PRESS:
-      e->cycleForward();
+      if (e->isInProgressionMode()) {
+        bool ignore_skip_flag = false;
+        e->nextMovement(ignore_skip_flag);
+      } else {
+        e->cycleForward();
+      }
       _light_blinker->blinkLight(CYCLE_LIGHT, 3.f);
+
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->undo();
-      _light_blinker->blinkLight(CYCLE_LIGHT, 0.f); // TODO blink extra extra
+      if (e->isInProgressionMode()) {
+        bool ignore_skip_flag = true;
+        e->nextMovement(ignore_skip_flag);
+      } else {
+        e->deleteCycles();
+      }
+      _light_blinker->blinkLight(CYCLE_LIGHT, 0.f);
       break;
     }
 
@@ -119,7 +141,7 @@ void Circle::processButtons(const ProcessArgs &args) {
       e->toggleProgression();
       break;
     case kokopellivcv::dsp::LongPressButton::LONG_PRESS:
-      e->mergeNextGroupWithCurrent();
+      e->toggleSkip();
       _light_blinker->blinkLight(TOGGLE_PROGRESSION_LIGHT, 0.f);
       break;
     }
@@ -151,7 +173,7 @@ void Circle::modulate() {
       e->_gko.love_updater.updateLoveResolution(_love_resolution);
     }
   }
-  _options.poly_input_phase_mode = 1 < inputs[PHASE_INPUT].getChannels();
+  _options.poly_input_phase_mode = 1 < inputs[PHASE_INPUT].getChannels() || 1 < inputs[LOVE_INPUT].getChannels();
 
   return;
 }
@@ -159,6 +181,17 @@ void Circle::modulate() {
 void Circle::modulateChannel(int channel_i) {
   kokopellivcv::dsp::circle::Engine *e = _engines[channel_i];
   float love = params[LOVE_PARAM].getValue();
+  float love_input = 0.f;
+  if (inputs[LOVE_INPUT].isConnected()) {
+    if (1 < inputs[LOVE_INPUT].getChannels()) {
+      love_input = rack::clamp(inputs[LOVE_INPUT].getPolyVoltage(channel_i) / 10.f, 0.f, 1.f);
+    } else {
+      love_input = rack::clamp(inputs[LOVE_INPUT].getPolyVoltage(0) / 10.f, 0.f, 1.f);
+    }
+  }
+
+  // TODO option to sum or multiply
+  love = rack::clamp(love + love_input, 0.f, 1.f);
 
   // more intuitive curve
   love = pow(love, 2);
@@ -254,36 +287,41 @@ void Circle::updateLights(const ProcessArgs &args) {
   float light_strength = .3f;
   LoveDirection love_direction = default_e->_gko._love_direction;
   if (love_direction == LoveDirection::OBSERVED_SUN) {
-    if (!default_e->_song.cycles.empty()) {
-      updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+    if (default_e->isInProgressionMode()) {
+      updateLight(CYCLE_LIGHT, colors::PROGRESSION_LIGHT, light_strength);
+      updateLight(DIVINITY_LIGHT, colors::PROGRESSION_LIGHT, light_strength);
     } else {
-      updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
-    }
-
-    if (default_e->_gko.observer.checkIfInSubgroupMode()) {
-      if (default_e->_gko.progression) {
-        updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
-      } else if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
-        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+      if (!default_e->_song.cycles.empty()) {
+        updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
       } else {
-        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
+        updateLight(DIVINITY_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
       }
-    } else {
-        updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
+
+
+      if (default_e->_gko.observer.checkIfInSubgroupMode()) {
+        if (default_e->_gko.observer.checkIfCanEnterFocusedSubgroup()) {
+          updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+        } else {
+          updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
+        }
+      } else {
+          updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, 0.f);
+      }
     }
   } else if (love_direction == LoveDirection::EMERGENCE) {
-    updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
-    if (default_e->_gko.progression) {
-      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+    if (default_e->isInProgressionMode()) {
+      updateLight(DIVINITY_LIGHT, colors::PROGRESSION_LIGHT, light_strength);
+      updateLight(CYCLE_LIGHT, colors::PROGRESSION_LIGHT, light_strength);
     } else {
-      updateLight(CYCLE_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength);
+      updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
+      updateLight(CYCLE_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
     }
   } else { // LoveDirection::NEW
     updateLight(DIVINITY_LIGHT, colors::EMERGENCE_LIGHT, light_strength);
     updateLight(CYCLE_LIGHT, colors::BAND_LIGHT, light_strength);
   }
 
-  updateLight(TOGGLE_PROGRESSION_LIGHT, colors::OBSERVED_SUN_LIGHT, light_strength * default_e->_gko.progression);
+  updateLight(TOGGLE_PROGRESSION_LIGHT, colors::PROGRESSION_LIGHT, light_strength * default_e->isInProgressionMode());
 }
 
 void Circle::postProcessAlways(const ProcessArgs &args) {

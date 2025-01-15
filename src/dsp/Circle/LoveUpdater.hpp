@@ -5,10 +5,10 @@
 
 #include "rack.hpp"
 
-// FIXME
 #include "Song.hpp"
 #include "Cycle.hpp"
 #include "Observer.hpp"
+#include "Conductor.hpp"
 #include "Group.hpp"
 #include "definitions.hpp"
 #include "SignalCapture.hpp"
@@ -24,7 +24,7 @@ public:
   float love_resolution = 1000.f;
 
   rack::dsp::ClockDivider _love_calculator_divider;
-  std::vector<float> _next_cycles_love;
+  std::vector<float> _next_cycles_song_love;
   std::vector<float> _next_cycles_observer_love;
 
   LoveUpdater() {
@@ -43,45 +43,61 @@ private:
     return rack::clamp(old + (current - old) * lambda, 0.f, 1.f);
   }
 
-public:
-  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles, Group* new_cycle_group) {
-    if (_next_cycles_love.size() < cycles.size()) {
-      while (_next_cycles_love.size() < cycles.size()) {
-        _next_cycles_love.push_back(0.f);
+  static inline void adjustSizeToSize(std::vector<float> &vec, unsigned int size) {
+    if (vec.size() < size) {
+      while (vec.size() < size) {
+        vec.push_back(0.f);
       }
+    } else if (size < vec.size()) {
+      vec.resize(size);
     }
+  }
 
-    if (_next_cycles_observer_love.size() < cycles.size()) {
-      while (_next_cycles_observer_love.size() < cycles.size()) {
-        _next_cycles_observer_love.push_back(0.f);
-      }
-    }
+public:
+  inline void updateSongCyclesLove(std::vector<Cycle*> &cycles, Group* new_cycle_group, int current_movement_i) {
+    adjustSizeToSize(_next_cycles_song_love, cycles.size());
+    adjustSizeToSize(_next_cycles_observer_love, cycles.size());
 
     if (_love_calculator_divider.process()) {
       for (unsigned int i = 0; i < cycles.size(); i++) {
-        if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
-          _next_cycles_observer_love[i] = 1.f;
-        } else {
+
+        if (!cycles[i]->is_playing) {
           _next_cycles_observer_love[i] = 0.f;
+          _next_cycles_song_love[i] = 0.f;
+          continue;
         }
 
-        float cycle_i_love = 1.f;
+        // TODO
+        // if (lock_observered_group)
+
+        float cycle_i_observer_love = 0.f;
+        float cycle_i_song_love = 1.f;
+
+        if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, new_cycle_group)) {
+          cycle_i_observer_love = 1.f;
+        }
+
         for (unsigned int j = i + 1; j < cycles.size(); j++) {
+          if (current_movement_i < cycles[j]->enter_at_movement_i) {
+            continue;
+          }
+
           if (Observer::checkIfCycleInGroupOneIsObservedByCycleInGroupTwo(cycles[i]->immediate_group, cycles[j]->immediate_group)) {
-            cycle_i_love *= (1.f - cycles[j]->readLove());
-            if (cycle_i_love <= 0.0001f) {
-              cycle_i_love = 0.f;
+            cycle_i_song_love *= (1.f - cycles[j]->readLove());
+            if (cycle_i_song_love <= 0.0001f) {
+              cycle_i_song_love = 0.f;
               break;
             }
           }
         }
 
-        _next_cycles_love[i] = cycle_i_love;
+        _next_cycles_song_love[i] = cycle_i_song_love;
+        _next_cycles_observer_love[i] = cycle_i_observer_love;
       }
     }
 
     for (unsigned int i = 0; i < cycles.size(); i++) {
-      cycles[i]->love = smoothLoveValue(_next_cycles_love[i], cycles[i]->love);
+      cycles[i]->song_love = smoothLoveValue(_next_cycles_song_love[i], cycles[i]->song_love);
       cycles[i]->observer_love = smoothLoveValue(_next_cycles_observer_love[i], cycles[i]->observer_love);
     }
   }

@@ -20,16 +20,36 @@ void Engine::cycleObservation() {
   _gko.cycleObservation(_song, options.cycle_forward_not_back);
 }
 
-void Engine::toggleProgression() {
-  _gko.progression = !_gko.progression;
+void Engine::prevMovement(bool ignore_skip_flag) {
+  _gko.conductor.prevMovement(_song.cycles, ignore_skip_flag);
 }
 
-void Engine::mergeNextGroupWithCurrent() {
-  //TODO
+void Engine::nextMovement(bool ignore_skip_flag) {
+  _gko.conductor.nextMovement(_song.cycles, ignore_skip_flag);
+}
+
+void Engine::goToStartMovement() {
+  _gko.conductor.goToStartMovement(_song.cycles);
+}
+
+void Engine::toggleProgression() {
+  _gko.toggleProgression(_song);
+}
+
+void Engine::toggleSkip() {
+  if (isRecording()) {
+    _song.new_cycle->skip_in_progression = !_song.new_cycle->skip_in_progression;
+  } else {
+    _gko.conductor.toggleSkipOnCycleAtCurrentMovement(_song.cycles);
+  }
 }
 
 bool Engine::isRecording() {
   return _gko._love_direction != LoveDirection::OBSERVED_SUN;
+}
+
+bool Engine::isInProgressionMode() {
+  return _gko.conductor.progression_mode;
 }
 
 void Engine::ascend() {
@@ -40,8 +60,8 @@ void Engine::ascend() {
   }
 }
 
-void Engine::undo() {
-  _gko.undoCycle(_song);
+void Engine::deleteCycles() {
+  _gko.deleteCycles(this->_song, this->options);
 }
 
 void Engine::channelStateReset() {

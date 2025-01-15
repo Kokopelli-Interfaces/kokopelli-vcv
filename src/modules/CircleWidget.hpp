@@ -60,28 +60,39 @@ struct ObservedSunDisplay : CircleTextBox {
 
     backgroundColor.a = phase;
 
-    if (e->_gko.observer.checkIfInSubgroupMode()) {
-      // textColor = colors::LOOK_BACK_LAYER;
-      textColor = colors::OBSERVED_SUN;
-      int pivot_id_len = e->_gko.observer._pivot_parent->id.size();
-      std::string left_text = e->_gko.observer._pivot_parent->id.substr(0, pivot_id_len);
-
-      std::string right_text;
-      // this is an invariant that does not hold sometimes due to race condition as this is widget thread
-      if ((unsigned int)pivot_id_len < e->_song.observed_sun->id.size()) {
-        right_text = e->_song.observed_sun->id.substr(pivot_id_len+1);
-      } else {
-        right_text = e->_song.observed_sun->id.substr(pivot_id_len);
+    if (e->isInProgressionMode()) {
+      textColor = colors::SOFT_GREEN;
+      if (e->_gko.conductor.isCurrentMovementSkipped(e->_song.cycles)) {
+        textColor = colors::SOFT_BROWN;
       }
 
-      std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
+      int movement_i = e->_gko.conductor._movement_i;
+      std::string s = std::to_string(movement_i+1);
       CircleTextBox::setText(s);
-      // CircleTextBox::setText(e->_song.observed_sun->id);
     } else {
-      textColor = colors::OBSERVED_SUN;
-      // std::string s = string::f("%s", e->_song.observed_sun->id);
-      // CircleTextBox::setText(s);
-      CircleTextBox::setText(e->_song.observed_sun->id);
+      if (e->_gko.observer.checkIfInSubgroupMode()) {
+        // textColor = colors::LOOK_BACK_LAYER;
+        textColor = colors::OBSERVED_SUN;
+        int pivot_id_len = e->_gko.observer._pivot_parent->id.size();
+        std::string left_text = e->_gko.observer._pivot_parent->id.substr(0, pivot_id_len);
+
+        std::string right_text;
+        // this is an invariant that does not hold sometimes due to race condition as this is widget thread
+        if ((unsigned int)pivot_id_len < e->_song.observed_sun->id.size()) {
+          right_text = e->_song.observed_sun->id.substr(pivot_id_len+1);
+        } else {
+          right_text = e->_song.observed_sun->id.substr(pivot_id_len);
+        }
+
+        std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
+        CircleTextBox::setText(s);
+        // CircleTextBox::setText(e->_song.observed_sun->id);
+      } else {
+        textColor = colors::OBSERVED_SUN;
+        // std::string s = string::f("%s", e->_song.observed_sun->id);
+        // CircleTextBox::setText(s);
+        CircleTextBox::setText(e->_song.observed_sun->id);
+      }
     }
   }
 };
@@ -108,14 +119,9 @@ struct BandDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    if (e->isRecording()) {
-      textColor = colors::BAND;
-    } else {
-      textColor = colors::OBSERVED_SUN;
-    }
-
     float phase = 0.f;
-    // phase = e->_song.observed_sun->getBeatPhase(e->_song.new_cycle->playhead);
+
+    // FIXME TODO get beat in movement
     phase = e->_song.observed_sun->getBeatPhase(e->_song.playhead);
 
     if (e->options.poly_input_phase_mode) {
@@ -125,9 +131,28 @@ struct BandDisplay : CircleTextBox {
     }
     backgroundColor.a = phase;
 
-    int band_display = e->_song.observed_sun->cycles_in_group.size() + 1;
-    std::string s = string::f("%d", band_display);
-    CircleTextBox::setText(s);
+    if (e->isInProgressionMode()){
+      textColor = colors::SOFT_GREEN;
+      bool ignore_cycle_skip_flag = false;
+      int next_movement_i = e->_gko.conductor.getNextMovementI(e->_song.cycles, ignore_cycle_skip_flag);
+
+      std::string s = "--";
+      if (next_movement_i != e->_gko.conductor._movement_i) {
+        s = string::f("%d", next_movement_i+1);
+      }
+
+      CircleTextBox::setText(s);
+    } else {
+      if (e->isRecording()) {
+        textColor = colors::BAND;
+      } else {
+        textColor = colors::OBSERVED_SUN;
+      }
+
+      int band_display = e->_song.observed_sun->cycles_in_group.size() + 1;
+      std::string s = string::f("%d", band_display);
+      CircleTextBox::setText(s);
+    }
 	}
 };
 
@@ -166,21 +191,13 @@ struct TotalBandBeatDisplay : CircleTextBox {
       textColor = colors::OBSERVED_SUN;;
     }
 
-    // option
     if (e->_gko.observer.checkIfInSubgroupMode()) {
       CircleTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
     } else {
       textColor = colors::LOOK_BACK_LAYER;
       CircleTextBox::setDisplayValue(e->getMostRecentCycleLength());
-      // if (e->_song.observed_sun->cycles_in_group.size() == 0) {
-      //   CircleTextBox::setDisplayValue(1);
-      // } else {
-      //   Time adjusted_period = e->_song.observed_sun->getAdjustedPeriod(e->_song.new_cycle->playhead);
-      //   int n_beats = e->_song.observed_sun->convertToBeat(adjusted_period, false);
-      //   CircleTextBox::setDisplayValue(n_beats);
-      // }
     }
-	}
+  }
 };
 
 struct CircleWidget : ModuleWidget {
@@ -222,6 +239,8 @@ struct CircleWidget : ModuleWidget {
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(16.244, 94.64)), module, Circle::TOGGLE_PROGRESSION_LIGHT));
 		addParam(createParam<MediumLEDButton>(mm2px(Vec(26.850, 85.333)), module, Circle::CYCLE_PARAM));
 		addChild(createLight<MediumLight<RedGreenBlueLight>>(mm2px(Vec(28.315, 86.798)), module, Circle::CYCLE_LIGHT));
+
+		addInput(createInput<PhaseOutPort>(mm2px(Vec(2.276, 99.598)), module, Circle::LOVE_INPUT));
 		addInput(createInput<PhaseOutPort>(mm2px(Vec(24.925, 99.598)), module, Circle::PHASE_INPUT));
 
     auto focused_display_size = mm2px(Vec(15.736, 4.312));

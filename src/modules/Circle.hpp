@@ -28,6 +28,7 @@ struct Circle : KokopelliVcvModule {
 	enum InputIds {
 		BAND_INPUT,
 		PHASE_INPUT,
+		LOVE_INPUT,
 		NUM_INPUTS
 	};
 	enum OutputIds {

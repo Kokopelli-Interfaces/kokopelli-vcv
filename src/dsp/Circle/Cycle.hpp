@@ -18,12 +18,16 @@ struct Cycle {
 
   Group *immediate_group;
 
+  int enter_at_movement_i = 0;
+  bool skip_in_progression = false;
+  bool is_playing = true;
+
   Time start = 0.f;
   Time period = 0.f;
 
   Time playhead = 0.f;
 
-  float love = 1.f;
+  float song_love = 1.f;
   float observer_love = 1.f;
 
   SignalCapture *signal_capture;
@@ -31,6 +35,7 @@ struct Cycle {
 
   bool loop = false;
   bool trim_beginning_not_end_of_signal = false;
+
 
 private:
   inline float equalPowerCrossfade(float a, float b, float fade) {
@@ -41,10 +46,11 @@ private:
 
 public:
 
-  inline Cycle(Group *immediate_group) {
+  inline Cycle(Group *immediate_group, int enter_movement_i) {
     this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
     this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
     this->immediate_group = immediate_group;
+    this->enter_at_movement_i = enter_movement_i;
   }
 
   inline ~Cycle() {
@@ -121,13 +127,13 @@ public:
       return 0.f;
     }
 
-    if (this->love == 0.f) {
+    if (this->song_love == 0.f) {
       return 0.f;
     }
 
     float signal = signal_capture->read(this->playhead);
     signal = fader.step(this->playhead, signal);
-    signal = niceFade(signal, fade_times) * this->love;
+    signal = niceFade(signal, fade_times) * this->song_love;
     return signal;
   }
 

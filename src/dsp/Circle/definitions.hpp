@@ -60,7 +60,7 @@ struct FadeTimes {
 
 struct Options {
   FadeTimes fade_times;
-  float love_resolution = 1000.f;
+  float love_resolution = 26.f;
   float ext_phase_smoothing_lambda = 1.00f;
   bool cycle_forward_not_back = false;
   bool attenuate_captured_band_input_at_change_transients = true;

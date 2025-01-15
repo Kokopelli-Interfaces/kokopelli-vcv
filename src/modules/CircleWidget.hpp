@@ -51,7 +51,7 @@ struct ObservedSunDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    float phase = e->_song.observed_sun->getPhase(e->_song.playhead);
+    float phase = e->getPhaseInObservedSong();
     if (e->options.poly_input_phase_mode) {
       backgroundColor = colors::CYAN;
     } else {
@@ -71,7 +71,6 @@ struct ObservedSunDisplay : CircleTextBox {
       CircleTextBox::setText(s);
     } else {
       if (e->_gko.observer.checkIfInSubgroupMode()) {
-        // textColor = colors::LOOK_BACK_LAYER;
         textColor = colors::OBSERVED_SUN;
         int pivot_id_len = e->_gko.observer._pivot_parent->id.size();
         std::string left_text = e->_gko.observer._pivot_parent->id.substr(0, pivot_id_len);
@@ -86,11 +85,8 @@ struct ObservedSunDisplay : CircleTextBox {
 
         std::string s = string::f("%s | %s", left_text.c_str(), right_text.c_str());
         CircleTextBox::setText(s);
-        // CircleTextBox::setText(e->_song.observed_sun->id);
       } else {
         textColor = colors::OBSERVED_SUN;
-        // std::string s = string::f("%s", e->_song.observed_sun->id);
-        // CircleTextBox::setText(s);
         CircleTextBox::setText(e->_song.observed_sun->id);
       }
     }
@@ -143,13 +139,13 @@ struct BandDisplay : CircleTextBox {
 
       CircleTextBox::setText(s);
     } else {
+      int band_display = e->_song.observed_sun->cycles_in_group.size();
+      textColor = colors::OBSERVED_SUN;
       if (e->isRecording()) {
         textColor = colors::BAND;
-      } else {
-        textColor = colors::OBSERVED_SUN;
+        band_display += 1;
       }
 
-      int band_display = e->_song.observed_sun->cycles_in_group.size() + 1;
       std::string s = string::f("%d", band_display);
       CircleTextBox::setText(s);
     }
@@ -165,38 +161,55 @@ struct BandBeatDisplay : CircleTextBox {
       textColor = colors::BAND;
       if (e->_song.cycles.empty() && e->_gko.use_ext_phase) {
         beat_in_observed_sun = (int) e->_song.new_cycle->playhead;
+    CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
       } else {
         beat_in_observed_sun = e->_song.observed_sun->convertToBeat(e->_song.new_cycle->playhead, false);
+    CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
       }
+    } else {
+if (!e->_song.observed_sun || e->_song.observed_sun->cycles_in_group.empty()) {
+      textColor = colors::OBSERVED_SUN;;
+      CircleTextBox::setText("--");
+      return;
     }
 
-    CircleTextBox::setDisplayValue(beat_in_observed_sun + 1);
-	}
+      textColor = colors::OBSERVED_SUN;;
+
+    int beat_in_last_cycle_in_group = e->_song.observed_sun->convertToBeat(e->_song.playhead, true);
+    beat_in_last_cycle_in_group = beat_in_last_cycle_in_group % (int) e->getMostRecentCycleLength(true);
+    CircleTextBox::setDisplayValue(beat_in_last_cycle_in_group + 1);
+    }
+  }
 };
 
 struct TotalBandBeatDisplay : CircleTextBox {
   using CircleTextBox::CircleTextBox;
 
   void update(kokopellivcv::dsp::circle::Engine* e) override {
-    if (e->_song.cycles.size() == 0) {
+    if (e->isRecording()) {
       textColor = colors::BAND;
+      kokopellivcv::dsp::circle::Group* new_cycle_group = e->_song.new_cycle->immediate_group;
+      if (new_cycle_group->cycles_in_group.empty() && !e->_gko.use_ext_phase) {
+        CircleTextBox::setText("--");
+        CircleTextBox::_previous_displayed_value = -1;
+        return;
+      }
+
+      Time adjusted_cycle_period = new_cycle_group->getAdjustedPeriod(e->_song.new_cycle->playhead);
+      CircleTextBox::setDisplayValue(adjusted_cycle_period);
+      return;
+    }
+
+      textColor = colors::OBSERVED_SUN;;
+
+    if (e->_song.cycles.size() == 0) {
       CircleTextBox::setText("--");
       CircleTextBox::_previous_displayed_value = -1;
       return;
     }
 
-    if (e->isRecording()) {
-      textColor = colors::BAND;
-    } else {
       textColor = colors::OBSERVED_SUN;;
-    }
-
-    if (e->_gko.observer.checkIfInSubgroupMode()) {
-      CircleTextBox::setDisplayValue(e->_song.observed_sun->getTotalBeats());
-    } else {
-      textColor = colors::LOOK_BACK_LAYER;
-      CircleTextBox::setDisplayValue(e->getMostRecentCycleLength());
-    }
+      CircleTextBox::setDisplayValue(e->getMostRecentCycleLength(true));
   }
 };
 
@@ -216,7 +229,6 @@ struct CircleWidget : ModuleWidget {
     setModule(module);
     box.size = Vec(RACK_GRID_WIDTH * hp, RACK_GRID_HEIGHT);
     setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Circle.svg")));
-
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<KokopelliScrew>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<KokopelliScrew>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
@@ -302,27 +314,6 @@ struct CircleWidget : ModuleWidget {
     menu->addChild(new BoolOptionMenuItem("Output observed song beat phase, not total song", [m]() {
       return &m->_options.output_observed_song_beat_phase_not_total_song;
     }));
-
-
-
-    // menu->addChild(new BoolOptionMenuItem("Use anti pop filter", [m]() {
-    //   return &m->_options.use_antipop_filter;
-    // }));
-
-    // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
-
-    // menu->addChild(new BoolOptionMenuItem("Include band in total song output", [m]() {
-    //   return &m->_options.include_moon_in_sun_output;
-    // }));
-
-    // menu->addChild(new BoolOptionMenuItem("Include unloved band in sun output", [m]() {
-    //   return &m->_options.include_unloved_moon_in_sun_output;
-    // }));
-
-    // OptionsMenuItem::addToMenu(love_resolution, menu);
-
-    // TODO
-    // menu->addChild(new Slider());
   }
 };
 

@@ -22,20 +22,21 @@ struct Cycle {
   bool skip_in_progression = false;
   bool is_playing = true;
 
-  Time start = 0.f;
-  Time period = 0.f;
-
   Time playhead = 0.f;
 
   float song_love = 1.f;
   float observer_love = 1.f;
 
-  SignalCapture *signal_capture;
-  SignalCapture *love_capture;
-
   bool loop = false;
-  bool trim_beginning_not_end_of_signal = false;
 
+  // read only
+
+  SignalCapture *_signal_capture;
+  SignalCapture *_outbound_love_capture;
+  Time _start_offset_in_signal = 0.f;
+  Time _offset_in_group = 0.f;
+  Time _period = 0.f;
+  bool _trim_beginning_not_end_of_signal = false;
 
 private:
   inline float equalPowerCrossfade(float a, float b, float fade) {
@@ -46,28 +47,31 @@ private:
 
 public:
 
-  inline Cycle(Group *immediate_group, int enter_movement_i) {
-    this->signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
-    this->love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
+  inline Cycle(Group *immediate_group, Time group_offset, int enter_movement_i) {
+    _signal_capture = new SignalCapture(kokopellivcv::dsp::SignalType::AUDIO);
+    _outbound_love_capture = new SignalCapture(kokopellivcv::dsp::SignalType::PARAM);
+
     this->immediate_group = immediate_group;
     this->enter_at_movement_i = enter_movement_i;
+
+    _offset_in_group = group_offset;
   }
 
   inline ~Cycle() {
-    delete signal_capture;
-    delete love_capture;
+    delete _signal_capture;
+    delete _outbound_love_capture;
   }
 
   inline Time getMaxCrossfadeTime() {
-    Time max_crossfade_time = signal_capture->_period - this->period;
-    if (this->period < max_crossfade_time) {
-      max_crossfade_time = this->period;
+    Time max_crossfade_time = _signal_capture->_period - _period;
+    if (_period < max_crossfade_time) {
+      max_crossfade_time = _period;
     }
     return max_crossfade_time;
   }
 
   inline float niceFade(float signal, FadeTimes fade_times) {
-    bool loop_fade = this->period < signal_capture->_period;
+    bool loop_fade = _period < _signal_capture->_period;
     if (loop_fade) {
       Time crossfade_time = fade_times.crossfade;
       Time max_crossfade_time = getMaxCrossfadeTime();
@@ -75,15 +79,15 @@ public:
         crossfade_time = max_crossfade_time;
       }
 
-      if (trim_beginning_not_end_of_signal) {
-        if (this->start + this->period - crossfade_time < this->playhead) {
-          float crossfade_right_sample = signal_capture->read(this->playhead - this->period);
-          float fade = (this->playhead - (this->start + this->period - crossfade_time)) / crossfade_time;
+      if (_trim_beginning_not_end_of_signal) {
+        if (_start_offset_in_signal + _period - crossfade_time < this->playhead) {
+          float crossfade_right_sample = _signal_capture->read(this->playhead - _period);
+          float fade = (this->playhead - (_start_offset_in_signal + _period - crossfade_time)) / crossfade_time;
           return equalPowerCrossfade(signal, crossfade_right_sample, fade);
         }
       } else {
         if (this->playhead <= crossfade_time) {
-          float crossfade_left_sample = signal_capture->read(this->playhead + this->period);
+          float crossfade_left_sample = _signal_capture->read(this->playhead + _period);
           float fade = this->playhead / crossfade_time;
           return equalPowerCrossfade(crossfade_left_sample, signal, fade);
         }
@@ -94,7 +98,7 @@ public:
 
     float signal_after_fade_in_out = signal;
 
-    float signal_capture_period = this->signal_capture->_period;
+    float signal_capture_period = _signal_capture->_period;
     bool fade_out = signal_capture_period - fade_times.fade_out <= this->playhead;
     if (fade_out) {
       Time fade_out_time = fade_times.fade_out;
@@ -123,7 +127,7 @@ public:
   }
 
   inline float readSignal(FadeTimes fade_times) {
-    if (signal_capture->_period < this->playhead) {
+    if (_signal_capture->_period < this->playhead) {
       return 0.f;
     }
 
@@ -131,18 +135,18 @@ public:
       return 0.f;
     }
 
-    float signal = signal_capture->read(this->playhead);
+    float signal = _signal_capture->read(this->playhead);
     signal = fader.step(this->playhead, signal);
     signal = niceFade(signal, fade_times) * this->song_love;
     return signal;
   }
 
   inline float readLove() {
-    if (signal_capture->_period < this->playhead) {
-      return love_capture->read(love_capture->_period);
+    if (_signal_capture->_period < this->playhead) {
+      return _outbound_love_capture->read(_outbound_love_capture->_period);
     }
 
-    float love = love_capture->read(this->playhead);
+    float love = _outbound_love_capture->read(this->playhead);
     if (1.f < love) {
       return 1.f;
     }
@@ -150,34 +154,34 @@ public:
   }
 
   inline void write(float in, float love) {
-    signal_capture->write(playhead, in);
-    love_capture->write(playhead, love);
+    _signal_capture->write(playhead, in);
+    _outbound_love_capture->write(playhead, love);
   }
 
   inline void captureWindowAndAlignPlayhead(Time window) {
-    this->period = window;
+    _period = window;
 
-    if (window < this->signal_capture->_period) {
-      trim_beginning_not_end_of_signal = true;
+    if (window < _signal_capture->_period) {
+      _trim_beginning_not_end_of_signal = true;
       Time max_crossfade_time = getMaxCrossfadeTime();
-      this->signal_capture->fitToWindow(window + max_crossfade_time);
-      this->love_capture->fitToWindow(window + max_crossfade_time);
+      _signal_capture->fitToWindow(window + max_crossfade_time);
+      _outbound_love_capture->fitToWindow(window + max_crossfade_time);
 
-      this->start = max_crossfade_time;
+      _start_offset_in_signal = max_crossfade_time;
       this->playhead = max_crossfade_time;
 
-      // printf("set cycle start and playhead to %Lf)\n", this->start);
+      // printf("set cycle start and playhead to %Lf)\n", _start_offset_in_signal);
     }
 
-    // printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
+    // printf("Cycle End with period %Lf (capture period %Lf)\n", _period, _signal_capture->_period);
   }
 
   inline void finishWrite() {
-    this->period = playhead;
-    this->signal_capture->finishWrite();
-    this->love_capture->finishWrite();
+    _period = playhead;
+    _signal_capture->finishWrite();
+    _outbound_love_capture->finishWrite();
 
-    // printf("Cycle End with period %Lf (capture period %Lf)\n", this->period, this->signal_capture->_period);
+    // printf("Cycle End with period %Lf (capture period %Lf)\n", _period, _signal_capture->_period);
   }
 };
 

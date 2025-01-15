@@ -7,9 +7,18 @@ void Engine::step() {
   _gko.advance(_song, inputs, options);
 }
 
-int Engine::getMostRecentCycleLength() {
+int Engine::getMostRecentCycleLength(bool in_observed_sun) {
+  if (in_observed_sun) {
+    if (_song.observed_sun && !_song.observed_sun->cycles_in_group.empty()) {
+      Cycle* last_cycle = _song.observed_sun->cycles_in_group.back();
+      return _song.observed_sun->convertToBeat(last_cycle->_period, false);
+    }
+
+    return 0;
+  }
+
   Cycle* recent_cycle = _song.cycles[_song.cycles.size()-1];
-  return recent_cycle->immediate_group->convertToBeat(recent_cycle->period, false);
+  return recent_cycle->immediate_group->convertToBeat(recent_cycle->_period, false);
 }
 
 void Engine::cycleForward() {
@@ -69,10 +78,14 @@ void Engine::channelStateReset() {
   _gko.love_updater._love_calculator_divider.reset();
 }
 
-float Engine::getPhaseInObservedSun() {
+float Engine::getPhaseInObservedSong() {
   if (this->_gko.use_ext_phase && this->_song.cycles.empty()) {
     return this->_gko.ext_phase;
   }
+
+  // TODO next cycles may create a progression period
+  // if (isInProgressionMode()) {
+  // }
 
   return this->_song.observed_sun->getPhase(this->_song.playhead);
 }
@@ -91,4 +104,17 @@ float Engine::getBeatPhase() {
   }
 
   return this->_song.groups[0]->getBeatPhase(this->_song.playhead);
+}
+
+int Engine::getMostRecentCycleInObservedSongBeat() {
+  if (_song.observed_sun && !_song.observed_sun->cycles_in_group.empty()) {
+    Cycle* last_cycle = _song.observed_sun->cycles_in_group.back();
+    Time last_cycle_playhead = last_cycle->playhead - last_cycle->_offset_in_group;
+    return _song.observed_sun->convertToBeat(last_cycle_playhead, true);
+  }
+  return 0;
+}
+
+int Engine::getNumberOfCyclesInGroupAccountingForCurrentMovement() {
+  return 0;
 }

@@ -164,9 +164,9 @@ struct FadeDuration : Quantity {
 	float getValue() override {
 		return *src;
 	}
-	float getMinValue() override {return 26.0f;}
+	float getMinValue() override {return 6.0f;}
 	float getMaxValue() override {return 44100.0f * 2;}
-	float getDefaultValue() override {return 10000.0f;}
+	float getDefaultValue() override {return 26.0f;}
 	float getDisplayValue() override {return getValue() / (44100 / 100);}
 	std::string getDisplayValueString() override {
 		float value = getDisplayValue();

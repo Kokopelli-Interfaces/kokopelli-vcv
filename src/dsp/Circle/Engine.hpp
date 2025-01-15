@@ -43,10 +43,13 @@ struct Engine {
 
   void deleteCycles();
 
-  float getPhaseInObservedSun();
+  int getNumberOfCyclesInGroupAccountingForCurrentMovement();
+
+  int getMostRecentCycleInObservedSongBeat();
+  float getPhaseInObservedSong();
   float getBeatPhase();
 
-  int getMostRecentCycleLength();
+  int getMostRecentCycleLength(bool in_observed_song);
 
 private:
   inline void write();

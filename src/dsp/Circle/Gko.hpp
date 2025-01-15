@@ -63,9 +63,10 @@ public:
 
     // may happen when reverse recording
     ended_cycle->finishWrite();
-    if (ended_cycle->period == 0.0) {
+    if (ended_cycle->_period == 0.0) {
       delete ended_cycle;
-      song.new_cycle = new Cycle(song.observed_sun, conductor._movement_i+1);
+      Time offset_in_group = song.observed_sun->getPhase(song.playhead);
+      song.new_cycle = new Cycle(song.observed_sun, offset_in_group, conductor._movement_i+1);
       return;
     }
 
@@ -104,7 +105,8 @@ public:
       break;
     }
 
-      song.new_cycle = new Cycle(song.observed_sun, conductor._movement_i+1);
+    Time offset_in_group = song.observed_sun->getPhase(song.playhead);
+    song.new_cycle = new Cycle(song.observed_sun, offset_in_group, conductor._movement_i+1);
   }
 
   inline void deleteCycles(Song &song, Options options) {
@@ -233,12 +235,12 @@ public:
 
     for (Cycle* cycle : song.cycles) {
       cycle->playhead += _step_size;
-      if (cycle->period + cycle->start < cycle->playhead) {
-        // // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->period, cycle->playhead);
-        cycle->playhead -= cycle->period;
-        assert(cycle->playhead < cycle->start + cycle->period);
+      if (cycle->_period + cycle->_start_offset_in_signal < cycle->playhead) {
+        // // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->_period, cycle->playhead);
+        cycle->playhead -= cycle->_period;
+        assert(cycle->playhead < cycle->_start_offset_in_signal + cycle->_period);
       } else if (cycle->playhead < 0.f) {
-        cycle->playhead += cycle->period;
+        cycle->playhead += cycle->_period;
       }
     }
   }

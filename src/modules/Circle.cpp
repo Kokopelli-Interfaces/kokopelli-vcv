@@ -238,7 +238,7 @@ void Circle::processChannel(const ProcessArgs& args, int channel_i) {
   }
 
   if (outputs[OBSERVER_PHASE_OUTPUT].isConnected()) {
-    float phase = e->getPhaseInObservedSun();
+    float phase = e->getPhaseInObservedSong();
     outputs[OBSERVER_PHASE_OUTPUT].setVoltage(phase * 10, channel_i);
   }
 

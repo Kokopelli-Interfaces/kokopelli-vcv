@@ -17,22 +17,24 @@ struct Group {
   std::vector<Cycle*> cycles_in_group;
   std::vector<float> next_cycles_relative_love;
 
-  std::vector<Time> period_history;
+  Time period = 1.f;
+  Time beat_period = 1.f;
 
-  Time period = 0.f;
-  Time beat_period = 0.f;
+  // read only
+
+  std::vector<Time> _period_history;
 
   inline bool isEmpty() {
     return cycles_in_group.empty();
   }
 
   inline void undoLastCycleWithoutUndoingParent() {
-    assert(cycles_in_group.size() == period_history.size());
+    assert(cycles_in_group.size() == _period_history.size());
 
     int last_i = cycles_in_group.size() - 1;
     cycles_in_group.pop_back();
-    period = period_history[last_i];
-    period_history.pop_back();
+    period = _period_history[last_i];
+    _period_history.pop_back();
     next_cycles_relative_love.pop_back();
   }
 
@@ -108,7 +110,7 @@ struct Group {
   }
 
   inline Time getAdjustedPeriod(Time cycle_period) {
-    assert(!cycles_in_group.empty());
+    assert(!period == 0 && !beat_period == 0);
 
     Time adjusted_period;
 
@@ -166,14 +168,14 @@ struct Group {
   // TODO cycle invariatn
   inline void addNewCycle(Cycle* cycle, bool use_ext_phase) {
     Time original_playhead = cycle->playhead;
-    // Time original_period = cycle->period;
+    // Time original_period = cycle->_period;
     if (parent_group != nullptr && cycle->immediate_group != parent_group) {
       parent_group->addNewCycle(cycle, use_ext_phase);
     }
 
     this->cycles_in_group.push_back(cycle);
     this->next_cycles_relative_love.push_back(1.f);
-    this->period_history.push_back(period);
+    _period_history.push_back(period);
 
     if (cycle->loop) {
       if (this->cycles_in_group.size() == 1) {
@@ -181,50 +183,50 @@ struct Group {
           period = 1.0f;
           beat_period = 1.0f;
         } else {
-          period = cycle->period;
-          beat_period = cycle->period;
+          period = cycle->_period;
+          beat_period = cycle->_period;
           return;
         }
       }
 
-      Time period_before = cycle->period;
-      adjustPeriodsToFit(cycle->period);
-      // printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->period, original_period);
-      Time period_diff = period_before - cycle->period;
+      Time period_before = cycle->_period;
+      adjustPeriodsToFit(cycle->_period);
+      // printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->_period, original_period);
+      Time period_diff = period_before - cycle->_period;
       bool period_roundback = 0.f < period_diff;
       if (period_roundback) {
         cycle->playhead = period_diff;
 
         const Time fade_duration = 0.01;
         cycle->fader.triggerFadeIn(cycle->playhead, fade_duration);
-        // printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->period);
+        // printf("-- move playhead to %Lf (0 < (original)%Lf - (new)%Lf)\n", period_diff, period_before, cycle->_period);
       } else {
         cycle->playhead = original_playhead;
-        // printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, cycle->period);
+        // printf("-- move playhead to original spot %Lf ((original)%Lf - (new)%Lf < 0)\n", original_playhead, period_before, cycle->_period);
       }
     }
 
-    // printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
-    // printf("-- cycle period %Lf, cycle playhead %Lf\n", cycle->period, cycle->playhead);
+    // printf("-- added to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->_period, false));
+    // printf("-- cycle period %Lf, cycle playhead %Lf\n", cycle->_period, cycle->playhead);
   }
 
   inline void addExistingCycle(Cycle* cycle) {
     this->cycles_in_group.push_back(cycle);
     this->next_cycles_relative_love.push_back(1.f);
-    this->period_history.push_back(period);
+    _period_history.push_back(period);
 
-    Time period_before = cycle->period;
+    Time period_before = cycle->_period;
     if (cycle->loop) {
       if (this->cycles_in_group.size() == 1) {
-        period = cycle->period;
-        beat_period = cycle->period;
+        period = cycle->_period;
+        beat_period = cycle->_period;
       } else {
-        adjustPeriodsToFit(cycle->period);
+        adjustPeriodsToFit(cycle->_period);
       }
     }
-    assert(cycle->period == period_before);
+    assert(cycle->_period == period_before);
 
-    // printf("-- add existing cycle to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->period, false));
+    // printf("-- add existing cycle to group %s, n_beats->%d\n", id.c_str(), convertToBeat(cycle->_period, false));
   }
 };
 

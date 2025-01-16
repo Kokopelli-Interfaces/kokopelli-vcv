@@ -27,7 +27,7 @@ struct Cycle {
   float song_love = 1.f;
   float observer_love = 1.f;
 
-  bool loop = false;
+  bool loop = true;
 
   // read only
 
@@ -60,6 +60,10 @@ public:
   inline ~Cycle() {
     delete _signal_capture;
     delete _outbound_love_capture;
+  }
+
+  inline void setPeriod(Time period) {
+    _period = period;
   }
 
   inline Time getMaxCrossfadeTime() {

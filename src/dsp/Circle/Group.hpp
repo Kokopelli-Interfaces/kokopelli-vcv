@@ -15,7 +15,6 @@ struct Group {
   std::string id = "*";
 
   std::vector<Cycle*> cycles_in_group;
-  std::vector<float> next_cycles_relative_love;
 
   Time period = 1.f;
   Time beat_period = 1.f;
@@ -35,7 +34,6 @@ struct Group {
     cycles_in_group.pop_back();
     period = _period_history[last_i];
     _period_history.pop_back();
-    next_cycles_relative_love.pop_back();
   }
 
   inline void undoLastCycle() {
@@ -154,7 +152,7 @@ struct Group {
     return adjusted_period;
   }
 
-  inline void adjustPeriodsToFit(Time &cycle_period) {
+  inline Time adjustPeriodsToFit(Time cycle_period) {
     assert(!cycles_in_group.empty());
 
     Time adjusted_period = getAdjustedPeriod(cycle_period);
@@ -162,10 +160,9 @@ struct Group {
       period = adjusted_period;
     }
 
-    cycle_period = adjusted_period;
+    return adjusted_period;
   }
 
-  // TODO cycle invariatn
   inline void addNewCycle(Cycle* cycle, bool use_ext_phase) {
     Time original_playhead = cycle->playhead;
     // Time original_period = cycle->_period;
@@ -174,7 +171,6 @@ struct Group {
     }
 
     this->cycles_in_group.push_back(cycle);
-    this->next_cycles_relative_love.push_back(1.f);
     _period_history.push_back(period);
 
     if (cycle->loop) {
@@ -190,7 +186,7 @@ struct Group {
       }
 
       Time period_before = cycle->_period;
-      adjustPeriodsToFit(cycle->_period);
+      cycle->setPeriod(adjustPeriodsToFit(cycle->_period));
       // printf("-- cycle period from (%Lf -> %Lf) (original %Lf)\n", period_before, cycle->_period, original_period);
       Time period_diff = period_before - cycle->_period;
       bool period_roundback = 0.f < period_diff;
@@ -212,7 +208,6 @@ struct Group {
 
   inline void addExistingCycle(Cycle* cycle) {
     this->cycles_in_group.push_back(cycle);
-    this->next_cycles_relative_love.push_back(1.f);
     _period_history.push_back(period);
 
     Time period_before = cycle->_period;

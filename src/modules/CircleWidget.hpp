@@ -198,7 +198,8 @@ struct TotalBandBeatDisplay : CircleTextBox {
       }
 
       Time adjusted_cycle_period = new_cycle_group->getAdjustedPeriod(e->_song.new_cycle->playhead);
-      CircleTextBox::setDisplayValue(adjusted_cycle_period);
+      int time_in_n_beats = adjusted_cycle_period / new_cycle_group->beat_period;
+      CircleTextBox::setDisplayValue(time_in_n_beats);
       return;
     }
 

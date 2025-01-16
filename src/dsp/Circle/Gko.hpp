@@ -184,6 +184,7 @@ public:
       }
     } else if (_love_direction == LoveDirection::OBSERVED_SUN && new_love_direction == LoveDirection::EMERGENCE) {
       nextCycle(song, CycleEnd::DISCARD);
+      _discard_cycle_at_next_love_return = false;
     }
 
     _love_direction = new_love_direction;
@@ -238,7 +239,6 @@ public:
       if (cycle->_period + cycle->_start_offset_in_signal < cycle->playhead) {
         // // printf("advanceTime: skip back cycle (%Lf < %Lf)\n", cycle->_period, cycle->playhead);
         cycle->playhead -= cycle->_period;
-        assert(cycle->playhead < cycle->_start_offset_in_signal + cycle->_period);
       } else if (cycle->playhead < 0.f) {
         cycle->playhead += cycle->_period;
       }

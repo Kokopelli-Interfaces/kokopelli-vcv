@@ -29,7 +29,8 @@ struct Song {
     this->groups.push_back(new Group());
     this->observed_sun = groups[0];
     int first_movement = 0;
-    this->new_cycle = new Cycle(this->observed_sun, 0.f, first_movement);
+    Time offset_in_group = 0.f;
+    this->new_cycle = new Cycle(this->observed_sun, offset_in_group, first_movement);
   }
 
   void clearEmptyGroups() {
